@@ -2,11 +2,22 @@ from circuits.net.events import write, read
 from circuits import Component, handler, Timer
 
 from .auth import authrequest, authgranted
+from .chat import chatevent, chatmessage
 
 import json
 from uuid import uuid4
+from time import time
 
 from pprint import pprint
+
+class Client(object):
+    def __init__(self, sock, ip, uuid, profile=None):
+        super(Client, self).__init__()
+        self.sock = sock
+        self.ip = ip
+        self.uuid = uuid
+        self.profile = profile
+
 
 class ClientManager(Component):
 
@@ -28,12 +39,13 @@ class ClientManager(Component):
         print("CA: Connect ", args)
         sock = args[0]
         ip = args[1]
-        print(sock, ip)
+
         if sock not in self._sockets:
             print("CA: New ip!", ip)
             uuid = uuid4()
             self._sockets[sock] = (ip, uuid)
-            self._clients[uuid] = (sock, ip)
+            self._clients[uuid] = Client(sock, ip, uuid)
+            self.fireEvent(write(sock, json.dumps({'type': 'info', 'content': 'Connected'})))
         else:
             print("CA: Strange! Old IP reconnected!" + "#"*15)
         #     self.fireEvent(write(sock, "Another client is connecting from your IP!"))
@@ -42,6 +54,9 @@ class ClientManager(Component):
     def read(self, *args):
         sock, msg = args[0], args[1]
         print("CM: ", msg)
+
+        useruuid = self._sockets[sock][1]
+
         try:
             msg = json.loads(msg)
         except:
@@ -51,18 +66,30 @@ class ClientManager(Component):
             if "message" in msg.keys():
                 msg = msg['message']
                 if "type" in msg.keys():
-                    if msg['type'] == "auth":
+                    msgtype = msg['type']
+                    if msgtype == "auth":
                         auth = msg['content']
-                        print("CM: Authrequest!")
-                        useruuid = self._sockets[sock][1]
-                        self.fireEvent(authrequest(auth['username'], auth['password'], useruuid, sock))
+                        print("CM: Authrequest")
+                        self.fireEvent(authrequest(auth['username'], auth['password'], useruuid, sock), "auth")
+                    if msgtype in ("chatevent", "chatmessage"):
+                        chatdata = msg['content']
+                        timestamp = time()
+                        print("CM: Chatrequest '%s'" % chatdata)
+                        event = None
+                        if msgtype == "chatmessage":
+                            event = chatmessage(sender=self._clients[useruuid], msg=chatdata, timestamp=timestamp)
+                        elif msgtype == "chatevent":
+                            event = chatevent(sender=self._clients[useruuid], msgtype=chatdata, timestamp=timestamp)
+                        if event:
+                            self.fireEvent(event, "chat")
+
         except Exception as e:
             print("CM: Erroneous (%s, %s) message received: %s" % (type(e), e, msg))
 
     @handler("authgranted")
     def on_authgranted(self, event):
         print("CM: Authorization has been granted by DB check: %s" % (event))
-
+        self._clients[event.uuid].profile = event.useraccount
         print(str(event.useraccount))
         print(str(event.uuid))
         authpacket = {"type": "auth", "content": {"success": True, "profile": event.useraccount}}

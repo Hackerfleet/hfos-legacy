@@ -8,6 +8,7 @@ from hfos.tilecache import TileCache
 from hfos.clientmanager import ClientManager
 from hfos.clientechoer import ClientEchoer
 from hfos.auth import Auth
+from hfos.chat import Chat
 from hfos.nmea import NMEAParser
 
 
@@ -21,7 +22,7 @@ class App(Component):
 
     def started(self, component):
         print("App: Creating timer for CA")
-        Timer(2, Event.create("ping", channels="wsserver"), persist=True).register(self)
+        Timer(30, Event.create("ping", channels="wsserver"), persist=True).register(self)
 
 
 server = Server(("0.0.0.0", 8055))
@@ -32,6 +33,7 @@ Static("/", docroot="/var/lib/hfos/static" ).register(server)
 WebSocketsDispatcher("/websocket").register(server)
 clientmanager = ClientManager().register(server)
 Auth().register(clientmanager)
+Chat().register(clientmanager)
 
 NMEAParser().register(app)
 

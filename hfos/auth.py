@@ -27,7 +27,7 @@ class authgranted(Event):
 
 class Auth(Component):
 
-    channel="wsserver"
+    channel="auth"
 
     def __init__(self, host="127.0.0.1", port=27017, *args):
         """
@@ -57,7 +57,7 @@ class Auth(Component):
                 if useraccount['passhash'] == event.passhash:
                     print("AUTH: Hash matches!")
                     del(useraccount['_id'], useraccount['passhash'])
-                    self.fireEvent(authgranted(event.username, useraccount, event.uuid, event.sock))
+                    self.fireEvent(authgranted(event.username, useraccount, event.uuid, event.sock), "wsserver")
 
             else:
                 # TODO: Write registration function
