@@ -1,67 +1,75 @@
-from circuits import Component, handler, Event
+"""
+Hackerfleet Operating System - Backend
 
-from pymongo import MongoClient
+Module: Auth
+============
 
+Authentication (and later Authorization) system
 
-class authrequest(Event):
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
 
-    def __init__(self, username, passhash, uuid, sock, *args):
-        super(authrequest, self).__init__(*args)
+"""
 
-        self.username = username
-        self.passhash = passhash
-        self.sock = sock
-        self.uuid = uuid
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-class authgranted(Event):
+from circuits import Component, handler
 
-    def __init__(self, username, useraccount, uuid, sock, *args):
-        super(authgranted, self).__init__(*args)
-
-        self.username = username
-        self.useraccount = useraccount
-        self.uuid = uuid
-        self.sock = sock
-        print(self.__dict__)
+from .database import userobject, profileobject
+from .events import authentication
 
 
-class Auth(Component):
+class Authenticator(Component):
+    """
+    Authenticates users against the database.
+    """
 
-    channel="auth"
+    channel = "auth"
 
-    def __init__(self, host="127.0.0.1", port=27017, *args):
-        """
-
-        :param host:
-        :param port:
-        :param user:
-        :param password:
-        """
-
-        super(Auth, self).__init__(*args)
-
-        self._host = host
-        self._port = port
-        self._client = MongoClient(host=self._host, port=self._port)
-        self._authcollection = self._client['hfos']['auth']
-
-    @handler("authrequest")
-    def authrequest(self, event):
-        print("AUTH: Request %s" % (event))
+    @handler("authenticationrequest")
+    def authenticationrequest(self, event):
+        """Handles authentication requests from clients"""
+        print("AUTHENTICATE: Request %s" % event)
         print("Username: %s, Passhash: %s" % (event.username, event.passhash))
         try:
-            useraccount = self._authcollection.find_one({'username': event.username})
+            #useraccount = self._authcollection.find_one({'username': event.username})
+            useraccount = userobject.find_one({'username': event.username})
+            print("AUTHENTICATE: Account: %s" % useraccount)
             if useraccount:
-                print("AUTH: User found!")
-                print(useraccount)
-                if useraccount['passhash'] == event.passhash:
-                    print("AUTH: Hash matches!")
-                    del(useraccount['_id'], useraccount['passhash'])
-                    self.fireEvent(authgranted(event.username, useraccount, event.uuid, event.sock), "wsserver")
+                print("AUTHENTICATE: User found!")
+                print(useraccount.__dict__)
+                if useraccount.passhash == event.passhash:
+                    print("AUTHENTICATE: Hash matches, fetching profile.")
+                    userprofile = profileobject.find_one({'uuid': useraccount.uuid})
+                    #del(useraccount['_id'], useraccount['passhash'])
+                    self.fireEvent(authentication(event.username, (useraccount, userprofile), event.uuid, event.sock),
+                                   "wsserver")
 
             else:
                 # TODO: Write registration function
-                print("AUTH: User created - HACK")
-                self._authcollection.insert({'username': event.username, 'passhash': event.passhash})
+                print("AUTHENTICATE: Creating user")
+
+                # New user gets registered with the first uuid he happens to turn up
+                newuser = userobject({'username': event.username, 'passhash': event.passhash, 'uuid': str(event.uuid)})
+                newuser.save()
+                newprofile = profileobject({'uuid': str(newuser.uuid)})
+                newprofile.save()
+
         except Exception as e:
-            print("AUTH: Exception! %s %s" % (type(e), e))
+            print("AUTHENTICATE: Exception! %s %s" % (type(e), e))
+
+    @handler("profileupdate")
+    def profileupdate(self, event):
+        """Handles client profile updates"""
+
+        print("AUTHENTICATE: Profileupdate %s" % event)
+
+        try:
+            newprofile = event.profile
+            print("AUTHENTICATE: Got: %s " % newprofile)
+            userprofile = profileobject.find_one({'uuid': newprofile['uuid']})
+            print("AUTHENTICATE: Have: %s" % userprofile)
+            userprofile.update(event.profile)
+            userprofile.save()
+        except Exception as e:
+            print("AUTHENTICATE: Exception! %s %s" % (type(e), e))

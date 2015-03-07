@@ -1,12 +1,27 @@
+"""
+Hackerfleet Operating System - Backend
+
+Module: TileCache
+=================
+
+Autonomously operating local tilecache
+
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
 #!/usr/bin/env python
 
-from circuits import Component, handler, Timer, Worker, task
-
-import os
 import socket
 
+from circuits import Worker, task
 from circuits.web.tools import serve_file
 from circuits.web.controllers import Controller
+
+import os
 
 try:
     from urllib import quote, unquote, urlopen
@@ -17,7 +32,9 @@ except ImportError:
 
 
 def get_tile(url, *args, **kwargs):
-
+    """
+    Threadable function to retrieve map tiles from the internet
+    """
     log = "TC: INFO Getting tile: %s" % url
 
     connection = None
@@ -45,22 +62,32 @@ def get_tile(url, *args, **kwargs):
 
 
 class TileCache(Controller):
-
+    """
+    Threaded, disk-caching tile delivery component
+    """
     #channel = "web"
 
     def __init__(self, path="/tilecache", tilepath="/var/cache/hfos/tilecache", defaulttile=None, **kwargs):
+        """
+
+        :param path: Webserver path to offer cache on
+        :param tilepath: Caching directory structure target path
+        :param defaulttile: Used, when no tile can be cached
+        :param kwargs:
+        """
         super(TileCache, self).__init__(**kwargs)
-        Worker(process=False, workers=50).register(self)
+        Worker(process=False, workers=50, channel="tcworkers").register(self)
 
         self.tilepath = tilepath
         self.path = path
         self.defaulttile = defaulttile
 
     def tilecache(self, event, *args, **kwargs):
+        """Checks and caches a requested tile to disk, then delivers it to client"""
         request, response = event.args[:2]
 
         origpath = request.path
-        path =  origpath
+        path = origpath
 
         if self.path is not None:
             path = path[len(self.path):]
@@ -73,7 +100,6 @@ class TileCache(Controller):
         #else:
         #    print("TC: WARNING! This should not happen! Path was empty!")
         #    return
-
 
         #if not location.startswith(os.path.dirname(self.tilepath)):
         #    return  # hacking attemp e.g. /foo/../../../../../etc/shadow
@@ -116,7 +142,7 @@ class TileCache(Controller):
             print("TC: Estimated filename: %s " % filename)
             print("TC: Estimated URL: %s " % url)
 
-            tile = yield self.call(task(get_tile, url), "worker")
+            tile = yield self.call(task(get_tile, url), "tcworker")
             #print("#"*23+str(type(tile)), str(tile))
             #print(log)
 
@@ -125,9 +151,8 @@ class TileCache(Controller):
             if tile:
                 try:
                     os.makedirs(tilepath)
-                except Exception as e:
-                    pass
-                    #print("TC: Couldn't create path: %s" % e)
+                except OSError as e:
+                    print("TC: Couldn't create path: %s (%s)" % (e, type(e)))
 
                 print("TC: Caching tile...")
                 try:

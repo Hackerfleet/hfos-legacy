@@ -1,0 +1,45 @@
+"""
+Hackerfleet Operating System - Backend
+
+Schema: Mapview
+=================
+
+Contains
+========
+
+MapView: User generated Mapviews
+
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
+# {
+#     'type': "object",
+#     'name': 'Profile',
+#     'properties': {
+#         'name': {'type': "string", 'minLength': 2, 'title': "Name", 'description': "Name or alias"},
+#         'title': {
+#             'type': "string",
+#             'enum': ['dr','jr','sir','mrs','mr','NaN','dj']
+#         }
+#     }
+# }
+
+from .coords import MapCoords
+
+MapView = {
+    'type': 'object',
+    'name': 'Mapview',
+    'properties': {
+        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique User ID', 'description': 'HIDDEN'},
+        'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Name of view'},
+        'color': {'type': 'string', 'title': 'View Color', 'format': 'color',
+                  'description': 'This views color indicator'},
+        'shared': {'type': 'boolean', 'title': 'Shared view', 'description': 'Share view with the crew'},
+        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'},
+        'coords': MapCoords
+    }
+}

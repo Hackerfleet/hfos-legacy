@@ -1,39 +1,37 @@
-from circuits.net.events import write, read
-from circuits import Component, handler, Event
+"""
+Hackerfleet Operating System - Backend
 
-from .auth import authrequest, authgranted
+Module: Chat
+============
+
+Chat manager
+
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 import json
-from uuid import uuid4
 
-from pprint import pprint
+from circuits.net.events import write
+from circuits import Component, handler
 
-
-
-
-class chatmessage(Event):
-    def __init__(self, msg, sender, timestamp, *args):
-        super(chatmessage, self).__init__(*args)
-        self.sender = sender
-        self.timestamp = timestamp
-        self.msg = msg
-
-        print("CHAT: Message generated")
-
-class chatevent(Event):
-    def __init__(self, msgtype, sender, timestamp, *args):
-        super(chatevent, self).__init__(*args)
-        self.sender = sender
-        self.timestamp = timestamp
-        self.msgtype = msgtype
-
-        print("CHAT: Event generated")
 
 class Chat(Component):
+    """
+    Chat manager
 
-    channel="chat"
+    Handles
+    * incoming chat messages
+    * chat broadcasts
+    """
+    channel = "chat"
 
-    def init(self):
+    def __init__(self, *args):
+        super(Chat, self).__init__(*args)
+
         print("CHAT: Started")
         self._clients = []
 
@@ -42,40 +40,63 @@ class Chat(Component):
         for recipient in self._clients:
             self.fireEvent(write(recipient.sock, json.dumps(chatpacket)), "wsserver")
 
+    def _getusername(self, event):
+        try:
+            username = event.sender.profile.nick
+        except AttributeError:
+            username = event.sender.account.username
+        return username
 
     @handler("chatevent")
     def on_chatevent(self, event):
+        """Chat event handler for incoming events"""
+
         print("CHAT: Event: '%s'" % event.__dict__)
         try:
             msgtype = event.msgtype
-            print(event.sender.profile)
-            username = event.sender.profile['username']
-            print(username)
+            username = self._getusername(event)
+
+            msg = ""
+
             if msgtype == "join":
                 self._clients.append(event.sender)
                 msg = "joined"
-            if msgtype == "part":
-                msg = "left"
-                if event.sender in self._clients:
-                    self._clients.remove(event.sender)
+            #if msgtype == "part":
+            #    msg = "left"
+            #    if event.sender in self._clients:
+            #        self._clients.remove(event.sender)
             # TODO: Make this a representation of the event itself
-            chatpacket = {'type': 'chat', 'content': {'sender': username, 'timestamp': event.timestamp, 'content': msg}}
-            self._broadcast(chatpacket)
-            
-            if msgtype == "part" and event.sender in self._clients:
-                self._clients.remove(event.sender)
+            try:
+                chatpacket = {'type': 'chat',
+                              'content': {
+                                  'sender': username,
+                                  'timestamp': event.timestamp,
+                                  'content': msg
+                              }
+                }
+                self._broadcast(chatpacket)
+            except Exception as e:
+                print("CHAT: Transmission error before broadcast: %s" % e)
+
+                #if msgtype == "part" and event.sender in self._clients:
+                #    self._clients.remove(event.sender)
 
         except Exception as e:
-            print("CHAT: Error: '%s'" % e)
-
-
+            print("CHAT: Error: '%s' %s" % (e, type(e)))
 
     @handler("chatmessage")
     def on_chatmessage(self, event):
+        """Handles new incoming chat messages by broadcasting them to all connected clients"""
         print("CHAT: Event: '%s'" % event.__dict__)
         try:
             # TODO: Make this a representation of the event itself
-            chatpacket = {'type': 'chat', 'content': {'sender': event.sender.profile['username'], 'timestamp': event.timestamp, 'content': ":" + str(event.msg)}}
+            chatpacket = {'type': 'chat',
+                          'content': {
+                              'sender': self._getusername(event),
+                              'timestamp': event.timestamp,
+                              'content': ":" + str(event.msg)
+                          }
+            }
             self._broadcast(chatpacket)
         except Exception as e:
             print("CHAT: Error: '%s'" % e)

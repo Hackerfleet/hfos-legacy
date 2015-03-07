@@ -1,0 +1,36 @@
+Primer
+======
+Since our platform is geared for running without a live connection to the
+internet, we have to supply a lot of redistributables with our product.
+
+We absolutely do not intend to claim other great people's work, so here is a
+complete list of our used redistributable assets.  Should something be
+missing, inappropriate or plainly wrong, contact the developers via
+hfos@hackerfleet.org
+
+UNCLEAR LICENSE
+===============
+But probably cool, research and add a license for these:
+* Lots of codrops from Tympanus! Huge thanks for many great UI improvements!
+* Leaflet.graticule - http://blog.thematicmapping.org/2013/07/creating-graticule-with-leaflet.html
+
+GPL
+===
+* DataTables is dual licensed under the GPL v2 license or a BSD (3-point) license: 
+  DataTables designed and created by SpryMedia (c) 2008-2014
+
+MIT/BSD Licenses
+================
+* Bootstrap - Copyright (c) 2011-2014, Twitter Inc.
+* jQuery - Copyright (c) 2014, The jQuery Foundation.
+* Leaflet - Copyright (c) 2010-2014, Vladimir Agafonkin, Copyright (c) 2010-2011, CloudMade
+* Leaflet.Pancontrol - Copyright (c) 2012, Kartena AB
+* Leaflet.zoomslider - Copyright (c) 2012-2014, Kartena AB, Mattias Bengtsson
+* Leaflet.Terminator - Copyright (c) 2013, Joerg Dietrich <astro@joergdietrich.com>
+* Leaflet.MousePosition - Copyright 2012, Ardhi Lukianto
+* Leaflet.EdgeMarker - Copyright (c) 2013, Gerald Pape
+* JS/CSS Gauge from http://bernii.github.io/gauge.js/
+
+Apache License
+==============
+* Boostrap-switch - (c) http://www.bootstrap-switch.org/
