@@ -21,12 +21,14 @@ from circuits import Worker, task
 from circuits.web.tools import serve_file
 from circuits.web.controllers import Controller
 
+from hfos.logger import hfoslog, error
+
 import os
 
 try:
     from urllib import quote, unquote, urlopen
 except ImportError:
-    print("V3")
+    hfoslog("V3")
     from urllib.request import urlopen
     from urllib.parse import quote, unquote  # NOQA
 
@@ -35,14 +37,14 @@ def get_tile(url, *args, **kwargs):
     """
     Threadable function to retrieve map tiles from the internet
     """
-    log = "TC: INFO Getting tile: %s" % url
+    log = "TCT: INFO Getting tile: %s" % url
 
     connection = None
 
     try:
         connection = urlopen(url=url, timeout=5)
     except Exception as e:
-        log += "TC: INFO Tilegetter error: %s " % str([type(e), e, url])
+        log += "TCT: ERROR Tilegetter error: %s " % str([type(e), e, url])
 
     content = ""
 
@@ -51,14 +53,16 @@ def get_tile(url, *args, **kwargs):
         try:
             content = connection.read()
         except (socket.timeout, socket.error) as e:
-            log += "TC INFO Tilegetter error: %s " % str([type(e), e])
+            log += "TCT: ERROR Tilegetter error: %s " % str([type(e), e])
 
         connection.close()
+    else:
+        log += "TCT: ERROR Got no connection."
 
-    log += "TC INFO Tilegetter done."
-    print(log)
-    print(type(content), "%20s" % content)
-    return content
+    log += "TCT INFO Tilegetter done."
+    #hfoslog(log)
+    #log(type(content), "%20s" % content)
+    return content, log
 
 
 class TileCache(Controller):
@@ -93,12 +97,12 @@ class TileCache(Controller):
             path = path[len(self.path):]
 
         path = unquote(path)
-        #print("TC: WARNING:  %s " % path)
+        #log("TC: WARNING:  %s " % path)
 
         #if path:
         #    location = os.path.abspath(path)
         #else:
-        #    print("TC: WARNING! This should not happen! Path was empty!")
+        #    log("TC: WARNING! This should not happen! Path was empty!")
         #    return
 
         #if not location.startswith(os.path.dirname(self.tilepath)):
@@ -115,7 +119,7 @@ class TileCache(Controller):
             filename = os.path.join(self.tilepath, service, x, y) + "/" + z + ".png"
             url = "http://" + service + "/" + x + "/" + y + "/" + z + ".png"
         except Exception as e:
-            print("TC: ERROR (%s) in URL: %s" % (e, origpath))
+            hfoslog("TC: ERROR (%s) in URL: %s" % (e, origpath))
             filename = ""
             url = ""
 
@@ -129,7 +133,7 @@ class TileCache(Controller):
 
         # Do we have the tile already?
         if os.path.isfile(filename):
-            print("TC: Tile exists in cache")
+            hfoslog("TC: Tile exists in cache")
             # Don't set cookies for static content
             response.cookie.clear()
             try:
@@ -138,13 +142,17 @@ class TileCache(Controller):
                 event.stop()
         else:
             # We will have to get it first.
-            print("TC: Tile not cached yet.")
-            print("TC: Estimated filename: %s " % filename)
-            print("TC: Estimated URL: %s " % url)
-
-            tile = yield self.call(task(get_tile, url), "tcworker")
-            #print("#"*23+str(type(tile)), str(tile))
-            #print(log)
+            hfoslog("TC: Tile not cached yet.")
+            hfoslog("TC: Estimated filename: %s " % filename)
+            hfoslog("TC: Estimated URL: %s " % url)
+            try:
+                tile, log = get_tile(url)  # yield self.call(task(get_tile, url), "tcworker")
+                hfoslog("TCT: ", log)
+            except Exception as e:
+                hfoslog("TC:", e, type(e))
+                tile = None
+            #log("#"*23+str(type(tile)), str(tile))
+            #log(log)
 
             tilepath = os.path.dirname(filename)
 
@@ -152,27 +160,33 @@ class TileCache(Controller):
                 try:
                     os.makedirs(tilepath)
                 except OSError as e:
-                    print("TC: Couldn't create path: %s (%s)" % (e, type(e)))
+                    hfoslog("TC: Couldn't create path: %s (%s)" % (e, type(e)))
 
-                print("TC: Caching tile...")
+                hfoslog("TC: Caching tile...")
                 try:
                     tilefile = open(filename, "wb")
                 except Exception as e:
-                    print("TC: Open error: %s" % str([type(e), e]))
+                    hfoslog("TC: Open error: %s" % str([type(e), e]))
                     return
 
                 try:
                     tilefile.write(bytes(tile))
 
                     tilefile.close()
-                    yield serve_file(request, response, filename)
                 except Exception as e:
-                    print("TC: Writing error: %s" % str([type(e), e]))
+                    hfoslog("TC: Writing error: %s" % str([type(e), e]))
                 finally:
                     event.stop()
-                print("TC: Tile stored and delivered.")
+
+                try:
+                    hfoslog("Delivering tile")
+                    yield serve_file(request, response, filename)
+                except Exception as e:
+                    hfoslog("TC: Couldn't deliver.", lvl=error)
+                    event.stop()
+                hfoslog("TC: Tile stored and delivered.")
             else:
-                print("TC: Got no tile, serving defaulttile: %s" % url)
+                hfoslog("TC: Got no tile, serving defaulttile: %s" % url)
                 if self.defaulttile:
                     try:
                         yield serve_file(request, response, self.defaulttile)

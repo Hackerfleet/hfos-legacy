@@ -28,8 +28,6 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 #     }
 # }
 
-from .coords import MapCoords
-
 MapView = {
     'type': 'object',
     'name': 'Mapview',
@@ -40,6 +38,38 @@ MapView = {
                   'description': 'This views color indicator'},
         'shared': {'type': 'boolean', 'title': 'Shared view', 'description': 'Share view with the crew'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'},
-        'coords': MapCoords
-    }
+        'coords': {
+            "lat": {
+                "id": "lat",
+                "type": "number",
+                "maximum": 90,
+                "minimum": -90,
+                "title": "Latitude of coordinate.",
+                "description": "",
+                "name": "lat"
+            },
+            "lon": {
+                "id": "lon",
+                "type": "number",
+                "maximum": -180,
+                "minimum": 180,
+                "title": "Longitude of coordinate.",
+                "description": "",
+                "name": "lon"
+            },
+            "zoom": {
+                "id": "zoom",
+                "type": "integer",
+                "multipleOf": 1,
+                "maximum": 20,
+                "minimum": 1,
+                "title": "Zoom of view.",
+                "description": "",
+                "name": "zoom"
+            }
+        }
+    },
+    "required": [
+        'uuid'
+    ]
 }

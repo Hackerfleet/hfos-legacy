@@ -27,24 +27,10 @@ from hfos.schemata.profile import Profile
 from hfos.schemata.user import User
 from hfos.schemata.mapview import MapView
 
+from .logger import hfoslog
 
 warmongo.connect("hfos")
 
 userobject = warmongo.model_factory(User)
 profileobject = warmongo.model_factory(Profile)
 mapviewobject = warmongo.model_factory(MapView)
-
-foo = mapviewobject({'uuid': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-                     'name': 'schöner name',
-                     'shared': True,
-                     'color': 'RGB(0,0,255)',
-                     'notes': 'Ahahaha, some notes',
-                     'coords': {
-                         'lat': 0,
-                         'lon': 0,
-                         'zoom': 5
-                     }
-})
-
-foo.validate()
-print(foo.serializablefields())

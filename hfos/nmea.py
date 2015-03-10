@@ -17,6 +17,7 @@ from circuits import Component
 from pynmea.streamer import NMEAStream
 
 from hfos.events import sensordata
+from hfos.logger import hfoslog
 
 
 class NMEAParser(Component):
