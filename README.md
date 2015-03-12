@@ -64,14 +64,20 @@ You will need to set up a bunch of more dependencies via npm to set up the front
 Backend
 -------
 
-No installation/daemon yet. Just set up a virtual env and install it:
+No installation/daemon yet. Just set up a virtual env and install it.
+You may want to create a path in /var/cache for hfos' tilecache and other stuff:
 
+    sudo mkdir -p /var/cache/hfos/tilecache
     git clone https://github.com/hackerfleet/hfos
     cd hfos
     virtualenv -p /usr/bin/python3.4 --system-site-packages venv
     source venv/bin/activate
     python setup.py install
     python hfos.py
+
+
+You may need to adapt permissions for that folder to accomodate the user you let hfos run with, until we re-
+add the daemon and package support foam, that does that automatically.
 
 Frontend
 --------
@@ -82,8 +88,10 @@ To install the frontend, update and pull the submodule, then change into it and 
     git submodule update
     cd frontend
     npm install
-    grunt install
+    bower install
+    grunt serve
 
+Point your browser to localhost:9000 to observe the magic. Don't forget to start the backend!
 
 Development
 -----------
