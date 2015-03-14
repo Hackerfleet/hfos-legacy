@@ -43,7 +43,8 @@ class Chat(Component):
     def authentication(self, event):
         try:
             hfoslog("Adding new user:", event.useruuid)
-            self._clients.append(event.useruuid)
+            if not event.useruuid in self._clients:
+                self._clients.append(event.useruuid)
         except Exception as e:
             hfoslog("chat authentication event failed:", e, type(e), lvl=error)
 
