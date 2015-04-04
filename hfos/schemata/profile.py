@@ -29,6 +29,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 # }
 
 Profile = {
+    'id': '#profile',
     'type': 'object',
     'name': 'Profile',
     'properties': {
@@ -45,12 +46,15 @@ Profile = {
                   'description': '<a href="#/preferences/shifts">Setup shifts</a>'},
         'color': {'type': 'string', 'title': 'User Color', 'format': 'color',
                   'description': 'Color used for map annotations, chat etc'},
+        'theme': {'type': 'string', 'title': 'User Theme', 'description': 'Theme used for user interface'},
         #'certs': {'type': 'array', 'items': 'string', 'title': '', 'description': ''},
         #'foodpref': {'type': 'string', 'title': '', 'description': ''},
         #'bunk': {'type': 'string', 'title': '', 'description': ''},
         'visa': {'type': 'boolean', 'title': 'Visas etc', 'description': 'Got all Visa documents etc?'},
         #'fees_paid': {'type': 'boolean', 'title': '', 'description': ''},
         #'fees_per_night': {'type': 'integer', 'title': '', 'description': ''},
-        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'}
+        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'},
     }
 }
+
+__schema__ = Profile
