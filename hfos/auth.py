@@ -17,7 +17,7 @@ from circuits import Component, handler
 
 from .database import userobject, profileobject
 from .events import authentication
-from hfos.logger import hfoslog, error, warn
+from hfos.logger import hfoslog, error, warn, critical
 
 
 class Authenticator(Component):
@@ -25,9 +25,9 @@ class Authenticator(Component):
     Authenticates users against the database.
     """
 
-    channel = "auth"
+    channel = "hfosweb"
 
-    @handler("authenticationrequest")
+    @handler("authenticationrequest", channel="auth")
     def authenticationrequest(self, event):
         """Handles authentication requests from clients"""
         hfoslog("Auth request for ", event.username)
@@ -36,7 +36,7 @@ class Authenticator(Component):
 
         try:
             useraccount = userobject.find_one({'username': event.username})
-            hfoslog("Account: %s" % useraccount)
+            hfoslog("Account: %s" % useraccount._fields)
         except Exception as e:
             hfoslog("No userobject due to error: ", e, type(e))
 
@@ -48,11 +48,11 @@ class Authenticator(Component):
 
                 try:
                     userprofile = profileobject.find_one({'uuid': useraccount.uuid})
-                    #del(useraccount['_id'], useraccount['passhash'])
+                    useraccount.passhash = ""
                     self.fireEvent(
-                        authentication(event.username, (useraccount, userprofile), event.uuid, useraccount.uuid,
+                        authentication(useraccount.username, (useraccount, userprofile), event.uuid, useraccount.uuid,
                                        event.sock),
-                        "wsserver")
+                        "auth")
                 except Exception as e:
                     hfoslog("No profile due to error: ", e, type(e), lvl=error)
             else:
@@ -70,23 +70,35 @@ class Authenticator(Component):
             except Exception as e:
                 hfoslog("Problem creating new user: ", type(e), e)
 
-    @handler("profileupdate")
-    def profileupdate(self, event):
-        """Handles client profile updates"""
+    def profilerequest(self, event):
+        """Handles client profile actions"""
 
-        hfoslog("Profileupdate %s" % event)
+        hfoslog("Profile update %s" % event)
+
+        if event.action != "update":
+            hfoslog("Unsupported profile action: ", event, lvl=warn)
+            return
 
         try:
-            newprofile = event.profile
+            newprofile = event.data
+            newuuid = newprofile['uuid']
             hfoslog("Got: %s " % newprofile)
+
+            if event.user.useruuid != newuuid:
+                hfoslog("Auth: User tried to manipulate wrong profile.", lvl=warn)
+                return
             userprofile = profileobject.find_one({'uuid': newprofile['uuid']})
+
             if not userprofile:
-                hfoslog("No profile, whoa?! Creating a new one..", lvl=error)
+                hfoslog("Auth: No profile! Creating a new one..", lvl=critical)
                 userprofile = profileobject()
+
             hfoslog("Have: %s" % userprofile)
-            userprofile.update(event.profile)
+
+            userprofile.update(newprofile)
             userprofile.save()
+
             hfoslog("Profile stored.")
             # TODO: Give client feedback
         except Exception as e:
-            hfoslog("Exception! %s %s" % (type(e), e))
+            hfoslog("Exception! %s %s" % (type(e), e), lvl=error)

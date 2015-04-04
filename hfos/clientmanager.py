@@ -20,8 +20,8 @@ from time import time
 from circuits.net.events import write
 from circuits import Component, handler
 
-from hfos.events import authenticationrequest, profileupdate, chatevent, chatmessage, mapviewrequest, send
-from hfos.logger import hfoslog, error, warn
+from hfos.events import send, broadcast, authenticationrequest, client_disconnect, AuthorizedEvents
+from hfos.logger import hfoslog, error, warn, critical, debug, info
 
 
 class Socket(object):
@@ -84,7 +84,8 @@ class ClientManager(Component):
     """
     Handles client connections and requests as well as client-outbound communication.
     """
-    channel = "wsserver"
+
+    channel = "hfosweb"
 
     def __init__(self, *args):
         super(ClientManager, self).__init__(*args)
@@ -94,6 +95,7 @@ class ClientManager(Component):
         self._users = {}
         self._count = 0
 
+    @handler("disconnect", channel="wsserver")
     def disconnect(self, sock):
         """Handles socket disconnections"""
 
@@ -101,9 +103,15 @@ class ClientManager(Component):
 
         if sock in self._sockets:
             hfoslog("CA: Deleting socket")
-            # TODO: Delete client as well
-            del self._sockets[sock]
+            sockobj = self._sockets[sock]
+            clientuuid = sockobj.clientuuid
 
+            self.fireEvent(client_disconnect(clientuuid, self._clients[clientuuid].useruuid))
+
+            del self._sockets[sock]
+            del self._clients[clientuuid]
+
+    @handler("connect", channel="wsserver")
     def connect(self, *args):
         """Registers new sockets and their clients and allocates uuids"""
 
@@ -124,117 +132,132 @@ class ClientManager(Component):
             #     self.fireEvent(write(sock, "Another client is connecting from your IP!"))
             #     self._sockets[sock] = (ip, uuid.uuid4())
 
-    @handler("send")
     def send(self, event):
-        """Sends a packet to an already known client by UUID"""
+        """Sends a packet to an already known user or one of his clients by UUID"""
 
-        hfoslog("CM: Sending to client '%s': '%s" % (event.uuid, event.packet))
         try:
-            hfoslog(self._users[event.uuid])
-            clients = self._users[event.uuid].clients
+            if event.sendtype == "user":
+                hfoslog("CM: Broadcasting to all of users clients: '%s': '%s" % (event.uuid, event.packet))
+                if not event.uuid in self._users:
+                    hfoslog('CM: Unknown user! ', event, lvl=critical)
+                    return
+                clients = self._users[event.uuid].clients
 
-            for clientuuid in clients:
-                sock = self._clients[clientuuid].sock
-                self.fireEvent(write(sock, json.dumps(event.packet)))
+                for clientuuid in clients:
+                    sock = self._clients[clientuuid].sock
+
+                    self.fireEvent(write(sock, json.dumps(event.packet)), "wsserver")
+            else:  # only to client
+                hfoslog("CM: Sending to user's client: '%s': '%s" % (event.uuid, event.packet))
+                if not event.uuid in self._clients:
+                    hfoslog('CM: Unknown client! ', event.uuid, lvl=critical)
+                    return
+
+                sock = self._clients[event.uuid].sock
+                self.fireEvent(write(sock, json.dumps(event.packet)), "wsserver")
         except Exception as e:
             hfoslog("CM: Exception during sending: %s (%s)" % (e, type(e)))
 
-    @handler("broadcast")
     def broadcast(self, event):
         """Broadcasts an event either to all users or clients, depending on event flag"""
+        try:
+            if event.broadcasttype == "users":
+                hfoslog("CM: Broadcasting to all users:", event.content)
+                for useruuid in self._users.keys():
+                    self.fireEvent(send(useruuid, event.content, sendtype="user"))
 
-        if event.type == "users":
-            hfoslog("CM: Broadcasting to all users:", event.content)
-            for user in self._users:
-                self.fireEvent(send(user.useruuid, event.content))
-        elif event.type == "clients":
-            hfoslog("CM: Broadcasting to all clients: ", event.content)
-            for client in self._clients:
-                self.fireEvent(write(client.sock, event.content))
-        elif event.type == "socks":
-            hfoslog("CM: Emergency?! Broadcasting to all sockets: ", event.content)
-            for sock in self._sockets:
-                self.fireEvent(write(sock, event.content))
+            elif event.broadcasttype == "clients":
+                hfoslog("CM: Broadcasting to all clients: ", event.content)
+                for client in self._clients.values():
+                    self.fireEvent(write(client.sock, event.content), "wsserver")
 
+            elif event.broadcasttype == "socks":
+                hfoslog("CM: Emergency?! Broadcasting to all sockets: ", event.content)
+                for sock in self._sockets:
+                    self.fireEvent(write(sock, event.content), "wsserver")
+
+        except Exception as e:
+            hfoslog("Error during broadcast: ", e, type(e), lvl=critical)
+
+    def _handleAuthorizedEvents(self, component, action, data, user, client):
+
+        if not user and component in AuthorizedEvents.keys():
+            hfoslog("CM: Unknown client tried to do an authenticated operation: %s", component, action, data, user)
+            return
+
+        event = AuthorizedEvents[component]
+        hfoslog("CM: Firing authorized event.", lvl=debug)
+        self.fireEvent(event(user, action, data, client))
+
+    @handler("read", channel="wsserver")
     def read(self, *args):
         """Handles raw client requests and distributes them to the appropriate components"""
-        timestamp = time()
-
         sock, msg = args[0], args[1]
         hfoslog("CM: ", msg)
 
         clientuuid = self._sockets[sock].clientuuid
-        # TODO: Make a difference between coonnection and user uuid
+
         try:
             msg = json.loads(msg)
         except Exception as e:
             hfoslog("CM: JSON Decoding failed! %s (%s of %s)" % (msg, e, type(e)))
 
         try:
-            if "message" in msg.keys():
-                msg = msg['message']
-                if "type" in msg.keys():
-                    msgtype = msg['type']
-                    if msgtype == "info":
-                        # uuuh.
-                        return
+            requestcomponent = msg['message']['component']
+            requestaction = msg['message']['action']
+        except (KeyError, AttributeError) as e:
+            hfoslog("CM: Unpacking error: ", msg, e, type(e), lvl=error)
+            return
 
-                    if msgtype == "auth":
-                        auth = msg['content']
-                        username = auth['username']
-                        hfoslog("CM: Auth request by ", username)
+        try:
+            requestdata = msg['message']['data']
+        except (KeyError, AttributeError) as e:
+            hfoslog("CM: No payload.", lvl=debug)
+            requestdata = None
 
-                        self.fireEvent(authenticationrequest(auth['username'], auth['password'], clientuuid, sock),
-                                       "auth")
-                        return
+        if requestcomponent == "auth":
+            if requestaction == "login":
+                try:
+                    hfoslog("CM: Login request")
 
-                    try:
-                        # Only for signed in users
-                        client = self._clients[clientuuid]
-                        useruuid = client.useruuid
-                        hfoslog("CM: Authenticated operation tried by ", client)
-                    except Exception as e:
-                        hfoslog("No useruuid.", lvl=warn)
-                        return
+                    username = requestdata['username']
+                    password = requestdata['password']
+                    hfoslog("CM: Auth request by ", username)
 
-                    try:
-                        userobj = self._users[useruuid]
-                    except KeyError:
-                        hfoslog("User not logged in.", lvl=warn)
-                        return
+                    self.fireEvent(authenticationrequest(username, password, clientuuid, sock), "auth")
+                    return
+                except Exception as e:
+                    hfoslog("Login failed: ", e, lvl=warn)
 
-                    if not useruuid and msgtype in ("profile", "mapview", "chat"):
-                        hfoslog("CM: Unknown client tried to do an authenticated operation: %s" % msg)
-                        return
-
-                    if msgtype == "profile":
-                        profile = msg['content']
-                        hfoslog("CM: Profile update")
-
-                        self.fireEvent(profileupdate(profile, useruuid, sock), "auth")
-                        return
-
-                    if msgtype == "mapview":
-                        details = msg['content']
-                        hfoslog("CM: Mapview request")
-
-                        self.fireEvent(mapviewrequest(userobj, details), "mapview")
-                        return
-
-                    if msgtype == "chatrequest":
-                        chatdata = msg['content']
-                        hfoslog("CM: Chat request '%s'" % chatdata)
-
-                        useraccount = self._users[useruuid]
-
-                        self.fireEvent(chatevent(useraccount, timestamp, chatdata), "chat")
-                        return
-
+        try:
+            # Only for signed in users
+            client = self._clients[clientuuid]
+            useruuid = client.useruuid
+            hfoslog("CM: Authenticated operation requested by ", client)
         except Exception as e:
-            hfoslog("CM: Erroneous (%s, %s) message received: %s" % (type(e), e, msg))
+            hfoslog("No useruuid!", lvl=critical)
+            return
+        if requestcomponent == "auth":
+            if requestaction == "logout":
+                hfoslog("CM: Client logged out:")
+                self._users[useruuid].clients.remove(clientuuid)
+                self._clients[clientuuid].useruuid = None
+            return
 
-    @handler("authentication")
-    def on_authgranted(self, event):
+        try:
+            user = self._users[useruuid]
+        except KeyError:
+            hfoslog("User not logged in.", lvl=warn)
+            return
+
+        try:
+            self._handleAuthorizedEvents(requestcomponent, requestaction, requestdata, user, client)
+        except Exception as e:
+            hfoslog("Requested action failed: ", e, lvl=warn)
+
+
+    @handler("authentication", channel="auth")
+    def authentication(self, event):
         """Links the client to the granted account and profile, then notifies the client"""
         try:
             hfoslog("CM: Authorization has been granted by DB check: %s" % event)
@@ -250,34 +273,35 @@ class ClientManager(Component):
 
             self._clients[clientuuid].useruuid = useruuid
 
-            authpacket = {"type": "auth", "content": {"success": True, "useraccount": account.serializablefields()}}
-            self.fireEvent(write(event.sock, json.dumps(authpacket)))
+            hfoslog("CM: Transmitting Authorization to client", lvl=debug)
+            authpacket = {"component": "auth", "action": "login", "data": account.serializablefields()}
+            self.fireEvent(write(event.sock, json.dumps(authpacket)), "wsserver")
 
-            profilepacket = {"type": "profile", "content": profile.serializablefields()}
-            self.fireEvent(write(event.sock, json.dumps(profilepacket)))
+            hfoslog("CM: Transmitting Profile to client", lvl=debug)
+            profilepacket = {"component": "profile", "action": "get", "data": profile.serializablefields()}
+            self.fireEvent(write(event.sock, json.dumps(profilepacket)), "wsserver")
 
-            self.fireEvent(event, "chat")
-            hfoslog("User configured:", signedinuser.__dict__)
+            hfoslog("CM: User configured:", signedinuser.__dict__, lvl=info)
 
         except Exception as e:
-            hfoslog("CM: Error (%s, %s) during auth grant: %s" % (type(e), e, event))
+            hfoslog("CM: Error (%s, %s) during auth grant: %s" % (type(e), e, event), lvl=error)
 
-    @handler("ping")
-    def on_ping(self, *args, **kwargs):
+    def ping(self, *args, **kwargs):
         """Pings all connected clients with stupid ping/demo messages"""
         self._count += 1
         hfoslog("CA: Ping %i" % self._count)
-        for sock in self._sockets:
-            ip = self._sockets[sock].ip
-            hfoslog("CA: Sending ping to %s " % ip)
-            data = {'type': 'info',
-                    'content': "Hello " + str(self._sockets[sock].clientuuid)
+
+        data = {'component': 'ping',
+                'action': "Hello"
+        }
+        if (self._count % 5) == 0:
+            data = {'component': 'navdata',
+                    'action': 'update',
+                    'data': {'true_course': 17,
+                             'spd_over_grnd': 23
+                    }
             }
-            if (self._count % 5) == 0:
-                data = {'type': 'navdata',
-                        'content': {'true_course': 17,
-                                    'spd_over_grnd': 23
-                        }
-                }
-            self.fireEvent(write(sock, json.dumps(data)))
+        self.fireEvent(broadcast("clients", json.dumps(data)))
+
+
 
