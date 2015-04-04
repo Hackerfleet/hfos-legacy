@@ -60,3 +60,5 @@ MapCoords = {
         "zoom"
     ]
 }
+
+__schema__ = MapCoords

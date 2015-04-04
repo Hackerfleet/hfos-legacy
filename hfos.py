@@ -33,7 +33,9 @@ import hfos.database
 
 from hfos.tilecache import TileCache
 from hfos.clientmanager import ClientManager
-from hfos.mapviewstorage import MapView
+from hfos.mapviewmanager import MapViewManager
+from hfos.layermanager import LayerManager
+from hfos.schemamanager import SchemaManager
 from hfos.auth import Authenticator
 from hfos.logger import hfoslog
 
@@ -53,7 +55,7 @@ class App(Component):
     def started(self, component):
         """Sets up the not-yet-so-useful Ping timer for demo purposes"""
         hfoslog("App: Creating timer for CA")
-        Timer(30, Event.create("ping", channels="wsserver"), persist=True).register(self)
+        Timer(90, Event.create("ping", channels="wsserver"), persist=True).register(self)
 
 
 server = Server(("0.0.0.0", 8055))
@@ -65,7 +67,8 @@ WebSocketsDispatcher("/websocket").register(server)
 clientmanager = ClientManager().register(server)
 Authenticator().register(clientmanager)
 Chat().register(clientmanager)
-MapView().register(clientmanager)
+MapViewManager().register(clientmanager)
+SchemaManager().register(clientmanager)
 
 NMEAParser().register(app)
 

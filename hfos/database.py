@@ -20,17 +20,28 @@ mapviewobject: Mapview factory
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+import sys
+import importlib
+
 #from circuits import Component, handler, Event, Worker, task
 import warmongo
+
+import hfos.schemata
 
 from hfos.schemata.profile import Profile
 from hfos.schemata.user import User
 from hfos.schemata.mapview import MapView
+from hfos.schemata.layer import Layer
+from hfos.schemata.layergroup import LayerGroup
 
 from .logger import hfoslog
 
 warmongo.connect("hfos")
 
+# TODO: This could be automated via the schemata-store. Hmm.
+
 userobject = warmongo.model_factory(User)
 profileobject = warmongo.model_factory(Profile)
 mapviewobject = warmongo.model_factory(MapView)
+layerobject = warmongo.model_factory(Layer)
+layergroupobject = warmongo.model_factory(LayerGroup)
