@@ -30,9 +30,10 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 MapView = {
     'type': 'object',
+    'id': '#mapview',
     'name': 'Mapview',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique User ID', 'description': 'HIDDEN'},
+        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Mapview ID', 'description': 'HIDDEN'},
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Name of view'},
         'color': {'type': 'string', 'title': 'View Color', 'format': 'color',
                   'description': 'This views color indicator'},
@@ -73,3 +74,5 @@ MapView = {
         'uuid'
     ]
 }
+
+__schema__ = MapView

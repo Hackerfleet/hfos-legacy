@@ -18,17 +18,18 @@ from circuits import Component, handler
 from hfos.events import send, broadcast
 
 from hfos.database import mapviewobject
-from hfos.logger import hfoslog, error
+from hfos.logger import hfoslog, error, warn, debug
 
 
-class MapView(Component):
+class MapViewManager(Component):
     """
     Handles mapview updates, subscriptions and broadcasts
     """
-    channel = "mapview"
+
+    channel = "hfosweb"
 
     def __init__(self, *args):
-        super(MapView, self).__init__(*args)
+        super(MapViewManager, self).__init__(*args)
 
         hfoslog("MVS: Started")
         self._subscribers = {}
@@ -38,7 +39,7 @@ class MapView(Component):
         try:
             hfoslog("MVS: Transmitting message '%s'" % mapviewpacket)
             for recipient in self._subscribers[mapviewuuid]:
-                self.fireEvent(send(recipient, mapviewpacket), "wsserver")
+                self.fireEvent(send(recipient, mapviewpacket))
         except Exception as e:
             hfoslog("MVS: Failed broadcast: ", e, type(e), lvl=error)
 
@@ -51,8 +52,15 @@ class MapView(Component):
         except Exception as e:
             hfoslog("Error during list retrieval:", e, type(e), lvl=error)
 
-    @handler("mapviewrequest")
-    def on_mapviewrequest(self, event):
+    def client_disconnect(self, event):
+        hfoslog("MVS: Removing disconnected client from subscriptions", lvl=debug)
+        clientuuid = event.clientuuid
+        for subscribers in self._subscribers.values():
+            if clientuuid in subscribers:
+                subscribers.remove(clientuuid)
+                hfoslog("MVS: Subscription removed: ", clientuuid, lvl=debug)
+
+    def mapviewrequest(self, event):
         """
         Handles new mapview category requests
 
@@ -63,25 +71,26 @@ class MapView(Component):
         """
 
         hfoslog("MVS: Event: '%s'" % event.__dict__)
-        #try:
+
         try:
             try:
-                userobj = event.sender
+                userobj = event.user
+                action = event.action
+                data = event.data
+
                 useruuid = userobj.useruuid
-                request = event.request
-                hfoslog("MVS: Request raw: %s" % request)
-                requesttype = request['type']
+                clientuuid = event.client.clientuuid
             except Exception as e:
                 raise ValueError("MVS: Problem during event unpacking:", e, type(e))
 
-            if requesttype == 'list':
+            if action == 'list':
                 try:
                     dblist = self._generatemapviewlist()
-                    self.fireEvent(send(useruuid, {'type': 'mapviewlist', 'content': dblist}), "wsserver")
+                    self.fireEvent(send(clientuuid, {'component': 'mapview', 'action': 'list', 'data': dblist}))
                 except Exception as e:
                     hfoslog("MVS: Listing error: ", e, type(e), lvl=error)
                 return
-            elif requesttype == 'get':
+            elif action == 'get':
                 dbmapview = None
 
                 try:
@@ -105,66 +114,78 @@ class MapView(Component):
                     except Exception as e:
                         hfoslog("MVS: Storing new view failed: ", e, type(e), lvl=error)
                 if dbmapview:
-                    self.fireEvent(send(useruuid, {'type': 'mapviewget', 'content': dbmapview.serializablefields()}),
-                                   "wsserver")
-
+                    self.fireEvent(send(clientuuid, {'component': 'mapview', 'action': 'get',
+                                                     'data': dbmapview.serializablefields()}))
                 return
-
-            mapviewdata = request['mapview']
-            mapviewuuid = mapviewdata['uuid']
-            hfoslog("MVS: MapView request: '%s' Mapviewdata: %s" % (requesttype, mapviewdata))
-
-            if requesttype == 'subscribe':
+            elif action == 'subscribe':
                 # TODO: Verify everything and send a response
-                if mapviewuuid in self._subscribers:
-                    self._subscribers[mapviewuuid].append(useruuid)
+                if data in self._subscribers:
+                    self._subscribers[data].append(clientuuid)
                 else:
-                    self._subscribers[mapviewuuid] = [useruuid]
+                    self._subscribers[data] = [clientuuid]
+                hfoslog("MVS: Subscription registered: ", data, clientuuid)
                 return
-            elif requesttype == 'unsubscribe':
+            elif action == 'unsubscribe':
                 # TODO: Verify everything and send a response
-                self._subscribers[mapviewuuid].remove(useruuid)
-                if len(self._subscribers[mapviewuuid]) == 0:
-                    del (self._subscribers[mapviewuuid])
+                self._subscribers[data].remove(clientuuid)
+                if len(self._subscribers[data]) == 0:
+                    del (self._subscribers[data])
+                    hfoslog("MVS: Subscription deleted: ", data, clientuuid)
+
                 return
-            elif requesttype == 'update':
+
+            # The following need a mapview object attached
+
+            try:
+                mapview = mapviewobject(data)
+                mapview.validate()
+            except Exception as e:
+                hfoslog("MVS: Only mapview related actions left, but no Mapviewobject.", e, type(e), lvl=warn)
+                return
+
+            if action == 'update':
                 dbmapview = None
                 hfoslog("MVS: Update begin")
                 try:
                     dbmapview = mapviewobject.find_one({'uuid': useruuid})
+                except Exception as e:
+                    hfoslog("MVS: Couldn't get mapview", (useruuid, e, type(e)), lvl=error)
+                    return
 
-                    dbmapview.update(mapviewdata)
+                try:
+                    dbmapview.update(mapview._fields)
                     dbmapview.save()
+
                     hfoslog("MVS: Valid update stored.")
                 except Exception as e:
-                    hfoslog("MVS: Database mapview not available. Looked for '%s' got error: '%s' (%s)" % (
-                    useruuid, e, type(e)))
+                    hfoslog("MVS: Database mapview update failed", (useruuid, e, type(e)), lvl=error)
+                    return
 
                 if not dbmapview:
                     try:
-                        hfoslog("MVS: New MapView: ", mapviewdata)
-                        mapviewdata['uuid'] = useruuid  # make sure
-                        dbmapview = mapviewobject(mapviewdata)
-                        dbmapview.save()
+                        hfoslog("MVS: New MapView: ", mapview)
+                        mapview.uuid = useruuid  # make sure
+                        mapview.save()
+                        dbmapview = mapview
                         hfoslog("MVS: New MapView stored.")
 
-                        if dbmapview.shared:
+                        if mapview.shared:
                             hfoslog("MVS: Broadcasting list update for new mapview.")
-                            self.fireEvent(broadcast("users", self._generatemapviewlist()), "wsserver")
+                            self.fireEvent(broadcast("users", self._generatemapviewlist()))
                     except Exception as e:
-                        hfoslog("MVS: MapView creation error: '%s' (%s)" % (e, type(e)))
+                        hfoslog("MVS: MapView creation error: '%s' (%s)" % (e, type(e)), lvl=error)
+                        return
+
                 try:
                     hfoslog("MVS: Subscriptions: ", self._subscribers)
-                    hfoslog("MVS: dbmapview: ", dbmapview._fields)
+                    hfoslog("MVS: dbmapview: ", mapview._fields)
                     if dbmapview.shared:
-                        if useruuid in self._subscribers:
+                        if dbmapview.uuid in self._subscribers:
                             try:
                                 hfoslog("MVS: Broadcasting mapview update to subscribers.")
-                                mapviewpacket = {'type': 'mapviewupdate',
-                                                 'content': {
-                                                     'sender': useruuid,
-                                                     'mapview': dbmapview.serializablefields(),
-                                                 }
+                                mapviewpacket = {'component': 'mapview',
+                                                 'action': 'update',
+                                                 'data': mapview.serializablefields()
                                 }
                                 self._broadcast(mapviewpacket, dbmapview.uuid)
                             except Exception as e:
