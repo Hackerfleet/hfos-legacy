@@ -42,7 +42,7 @@ def get_tile(url, *args, **kwargs):
     connection = None
 
     try:
-        connection = urlopen(url=url, timeout=5)
+        connection = urlopen(url=url, timeout=2)
     except Exception as e:
         log += "TCT: ERROR Tilegetter error: %s " % str([type(e), e, url])
 
@@ -59,7 +59,7 @@ def get_tile(url, *args, **kwargs):
     else:
         log += "TCT: ERROR Got no connection."
 
-    log += "TCT INFO Tilegetter done."
+    log += "TCT INFO Tilegetter done: " + str(len(content))
     #hfoslog(log)
     #log(type(content), "%20s" % content)
     return content, log
@@ -80,11 +80,12 @@ class TileCache(Controller):
         :param kwargs:
         """
         super(TileCache, self).__init__(**kwargs)
-        Worker(process=False, workers=50, channel="tcworkers").register(self)
+        self.worker = Worker(process=False, workers=2, channel="tcworkers").register(self)
 
         self.tilepath = tilepath
         self.path = path
         self.defaulttile = defaulttile
+        self._tilelist = []
 
     def tilecache(self, event, *args, **kwargs):
         """Checks and caches a requested tile to disk, then delivers it to client"""
@@ -145,14 +146,19 @@ class TileCache(Controller):
             hfoslog("TC: Tile not cached yet.")
             hfoslog("TC: Estimated filename: %s " % filename)
             hfoslog("TC: Estimated URL: %s " % url)
+            if url in self._tilelist:
+                hfoslog("TC: Getting a tile for the second time?!", lvl=error)
+            else:
+                self._tilelist += url
             try:
-                tile, log = get_tile(url)  # yield self.call(task(get_tile, url), "tcworker")
+                tile, log = yield self.call(task(get_tile, url), "tcworkers")
                 hfoslog("TCT: ", log)
             except Exception as e:
                 hfoslog("TC:", e, type(e))
                 tile = None
             #log("#"*23+str(type(tile)), str(tile))
-            #log(log)
+
+            hfoslog("TC: Unfinished: ", self.worker.pool._inqueue.unfinished_tasks, lvl=error)
 
             tilepath = os.path.dirname(filename)
 

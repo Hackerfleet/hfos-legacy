@@ -52,13 +52,24 @@ class MapViewManager(Component):
         except Exception as e:
             hfoslog("Error during list retrieval:", e, type(e), lvl=error)
 
+
+    def _unsubscribe(self, clientuuid, mapuuid=None):
+        # TODO: Verify everything and send a response
+        if not mapuuid:
+            for subscribers in self._subscribers.values():
+                if clientuuid in subscribers:
+                    subscribers.remove(clientuuid)
+                    hfoslog("MVS: Subscription removed: ", clientuuid, lvl=debug)
+        else:
+            self._subscribers[mapuuid].remove(clientuuid)
+            if len(self._subscribers[mapuuid]) == 0:
+                del (self._subscribers[mapuuid])
+                hfoslog("MVS: Subscription deleted: ", mapuuid, clientuuid)
+
     def client_disconnect(self, event):
         hfoslog("MVS: Removing disconnected client from subscriptions", lvl=debug)
         clientuuid = event.clientuuid
-        for subscribers in self._subscribers.values():
-            if clientuuid in subscribers:
-                subscribers.remove(clientuuid)
-                hfoslog("MVS: Subscription removed: ", clientuuid, lvl=debug)
+        self._unsubscribe(clientuuid)
 
     def mapviewrequest(self, event):
         """
@@ -120,18 +131,14 @@ class MapViewManager(Component):
             elif action == 'subscribe':
                 # TODO: Verify everything and send a response
                 if data in self._subscribers:
-                    self._subscribers[data].append(clientuuid)
+                    if not clientuuid in self._subscribers[data]:
+                        self._subscribers[data].append(clientuuid)
                 else:
                     self._subscribers[data] = [clientuuid]
                 hfoslog("MVS: Subscription registered: ", data, clientuuid)
                 return
             elif action == 'unsubscribe':
-                # TODO: Verify everything and send a response
-                self._subscribers[data].remove(clientuuid)
-                if len(self._subscribers[data]) == 0:
-                    del (self._subscribers[data])
-                    hfoslog("MVS: Subscription deleted: ", data, clientuuid)
-
+                self._unsubscribe(clientuuid, data)
                 return
 
             # The following need a mapview object attached

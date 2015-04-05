@@ -67,7 +67,15 @@ MapView = {
                 "title": "Zoom of view.",
                 "description": "",
                 "name": "zoom"
+            },
+            "autoDiscover": {
+                "id": "autoDiscover",
+                "type": "boolean",
+                "title": "Autodiscover on device.",
+                "description": "",
+                "name": "autoDiscover"
             }
+
         }
     },
     "required": [

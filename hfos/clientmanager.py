@@ -148,7 +148,7 @@ class ClientManager(Component):
 
                     self.fireEvent(write(sock, json.dumps(event.packet)), "wsserver")
             else:  # only to client
-                hfoslog("CM: Sending to user's client: '%s': '%s" % (event.uuid, event.packet))
+                hfoslog("CM: Sending to user's client: '%s': '%.50s ..." % (event.uuid, event.packet), lvl=debug)
                 if not event.uuid in self._clients:
                     hfoslog('CM: Unknown client! ', event.uuid, lvl=critical)
                     return
