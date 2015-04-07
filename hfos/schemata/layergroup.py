@@ -13,7 +13,10 @@ LayerGroup = {
         'shared': {'type': 'boolean', 'title': 'Shared group', 'description': 'Share group with the crew'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'},
         'layers': {'type': 'array',
-                   'items': {'type': 'string'
+                   'items': {
+                       'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                       'type': 'string',
+                       'title': 'Unique Layer ID'
                    }
         }
     }

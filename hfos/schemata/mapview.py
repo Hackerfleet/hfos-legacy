@@ -39,6 +39,13 @@ MapView = {
                   'description': 'This views color indicator'},
         'shared': {'type': 'boolean', 'title': 'Shared view', 'description': 'Share view with the crew'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'},
+        'layergroups': {'type': 'array',
+                        'items': {
+                            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                            'type': 'string',
+                            'title': 'Unique Layergroup ID'
+                        }
+        },
         'coords': {
             "lat": {
                 "id": "lat",

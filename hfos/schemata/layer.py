@@ -13,6 +13,8 @@ Layer = {
         'shared': {'type': 'boolean', 'title': 'Shared view', 'description': 'Share view with the crew'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'},
         'cached': {'type': 'boolean', 'title': 'Use tilecache', 'description': 'Cache all downloaded map data'},
+        'baselayer': {'type': 'boolean', 'title': 'Can be baselayer',
+                      'description': 'Baselayer (can be the first layer of a group)'},
         'cachesize': {'type': 'number', 'description': 'Current size of cache.'},
         'url': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Layer URL'},
         'layerOptions': {
