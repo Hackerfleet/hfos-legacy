@@ -50,14 +50,14 @@ __all__ = ['coords',
 
 from importlib import import_module
 
-from hfos.logger import hfoslog, info
+from hfos.logger import hfoslog, debug
 
 
 def _build_schemastore():
     result = {}
 
     for schemaname in __all__:
-        hfoslog('Adding Schema:', schemaname, lvl=info)
+        hfoslog('Adding Schema:', schemaname, lvl=debug)
         schemamodule = import_module('hfos.schemata.' + schemaname)
         result[schemaname] = schemamodule.__schema__
 
