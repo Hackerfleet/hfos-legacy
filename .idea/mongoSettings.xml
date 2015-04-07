@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MongoConfiguration">
+    <option name="serverConfigurations">
+      <list>
+        <ServerConfiguration>
+          <option name="label" value="Localhost" />
+          <option name="serverName" value="localhost" />
+          <option name="serverPort" value="27017" />
+          <option name="userDatabase" value="hfos" />
+        </ServerConfiguration>
+      </list>
+    </option>
+    <option name="shellPath" value="/usr/bin/mongo" />
+  </component>
+</project>
+
