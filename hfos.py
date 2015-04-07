@@ -38,6 +38,7 @@ from hfos.layermanager import LayerManager
 from hfos.schemamanager import SchemaManager
 from hfos.auth import Authenticator
 from hfos.logger import hfoslog
+from hfos.debugger import HFDebugger
 
 from hfos.chat import Chat
 from hfos.nmea import NMEAParser
@@ -59,8 +60,10 @@ class App(Component):
 
 
 server = Server(("0.0.0.0", 8055))
+
 app = App().register(server)
 
+HFDebugger().register(server)
 TileCache().register(server)
 Static("/", docroot="/var/lib/hfos/static").register(server)
 WebSocketsDispatcher("/websocket").register(server)
@@ -69,11 +72,11 @@ Authenticator().register(clientmanager)
 Chat().register(clientmanager)
 MapViewManager().register(clientmanager)
 SchemaManager().register(clientmanager)
+Logger().register(server)
 
 NMEAParser().register(app)
 
-#Debugger().register(server)
-Logger().register(server)
+Debugger().register(server)
 
 
 #webbrowser.open("http://127.0.0.1:8055")

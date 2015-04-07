@@ -15,7 +15,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits.core import Event
 
-from hfos.logger import hfoslog, debug
+from hfos.logger import hfoslog, debug, critical
 
 
 class AuthorizedEvent(Event):
@@ -27,6 +27,18 @@ class AuthorizedEvent(Event):
         self.action = action
         self.data = data
         self.client = client
+
+
+# Debugger
+
+
+class debugrequest(AuthorizedEvent):
+    """Debugging event"""
+
+    def __init__(self, *args):
+        super(debugrequest, self).__init__(*args)
+
+        hfoslog('DEBUG EVENT CREATED.', lvl=critical)
 
 
 # Clientmanager Events
@@ -258,6 +270,7 @@ class sensordata(Event):
 
 
 AuthorizedEvents = {
+    'debugger': debugrequest,
     'profile': profilerequest,
     'mapview': mapviewrequest,
     'chat': chatrequest,

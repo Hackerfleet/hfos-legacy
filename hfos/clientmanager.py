@@ -180,19 +180,26 @@ class ClientManager(Component):
             hfoslog("Error during broadcast: ", e, type(e), lvl=critical)
 
     def _handleAuthorizedEvents(self, component, action, data, user, client):
+        try:
+            if component == "debugger":
+                hfoslog('CM:', component, action, data, user, client, lvl=critical)
+            if not user and component in AuthorizedEvents.keys():
+                hfoslog("CM: Unknown client tried to do an authenticated operation: %s", component, action, data, user)
+                return
 
-        if not user and component in AuthorizedEvents.keys():
-            hfoslog("CM: Unknown client tried to do an authenticated operation: %s", component, action, data, user)
-            return
-
-        event = AuthorizedEvents[component]
-        hfoslog("CM: Firing authorized event.", lvl=debug)
-        self.fireEvent(event(user, action, data, client))
+            event = AuthorizedEvents[component]
+            #hfoslog(event, lvl=critical)
+            hfoslog("CM: Firing authorized event.", lvl=debug)
+            #hfoslog("CM: ", (user, action, data, client), lvl=critical)
+            self.fireEvent(event(user, action, data, client))
+        except Exception as e:
+            hfoslog("CM: Critical error during authorized event handling:", e, type(e), lvl=critical)
 
     @handler("read", channel="wsserver")
     def read(self, *args):
         """Handles raw client requests and distributes them to the appropriate components"""
         sock, msg = args[0], args[1]
+        user = password = client = clientuuid = useruuid = requestdata = requestaction = None
         hfoslog("CM: ", msg)
 
         clientuuid = self._sockets[sock].clientuuid
