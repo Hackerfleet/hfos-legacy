@@ -198,16 +198,20 @@ class ClientManager(Component):
     @handler("read", channel="wsserver")
     def read(self, *args):
         """Handles raw client requests and distributes them to the appropriate components"""
-        sock, msg = args[0], args[1]
-        user = password = client = clientuuid = useruuid = requestdata = requestaction = None
-        hfoslog("CM: ", msg)
+        try:
+            sock, msg = args[0], args[1]
+            user = password = client = clientuuid = useruuid = requestdata = requestaction = None
+            hfoslog("CM: ", msg)
 
-        clientuuid = self._sockets[sock].clientuuid
+            clientuuid = self._sockets[sock].clientuuid
+        except Exception as e:
+            hfoslog("CM: Receiving error: ", e, type(e),)
 
         try:
             msg = json.loads(msg)
         except Exception as e:
             hfoslog("CM: JSON Decoding failed! %s (%s of %s)" % (msg, e, type(e)))
+            return
 
         try:
             requestcomponent = msg['message']['component']
