@@ -19,6 +19,8 @@ from .database import userobject, profileobject
 from .events import authentication
 from hfos.logger import hfoslog, error, warn, critical
 
+from uuid import uuid4
+
 
 class Authenticator(Component):
     """
@@ -47,7 +49,8 @@ class Authenticator(Component):
                 hfoslog("Auth: Hash matches, fetching profile.")
 
                 try:
-                    userprofile = profileobject.find_one({'uuid': useraccount.uuid})
+                    userprofile = profileobject.find_one({'uuid': str(useraccount.uuid)})
+                    hfoslog("Auth: Profile: ", userprofile, useraccount.uuid)
                     useraccount.passhash = ""
                     self.fireEvent(
                         authentication(useraccount.username, (useraccount, userprofile), event.clientuuid,
@@ -63,8 +66,7 @@ class Authenticator(Component):
             # TODO: Write registration function
             hfoslog("Auth: Creating user")
             try:
-                # New user gets registered with the first uuid he happens to turn up
-                newuser = userobject({'username': event.username, 'passhash': event.passhash, 'uuid': str(event.uuid)})
+                newuser = userobject({'username': event.username, 'passhash': event.passhash, 'uuid': str(uuid4())})
                 newuser.save()
                 newprofile = profileobject({'uuid': str(newuser.uuid)})
                 newprofile.save()

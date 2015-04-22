@@ -51,7 +51,10 @@ Profile = {
                 'theme': {'type': 'string', 'title': 'User Theme', 'description': 'Theme used for user interface'},
             }
         }
-    }
+    },
+    'required': [
+        'uuid'
+    ]
 }
 
 __schema__ = Profile
