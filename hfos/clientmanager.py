@@ -20,7 +20,7 @@ from time import time
 from circuits.net.events import write
 from circuits import Component, handler
 
-from hfos.events import send, broadcast, authenticationrequest, client_disconnect, AuthorizedEvents
+from hfos.events import send, broadcast, authenticationrequest, clientdisconnect, AuthorizedEvents
 from hfos.logger import hfoslog, error, warn, critical, debug, info
 
 
@@ -45,7 +45,7 @@ class Client(object):
     Client metadata object
     """
 
-    def __init__(self, sock, ip, clientuuid, useruuid=None):
+    def __init__(self, sock, ip, clientuuid, useruuid=None, name=''):
         """
 
         :param sock: Associated connection
@@ -57,6 +57,10 @@ class Client(object):
         self.ip = ip
         self.clientuuid = clientuuid
         self.useruuid = useruuid
+        if name == '':
+            self.name = clientuuid
+        else:
+            self.name = name
 
 
 class User(object):
@@ -106,7 +110,7 @@ class ClientManager(Component):
             sockobj = self._sockets[sock]
             clientuuid = sockobj.clientuuid
 
-            self.fireEvent(client_disconnect(clientuuid, self._clients[clientuuid].useruuid))
+            self.fireEvent(clientdisconnect(clientuuid, self._clients[clientuuid].useruuid))
 
             del self._sockets[sock]
             del self._clients[clientuuid]
@@ -233,12 +237,16 @@ class ClientManager(Component):
 
                     username = requestdata['username']
                     password = requestdata['password']
+                    newclientuuid = requestdata['clientuuid']
                     hfoslog("CM: Auth request by ", username)
 
-                    self.fireEvent(authenticationrequest(username, password, clientuuid, sock), "auth")
+                    self.fireEvent(authenticationrequest(username, password, clientuuid, newclientuuid, sock), "auth")
                     return
                 except Exception as e:
                     hfoslog("Login failed: ", e, lvl=warn)
+            elif requestaction == "logout":
+                hfoslog("User logged out, refreshing client.")
+                self.fireEvent(clientdisconnect(clientuuid))
 
         try:
             # Only for signed in users
@@ -284,13 +292,15 @@ class ClientManager(Component):
 
             self._clients[clientuuid].useruuid = useruuid
 
-            hfoslog("CM: Transmitting Authorization to client", lvl=debug)
+
             authpacket = {"component": "auth", "action": "login", "data": account.serializablefields()}
+            hfoslog("CM: Transmitting Authorization to client", authpacket, lvl=debug)
             self.fireEvent(write(event.sock, json.dumps(authpacket)), "wsserver")
 
-            hfoslog("CM: Transmitting Profile to client", lvl=debug)
-            profilepacket = {"component": "profile", "action": "get", "data": profile.serializablefields()}
-            self.fireEvent(write(event.sock, json.dumps(profilepacket)), "wsserver")
+            if profile:
+                profilepacket = {"component": "profile", "action": "get", "data": profile.serializablefields()}
+                hfoslog("CM: Transmitting Profile to client", profilepacket, lvl=debug)
+                self.fireEvent(write(event.sock, json.dumps(profilepacket)), "wsserver")
 
             hfoslog("CM: User configured:", signedinuser.__dict__, lvl=info)
 

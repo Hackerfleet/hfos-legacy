@@ -30,37 +30,38 @@ class Authenticator(Component):
     @handler("authenticationrequest", channel="auth")
     def authenticationrequest(self, event):
         """Handles authentication requests from clients"""
-        hfoslog("Auth request for ", event.username)
+        hfoslog("Auth: Auth request for ", event.username)
 
         useraccount = None
 
         try:
             useraccount = userobject.find_one({'username': event.username})
-            hfoslog("Account: %s" % useraccount._fields)
+            hfoslog("Auth: Account: %s" % useraccount._fields)
         except Exception as e:
-            hfoslog("No userobject due to error: ", e, type(e))
+            hfoslog("Auth: No userobject due to error: ", e, type(e))
 
         if useraccount:
-            hfoslog("User found!")
+            hfoslog("Auth: User found!")
 
             if useraccount.passhash == event.passhash:
-                hfoslog("Hash matches, fetching profile.")
+                hfoslog("Auth: Hash matches, fetching profile.")
 
                 try:
                     userprofile = profileobject.find_one({'uuid': useraccount.uuid})
                     useraccount.passhash = ""
                     self.fireEvent(
-                        authentication(useraccount.username, (useraccount, userprofile), event.uuid, useraccount.uuid,
+                        authentication(useraccount.username, (useraccount, userprofile), event.clientuuid,
+                                       useraccount.uuid,
                                        event.sock),
                         "auth")
                 except Exception as e:
-                    hfoslog("No profile due to error: ", e, type(e), lvl=error)
+                    hfoslog("Auth: No profile due to error: ", e, type(e), lvl=error)
             else:
-                hfoslog("Password wrong!", lvl=warn)
+                hfoslog("Auth: Password wrong!", lvl=warn)
 
         else:
             # TODO: Write registration function
-            hfoslog("Creating user")
+            hfoslog("Auth: Creating user")
             try:
                 # New user gets registered with the first uuid he happens to turn up
                 newuser = userobject({'username': event.username, 'passhash': event.passhash, 'uuid': str(event.uuid)})
@@ -68,32 +69,32 @@ class Authenticator(Component):
                 newprofile = profileobject({'uuid': str(newuser.uuid)})
                 newprofile.save()
             except Exception as e:
-                hfoslog("Problem creating new user: ", type(e), e)
+                hfoslog("Auth: Problem creating new user: ", type(e), e)
 
     def profilerequest(self, event):
         """Handles client profile actions"""
 
-        hfoslog("Profile update %s" % event)
+        hfoslog("Auth: Profile update %s" % event)
 
         if event.action != "update":
-            hfoslog("Unsupported profile action: ", event, lvl=warn)
+            hfoslog("Auth: Unsupported profile action: ", event, lvl=warn)
             return
 
         try:
             newprofile = event.data
-            newuuid = newprofile['uuid']
-            hfoslog("Got: %s " % newprofile)
+            hfoslog("Auth: Updating with %s " % newprofile)
 
-            if event.user.useruuid != newuuid:
+            userprofile = profileobject.find_one({'uuid': event.user.useruuid})
+
+            if event.user.useruuid != newprofile['uuid']:
                 hfoslog("Auth: User tried to manipulate wrong profile.", lvl=warn)
                 return
-            userprofile = profileobject.find_one({'uuid': newprofile['uuid']})
 
             if not userprofile:
                 hfoslog("Auth: No profile! Creating a new one..", lvl=critical)
                 userprofile = profileobject()
 
-            hfoslog("Have: %s" % userprofile)
+            hfoslog("Auth: Updating %s" % userprofile)
 
             userprofile.update(newprofile)
             userprofile.save()

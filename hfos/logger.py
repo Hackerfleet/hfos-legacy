@@ -40,9 +40,9 @@ lvldata = {10: ['DEBUG', '\033[1;97m'],
 count = 0
 
 logfile = "/var/log/hfos/service.log"
-verbosity = {'global': debug,
+verbosity = {'global': warn,
              'file': off,
-             'console': debug}
+             'console': warn}
 
 start = time.time()
 

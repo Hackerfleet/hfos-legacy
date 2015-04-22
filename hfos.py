@@ -28,10 +28,12 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 from circuits import Component, Debugger, Event, Timer
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Logger, Server, Static
+# from circuits.tools import graph
 
 import hfos.database
 
 from hfos.tilecache import TileCache
+from hfos.remotecontrolmanager import RemoteControlManager
 from hfos.clientmanager import ClientManager
 from hfos.mapviewmanager import MapViewManager
 from hfos.layermanager import LayerManager
@@ -71,15 +73,17 @@ clientmanager = ClientManager().register(server)
 Authenticator().register(clientmanager)
 Chat().register(clientmanager)
 MapViewManager().register(clientmanager)
+RemoteControlManager().register(clientmanager)
 SchemaManager().register(clientmanager)
-Logger().register(server)
+#Logger().register(server)
 
 NMEAParser().register(app)
 
-Debugger().register(server)
+#Debugger().register(server)
 
 
 #webbrowser.open("http://127.0.0.1:8055")
 
 hfoslog("Running...")
+#graph(server)
 server.run()

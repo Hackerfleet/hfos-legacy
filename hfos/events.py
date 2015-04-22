@@ -79,7 +79,7 @@ class broadcast(Event):
         hfoslog("Broadcast event generated:", broadcasttype, content, lvl=debug)
 
 
-class client_disconnect(Event):
+class clientdisconnect(Event):
     def __init__(self, clientuuid, useruuid=None, *args):
         """
 
@@ -87,7 +87,7 @@ class client_disconnect(Event):
         :param packet: Data packet to transmit to client
         :param args: Further Args
         """
-        super(client_disconnect, self).__init__(*args)
+        super(clientdisconnect, self).__init__(*args)
         self.clientuuid = clientuuid
         self.useruuid = useruuid
 
@@ -100,12 +100,12 @@ class client_disconnect(Event):
 class authenticationrequest(Event):
     """A client wants to authenticated a connection"""
 
-    def __init__(self, username, passhash, uuid, sock, *args):
+    def __init__(self, username, passhash, clientuuid, newclientuuid, sock, *args):
         """
 
         :param username: Account username
         :param passhash: Account md5 hash
-        :param uuid: Unique User ID of known connection
+        :param clientuuid: Unique User ID of known connection
         :param sock: Associated Socket
         :param args: Further Args
         """
@@ -114,7 +114,8 @@ class authenticationrequest(Event):
         self.username = username
         self.passhash = passhash
         self.sock = sock
-        self.uuid = uuid
+        self.clientuuid = clientuuid
+        self.newclientuuid = newclientuuid
 
 
 class authentication(Event):
@@ -269,10 +270,28 @@ class sensordata(Event):
         self.data = data
 
 
+# Remote Control requests
+
+class remotecontrolrequest(AuthorizedEvent):
+    """A client wants to remote control a servo"""
+
+
+# Remote Control events
+
+class remotecontrolupdate(Event):
+    """A client wants to remote control a servo"""
+
+    def __init__(self, controldata, *args):
+        super(remotecontrolupdate, self).__init__(*args)
+        self.controldata = controldata
+
+
+
 AuthorizedEvents = {
     'debugger': debugrequest,
     'profile': profilerequest,
     'mapview': mapviewrequest,
     'chat': chatrequest,
-    'schema': schemarequest
+    'schema': schemarequest,
+    'remotectrl': remotecontrolrequest,
 }

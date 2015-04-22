@@ -17,8 +17,8 @@ MapView: User generated Mapviews
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 # {
-#     'type': "object",
-#     'name': 'Profile',
+# 'type': "object",
+# 'name': 'Profile',
 #     'properties': {
 #         'name': {'type': "string", 'minLength': 2, 'title': "Name", 'description': "Name or alias"},
 #         'title': {
@@ -33,7 +33,14 @@ MapView = {
     'id': '#mapview',
     'name': 'Mapview',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Mapview ID', 'description': 'HIDDEN'},
+        'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                 'type': 'string',
+                 'title': 'Unique Mapview ID'
+                 },
+        'useruuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                     'type': 'string',
+                     'title': "Owner's unique user ID"
+                     },
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Name of view'},
         'color': {'type': 'string', 'title': 'View Color', 'format': 'color',
                   'description': 'This views color indicator'},
@@ -45,7 +52,7 @@ MapView = {
                             'type': 'string',
                             'title': 'Unique Layergroup ID'
                         }
-        },
+                        },
         'coords': {
             "lat": {
                 "id": "lat",
@@ -54,7 +61,8 @@ MapView = {
                 "minimum": -90,
                 "title": "Latitude of coordinate.",
                 "description": "",
-                "name": "lat"
+                "name": "lat",
+                "default": 54.17805
             },
             "lon": {
                 "id": "lon",
@@ -63,7 +71,8 @@ MapView = {
                 "minimum": 180,
                 "title": "Longitude of coordinate.",
                 "description": "",
-                "name": "lon"
+                "name": "lon",
+                "default": 7.88669
             },
             "zoom": {
                 "id": "zoom",
@@ -73,14 +82,16 @@ MapView = {
                 "minimum": 1,
                 "title": "Zoom of view.",
                 "description": "",
-                "name": "zoom"
+                "name": "zoom",
+                "default": 16
             },
             "autoDiscover": {
                 "id": "autoDiscover",
                 "type": "boolean",
                 "title": "Autodiscover on device.",
                 "description": "",
-                "name": "autoDiscover"
+                "name": "autoDiscover",
+                "default": True
             }
 
         }

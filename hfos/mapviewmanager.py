@@ -15,6 +15,8 @@ import json
 
 from circuits import Component, handler
 
+from uuid import uuid4
+
 from hfos.events import send, broadcast
 
 from hfos.database import mapviewobject
@@ -116,7 +118,8 @@ class MapViewManager(Component):
                         except AttributeError:
                             nickname = userobj.account.username
                         # TODO: Move this into a seperate operation (create)
-                        dbmapview = mapviewobject({'uuid': useruuid,
+                        dbmapview = mapviewobject({'uuid': str(uuid4()),
+                                                   'useruuid': useruuid,
                                                    'name': '%s Default MapView' % nickname,
                                                    'shared': True,
                         })
@@ -154,24 +157,27 @@ class MapViewManager(Component):
                 dbmapview = None
                 hfoslog("MVS: Update begin")
                 try:
-                    dbmapview = mapviewobject.find_one({'uuid': useruuid})
+                    uuid = mapview.uuid
+                    dbmapview = mapviewobject.find_one({'uuid': uuid})
+                    hfoslog(dbmapview.__dict__, lvl=error)
                 except Exception as e:
-                    hfoslog("MVS: Couldn't get mapview", (useruuid, e, type(e)), lvl=error)
+                    hfoslog("MVS: Couldn't get mapview", (uuid, e, type(e)), lvl=error)
                     return
 
                 try:
+
                     dbmapview.update(mapview._fields)
                     dbmapview.save()
 
                     hfoslog("MVS: Valid update stored.")
                 except Exception as e:
-                    hfoslog("MVS: Database mapview update failed", (useruuid, e, type(e)), lvl=error)
+                    hfoslog("MVS: Database mapview update failed: ", (uuid, e, type(e)), lvl=error)
                     return
 
                 if not dbmapview:
                     try:
                         hfoslog("MVS: New MapView: ", mapview)
-                        mapview.uuid = useruuid  # make sure
+                        mapview.uuid = uuid  # make sure
                         mapview.save()
                         dbmapview = mapview
                         hfoslog("MVS: New MapView stored.")

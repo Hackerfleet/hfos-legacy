@@ -156,9 +156,6 @@ class TileCache(Controller):
             except Exception as e:
                 hfoslog("TC:", e, type(e))
                 tile = None
-            #log("#"*23+str(type(tile)), str(tile))
-
-            hfoslog("TC: Unfinished: ", self.worker.pool._inqueue.unfinished_tasks, lvl=error)
 
             tilepath = os.path.dirname(filename)
 
@@ -170,17 +167,15 @@ class TileCache(Controller):
 
                 hfoslog("TC: Caching tile...")
                 try:
-                    tilefile = open(filename, "wb")
+                    with open(filename, "wb") as tilefile:
+                        try:
+                            tilefile.write(bytes(tile))
+                        except Exception as e:
+                            hfoslog("TC: Writing error: %s" % str([type(e), e]))
+
                 except Exception as e:
                     hfoslog("TC: Open error: %s" % str([type(e), e]))
                     return
-
-                try:
-                    tilefile.write(bytes(tile))
-
-                    tilefile.close()
-                except Exception as e:
-                    hfoslog("TC: Writing error: %s" % str([type(e), e]))
                 finally:
                     event.stop()
 
