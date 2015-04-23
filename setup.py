@@ -81,7 +81,8 @@ setup(name="hfos",
       ],
       install_requires=['circuits==3.1.0',
                         'Pynmea==0.3.0',
-                        'warmongo==0.5.2-hf'
+                        'warmongo==0.5.2-hf',
+                        'jsonschema==2.4.0'
       ]
 
 )
