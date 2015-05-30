@@ -23,6 +23,7 @@ import time
 import sys
 import inspect
 
+verbose = 5
 debug = 10
 info = 20
 warn = 30
@@ -30,7 +31,8 @@ error = 40
 critical = 50
 off = 100
 
-lvldata = {10: ['DEBUG', '\033[1;97m'],
+lvldata = {5: ['VERBOSE', '\033[1;97m'],
+           10: ['DEBUG', '\033[1;97m'],
            20: ['INFO', '\033[1;92m'],
            30: ['WARN', '\033[1;94m'],
            40: ['ERROR', '\033[1;91m'],
@@ -40,7 +42,7 @@ lvldata = {10: ['DEBUG', '\033[1;97m'],
 count = 0
 
 logfile = "/var/log/hfos/service.log"
-verbosity = {'global': debug,
+verbosity = {'global': verbose,
              'file': off,
              'console': debug}
 

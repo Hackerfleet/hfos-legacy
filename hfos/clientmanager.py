@@ -16,6 +16,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 import json
 from uuid import uuid4
 from time import time
+from random import randint
 
 from circuits.net.events import write
 from circuits import Component, handler
@@ -150,17 +151,28 @@ class ClientManager(Component):
                 for clientuuid in clients:
                     sock = self._clients[clientuuid].sock
 
-                    self.fireEvent(write(sock, json.dumps(event.packet)), "wsserver")
+                    if not event.raw:
+                        self.fireEvent(write(sock, json.dumps(event.packet)), "wsserver")
+                    else:
+                        hfoslog("CM: Sending raw data to client")
+                        self.fireEvent(write(sock, event.packet), "wsserver")
             else:  # only to client
                 hfoslog("CM: Sending to user's client: '%s': '%.50s ..." % (event.uuid, event.packet), lvl=debug)
                 if not event.uuid in self._clients:
                     hfoslog('CM: Unknown client! ', event.uuid, lvl=critical)
+                    hfoslog('CM: Clients: ', self._clients, lvl=debug)
                     return
 
                 sock = self._clients[event.uuid].sock
-                self.fireEvent(write(sock, json.dumps(event.packet)), "wsserver")
+                if not event.raw:
+                    self.fireEvent(write(sock, json.dumps(event.packet)), "wsserver")
+                else:
+                    hfoslog("CM: Sending raw data to client")
+                    self.fireEvent(write(sock, event.packet), "wsserver")
+
+
         except Exception as e:
-            hfoslog("CM: Exception during sending: %s (%s)" % (e, type(e)))
+            hfoslog("CM: Exception during sending: %.50s (%s)" % (e, type(e)))
 
     def broadcast(self, event):
         """Broadcasts an event either to all users or clients, depending on event flag"""
@@ -315,11 +327,11 @@ class ClientManager(Component):
         data = {'component': 'ping',
                 'action': "Hello"
         }
-        if (self._count % 5) == 0:
+        if (self._count % 2) == 0:
             data = {'component': 'navdata',
                     'action': 'update',
-                    'data': {'true_course': 17,
-                             'spd_over_grnd': 23
+                    'data': {'true_course': randint(0, 359),
+                             'spd_over_grnd': randint(0, 50)
                     }
             }
         self.fireEvent(broadcast("clients", json.dumps(data)))

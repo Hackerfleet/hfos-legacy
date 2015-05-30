@@ -33,11 +33,13 @@ from circuits.web import Logger, Server, Static
 import hfos.database
 
 from hfos.tilecache import TileCache
+from hfos.machineroom import Machineroom
 from hfos.remotecontrolmanager import RemoteControlManager
 from hfos.clientmanager import ClientManager
 from hfos.mapviewmanager import MapViewManager
 from hfos.layermanager import LayerManager
 from hfos.schemamanager import SchemaManager
+from hfos.camera import CameraManager
 from hfos.auth import Authenticator
 from hfos.logger import hfoslog
 from hfos.debugger import HFDebugger
@@ -46,6 +48,8 @@ from hfos.chat import Chat
 from hfos.nmea import NMEAParser
 
 import webbrowser
+
+from hfos.machineroom import machine, pump, rudder
 
 
 class App(Component):
@@ -58,28 +62,37 @@ class App(Component):
     def started(self, component):
         """Sets up the not-yet-so-useful Ping timer for demo purposes"""
         hfoslog("App: Creating timer for CA")
-        Timer(90, Event.create("ping", channels="wsserver"), persist=True).register(self)
+        Timer(5, Event.create("ping"), channels='wsserver', persist=True).register(self)
+        # Timer(5, rudder(20), channels='machineroom', persist=True).register(self)
+
 
 
 server = Server(("0.0.0.0", 8055))
 
+HFDebugger().register(server)
+
 app = App().register(server)
 
-HFDebugger().register(server)
+Machineroom().register(app)
+NMEAParser().register(app)
+
 TileCache().register(server)
 Static("/", docroot="/var/lib/hfos/static").register(server)
 WebSocketsDispatcher("/websocket").register(server)
+
 clientmanager = ClientManager().register(server)
+SchemaManager().register(clientmanager)
 Authenticator().register(clientmanager)
 Chat().register(clientmanager)
 MapViewManager().register(clientmanager)
 RemoteControlManager().register(clientmanager)
-SchemaManager().register(clientmanager)
+#CameraManager().register(clientmanager)
+
 #Logger().register(server)
 
-NMEAParser().register(app)
-
-#Debugger().register(server)
+dbg = Debugger()
+# dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
+dbg.register(server)
 
 
 #webbrowser.open("http://127.0.0.1:8055")
