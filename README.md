@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/Hackerfleet/hfos.png?label=ready&title=Ready)](https://waffle.io/Hackerfleet/hfos)
 HFOS - The Hackerfleet Operating System
 =======================================
 
