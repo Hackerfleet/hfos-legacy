@@ -33,6 +33,8 @@ from hfos.schemata.user import User
 from hfos.schemata.mapview import MapView
 from hfos.schemata.layer import Layer
 from hfos.schemata.layergroup import LayerGroup
+from hfos.schemata.controllable import Controllable
+from hfos.schemata.controller import Controller
 
 from .logger import hfoslog
 
@@ -42,6 +44,11 @@ warmongo.connect("hfos")
 
 userobject = warmongo.model_factory(User)
 profileobject = warmongo.model_factory(Profile)
+
 mapviewobject = warmongo.model_factory(MapView)
+
 layerobject = warmongo.model_factory(Layer)
 layergroupobject = warmongo.model_factory(LayerGroup)
+
+controllerobject = warmongo.model_factory(Controller)
+controllableobject = warmongo.model_factory(Controllable)

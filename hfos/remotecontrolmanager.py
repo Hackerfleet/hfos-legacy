@@ -21,10 +21,23 @@ from hfos.logger import hfoslog, error, warn, critical
 
 from hfos.events import remotecontrolupdate, send
 
+from hfos.database import controllableobject, controllerobject
+
 from time import time
 
 
-class RemoteControlManager(Component):
+class Manager(Component):
+    def _getobjectlist(self, objecttype, conditions=None):
+        try:
+            result = {}
+            for item in objecttype.find(conditions):
+                result[item.uuid] = item.serializablefields()
+            return result
+        except Exception as e:
+            hfoslog("Error during list retrieval:", e, type(e), lvl=error)
+
+
+class RemoteControlManager(Manager):
     """
     Remote Control manager
 
@@ -60,6 +73,16 @@ class RemoteControlManager(Component):
             clientname = event.client.name
             clientuuid = event.client.clientuuid
 
+            if action == 'list':
+                try:
+                    dblist = {'controllables': self._getobjectlist(controllableobject),
+                              'controllers': self._getobjectlist(controllerobject)}
+
+                    self.fireEvent(send(clientuuid, {'component': 'remotectrl', 'action': 'list', 'data': dblist}))
+                except Exception as e:
+                    hfoslog("RCM: Listing error: ", e, type(e), lvl=error)
+                return
+
             if action == "takeControl":
                 hfoslog("Client wants to remote control: ", username, clientname, lvl=warn)
                 if not self.remotecontroller:
@@ -83,7 +106,7 @@ class RemoteControlManager(Component):
                 hfoslog("RMTCTRL: Control data received: ", data)
                 if event.client.clientuuid == self.remotecontroller:
                     hfoslog("RMTCTRL: Valid data, handing on to ControlDataManager.")
-                    self.fireEvent(remotecontrolupdate(data), "remotecontrol")
+                    self.fireEvent(remotecontrolupdate(data), "machineroom")
                 else:
                     hfoslog("RMTCTRL: Invalid control data update request!", lvl=warn)
 
