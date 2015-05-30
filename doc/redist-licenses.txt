@@ -34,3 +34,7 @@ MIT/BSD Licenses
 Apache License
 ==============
 * Boostrap-switch - (c) http://www.bootstrap-switch.org/
+
+Ubuntu Font License 1.0
+=======================
+* http://www.fontspace.com/wlm-fonts/lets-go-digital
