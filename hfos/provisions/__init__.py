@@ -14,5 +14,7 @@ This contains tilelayer urls, api stuff etc.
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-__all__ = ['layers'
+__all__ = ['layers',
+           'controllables',
+           'controllers'
 ]
