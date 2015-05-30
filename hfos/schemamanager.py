@@ -1,8 +1,8 @@
 """
 Hackerfleet Operating System - Backend
 
-Module: SchemataManager
-=======================
+Module: SchemaManager
+=====================
 
 :copyright: (C) 2011-2015 riot@hackerfleet.org
 :license: GPLv3 (See LICENSE)

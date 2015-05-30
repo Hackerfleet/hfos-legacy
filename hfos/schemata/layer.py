@@ -5,7 +5,7 @@ Layer = {
     'id': '#Layer',
     'name': 'Layer',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique User ID', 'description': 'HIDDEN'},
+        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Layer ID', 'description': 'HIDDEN'},
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Name of view'},
         'owner': {'type': 'string', 'minLength': 36, 'title': "Owner's Unique ID", 'description': 'HIDDEN'},
         'color': {'type': 'string', 'title': 'View Color', 'format': 'color',

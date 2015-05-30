@@ -21,7 +21,10 @@ Profile = {
     'type': 'object',
     'name': 'Profile',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique User ID', 'description': 'HIDDEN'},
+        'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                 'type': 'string',
+                 'title': 'Unique Profile ID'
+                 },
         "userdata": {
             "id": "#profile.userdata",
             "type": "object",
@@ -40,6 +43,29 @@ Profile = {
                 'visa': {'type': 'boolean', 'title': 'Visas etc', 'description': 'Got all Visa documents etc?'},
                 'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
                           'description': 'Custom user notes'},
+            }
+        },
+        "components": {
+            "id": "#profile.components",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "settings": {
+                    "type": "array",
+                    "items": {
+                        "id": "#components.settings",
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "settings": {"type": "object"}
+                        }
+                    }
+                }
             }
         },
         "settings": {

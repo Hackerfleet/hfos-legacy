@@ -40,24 +40,28 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__all__ = ['coords',
-           'layer',
-           'layergroup',
-           'mapview',
-           'profile',
-           'user'
+__all__ = [
+    'client',
+    'coords',
+    'layer',
+    'layergroup',
+    'mapview',
+    'profile',
+    'controllable',
+    'controller',
+    'user'
 ]
 
 from importlib import import_module
 
-from hfos.logger import hfoslog, debug
+from hfos.logger import hfoslog, verbose
 
 
 def _build_schemastore():
     result = {}
 
     for schemaname in __all__:
-        hfoslog('Adding Schema:', schemaname, lvl=debug)
+        hfoslog('Adding Schema:', schemaname, lvl=verbose)
         schemamodule = import_module('hfos.schemata.' + schemaname)
         result[schemaname] = schemamodule.__schema__
 
