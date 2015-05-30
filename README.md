@@ -47,6 +47,8 @@ If you want to discuss (opensource) maritime technology in general incl. where w
 Installation
 ============
 
+Warning: **HFOS is not compatible with Python 3.2!**
+
 Preparation
 -----------
 
