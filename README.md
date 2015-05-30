@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/Hackerfleet/hfos.svg)](https://travis-ci.org/Hackerfleet/hfos)
 [![Stories in Ready](https://badge.waffle.io/Hackerfleet/hfos.png?label=ready&title=Ready)](https://waffle.io/Hackerfleet/hfos)
 [![Requirements Status](https://requires.io/github/Hackerfleet/hfos/requirements.svg?branch=master)](https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master)
 HFOS - The Hackerfleet Operating System
