@@ -27,29 +27,21 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits import Component, Debugger, Event, Timer
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
-from circuits.web import Logger, Server, Static
+from circuits.web import Server, Static
 # from circuits.tools import graph
 
-import hfos.database
+from hfos.web.remotecontrolmanager import RemoteControlManager
+from hfos.web.clientmanager import ClientManager
+from hfos.web.mapviewmanager import MapViewManager
+from hfos.web.schemamanager import SchemaManager
+from hfos.web.auth import Authenticator
+from hfos.web.chat import Chat
+from hfos.web.tilecache import TileCache
 
-from hfos.tilecache import TileCache
-from hfos.machineroom import Machineroom
-from hfos.remotecontrolmanager import RemoteControlManager
-from hfos.clientmanager import ClientManager
-from hfos.mapviewmanager import MapViewManager
-from hfos.layermanager import LayerManager
-from hfos.schemamanager import SchemaManager
-from hfos.camera import CameraManager
-from hfos.auth import Authenticator
 from hfos.logger import hfoslog
 from hfos.debugger import HFDebugger
 
-from hfos.chat import Chat
 from hfos.nmea import NMEAParser
-
-import webbrowser
-
-from hfos.machineroom import machine, pump, rudder
 
 
 class App(Component):
@@ -73,7 +65,7 @@ HFDebugger().register(server)
 
 app = App().register(server)
 
-Machineroom().register(app)
+#Machineroom().register(app)
 NMEAParser().register(app)
 
 TileCache().register(server)
