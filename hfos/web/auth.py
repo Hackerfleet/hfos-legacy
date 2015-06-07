@@ -15,8 +15,8 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits import Component, handler
 
-from .database import userobject, profileobject
-from .events import authentication
+from database import userobject, profileobject
+from events import authentication
 from hfos.logger import hfoslog, error, warn, critical
 
 from uuid import uuid4
@@ -69,7 +69,9 @@ class Authenticator(Component):
                 newuser = userobject({'username': event.username, 'passhash': event.passhash, 'uuid': str(uuid4())})
                 newuser.save()
                 newprofile = profileobject({'uuid': str(newuser.uuid)})
+                newprofile.components.enabled = ["dasboard", "map", "weather", "settings"]
                 newprofile.save()
+                self.fireEvent()
             except Exception as e:
                 hfoslog("Auth: Problem creating new user: ", type(e), e)
 
