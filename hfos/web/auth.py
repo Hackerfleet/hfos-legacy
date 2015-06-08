@@ -17,8 +17,8 @@ from uuid import uuid4
 
 from circuits import Component, handler
 
-from database import userobject, profileobject
-from events import authentication
+from hfos.database import userobject, profileobject
+from hfos.events import authentication
 from hfos.logger import hfoslog, error, warn, critical
 
 
