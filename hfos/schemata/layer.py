@@ -33,7 +33,7 @@ Layer = {
                              'description': 'URL to the tile image to show in place of the tile that failed to load.',
                              'default': ''},
             'attribution': {'type': 'string',
-                            'description': 'e.g. "© Openstreetmap" — the string used by the attribution control, describes the layer data.',
+                            'description': 'e.g. "&copy; Openstreetmap" - the string used by the attribution control, describes the layer data.',
                             'default': ''},
             'tms': {'type': 'boolean',
                     'description': 'If true, inverses Y axis numbering for tiles (turn this on for TMS services).',
