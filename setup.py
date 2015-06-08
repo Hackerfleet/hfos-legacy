@@ -74,12 +74,13 @@ setup(name="hfos",
 
       long_description=include_readme(),
       dependency_links=['https://github.com/Hackerfleet/pynmea/archive/master.zip#egg=Pynmea-0.7.0',
-                        'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.2-hf'
+                        'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.3-hf'
       ],
       install_requires=['circuits==3.1.0',
                         'Pynmea==0.7.0',
-                        'warmongo==0.5.2-hf',
+                        'pymongo==3.0.1',
+                        'warmongo==0.5.3-hf',
                         'jsonschema==2.4.0'
-      ]
-
+                        ],
+      test_suite="tests.main.main"
 )
