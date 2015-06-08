@@ -13,13 +13,13 @@ Authentication (and later Authorization) system
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+from uuid import uuid4
+
 from circuits import Component, handler
 
 from database import userobject, profileobject
 from events import authentication
 from hfos.logger import hfoslog, error, warn, critical
-
-from uuid import uuid4
 
 
 class Authenticator(Component):
@@ -63,17 +63,30 @@ class Authenticator(Component):
                 hfoslog("Auth: Password wrong!", lvl=warn)
 
         else:
-            # TODO: Write registration function
             hfoslog("Auth: Creating user")
             try:
                 newuser = userobject({'username': event.username, 'passhash': event.passhash, 'uuid': str(uuid4())})
                 newuser.save()
-                newprofile = profileobject({'uuid': str(newuser.uuid)})
-                newprofile.components.enabled = ["dasboard", "map", "weather", "settings"]
-                newprofile.save()
-                self.fireEvent()
             except Exception as e:
                 hfoslog("Auth: Problem creating new user: ", type(e), e)
+                return
+            try:
+                newprofile = profileobject({'uuid': str(newuser.uuid)})
+                hfoslog(newprofile.uuid)
+
+                newprofile.components = {'enabled': ["dasboard", "map", "weather", "settings"]}
+                newprofile.save()
+            except Exception as e:
+                hfoslog("Auth: Problem creating new profile: ", type(e), e)
+                return
+
+            try:
+                self.fireEvent(authentication(newuser.username, (newuser, newprofile), event.clientuuid,
+                                              newuser.uuid,
+                                              event.sock),
+                               "auth")
+            except Exception as e:
+                hfoslog("Auth: Error during new account confirmation transmission")
 
     def profilerequest(self, event):
         """Handles client profile actions"""
@@ -90,13 +103,9 @@ class Authenticator(Component):
 
             userprofile = profileobject.find_one({'uuid': event.user.useruuid})
 
-            if event.user.useruuid != newprofile['uuid']:
+            if event.user.useruuid != userprofile.uuid:
                 hfoslog("Auth: User tried to manipulate wrong profile.", lvl=warn)
                 return
-
-            if not userprofile:
-                hfoslog("Auth: No profile! Creating a new one..", lvl=critical)
-                userprofile = profileobject()
 
             hfoslog("Auth: Updating %s" % userprofile)
 
