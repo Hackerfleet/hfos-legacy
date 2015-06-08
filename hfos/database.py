@@ -22,10 +22,12 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 import sys
 import importlib
+from six.moves import input  # Lazily loaded, may be marked as error, e.g. in IDEs
 
 #from circuits import Component, handler, Event, Worker, task
 import warmongo
 
+from hfos.logger import hfoslog, warn
 import hfos.schemata
 
 from hfos.schemata.profile import Profile
@@ -36,7 +38,21 @@ from hfos.schemata.layergroup import LayerGroup
 from hfos.schemata.controllable import Controllable
 from hfos.schemata.controller import Controller
 
-from .logger import hfoslog
+
+def clear_all():
+    sure = input("Are you sure to drop the complete database content?")
+    if not (sure.upper() in ("Y", "J")):
+        sys.exit(5)
+
+    import pymongo
+
+    client = pymongo.MongoClient(host="localhost", port=27017)
+    db = client["hfos"]
+
+    for col in db.collection_names(include_system_collections=False):
+        hfoslog("DB: Dropping collection ", col, lvl=warn)
+        db.drop_collection(col)
+
 
 warmongo.connect("hfos")
 
