@@ -1,0 +1,24 @@
+# Linting, QA
+pyflakes
+pep8
+mccabe
+
+# Convenient Development Tasks
+Fabric
+
+# Debugging
+pudb
+
+# Packaging
+wheel
+
+# Running Tests
+tox
+pytest
+coveralls
+pytest-cov
+
+# Generating Documentation
+Sphinx
+releases
+Sphinx-PyPI-upload

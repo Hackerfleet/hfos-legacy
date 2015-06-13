@@ -3,7 +3,7 @@
 
 # Hackerfleet Technology Demonstrator License
 # ===========================================
-# Copyright (C) 2011-2014 riot <riot@hackerfleet.org> and others.
+# Copyright (C) 2011-2015 riot <riot@hackerfleet.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,44 +18,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-
 from setuptools import setup
 
-
-# TODO: rebuild the package finder using setuptools & pkg_resources
-
-def include_readme():
-    readme = open("README.md")
-    include = readme.readlines(10)[2:10]
-    readme.close()
-    return "".join(include)
-
-
-def is_package(path):
-    return (
-        os.path.isdir(path) and
-        os.path.isfile(os.path.join(path, '__init__.py'))
-    )
-
-
-def find_packages(path, base=""):
-    """ Find all packages in path """
-    packages = {}
-    for item in os.listdir(path):
-        dir = os.path.join(path, item)
-        if is_package(dir):
-            if base:
-                module_name = "%(base)s.%(item)s" % vars()
-            else:
-                module_name = item
-            packages[module_name] = dir
-            packages.update(find_packages(dir, module_name))
-    return packages
-
-
-packages = find_packages(".")
-package_names = list(packages.keys())
+# TODO:
+# Classifiers
+# Keywords
+# download_url
+# platform
 
 setup(name="hfos",
       version="1.0.0",
@@ -65,22 +34,32 @@ setup(name="hfos",
       author_email="packages@hackerfleet.org",
       url="https://github.com/hackerfleet/hfos",
       license="GNU General Public License v3",
-      package_dir=packages,
+      packages=['hfos',
+                'hfos.schemata',
+                'hfos.web',
+                'hfos.provisions'],
       scripts=[
-          'hfos.py',
+          'hfos_launcher.py',
       ],
       data_files=[
       ],
 
-      long_description=include_readme(),
-      dependency_links=['https://github.com/Hackerfleet/pynmea/archive/master.zip#egg=Pynmea-0.7.0',
-                        'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.3-hf'
+      long_description="""HFOS - The Hackerfleet Operating System
+=======================================
+
+A modern, opensource approach to maritime navigation.
+
+This software package is supposed to run on your ship/car/plane/ufo's board computer.
+See https://github.com/hackerfleet/hfos""",
+      dependency_links=[
+          'https://github.com/Hackerfleet/pynmea/archive/master.zip#egg=pynmea-0.7.0',
+          'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.3.hf'
       ],
       install_requires=['circuits==3.1.0',
-                        'Pynmea==0.7.0',
                         'pymongo==3.0.1',
-                        'warmongo==0.5.3-hf',
-                        'jsonschema==2.4.0'
+                        'jsonschema==2.5.0',
+                        'pynmea==0.7.0',
+                        'warmongo==0.5.3.hf'
                         ],
-      test_suite="tests.main.main"
-)
+      test_suite="tests.main.main",
+      )
