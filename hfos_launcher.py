@@ -37,6 +37,7 @@ from hfos.web.schemamanager import SchemaManager
 from hfos.web.auth import Authenticator
 from hfos.web.chat import Chat
 from hfos.web.tilecache import TileCache
+from hfos.web.demo import WebDemo
 
 from hfos.logger import hfoslog
 from hfos.debugger import HFDebugger
@@ -54,7 +55,7 @@ class App(Component):
     def started(self, component):
         """Sets up the not-yet-so-useful Ping timer for demo purposes"""
         hfoslog("App: Creating timer for CA")
-        Timer(5, Event.create("ping"), channels='wsserver', persist=True).register(self)
+        # Timer(5, Event.create("ping"), channels='wsserver', persist=True).register(self)
         # Timer(5, rudder(20), channels='machineroom', persist=True).register(self)
 
 
@@ -78,6 +79,7 @@ Authenticator().register(clientmanager)
 Chat().register(clientmanager)
 MapViewManager().register(clientmanager)
 RemoteControlManager().register(clientmanager)
+WebDemo().register(clientmanager)
 #CameraManager().register(clientmanager)
 
 #Logger().register(server)
