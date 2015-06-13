@@ -1,13 +1,11 @@
 """
-Hackerfleet Operating System - Backend
-
-Schema: Profile
-=================
+Schema: Client
+==============
 
 Contains
-========
+--------
 
-Profile: Userprofile with general flags and fields
+Client: Clientprofile to store client specific settings
 
 :copyright: (C) 2011-2015 riot@hackerfleet.org
 :license: GPLv3 (See LICENSE)

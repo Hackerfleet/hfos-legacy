@@ -1,11 +1,10 @@
 """
-Hackerfleet Operating System - Backend
 
 Schema: Profile
-=================
+===============
 
 Contains
-========
+--------
 
 Profile: Userprofile with general flags and fields
 

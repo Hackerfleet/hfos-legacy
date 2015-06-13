@@ -1,13 +1,12 @@
 """
-Hackerfleet Operating System - Backend
 
-Schema: Profile
-=================
+Schema: Controller
+==================
 
 Contains
-========
+--------
 
-Profile: Userprofile with general flags and fields
+Controller: Remote control input device to controllable mapping
 
 :copyright: (C) 2011-2015 riot@hackerfleet.org
 :license: GPLv3 (See LICENSE)

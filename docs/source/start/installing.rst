@@ -38,5 +38,5 @@ repository by simply performing the following in the hfos working directory:
    $ git pull -u
 
 .. note::
-You do not need to reinstall if you have installed with setuptools via
+   You do not need to reinstall if you have installed with setuptools via
    the hfos repository and used setuptools to install in "develop" mode.

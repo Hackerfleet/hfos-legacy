@@ -1,5 +1,5 @@
 """
-Hackerfleet Operating System - Backend
+
 
 Module Schemata
 ===============
@@ -80,4 +80,5 @@ def test():
 
 # https://github.com/fge/sample-json-schemas/tree/master/geojson
 
-test()
+if __name__ == "__main__":
+    test()

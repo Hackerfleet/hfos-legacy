@@ -1,5 +1,4 @@
 """
-Hackerfleet Operating System - Backend
 
 Module: SchemaManager
 =====================
@@ -9,7 +8,7 @@ Module: SchemaManager
 
 """
 
-__author__ = 'riot'
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits import Component
 

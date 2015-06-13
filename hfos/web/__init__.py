@@ -1,5 +1,6 @@
 """
-Hackerfleet Operating System - Backend - Web bits
+
+Web bits
 
 Package HFOS.web
 ================
@@ -12,3 +13,6 @@ The backend package dealing with the web frontend interface.
 """
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
+__all__ = ['auth', 'chat', 'clientmanager', 'demo', 'layermanager', 'mapviewmanager', 'remotecontrolmanager',
+           'schemamanager', 'tilecache']

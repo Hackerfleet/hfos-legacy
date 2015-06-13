@@ -1,25 +1,25 @@
 .. image:: https://travis-ci.org/hackerfleet/hfos.svg
-:target: https://travis-ci.org/hackerfleet/hfos
-   :alt: Build Status
+    :target: https://travis-ci.org/hackerfleet/hfos
+    :alt: Build Status
 
 .. image:: https://coveralls.io/repos/hackerfleet/hfos/badge.png
-:target: https://coveralls.io/r/hackerfleet/hfos
-   :alt: Coverage
+    :target: https://coveralls.io/r/hackerfleet/hfos
+    :alt: Coverage
 
 .. image:: https://landscape.io/github/hackerfleet/hfos/master/landscape.png
-:target: https://landscape.io/github/hackerfleet/hfos/master
-   :alt: Quality
+    :target: https://landscape.io/github/hackerfleet/hfos/master
+    :alt: Quality
 
 .. image:: https://badge.waffle.io/hackerfleet/hfos.png?label=ready&title=Ready 
-:target: https://waffle.io/hackerfleet/hfos
-   :alt: Stories Ready
+    :target: https://waffle.io/hackerfleet/hfos
+    :alt: Stories Ready
 
 .. image:: https://requires.io/bitbucket/hackerfleet/hfos/requirements.png?branch=default
-:target: https://requires.io/bitbucket/hackerfleet/hfos/requirements?branch=default
-   :alt: Requirements Status
+    :target: https://requires.io/bitbucket/hackerfleet/hfos/requirements?branch=default
+    :alt: Requirements Status
 
-    | HFOS - The Hackerfleet Operating System
-    | =======================================
+HFOS - The Hackerfleet Operating System
+=======================================
 
     A modern, opensource approach to maritime navigation.
 
@@ -76,23 +76,23 @@ installed via your distribution's package manager.
 
 For Debian Unstable use this:
 
-::
+.. code-block:: bash
 
-    sudo apt-get install mongodb python3.4 python3-pip python3-grib \
-                         python3-bson python3-pymongo python3-serial
+    $ sudo apt-get install mongodb python3.4 python3-pip python3-grib \
+                           python3-bson python3-pymongo python3-serial
 
 If you want (and can), install the mongo and bson extensions:
 
-::
+.. code-block:: bash
 
-    sudo apt-get install python3-pymongo-ext python3-bson-ext
+    $ sudo apt-get install python3-pymongo-ext python3-bson-ext
 
 You will need to set up a bunch of more dependencies via npm to set up
 the frontend:
 
-::
+.. code-block:: bash
 
-    sudo apt-get install npm
+    $ sudo apt-get install npm
 
 Backend
 -------
@@ -101,15 +101,15 @@ No installation/daemon yet. Just set up a virtual env and install it.
 You may want to create a path in /var/cache for hfos' tilecache and
 other stuff:
 
-::
+.. code-block:: bash
 
-    sudo mkdir -p /var/cache/hfos/tilecache
-    git clone https://github.com/hackerfleet/hfos
-    cd hfos
-    virtualenv -p /usr/bin/python3.4 --system-site-packages venv
-    source venv/bin/activate
-    python setup.py install
-    python hfos.py
+    $ sudo mkdir -p /var/cache/hfos/tilecache
+    $ git clone https://github.com/hackerfleet/hfos
+    $ cd hfos
+    $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
+    $ source venv/bin/activate
+    $ python setup.py install
+    $ python hfos.py
 
 You may need to adapt permissions for that folder to accomodate the
 user you let hfos run with, until we re-add the daemon and package support foam, that does that automatically.
@@ -120,14 +120,14 @@ Frontend
 To install the frontend, update and pull the submodule, then change into
 it and either install or develop.
 
-::
+.. code-block:: bash
 
-    git submodule init
-    git submodule update
-    cd frontend
-    npm install
-    bower install
-    grunt serve
+    $ git submodule init
+    $ git submodule update
+    $ cd frontend
+    $ npm install
+    $ bower install
+    $ grunt serve
 
 Point your browser to localhost:9000 to observe the magic. Don't forget
 to start the backend!
@@ -135,23 +135,23 @@ to start the backend!
 Development
 -----------
 
-::
+.. code-block:: bash
 
-    cd hfos
-    virtualenv -p /usr/bin/python3.4 --system-site-packages
+    $ cd hfos
+    $ virtualenv -p /usr/bin/python3.4 --system-site-packages
 
 Activate venv and run setup.py:
 
-::
+.. code-block:: bash
 
-    source venv/bin/activate
-    python setup.py develop
+    $ source venv/bin/activate
+    $ python setup.py develop
 
 Run hfos:
 
-::
+.. code-block:: bash
 
-    python hfos.py
+    $ python hfos.py
 
 You should see some info/debug output and the web engine as well as
 other components starting up.
@@ -167,10 +167,10 @@ instructions:
 If you're using Debian, we provide a skeleton to build a cleanly
 installable dpkg package:
 
-::
+.. code-block:: bash
 
-    sudo apt-get install dpkg-dev
-    dpkg-buildpackage
+    $ sudo apt-get install dpkg-dev
+    $ dpkg-buildpackage
 
 Run buildpackage in the top source directory to generate a debian
 package.
@@ -204,4 +204,4 @@ This is migrating over to hfos-frontend submodule.
 
 Missing? Add yourself or ping us ;)
 
-:boat: :+1:
+-- :boat: :+1:

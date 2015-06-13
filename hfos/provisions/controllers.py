@@ -1,4 +1,19 @@
-__author__ = 'riot'
+"""
+
+Provisioning: Controllables
+===========================
+
+Contains
+--------
+
+Controllables for several predefined functions.
+
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from hfos.provisions.base import *
 from hfos.database import controllerobject
@@ -40,6 +55,6 @@ Controllers = [
          },
      ]}
 ]
-
-provisionList(Controllers, controllerobject)
-hfoslog('Provisioning: Controllers: Done.')
+if __name__ == "__main__":
+    provisionList(Controllers, controllerobject)
+    hfoslog('Provisioning: Controllers: Done.')

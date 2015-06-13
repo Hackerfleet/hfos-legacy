@@ -1,5 +1,5 @@
 """
-Hackerfleet Operating System - Backend
+
 
 Module clientmanager
 ====================

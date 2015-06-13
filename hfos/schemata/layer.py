@@ -1,4 +1,24 @@
-__author__ = 'riot'
+"""
+
+Schema: Layer
+=============
+
+Contains
+--------
+
+Layer: General and renderer specific layer configuration data.
+
+See also
+--------
+
+Provisions
+
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 Layer = {
     'type': 'object',

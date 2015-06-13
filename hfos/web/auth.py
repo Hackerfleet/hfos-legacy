@@ -1,5 +1,4 @@
 """
-Hackerfleet Operating System - Backend
 
 Module: Auth
 ============

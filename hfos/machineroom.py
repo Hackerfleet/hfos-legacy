@@ -1,17 +1,22 @@
 """
-Hackerfleet Operating System - Backend
 
 Module: Machineroom
 ===================
+
+Engine, Rudder and miscellaneous machine roome control operations.
+
+Currently this is only useable in conjunction with Hackerfleet's MS 0x00 NeoCortex board.
 
 :copyright: (C) 2011-2015 riot@hackerfleet.org
 :license: GPLv3 (See LICENSE)
 
 """
 
-__author__ = 'riot'
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from random import randint
+
+import six
 
 from circuits import Component, handler, Event
 from circuits.io.events import write
@@ -50,7 +55,10 @@ class Machineroom(Component):
     version = b'v'
     message = b'm'
     sep = b','
-    terminator = bytes(chr(13), encoding="ascii")
+    if six.PY2:
+        terminator = chr(13)
+    else:
+        terminator = bytes(chr(13), encoding="ascii")
 
     def __init__(self, port="/dev/ttyUSB0", baudrate=9600, buffer=4096, *args):
         super(Machineroom, self).__init__(args)

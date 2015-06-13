@@ -23,7 +23,7 @@ Coding Style
 - Doc Strings shall confirm to the `PEP257 <http://legacy.python.org/dev/peps/pep-0257/>`_ Convention.
 
 .. note:: Arguments, Keyword Arguments, Return and Exceptions must be
-documented with the appropriate Sphinx`Python Domain <http://sphinx-doc.org/latest/domains.html#the-python-domain>`_.
+  documented with the appropriate Sphinx`Python Domain <http://sphinx-doc.org/latest/domains.html#the-python-domain>`_.
 
 
 Revision History

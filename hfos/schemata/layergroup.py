@@ -1,4 +1,24 @@
-__author__ = 'riot'
+"""
+
+Schema: LayerGroup
+==================
+
+Contains
+--------
+
+LayerGroup: A configurable group of predefined layers
+
+See also
+--------
+
+Provisions
+
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 LayerGroup = {
     'type': 'object',

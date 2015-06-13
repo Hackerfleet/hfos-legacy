@@ -1,11 +1,10 @@
 """
-Hackerfleet Operating System - Backend
 
 Schema: Coords
-=================
+==============
 
 Contains
-========
+--------
 
 MapCoords: Leaflet compatible lat/lon/zoom combination
 

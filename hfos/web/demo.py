@@ -1,5 +1,4 @@
 """
-Hackerfleet Operating System - Backend
 
 Module: Web.Demo
 ================
@@ -9,7 +8,7 @@ Module: Web.Demo
 
 """
 
-__author__ = 'riot'
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from random import randint
 import json
@@ -22,13 +21,14 @@ from hfos.events import broadcast
 
 class WebDemo(Component):
     """
-    Handles schemata requests from clients.
+    Demonstrates functionality by interactively playing back demo data.
     """
 
     channel = "hfosweb"
 
     def ping(self, *args, **kwargs):
-        """Pings all connected clients with stupid ping/demo messages"""
+        """Pings all connected clients with stupid ping/demo messages (for now)"""
+
         self._count += 1
         hfoslog("CA: Ping %i" % self._count)
 

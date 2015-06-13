@@ -17,8 +17,8 @@ Communication
 - `Issue Tracker`_
 
 
-.. note:: If you are familiar with `IRC <http://en.wikipedia.org/wiki/Internet_Relay_Chat>`_
-and use your own IRC Client then connect to the FreeNode Network and ``/join #hackerfleet``.
+.. note:: If you are familiar with `IRC <http://en.wikipedia.org/wiki/Internet_Relay_Chat>`
+        and use your own IRC Client then connect to the FreeNode Network and ``/join #hackerfleet``.
 
 
 Standards

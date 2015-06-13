@@ -1,5 +1,4 @@
 """
-Hackerfleet Operating System - Backend
 
 Schema: User
 ============
@@ -7,7 +6,7 @@ Schema: User
 Account credentials and administrativa
 
 Contains
-========
+--------
 
 User: Useraccount object
 

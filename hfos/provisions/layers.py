@@ -1,3 +1,20 @@
+"""
+
+Provisioning: Layers
+====================
+
+Contains
+--------
+
+Predefined open layers.
+
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
 from hfos.provisions.base import *
 from hfos.database import layerobject
 
@@ -130,5 +147,6 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
     }
 ]
 
-provisionList(layers, layerobject)
-hfoslog('Provisioning: Layers: Done.')
+if __name__ == "__main__":
+    provisionList(layers, layerobject)
+    hfoslog('Provisioning: Layers: Done.')

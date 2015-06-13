@@ -13,8 +13,8 @@ This is the recommended way to setup a development enviornment
 for developing the backend and frontend of HFOS .
 
 .. note:: This document *assumes* you already have a working `Python`_
-environment with a minimum `Python`_ version of 2.7 as well
-          as mongodb and `pip`_ already installed.
+        environment with a minimum `Python`_ version of 2.7 as well
+        as mongodb and `pip`_ already installed.
 
 
 Prerequisites
@@ -33,8 +33,8 @@ and functions useful for both development and deployments.
     $ source $(which virtualenvwrapper.sh)
 
 .. note:: You should put ``source $(which virtualenvwrapper.sh)`` in either
-your ``$HOME/.bashrc`` or ``$HOME/.profile`` depending on how you
-          login and interact with your terminals.
+        your ``$HOME/.bashrc`` or ``$HOME/.profile`` depending on how you
+        login and interact with your terminals.
 
 In addition to the above recommendations you must also have a `Git`_ client
 installed and ready to use as well as your Editor/IDE of choice ready to use.
