@@ -319,22 +319,3 @@ class ClientManager(Component):
         except Exception as e:
             hfoslog("CM: Error (%s, %s) during auth grant: %s" % (type(e), e, event), lvl=error)
 
-    def ping(self, *args, **kwargs):
-        """Pings all connected clients with stupid ping/demo messages"""
-        self._count += 1
-        hfoslog("CA: Ping %i" % self._count)
-
-        data = {'component': 'ping',
-                'action': "Hello"
-        }
-        if (self._count % 2) == 0:
-            data = {'component': 'navdata',
-                    'action': 'update',
-                    'data': {'true_course': randint(0, 359),
-                             'spd_over_grnd': randint(0, 50)
-                    }
-            }
-        self.fireEvent(broadcast("clients", json.dumps(data)))
-
-
-
