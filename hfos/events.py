@@ -220,7 +220,7 @@ class layermanagementrequest(Event):
         :param mapview: The new mapview object
         :param args: Further Args
         """
-        super(layerrequest, self).__init__(*args)
+        super(layermanagementrequest, self).__init__(*args)
         self.sender = sender
         self.request = request
 
@@ -249,7 +249,7 @@ class layerrequest(Event):
 class layerbroadcast(Event):
     """Something changed a layer and subscribers need to get notified"""
 
-    def __init__(self, sender, broadcast, *args):
+    def __init__(self, sender, broadcastdata, *args):
         """
 
         :param sender: Originating User object
@@ -258,7 +258,7 @@ class layerbroadcast(Event):
         """
         super(layerbroadcast, self).__init__(*args)
         self.sender = sender
-        self.broadcast = broadcast
+        self.broadcastdata = broadcastdata
 
         hfoslog("LM: Update-Event generated")
 
@@ -292,7 +292,6 @@ class remotecontrolupdate(Event):
     def __init__(self, controldata, *args):
         super(remotecontrolupdate, self).__init__(*args)
         self.controldata = controldata
-
 
 
 AuthorizedEvents = {
