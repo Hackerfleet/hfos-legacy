@@ -13,16 +13,12 @@ Chat manager
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-import json
+from time import time
 
-from circuits.net.events import write
-from circuits import Component, handler
+from circuits import Component
 
 from hfos.logger import hfoslog, error, warn
-
 from hfos.events import broadcast
-
-from time import time
 
 
 class Chat(Component):
@@ -67,7 +63,7 @@ class Chat(Component):
                                   'timestamp': time(),
                                   'content': ":" + str(data)
                               }
-                }
+                              }
             else:
                 hfoslog("CHAT: Unsupported action: ", action, event, lvl=warn)
                 return

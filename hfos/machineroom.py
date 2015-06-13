@@ -11,16 +11,13 @@ Module: Machineroom
 
 __author__ = 'riot'
 
+from random import randint
+
 from circuits import Component, handler, Event
-from circuits.io.events import write, ready, opened
+from circuits.io.events import write
 from circuits.io import Serial
 
 from hfos.logger import hfoslog, critical
-from hfos.events import send
-
-from random import randint
-
-from struct import pack
 
 
 class MachineroomEvent(Event):
@@ -85,7 +82,6 @@ class Machineroom(Component):
         # self._sendcommand(b'h')
         self._sendcommand(b'l,0')
         self._sendcommand(b'm,HFOS Control')
-
 
     def _handleServo(self, channel, value):
         self._sendcommand(self.servo + self.sep + bytes([channel]) + self.sep + bytes([value]))

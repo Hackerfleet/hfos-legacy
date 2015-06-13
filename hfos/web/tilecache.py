@@ -13,17 +13,14 @@ Autonomously operating local tilecache
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-#!/usr/bin/env python
-
 import socket
+import os
 
 from circuits import Worker, task
 from circuits.web.tools import serve_file
 from circuits.web.controllers import Controller
 
 from hfos.logger import hfoslog, error
-
-import os
 
 try:
     from urllib import quote, unquote, urlopen
@@ -60,8 +57,8 @@ def get_tile(url, *args, **kwargs):
         log += "TCT: ERROR Got no connection."
 
     log += "TCT INFO Tilegetter done: " + str(len(content))
-    #hfoslog(log)
-    #log(type(content), "%20s" % content)
+    # hfoslog(log)
+    # log(type(content), "%20s" % content)
     return content, log
 
 
@@ -69,7 +66,7 @@ class TileCache(Controller):
     """
     Threaded, disk-caching tile delivery component
     """
-    #channel = "web"
+    # channel = "web"
 
     def __init__(self, path="/tilecache", tilepath="/var/cache/hfos/tilecache", defaulttile=None, **kwargs):
         """
@@ -98,19 +95,19 @@ class TileCache(Controller):
             path = path[len(self.path):]
 
         path = unquote(path)
-        #log("TC: WARNING:  %s " % path)
+        # log("TC: WARNING:  %s " % path)
 
-        #if path:
+        # if path:
         #    location = os.path.abspath(path)
-        #else:
+        # else:
         #    log("TC: WARNING! This should not happen! Path was empty!")
         #    return
 
-        #if not location.startswith(os.path.dirname(self.tilepath)):
+        # if not location.startswith(os.path.dirname(self.tilepath)):
         #    return  # hacking attemp e.g. /foo/../../../../../etc/shadow
 
         spliturl = path.split("/")
-        #log("[TC] URL split", spliturl)
+        # log("[TC] URL split", spliturl)
         service = "/".join(spliturl[1:-3])  # get all but the coords as service
         try:
             x = spliturl[-3]

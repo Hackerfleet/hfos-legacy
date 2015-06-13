@@ -19,7 +19,6 @@ from circuits.tools import tryimport
 from hfos.events import send
 from hfos.logger import hfoslog, error, debug
 
-
 opencv = tryimport("cv2")
 
 
@@ -88,7 +87,6 @@ class CameraManager(Component):
         if self._framecount % 100 == 0:
             hfoslog("CAM: ", self._framecount, " frames taken.", lvl=debug)
 
-
     def toggleFilming(self):
         if self._filming:
             hfoslog("CAM: Stopping operation")
@@ -98,7 +96,6 @@ class CameraManager(Component):
             hfoslog("CAM: Starting operation")
             self._filming = True
             self.timer.start()
-
 
     def _broadcast(self, camerapacket, camerauuid):
         try:
@@ -115,7 +112,6 @@ class CameraManager(Component):
             return result
         except Exception as e:
             hfoslog("Error during list retrieval:", e, type(e), lvl=error)
-
 
     def _unsubscribe(self, clientuuid, camerauuid=None):
         # TODO: Verify everything and send a response
@@ -172,7 +168,7 @@ class CameraManager(Component):
             elif action == 'subscribe':
                 # TODO: Verify everything and send a response
                 if data in self._subscribers:
-                    if not clientuuid in self._subscribers[data]:
+                    if clientuuid not in self._subscribers[data]:
                         self._subscribers[data].append(clientuuid)
                 else:
                     self._subscribers[data] = [clientuuid]

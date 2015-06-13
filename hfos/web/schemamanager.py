@@ -11,10 +11,9 @@ Module: SchemaManager
 
 __author__ = 'riot'
 
-import hfos.schemata
-
 from circuits import Component
 
+import hfos.schemata
 from hfos.logger import hfoslog, info
 from hfos.events import send
 
@@ -33,7 +32,7 @@ class SchemaManager(Component):
                 response = {'component': 'schema',
                             'action': 'Get',
                             'data': self.schemata[event.data]
-                }
+                            }
                 self.fireEvent(send(event.client.clientuuid, response))
         elif event.action == "All":
             hfoslog("SM: Schemarequest for all schemata from ", event.user, lvl=info)
@@ -41,5 +40,3 @@ class SchemaManager(Component):
                         'action': 'All',
                         'data': hfos.schemata.schemastore}
             self.fireEvent(send(event.client.clientuuid, response))
-
-

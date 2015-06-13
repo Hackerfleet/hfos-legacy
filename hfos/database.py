@@ -21,15 +21,11 @@ mapviewobject: Mapview factory
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 import sys
-import importlib
-from six.moves import input  # Lazily loaded, may be marked as error, e.g. in IDEs
 
-#from circuits import Component, handler, Event, Worker, task
 import warmongo
 
+from six.moves import input  # Lazily loaded, may be marked as error, e.g. in IDEs
 from hfos.logger import hfoslog, warn
-import hfos.schemata
-
 from hfos.schemata.profile import Profile
 from hfos.schemata.user import User
 from hfos.schemata.mapview import MapView

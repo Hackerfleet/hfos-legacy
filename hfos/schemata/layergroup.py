@@ -18,7 +18,7 @@ LayerGroup = {
                        'type': 'string',
                        'title': 'Unique Layer ID'
                    }
-        }
+                   }
     }
 }
 

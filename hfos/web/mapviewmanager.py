@@ -11,14 +11,11 @@ Module: Mapviewstorage
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-import json
-
-from circuits import Component, handler
-
 from uuid import uuid4
 
-from hfos.events import send, broadcast
+from circuits import Component
 
+from hfos.events import send, broadcast
 from hfos.database import mapviewobject
 from hfos.logger import hfoslog, error, warn, debug
 
@@ -53,7 +50,6 @@ class MapViewManager(Component):
             return result
         except Exception as e:
             hfoslog("Error during list retrieval:", e, type(e), lvl=error)
-
 
     def _unsubscribe(self, clientuuid, mapuuid=None):
         # TODO: Verify everything and send a response
@@ -122,7 +118,7 @@ class MapViewManager(Component):
                                                    'useruuid': useruuid,
                                                    'name': '%s Default MapView' % nickname,
                                                    'shared': True,
-                        })
+                                                   })
                         hfoslog("MVS: New mapviewobject: ", dbmapview)
                         dbmapview.save()
                     except Exception as e:
@@ -134,7 +130,7 @@ class MapViewManager(Component):
             elif action == 'subscribe':
                 # TODO: Verify everything and send a response
                 if data in self._subscribers:
-                    if not clientuuid in self._subscribers[data]:
+                    if clientuuid not in self._subscribers[data]:
                         self._subscribers[data].append(clientuuid)
                 else:
                     self._subscribers[data] = [clientuuid]
@@ -161,7 +157,7 @@ class MapViewManager(Component):
                     dbmapview = mapviewobject.find_one({'uuid': uuid})
                     hfoslog(dbmapview.__dict__, lvl=error)
                 except Exception as e:
-                    hfoslog("MVS: Couldn't get mapview", (uuid, e, type(e)), lvl=error)
+                    hfoslog("MVS: Couldn't get mapview", (data, e, type(e)), lvl=error)
                     return
 
                 try:
@@ -199,7 +195,7 @@ class MapViewManager(Component):
                                 mapviewpacket = {'component': 'mapview',
                                                  'action': 'update',
                                                  'data': mapview.serializablefields()
-                                }
+                                                 }
                                 self._broadcast(mapviewpacket, dbmapview.uuid)
                             except Exception as e:
                                 hfoslog("MVS: Transmission error before broadcast: %s" % e)

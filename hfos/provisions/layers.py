@@ -19,7 +19,8 @@ layers = [
         "url": 'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
         "layerOptions": {
             "maxZoom": 16,
-            "attribution": 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+            "attribution": '<a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy;\
+<a href="https://opentopomap.org">OpenTopoMap</a>'
         }
     },
     {
@@ -39,7 +40,7 @@ layers = [
         "url": "http://localhost:8055/tilecache/a.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": True,
-            "attribution": "&copy; <a href=\"http://www.opencyclemap.org/copyright\">OpenCycleMap</a> contributors - &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
+            "attribution": "&copy; <a href=\"http://www.opencyclemap.org/copyright\">OpenCycleMap</a> contributors"
         },
         "type": "xyz"
     },
@@ -99,7 +100,8 @@ layers = [
         "layerOptions": {
             "continuousWorld": True,
             "opacity": 0.25,
-            "attribution": "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+            "attribution": "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping,\
+Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
         },
         "type": "xyz"
     },
@@ -111,7 +113,7 @@ layers = [
         "url": "http://localhost:8055/tilecache/openfiremap.org/hytiles/{z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": True,
-            "attribution": "&copy; <a href=\"http://www.openfiremap.org\">OpenFireMap</a> contributors - &copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
+            "attribution": "&copy; <a href=\"http://www.openfiremap.org\">OpenFireMap</a> contributors"
         },
         "type": "xyz"
     },

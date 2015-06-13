@@ -11,13 +11,10 @@ Module: LayerManager
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-import json
-
-from circuits import Component, handler
+from circuits import Component
 
 from hfos.events import send, broadcast
-
-from hfos.database import layerobject, layergroupobject
+from hfos.database import layerobject
 from hfos.logger import hfoslog, error
 
 
@@ -69,7 +66,7 @@ class LayerManager(Component):
         """
 
         hfoslog("LM: Event: '%s'" % event.__dict__)
-        #try:
+        # try:
         try:
             try:
                 userobj = event.sender
@@ -105,7 +102,7 @@ class LayerManager(Component):
                         dblayer = layerobject({'uuid': useruuid,
                                                'name': '%s Default MapView' % nickname,
                                                'shared': True,
-                        })
+                                               })
                         hfoslog("LM: New layerobject: ", dblayer)
                         dblayer.save()
                     except Exception as e:
@@ -171,7 +168,7 @@ class LayerManager(Component):
                                                    'sender': useruuid,
                                                    'layer': dblayer.serializablefields(),
                                                }
-                                }
+                                               }
                                 self._broadcast(layerpacket, dblayer.uuid)
                             except Exception as e:
                                 hfoslog("LM: Transmission error before broadcast: %s" % e)

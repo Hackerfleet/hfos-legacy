@@ -35,7 +35,8 @@ Controller = {
                              'controlaxis': {'type': 'integer'},
                              'controlbutton': {'type': 'integer'},
                              'controluuid': {
-                                 'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                                 'pattern':
+                                     '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                                  'type': 'string',
                                  'title': 'Associated uuid of Controllable'
                              },

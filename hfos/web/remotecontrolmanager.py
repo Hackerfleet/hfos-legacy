@@ -13,17 +13,11 @@ Chat manager
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-import json
-
 from circuits import Component
 
 from hfos.logger import hfoslog, error, warn, critical
-
 from hfos.events import remotecontrolupdate, send
-
 from hfos.database import controllableobject, controllerobject
-
-from time import time
 
 
 class Manager(Component):

@@ -17,7 +17,6 @@ from circuits import Component
 from pynmea.streamer import NMEAStream
 
 from hfos.events import sensordata
-from hfos.logger import hfoslog
 
 
 class NMEAParser(Component):
@@ -30,7 +29,7 @@ class NMEAParser(Component):
     def __init__(self):
         super(NMEAParser, self).__init__()
         self.streamer = NMEAStream()
-        #self.streamer.get_objects("\n")
+        # self.streamer.get_objects("\n")
 
     def _parse(self, data):
         """
@@ -38,7 +37,7 @@ class NMEAParser(Component):
 
         The nmea data is parsed and returned as NMEASentence object
         """
-        #sentences = []
+        # sentences = []
         sen_time = time.time()
 
         # TODO: Something here is fishy, as in the first received packet
@@ -51,10 +50,10 @@ class NMEAParser(Component):
             del (nmeadata['nmea_sentence'])
             nmeadata['time'] = sen_time
             nmeadata['type'] = sentence.sen_type
-            #sentences.append(nmeadata)
+            # sentences.append(nmeadata)
             self.fireEvent(sensordata(nmeadata))
 
-            #return sentences
+            # return sentences
 
     def read(self, *args, **kwargs):
         """Handles incoming raw sensor data"""
