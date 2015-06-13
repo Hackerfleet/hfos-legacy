@@ -2,21 +2,22 @@
     :target: https://travis-ci.org/Hackerfleet/hfos
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/hackerfleet/hfos/badge.png
-    :target: https://coveralls.io/r/hackerfleet/hfos
-    :alt: Coverage
-
 .. image:: https://landscape.io/github/Hackerfleet/hfos/master/landscape.svg?style=flat
     :target: https://landscape.io/github/Hackerfleet/hfos/master
     :alt: Quality
+
+.. image:: https://requires.io/github/Hackerfleet/hfos/requirements.svg?branch=master
+    :target: https://requires.io/github/hackerfleet/hfos/requirements?branch=default
+    :alt: Requirements Status
 
 .. image:: https://badge.waffle.io/hackerfleet/hfos.png?label=ready&title=Ready 
     :target: https://waffle.io/hackerfleet/hfos
     :alt: Stories Ready
 
-.. image:: https://requires.io/bitbucket/hackerfleet/hfos/requirements.png?branch=default
-    :target: https://requires.io/bitbucket/hackerfleet/hfos/requirements?branch=default
-    :alt: Requirements Status
+.. image:: https://coveralls.io/repos/hackerfleet/hfos/badge.png
+    :target: https://coveralls.io/r/hackerfleet/hfos
+    :alt: Coverage
+
 
 HFOS - The Hackerfleet Operating System
 =======================================
