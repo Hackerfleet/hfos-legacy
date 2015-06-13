@@ -1,0 +1,12 @@
+[run]
+omit = hfos/__init__.py
+       hfos/web/__init__.py
+       hfos/provisions/__init__.py
+       hfos/schemata/__init__.py
+       tests/*
+
+[html]
+directory = coverage
+
+[xml]
+output = coverage.xml
