@@ -58,7 +58,7 @@ def hfoslog(*what, **kwargs):
         lvl = info
 
     global count
-    global start
+
     count += 1
 
     now = time.time() - start

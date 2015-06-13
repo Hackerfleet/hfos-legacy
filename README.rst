@@ -1,13 +1,13 @@
-.. image:: https://travis-ci.org/hackerfleet/hfos.svg
-    :target: https://travis-ci.org/hackerfleet/hfos
+.. image:: https://travis-ci.org/Hackerfleet/hfos.svg?branch=master
+    :target: https://travis-ci.org/Hackerfleet/hfos
     :alt: Build Status
 
 .. image:: https://coveralls.io/repos/hackerfleet/hfos/badge.png
     :target: https://coveralls.io/r/hackerfleet/hfos
     :alt: Coverage
 
-.. image:: https://landscape.io/github/hackerfleet/hfos/master/landscape.png
-    :target: https://landscape.io/github/hackerfleet/hfos/master
+.. image:: https://landscape.io/github/Hackerfleet/hfos/master/landscape.svg?style=flat
+    :target: https://landscape.io/github/Hackerfleet/hfos/master
     :alt: Quality
 
 .. image:: https://badge.waffle.io/hackerfleet/hfos.png?label=ready&title=Ready 
