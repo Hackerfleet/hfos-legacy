@@ -1,8 +1,3 @@
-.. HFOS documentation master file, created by
-sphinx-quickstart on Fri Jun 12 16:27:08 2015.
-You can adapt this file completely to your liking, but it should at least
-contain the root `toctree` directive.
-
 ==================
 HFOS Documentation
 ==================
@@ -18,39 +13,39 @@ Sailor's Manual
 ===============
 
 .. toctree::
-:maxdepth: 2
-       manual/index
-       manual/
+    :maxdepth: 2
+
+    manual/index
 
 Developer Documentation
 =======================
 
 
 .. toctree::
-:maxdepth: 1
+    :maxdepth: 1
 
-       start/index
-       tutorials/index
-       man/index
-       api/index
-       dev/index
-       changes
-       roadmap
-       contributors
-       faq
+    start/index
+    tutorials/index
+    dev/index
+    dev/man/index
+    dev/api/index
+    changes
+    roadmap
+    contributors
+    faq
 
 .. toctree::
-:hidden:
+    :hidden:
 
-       glossary
+    glossary
 
 .. ifconfig:: devel
 
    .. toctree::
-:hidden:
+    :hidden:
 
-          todo
-          readme
+    todo
+    readme
 
 Indices and tables
 ==================

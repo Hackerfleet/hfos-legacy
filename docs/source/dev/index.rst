@@ -12,7 +12,7 @@ Guidelines
 ----------
 
 .. toctree::
-:maxdepth: 2
+       :maxdepth: 2
 
        introduction
        contributing
@@ -25,6 +25,6 @@ Code documentation
 ------------------
 
 .. toctree::
-:maxdepth: 2
+       :maxdepth: 2
 
        packages/modules

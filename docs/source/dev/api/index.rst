@@ -4,7 +4,6 @@ API Documentation
 
 
 .. toctree::
-:maxdepth: 1
+        :maxdepth: 1
         :glob:
 
-        hfos*

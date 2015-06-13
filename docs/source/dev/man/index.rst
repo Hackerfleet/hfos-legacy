@@ -8,7 +8,7 @@ Core Library
 
 
 .. toctree::
-:maxdepth: 2
+       :maxdepth: 2
 
        web
        schemata
@@ -19,6 +19,6 @@ Miscellaneous
 
 
 .. toctree::
-:maxdepth: 2
+       :maxdepth: 2
 
        misc/tools
