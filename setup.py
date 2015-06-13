@@ -56,8 +56,8 @@ See https://github.com/hackerfleet/hfos""",
           'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.3.hf'
       ],
       install_requires=['circuits==3.1.0',
-                        'pymongo==3.0.1',
-                        'jsonschema==2.5.0',
+                        'pymongo>=3.0.2',
+                        'jsonschema>=2.5.1',
                         'pynmea==0.7.0',
                         'warmongo==0.5.3.hf'
                         ],
