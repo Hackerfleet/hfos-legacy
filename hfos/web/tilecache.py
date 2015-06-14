@@ -1,6 +1,5 @@
 """
 
-
 Module: TileCache
 =================
 
@@ -23,20 +22,17 @@ from circuits.web.controllers import Controller
 
 from hfos.logger import hfoslog, error
 
-# TODO: Find a better (newer) way for this.
 if six.PY2:
     from urllib import unquote, urlopen
 else:
-    # noinspection PyUnresolvedReferences
     from urllib.request import urlopen
-    # noinspection PyUnresolvedReferences
     from urllib.parse import unquote  # NOQA
 
 
 def get_tile(url):
     """
     Threadable function to retrieve map tiles from the internet
-    :param url: Tile URL to fetch and cache
+    :param url: URL of tile to get
     """
     log = "TCT: INFO Getting tile: %s" % url
 
@@ -44,7 +40,6 @@ def get_tile(url):
 
     try:
         if six.PY3:
-            # noinspection PyArgumentList
             connection = urlopen(url=url, timeout=2)
         else:
             connection = urlopen(url=url)
@@ -92,10 +87,8 @@ class TileCache(Controller):
         self.defaulttile = defaulttile
         self._tilelist = []
 
-    def tilecache(self, event):
-        """Checks and caches a requested tile to disk, then delivers it to client
-        :param event: Request from client
-        """
+    def tilecache(self, event, *args, **kwargs):
+        """Checks and caches a requested tile to disk, then delivers it to client"""
         request, response = event.args[:2]
 
         origpath = request.path
@@ -105,20 +98,9 @@ class TileCache(Controller):
             path = path[len(self.path):]
 
         path = unquote(path)
-        # log("TC: WARNING:  %s " % path)
-
-        # if path:
-        #    location = os.path.abspath(path)
-        # else:
-        #    log("TC: WARNING! This should not happen! Path was empty!")
-        #    return
-
-        # if not location.startswith(os.path.dirname(self.tilepath)):
-        #    return  # hacking attemp e.g. /foo/../../../../../etc/shadow
-
         spliturl = path.split("/")
-        # log("[TC] URL split", spliturl)
         service = "/".join(spliturl[1:-3])  # get all but the coords as service
+
         try:
             x = spliturl[-3]
             y = spliturl[-2]
@@ -127,21 +109,15 @@ class TileCache(Controller):
             filename = os.path.join(self.tilepath, service, x, y) + "/" + z + ".png"
             url = "http://" + service + "/" + x + "/" + y + "/" + z + ".png"
         except Exception as e:
-            hfoslog("TC: ERROR (%s) in URL: %s" % (e, origpath))
+            hfoslog("[TC] ERROR (%s) in URL: %s" % (e, origpath))
             filename = ""
             url = ""
 
         # TODO: Clean up, restructure this
 
-        # This check only necessary when leaflet is set continuousworld=true
-        # (And it is not checking the upper bounds for x&y which are 2^z)
-        # if (int(x) < 0 or int(y) < 0 or int(z) < 0):
-        #    log("[TC] Illegal tile requested: ", url, lvl=warn)
-        #    value['response'] = self.defaulttile
-
         # Do we have the tile already?
         if os.path.isfile(filename):
-            hfoslog("TC: Tile exists in cache")
+            hfoslog("[TC] Tile exists in cache")
             # Don't set cookies for static content
             response.cookie.clear()
             try:
@@ -150,18 +126,17 @@ class TileCache(Controller):
                 event.stop()
         else:
             # We will have to get it first.
-            hfoslog("TC: Tile not cached yet.")
-            hfoslog("TC: Estimated filename: %s " % filename)
-            hfoslog("TC: Estimated URL: %s " % url)
+            hfoslog("[TC] Tile not cached yet. Tile data: ", filename, url)
             if url in self._tilelist:
-                hfoslog("TC: Getting a tile for the second time?!", lvl=error)
+                hfoslog("[TC] Getting a tile for the second time?!", lvl=error)
             else:
                 self._tilelist += url
             try:
                 tile, log = yield self.call(task(get_tile, url), "tcworkers")
-                hfoslog("TCT: ", log)
+                if log:
+                    hfoslog("[TC] Thread error: ", log)
             except Exception as e:
-                hfoslog("TC:", e, type(e))
+                hfoslog("[TC]", e, type(e))
                 tile = None
 
             tilepath = os.path.dirname(filename)
@@ -170,18 +145,18 @@ class TileCache(Controller):
                 try:
                     os.makedirs(tilepath)
                 except OSError as e:
-                    hfoslog("TC: Couldn't create path: %s (%s)" % (e, type(e)))
+                    hfoslog("[TC] Couldn't create path: %s (%s)" % (e, type(e)))
 
-                hfoslog("TC: Caching tile...")
+                hfoslog("[TC] Caching tile...")
                 try:
                     with open(filename, "wb") as tilefile:
                         try:
                             tilefile.write(bytes(tile))
                         except Exception as e:
-                            hfoslog("TC: Writing error: %s" % str([type(e), e]))
+                            hfoslog("[TC] Writing error: %s" % str([type(e), e]))
 
                 except Exception as e:
-                    hfoslog("TC: Open error: %s" % str([type(e), e]))
+                    hfoslog("[TC] Open error: %s" % str([type(e), e]))
                     return
                 finally:
                     event.stop()
@@ -190,11 +165,11 @@ class TileCache(Controller):
                     hfoslog("Delivering tile")
                     yield serve_file(request, response, filename)
                 except Exception as e:
-                    hfoslog("TC: Couldn't deliver.", e, lvl=error)
+                    hfoslog("[TC] Couldn't deliver tile: ", e, lvl=error)
                     event.stop()
-                hfoslog("TC: Tile stored and delivered.")
+                hfoslog("[TC] Tile stored and delivered.")
             else:
-                hfoslog("TC: Got no tile, serving defaulttile: %s" % url)
+                hfoslog("[TC] Got no tile, serving defaulttile: %s" % url)
                 if self.defaulttile:
                     try:
                         yield serve_file(request, response, self.defaulttile)
