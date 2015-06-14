@@ -141,7 +141,7 @@ class ClientManager(Component):
         try:
             if event.sendtype == "user":
                 hfoslog("CM: Broadcasting to all of users clients: '%s': '%s" % (event.uuid, event.packet))
-                if not event.uuid in self._users:
+                if event.uuid not in self._users:
                     hfoslog('CM: Unknown user! ', event, lvl=critical)
                     return
                 clients = self._users[event.uuid].clients
@@ -156,7 +156,7 @@ class ClientManager(Component):
                         self.fireEvent(write(sock, event.packet), "wsserver")
             else:  # only to client
                 hfoslog("CM: Sending to user's client: '%s': '%.50s ..." % (event.uuid, event.packet), lvl=debug)
-                if not event.uuid in self._clients:
+                if event.uuid not in self._clients:
                     hfoslog('CM: Unknown client! ', event.uuid, lvl=critical)
                     hfoslog('CM: Clients: ', self._clients, lvl=debug)
                     return
@@ -167,7 +167,6 @@ class ClientManager(Component):
                 else:
                     hfoslog("CM: Sending raw data to client")
                     self.fireEvent(write(sock, event.packet), "wsserver")
-
 
         except Exception as e:
             hfoslog("CM: Exception during sending: %.50s (%s)" % (e, type(e)))
@@ -202,9 +201,9 @@ class ClientManager(Component):
                 return
 
             event = AuthorizedEvents[component]
-            #hfoslog(event, lvl=critical)
+            # hfoslog(event, lvl=critical)
             hfoslog("CM: Firing authorized event.", lvl=debug)
-            #hfoslog("CM: ", (user, action, data, client), lvl=critical)
+            # hfoslog("CM: ", (user, action, data, client), lvl=critical)
             self.fireEvent(event(user, action, data, client))
         except Exception as e:
             hfoslog("CM: Critical error during authorized event handling:", e, type(e), lvl=critical)
@@ -284,7 +283,6 @@ class ClientManager(Component):
         except Exception as e:
             hfoslog("Requested action failed: ", e, lvl=warn)
 
-
     @handler("authentication", channel="auth")
     def authentication(self, event):
         """Links the client to the granted account and profile, then notifies the client"""
@@ -302,7 +300,6 @@ class ClientManager(Component):
 
             self._clients[clientuuid].useruuid = useruuid
 
-
             authpacket = {"component": "auth", "action": "login", "data": account.serializablefields()}
             hfoslog("CM: Transmitting Authorization to client", authpacket, lvl=debug)
             self.fireEvent(write(event.sock, json.dumps(authpacket)), "wsserver")
@@ -316,4 +313,3 @@ class ClientManager(Component):
 
         except Exception as e:
             hfoslog("CM: Error (%s, %s) during auth grant: %s" % (type(e), e, event), lvl=error)
-

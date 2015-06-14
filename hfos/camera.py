@@ -190,6 +190,5 @@ class CameraManager(Component):
                 self._unsubscribe(clientuuid, data)
                 return
 
-
         except Exception as e:
             hfoslog("CAM: Global Error: '%s' %s" % (e, type(e)), lvl=error)
