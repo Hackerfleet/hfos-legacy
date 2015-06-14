@@ -15,12 +15,13 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 import socket
 import os
 import six
+import errno
 
 from circuits import Worker, task
 from circuits.web.tools import serve_file
 from circuits.web.controllers import Controller
 
-from hfos.logger import hfoslog, error
+from hfos.logger import hfoslog, error, verbose
 
 if six.PY2:
     from urllib import unquote, urlopen
@@ -34,8 +35,7 @@ def get_tile(url):
     Threadable function to retrieve map tiles from the internet
     :param url: URL of tile to get
     """
-    log = "TCT: INFO Getting tile: %s" % url
-
+    log = ""
     connection = None
 
     try:
@@ -59,9 +59,6 @@ def get_tile(url):
     else:
         log += "TCT: ERROR Got no connection."
 
-    log += "TCT INFO Tilegetter done: " + str(len(content))
-    # hfoslog(log)
-    # log(type(content), "%20s" % content)
     return content, log
 
 
@@ -87,18 +84,12 @@ class TileCache(Controller):
         self.defaulttile = defaulttile
         self._tilelist = []
 
-    def tilecache(self, event, *args, **kwargs):
-        """Checks and caches a requested tile to disk, then delivers it to client"""
-        request, response = event.args[:2]
-
-        origpath = request.path
-        path = origpath
-
+    def _splitURL(self, url):
         if self.path is not None:
-            path = path[len(self.path):]
+            url = url[len(self.path):]
 
-        path = unquote(path)
-        spliturl = path.split("/")
+        url = unquote(url)
+        spliturl = url.split("/")
         service = "/".join(spliturl[1:-3])  # get all but the coords as service
 
         try:
@@ -107,13 +98,18 @@ class TileCache(Controller):
             z = spliturl[-1].split('.')[0]
 
             filename = os.path.join(self.tilepath, service, x, y) + "/" + z + ".png"
-            url = "http://" + service + "/" + x + "/" + y + "/" + z + ".png"
+            realurl = "http://" + service + "/" + x + "/" + y + "/" + z + ".png"
         except Exception as e:
-            hfoslog("[TC] ERROR (%s) in URL: %s" % (e, origpath))
+            hfoslog("[TC] ERROR (%s) in URL: %s" % (e, url))
             filename = ""
-            url = ""
+            realurl = ""
 
-        # TODO: Clean up, restructure this
+        return filename, realurl
+
+    def tilecache(self, event, *args, **kwargs):
+        """Checks and caches a requested tile to disk, then delivers it to client"""
+        request, response = event.args[:2]
+        filename, url = self._splitURL(request.path)
 
         # Do we have the tile already?
         if os.path.isfile(filename):
@@ -145,9 +141,10 @@ class TileCache(Controller):
                 try:
                     os.makedirs(tilepath)
                 except OSError as e:
-                    hfoslog("[TC] Couldn't create path: %s (%s)" % (e, type(e)))
+                    if e.errno != errno.EEXIST:
+                        hfoslog("[TC] Couldn't create path: %s (%s)" % (e, type(e)))
 
-                hfoslog("[TC] Caching tile...")
+                hfoslog("[TC] Caching tile.", lvl=verbose)
                 try:
                     with open(filename, "wb") as tilefile:
                         try:
@@ -162,12 +159,12 @@ class TileCache(Controller):
                     event.stop()
 
                 try:
-                    hfoslog("Delivering tile")
+                    hfoslog("[TC] Delivering tile.", lvl=verbose)
                     yield serve_file(request, response, filename)
                 except Exception as e:
                     hfoslog("[TC] Couldn't deliver tile: ", e, lvl=error)
                     event.stop()
-                hfoslog("[TC] Tile stored and delivered.")
+                hfoslog("[TC] Tile stored and delivered.", lvl=verbose)
             else:
                 hfoslog("[TC] Got no tile, serving defaulttile: %s" % url)
                 if self.defaulttile:
