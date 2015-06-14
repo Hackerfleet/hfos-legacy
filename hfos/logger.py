@@ -48,6 +48,7 @@ import sys
 import inspect
 import six
 
+events = 4
 verbose = 5
 debug = 10
 info = 20
@@ -56,7 +57,8 @@ error = 40
 critical = 50
 off = 100
 
-lvldata = {5: ['VERBOSE', '\033[1;97m'],
+lvldata = {4: ['EVENTS', '\033[1:97m'],
+           5: ['VERBOSE', '\033[1;97m'],
            10: ['DEBUG', '\033[1;97m'],
            20: ['INFO', '\033[1;92m'],
            30: ['WARN', '\033[1;94m'],
@@ -68,7 +70,7 @@ terminator = '\033[0m'
 count = 0
 
 logfile = "/var/log/hfos/service.log"
-verbosity = {'global': verbose,
+verbosity = {'global': info,
              'file': off,
              'console': debug}
 
@@ -80,6 +82,8 @@ def hfoslog(*what, **kwargs):
     :param kwargs: Debug message level
     :param what: Loggable objects (i.e. they have a string representation)
     """
+
+    # TODO: Filter out log levels BEFORE doing _anything_ here
 
     if 'lvl' in kwargs:
         lvl = kwargs['lvl']

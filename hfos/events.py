@@ -15,7 +15,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits.core import Event
 
-from hfos.logger import hfoslog, debug, critical, verbose
+from hfos.logger import hfoslog, debug, critical, verbose, events
 
 
 class AuthorizedEvent(Event):
@@ -38,7 +38,7 @@ class debugrequest(AuthorizedEvent):
     def __init__(self, *args):
         super(debugrequest, self).__init__(*args)
 
-        hfoslog('DEBUG EVENT CREATED.', lvl=critical)
+        hfoslog('[DEBUG-EVENT] CREATED.', lvl=critical)
 
 
 # Clientmanager Events
@@ -60,7 +60,7 @@ class send(Event):
         self.sendtype = sendtype
         self.raw = raw
 
-        hfoslog("Send event generated:", uuid, packet, sendtype, lvl=verbose)
+        hfoslog("[CM-EVENT] Send event generated:", uuid, packet, sendtype, lvl=verbose)
 
 
 class broadcast(Event):
@@ -77,7 +77,7 @@ class broadcast(Event):
         self.broadcasttype = broadcasttype
         self.content = content
 
-        hfoslog("Broadcast event generated:", broadcasttype, content, lvl=debug)
+        hfoslog("[CM-EVENT] Broadcast event generated:", broadcasttype, content, lvl=debug)
 
 
 class clientdisconnect(Event):
@@ -95,7 +95,7 @@ class clientdisconnect(Event):
         self.clientuuid = clientuuid
         self.useruuid = useruuid
 
-        hfoslog("Client disconnect event generated:", clientuuid, useruuid, lvl=debug)
+        hfoslog("[CM-EVENT] Client disconnect event generated:", clientuuid, useruuid, lvl=debug)
 
 
 # Authenticator Events
@@ -142,7 +142,7 @@ class authentication(Event):
         self.useruuid = useruuid
         self.sock = sock
 
-        hfoslog("Authentication granted:", self.__dict__, lvl=debug)
+        hfoslog("[AUTH-EVENT] Authentication granted:", self.__dict__, lvl=events)
 
 
 class profilerequest(AuthorizedEvent):
@@ -156,7 +156,7 @@ class profilerequest(AuthorizedEvent):
         """
         super(profilerequest, self).__init__(*args)
 
-        hfoslog("Profile update request: ", self.__dict__)
+        hfoslog("[PROFILE-EVENT] Profile update request: ", self.__dict__, lvl=events)
 
 
 # Schemata requests
@@ -189,7 +189,7 @@ class mapviewrequest(AuthorizedEvent):
     def __init__(self, *args):
         super(mapviewrequest, self).__init__(*args)
 
-        hfoslog("MVS: Request generated")
+        hfoslog("[MVS-EVENT] Request generated", lvl=events)
 
 
 class mapviewbroadcast(Event):
@@ -206,7 +206,7 @@ class mapviewbroadcast(Event):
         self.sender = sender
         self.mapview = mapview
 
-        hfoslog("MVS: Broadcast-Event generated")
+        hfoslog("[MVS-EVENT] Broadcast-Event generated", lvl=events)
 
 
 # Layer Events
@@ -227,7 +227,7 @@ class layermanagementrequest(Event):
         self.sender = sender
         self.request = request
 
-        hfoslog("LM: Request generated")
+        hfoslog("[LM-EVENT] Request generated", lvl=events)
 
 
 class layerrequest(Event):
@@ -246,7 +246,7 @@ class layerrequest(Event):
         self.action = action
         self.data = data
 
-        hfoslog("LM: Request generated")
+        hfoslog("[LM-EVENT] Request generated", lvl=events)
 
 
 class layerbroadcast(Event):
@@ -263,7 +263,7 @@ class layerbroadcast(Event):
         self.sender = sender
         self.broadcastdata = broadcastdata
 
-        hfoslog("LM: Update-Event generated")
+        hfoslog("[LM-EVENT] Update-Event generated", lvl=events)
 
 
 # Sensor Events
