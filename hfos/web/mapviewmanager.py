@@ -30,17 +30,17 @@ class MapViewManager(Component):
     def __init__(self, *args):
         super(MapViewManager, self).__init__(*args)
 
-        hfoslog("MVS: Started")
+        hfoslog("[MVM] Started")
         self._subscribers = {}
 
     def _broadcast(self, mapviewpacket, mapviewuuid):
 
         try:
-            hfoslog("MVS: Transmitting message '%s'" % mapviewpacket)
+            hfoslog("[MVM] Transmitting message '%s'" % mapviewpacket)
             for recipient in self._subscribers[mapviewuuid]:
                 self.fireEvent(send(recipient, mapviewpacket))
         except Exception as e:
-            hfoslog("MVS: Failed broadcast: ", e, type(e), lvl=error)
+            hfoslog("[MVM] Failed broadcast: ", e, type(e), lvl=error)
 
     def _generatemapviewlist(self):
         try:
@@ -49,7 +49,7 @@ class MapViewManager(Component):
                 result[item.uuid] = item.serializablefields()
             return result
         except Exception as e:
-            hfoslog("Error during list retrieval:", e, type(e), lvl=error)
+            hfoslog("[MVM] Error during list retrieval:", e, type(e), lvl=error)
 
     def _unsubscribe(self, clientuuid, mapuuid=None):
         # TODO: Verify everything and send a response
@@ -57,19 +57,19 @@ class MapViewManager(Component):
             for subscribers in self._subscribers.values():
                 if clientuuid in subscribers:
                     subscribers.remove(clientuuid)
-                    hfoslog("MVS: Subscription removed: ", clientuuid, lvl=debug)
+                    hfoslog("[MVM] Subscription removed: ", clientuuid, lvl=debug)
         else:
             self._subscribers[mapuuid].remove(clientuuid)
             if len(self._subscribers[mapuuid]) == 0:
                 del (self._subscribers[mapuuid])
-                hfoslog("MVS: Subscription deleted: ", mapuuid, clientuuid)
+                hfoslog("[MVM] Subscription deleted: ", mapuuid, clientuuid)
 
     def client_disconnect(self, event):
         """Handles unsubscription of disconnected clients
         :param event:
         """
 
-        hfoslog("MVS: Removing disconnected client from subscriptions", lvl=debug)
+        hfoslog("[MVM] Removing disconnected client from subscriptions", lvl=debug)
         clientuuid = event.clientuuid
         self._unsubscribe(clientuuid)
 
@@ -85,7 +85,7 @@ class MapViewManager(Component):
             * get
         """
 
-        hfoslog("MVS: Event: '%s'" % event.__dict__)
+        hfoslog("[MVM] Event: '%s'" % event.__dict__, lvl=debug)
 
         try:
             try:
@@ -96,14 +96,14 @@ class MapViewManager(Component):
                 useruuid = userobj.useruuid
                 clientuuid = event.client.clientuuid
             except Exception as e:
-                raise ValueError("MVS: Problem during event unpacking:", e, type(e))
+                raise ValueError("[MVM] Problem during event unpacking:", e, type(e))
 
             if action == 'list':
                 try:
                     dblist = self._generatemapviewlist()
                     self.fireEvent(send(clientuuid, {'component': 'mapview', 'action': 'list', 'data': dblist}))
                 except Exception as e:
-                    hfoslog("MVS: Listing error: ", e, type(e), lvl=error)
+                    hfoslog("[MVM] Listing error: ", e, type(e), lvl=error)
                 return
             elif action == 'get':
                 dbmapview = None
@@ -111,7 +111,7 @@ class MapViewManager(Component):
                 try:
                     dbmapview = mapviewobject.find_one({'uuid': useruuid})
                 except Exception as e:
-                    hfoslog("MVS: Get for MapView failed, creating new one.", e)
+                    hfoslog("[MVM] Get for MapView failed, creating new one.", e)
 
                 if not dbmapview:
                     try:
@@ -125,10 +125,10 @@ class MapViewManager(Component):
                                                    'name': '%s Default MapView' % nickname,
                                                    'shared': True,
                                                    })
-                        hfoslog("MVS: New mapviewobject: ", dbmapview)
+                        hfoslog("[MVM] New mapviewobject: ", dbmapview)
                         dbmapview.save()
                     except Exception as e:
-                        hfoslog("MVS: Storing new view failed: ", e, type(e), lvl=error)
+                        hfoslog("[MVM] Storing new view failed: ", e, type(e), lvl=error)
                 if dbmapview:
                     self.fireEvent(send(clientuuid, {'component': 'mapview', 'action': 'get',
                                                      'data': dbmapview.serializablefields()}))
@@ -140,7 +140,7 @@ class MapViewManager(Component):
                         self._subscribers[data].append(clientuuid)
                 else:
                     self._subscribers[data] = [clientuuid]
-                hfoslog("MVS: Subscription registered: ", data, clientuuid)
+                hfoslog("[MVM] Subscription registered: ", data, clientuuid)
                 return
             elif action == 'unsubscribe':
                 self._unsubscribe(clientuuid, data)
@@ -152,18 +152,18 @@ class MapViewManager(Component):
                 mapview = mapviewobject(data)
                 mapview.validate()
             except Exception as e:
-                hfoslog("MVS: Only mapview related actions left, but no Mapviewobject.", e, type(e), lvl=warn)
+                hfoslog("[MVM] Only mapview related actions left, but no Mapviewobject.", e, type(e), lvl=warn)
                 return
 
             if action == 'update':
 
-                hfoslog("MVS: Update begin")
+                hfoslog("[MVM] Update begin")
                 try:
                     uuid = mapview.uuid
                     dbmapview = mapviewobject.find_one({'uuid': uuid})
-                    hfoslog(dbmapview.__dict__, lvl=error)
+                    hfoslog("[MVM] Database Mapview dict: ", dbmapview.__dict__, lvl=error)
                 except Exception as e:
-                    hfoslog("MVS: Couldn't get mapview", (data, e, type(e)), lvl=error)
+                    hfoslog("[MVM] Couldn't get mapview", (data, e, type(e)), lvl=error)
                     return
 
                 if dbmapview:
@@ -171,46 +171,46 @@ class MapViewManager(Component):
                         dbmapview.update(mapview._fields)
                         dbmapview.save()
 
-                        hfoslog("MVS: Valid update stored.")
+                        hfoslog("[MVM] Valid update stored.")
                     except Exception as e:
-                        hfoslog("MVS: Database mapview update failed: ", (uuid, e, type(e)), lvl=error)
+                        hfoslog("[MVM] Database mapview update failed: ", (uuid, e, type(e)), lvl=error)
                         return
                 else:
                     try:
-                        hfoslog("MVS: New MapView: ", mapview)
+                        hfoslog("[MVM] New MapView: ", mapview)
                         mapview.uuid = uuid  # make sure
                         mapview.save()
                         dbmapview = mapview
-                        hfoslog("MVS: New MapView stored.")
+                        hfoslog("[MVM] New MapView stored.")
 
                         if mapview.shared:
-                            hfoslog("MVS: Broadcasting list update for new mapview.")
+                            hfoslog("[MVM] Broadcasting list update for new mapview.")
                             self.fireEvent(broadcast("users", self._generatemapviewlist()))
                     except Exception as e:
-                        hfoslog("MVS: MapView creation error: '%s' (%s)" % (e, type(e)), lvl=error)
+                        hfoslog("[MVM] MapView creation error: '%s' (%s)" % (e, type(e)), lvl=error)
                         return
 
                 try:
-                    hfoslog("MVS: Subscriptions: ", self._subscribers)
-                    hfoslog("MVS: dbmapview: ", mapview._fields)
+                    hfoslog("[MVM] Subscriptions: ", self._subscribers)
+                    hfoslog("[MVM] dbmapview: ", mapview._fields)
                     if dbmapview.shared:
                         if dbmapview.uuid in self._subscribers:
                             try:
-                                hfoslog("MVS: Broadcasting mapview update to subscribers.")
+                                hfoslog("[MVM] Broadcasting mapview update to subscribers.")
                                 mapviewpacket = {'component': 'mapview',
                                                  'action': 'update',
                                                  'data': mapview.serializablefields()
                                                  }
                                 self._broadcast(mapviewpacket, dbmapview.uuid)
                             except Exception as e:
-                                hfoslog("MVS: Transmission error before broadcast: %s" % e)
+                                hfoslog("[MVM] Transmission error before broadcast: %s" % e)
                         else:
-                            hfoslog("MVS: Not subscribed.")
+                            hfoslog("[MVM] Not subscribed.")
 
                     else:
-                        hfoslog("MVS: Not shared.")
+                        hfoslog("[MVM] Not shared.")
                 except Exception as e:
-                    hfoslog("MVS: Update error during final mapview handling", e)
+                    hfoslog("[MVM] Update error during final mapview handling", e)
 
         except Exception as e:
-            hfoslog("MVS: Global Error: '%s' %s" % (e, type(e)), lvl=error)
+            hfoslog("[MVM] Global Error: '%s' %s" % (e, type(e)), lvl=error)

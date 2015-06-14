@@ -34,7 +34,7 @@ class Chat(Component):
     def __init__(self, *args):
         super(Chat, self).__init__(*args)
 
-        hfoslog("CHAT: Started")
+        hfoslog("[CHAT] Started")
 
     def _getusername(self, event):
         try:
@@ -48,7 +48,7 @@ class Chat(Component):
         :param event: ChatRequest with incoming chat message
         """
 
-        hfoslog("CHAT: Event: '%s'" % event.__dict__)
+        hfoslog("[CHAT] Event: '%s'" % event.__dict__)
         try:
             action = event.action
             data = event.data
@@ -64,13 +64,13 @@ class Chat(Component):
                               }
                               }
             else:
-                hfoslog("CHAT: Unsupported action: ", action, event, lvl=warn)
+                hfoslog("[CHAT] Unsupported action: ", action, event, lvl=warn)
                 return
 
             try:
                 self.fireEvent(broadcast("users", chatpacket))
             except Exception as e:
-                hfoslog("CHAT: Transmission error before broadcast: %s" % e, lvl=error)
+                hfoslog("[CHAT] Transmission error before broadcast: %s" % e, lvl=error)
 
         except Exception as e:
-            hfoslog("CHAT: Error: '%s' %s" % (e, type(e)), lvl=error)
+            hfoslog("[CHAT] Error: '%s' %s" % (e, type(e)), lvl=error)

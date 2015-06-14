@@ -61,7 +61,7 @@ def _build_schemastore():
     result = {}
 
     for schemaname in __all__:
-        hfoslog('Adding Schema:', schemaname, lvl=verbose)
+        hfoslog('[SCHEMATA] Adding Schema:', schemaname, lvl=verbose)
         schemamodule = import_module('hfos.schemata.' + schemaname)
         result[schemaname] = schemamodule.__schema__
 
@@ -77,7 +77,7 @@ def test():
     from jsonschema import Draft4Validator
 
     for schemaname, schema in schemastore.items():
-        hfoslog("Validating schema ", schemaname)
+        hfoslog("[SCHEMATA] Validating schema ", schemaname)
         Draft4Validator.check_schema(schema)
 
 # https://github.com/fge/sample-json-schemas/tree/master/geojson

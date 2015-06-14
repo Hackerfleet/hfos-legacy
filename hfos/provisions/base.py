@@ -28,10 +28,10 @@ def provisionList(items, dbobject):
 
     for item in items:
         itemname = item['name']
-        hfoslog('Provisioning: Validating object: ', itemname)
+        hfoslog('[PROV] Provisioning: Validating object: ', itemname)
 
         if dbobject.count({'name': itemname}) > 0:
-            hfoslog('Provisioning: Not updating item ', item, lvl=warn)
+            hfoslog('[PROV] Provisioning: Not updating item ', item, lvl=warn)
         else:
             newobject = dbobject(item)
 

@@ -51,7 +51,7 @@ def clear_all():
     db = client["hfos"]
 
     for col in db.collection_names(include_system_collections=False):
-        hfoslog("DB: Dropping collection ", col, lvl=warn)
+        hfoslog("[DB] Dropping collection ", col, lvl=warn)
         db.drop_collection(col)
 
 

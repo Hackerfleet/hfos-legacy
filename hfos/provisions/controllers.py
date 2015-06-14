@@ -58,4 +58,4 @@ Controllers = [
 ]
 if __name__ == "__main__":
     provisionList(Controllers, controllerobject)
-    hfoslog('Provisioning: Controllers: Done.')
+    hfoslog('[PROV] Provisioning: Controllers: Done.')

@@ -40,7 +40,7 @@ class CameraManager(Component):
         self._framecount = 0
         self._frames = {}
 
-        hfoslog("CAM: Checking opencv for cameras.", lvl=debug)
+        hfoslog("[CAM] Checking opencv for cameras.", lvl=debug)
         for cam in range(maxcams):
             video = opencv.VideoCapture(cam)
             if video.isOpened():
@@ -49,13 +49,13 @@ class CameraManager(Component):
                           'cam': video
                           }
                 self._cameras[cam] = camera
-                hfoslog("CAM: Found camera [", cam, "]: ", camera)
+                hfoslog("[CAM] Found camera [", cam, "]: ", camera)
 
-        hfoslog("CAM: Starting timer")
+        hfoslog("[CAM] Starting timer")
         self.timer = Timer(0.05, Event.create("rec"), persist=True).register(self)
 
-        hfoslog(self._cameras)
-        hfoslog("CAM: Started")
+        hfoslog("[CAM] Found cameras: ", self._cameras, lvl=debug)
+        hfoslog("[CAM] Started")
 
     def rec(self):
         """Records a single snapshot"""
@@ -63,7 +63,7 @@ class CameraManager(Component):
         try:
             self._snapshot()
         except Exception as e:
-            hfoslog("CAM: Timer error: ", e, type(e), lvl=error)
+            hfoslog("[CAM] Timer error: ", e, type(e), lvl=error)
 
     def _snapshot(self):
         self._framecount += 1
@@ -71,9 +71,9 @@ class CameraManager(Component):
         try:
             for camid, cam in self._cameras.items():
                 if cam['uuid'] in self._subscribers:
-                    # hfoslog("CAM: Taking input of ", cam)
+                    # hfoslog("[CAM] Taking input of ", cam)
                     success, cvresult = cam['cam'].read()
-                    # hfoslog("CAM: Result: ", cvresult)
+                    # hfoslog("[CAM] Result: ", cvresult)
                     if success:
 
                         campacketheader = {'component': 'camera' + str(camid),
@@ -87,22 +87,22 @@ class CameraManager(Component):
 
                         self._broadcast(campacket, cam['uuid'])
                     else:
-                        hfoslog("CAM: Failed to get an image.", success, cvresult)
+                        hfoslog("[CAM] Failed to get an image.", success, cvresult)
 
         except Exception as e:
-            hfoslog("CAM: Error: ", e, type(e), lvl=error)
+            hfoslog("[CAM] Error: ", e, type(e), lvl=error)
         if self._framecount % 100 == 0:
-            hfoslog("CAM: ", self._framecount, " frames taken.", lvl=debug)
+            hfoslog("[CAM] ", self._framecount, " frames taken.", lvl=debug)
 
     def toggleFilming(self):
         """Toggles the camera system recording state"""
 
         if self._filming:
-            hfoslog("CAM: Stopping operation")
+            hfoslog("[CAM] Stopping operation")
             self._filming = False
             self.timer.stop()
         else:
-            hfoslog("CAM: Starting operation")
+            hfoslog("[CAM] Starting operation")
             self._filming = True
             self.timer.start()
 
@@ -111,7 +111,7 @@ class CameraManager(Component):
             for recipient in self._subscribers[camerauuid]:
                 self.fireEvent(send(recipient, camerapacket, raw=True), "hfosweb")
         except Exception as e:
-            hfoslog("CAM: Failed broadcast: ", e, type(e), lvl=error)
+            hfoslog("[CAM] Failed broadcast: ", e, type(e), lvl=error)
 
     def _generatecameralist(self):
         try:
@@ -120,7 +120,7 @@ class CameraManager(Component):
                 result[item['name']] = item['uuid']
             return result
         except Exception as e:
-            hfoslog("Error during list retrieval:", e, type(e), lvl=error)
+            hfoslog("[CAM] Error during list retrieval:", e, type(e), lvl=error)
 
     def _unsubscribe(self, clientuuid, camerauuid=None):
         # TODO: Verify everything and send a response
@@ -128,12 +128,12 @@ class CameraManager(Component):
             for subscribers in self._subscribers.values():
                 if clientuuid in subscribers:
                     subscribers.remove(clientuuid)
-                    hfoslog("CAM: Subscription removed: ", clientuuid, lvl=debug)
+                    hfoslog("[CAM] Subscription removed: ", clientuuid, lvl=debug)
         else:
             self._subscribers[camerauuid].remove(clientuuid)
             if len(self._subscribers[camerauuid]) == 0:
                 del (self._subscribers[camerauuid])
-                hfoslog("CAM: Subscription deleted: ", camerauuid, clientuuid)
+                hfoslog("[CAM] Subscription deleted: ", camerauuid, clientuuid)
 
     def client_disconnect(self, event):
         """
@@ -141,7 +141,7 @@ class CameraManager(Component):
 
         :param event:
         """
-        hfoslog("CAM: Removing disconnected client from subscriptions", lvl=debug)
+        hfoslog("[CAM] Removing disconnected client from subscriptions", lvl=debug)
         clientuuid = event.clientuuid
         self._unsubscribe(clientuuid)
 
@@ -156,7 +156,7 @@ class CameraManager(Component):
         * update
         """
 
-        hfoslog("CAM: Event: '%s'" % event.__dict__)
+        hfoslog("[CAM] Event: '%s'" % event.__dict__)
 
         try:
             try:
@@ -165,7 +165,7 @@ class CameraManager(Component):
 
                 clientuuid = event.client.clientuuid
             except Exception as e:
-                raise ValueError("CAM: Problem during event unpacking:", e, type(e))
+                raise ValueError("[CAM] Problem during event unpacking:", e, type(e))
 
             if action == 'list':
                 try:
@@ -173,7 +173,7 @@ class CameraManager(Component):
                     self.fireEvent(send(clientuuid, {'component': 'camera', 'action': 'list', 'data': dblist}),
                                    "hfosweb")
                 except Exception as e:
-                    hfoslog("CAM: Listing error: ", e, type(e), lvl=error)
+                    hfoslog("[CAM] Listing error: ", e, type(e), lvl=error)
                 return
             elif action == 'get':
                 return
@@ -184,11 +184,11 @@ class CameraManager(Component):
                         self._subscribers[data].append(clientuuid)
                 else:
                     self._subscribers[data] = [clientuuid]
-                hfoslog("CAM: Subscription registered: ", data, clientuuid)
+                hfoslog("[CAM] Subscription registered: ", data, clientuuid)
                 return
             elif action == 'unsubscribe':
                 self._unsubscribe(clientuuid, data)
                 return
 
         except Exception as e:
-            hfoslog("CAM: Global Error: '%s' %s" % (e, type(e)), lvl=error)
+            hfoslog("[CAM] Global Error: '%s' %s" % (e, type(e)), lvl=error)

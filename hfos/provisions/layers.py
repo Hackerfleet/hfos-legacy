@@ -150,4 +150,4 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
 
 if __name__ == "__main__":
     provisionList(layers, layerobject)
-    hfoslog('Provisioning: Layers: Done.')
+    hfoslog('[PROV] Provisioning: Layers: Done.')

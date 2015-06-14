@@ -35,16 +35,16 @@ class HFDebugger(Component):
     def __init__(self, *args):
         super(HFDebugger, self).__init__(*args)
 
-        hfoslog("DEBUGGER: Started")
+        hfoslog("[DBG] Started")
 
     def debugrequest(self, event):
         try:
-            hfoslog(event, lvl=critical)
+            hfoslog("[DBG] Event: ", event, lvl=critical)
 
             if event.action == "storejson":
-                hfoslog("DBG: Storing received object to /tmp", lvl=critical)
+                hfoslog("[DBG] Storing received object to /tmp", lvl=critical)
                 fp = open('/tmp/hfosdebugger_' + str(event.user.useruuid) + "_" + str(uuid4()), "w")
                 json.dump(event.data, fp, indent=True)
                 fp.close()
         except Exception as e:
-            hfoslog("DBG: Exception during debug handling:", e, type(e), lvl=critical)
+            hfoslog("[DBG] Exception during debug handling:", e, type(e), lvl=critical)
