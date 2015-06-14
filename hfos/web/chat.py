@@ -52,8 +52,6 @@ class Chat(Component):
             data = event.data
             username = self._getusername(event)
 
-            msg = ""
-
             if action == "say":
                 chatpacket = {'component': 'chat',
                               'action': 'broadcast',

@@ -22,7 +22,7 @@ from circuits import Component, handler, Event
 from circuits.io.events import write
 from circuits.io import Serial
 
-from hfos.logger import hfoslog, critical
+from hfos.logger import hfoslog, critical, debug
 
 
 class MachineroomEvent(Event):
@@ -60,7 +60,7 @@ class Machineroom(Component):
     else:
         terminator = bytes(chr(13), encoding="ascii")
 
-    def __init__(self, port="/dev/ttyUSB0", baudrate=9600, buffer=4096, *args):
+    def __init__(self, port="/dev/ttyUSB0", baudrate=9600, buffersize=4096, *args):
         super(Machineroom, self).__init__(args)
         hfoslog("[MR] Machineroom starting")
 
@@ -68,7 +68,7 @@ class Machineroom(Component):
         self._machinechannel = 1
         self._pumpchannel = 3  # TODO: Make this a dedicated singleton call? e.g. pumpon/pumpoff.. not so generic
 
-        Serial(port, baudrate, buffer, timeout=5, channel="port").register(self)
+        Serial(port, baudrate, buffersize, timeout=5, channel="port").register(self)
 
         hfoslog("[MR] Running")
 
@@ -81,6 +81,7 @@ class Machineroom(Component):
 
     @handler("opened", channel="port")
     def opened(self, *args):
+        hfoslog("[MR] Opened: ", args, lvl=debug)
         self._sendcommand(b'l,1')  # Saying hello, shortly
         hfoslog("[MR] Turning off engine, pump and neutralizing rudder")
         self._sendcommand(b'v')

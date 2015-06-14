@@ -15,8 +15,9 @@ Controllables for several predefined functions.
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from hfos.provisions.base import *
+from hfos.provisions.base import provisionList
 from hfos.database import controllableobject
+from hfos.logger import hfoslog
 
 Controllables = [
     {

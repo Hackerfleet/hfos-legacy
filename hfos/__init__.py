@@ -20,7 +20,7 @@ try:
     __import__('pkg_resources').declare_namespace(__name__)
 except ImportError:
     from pkgutil import extend_path
-    __path__ = extend_path(__path__, __name__)
+    __path__ = extend_path(__path__, __name__)  # noqa
     import os
     for _path in __path__:
         _path = os.path.join(_path, '__init__.py')
@@ -28,4 +28,4 @@ except ImportError:
             from six import exec_
             with open(_path) as fd:
                 exec_(fd, globals())
-    del os, extend_path, _path, fd, exec_
+    del os, extend_path, _path, fd, exec_  # noqa

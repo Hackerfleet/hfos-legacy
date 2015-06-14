@@ -55,7 +55,7 @@ class NMEAParser(Component):
 
             # return sentences
 
-    def read(self, *args, **kwargs):
+    def read(self, *args):
         """Handles incoming raw sensor data"""
 
         data = args

@@ -15,8 +15,9 @@ Controllables for several predefined functions.
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from hfos.provisions.base import *
+from hfos.provisions.base import provisionList
 from hfos.database import controllerobject
+from hfos.logger import hfoslog
 
 Controllers = [
     {'name': 'MS0x00 - Logitech Extreme 3D Pro',

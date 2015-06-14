@@ -25,7 +25,7 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from circuits import Component, Debugger, Event, Timer
+from circuits import Component, Debugger
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 # from circuits.tools import graph

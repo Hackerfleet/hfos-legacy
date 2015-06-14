@@ -16,6 +16,8 @@ from uuid import uuid4
 from circuits import Component, handler, Timer, Event
 from circuits.tools import tryimport
 
+import six
+
 from hfos.events import send
 from hfos.logger import hfoslog, error, debug
 
@@ -73,10 +75,13 @@ class CameraManager(Component):
                     # hfoslog("CAM: Result: ", cvresult)
                     if success:
 
-                        campacketheader = {'component': 'camera',
+                        campacketheader = {'component': 'camera' + str(camid),
                                            'action': 'update',
                                            }
-                        campacket = bytes(str(campacketheader), encoding="UTF8") + cvresult.tostring()
+                        if six.PY3:
+                            campacket = bytes(str(campacketheader), encoding="UTF8") + cvresult.tostring()
+                        else:
+                            campacket = bytes(str(campacketheader)) + cvresult.tostring()
 
                         self._broadcast(campacket, cam['uuid'])
                     else:
@@ -146,11 +151,9 @@ class CameraManager(Component):
 
         try:
             try:
-                userobj = event.user
                 action = event.action
                 data = event.data
 
-                useruuid = userobj.useruuid
                 clientuuid = event.client.clientuuid
             except Exception as e:
                 raise ValueError("CAM: Problem during event unpacking:", e, type(e))

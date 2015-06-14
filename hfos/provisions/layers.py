@@ -15,8 +15,9 @@ Predefined open layers.
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from hfos.provisions.base import *
+from hfos.provisions.base import provisionList
 from hfos.database import layerobject
+from hfos.logger import hfoslog
 
 layers = [
     {

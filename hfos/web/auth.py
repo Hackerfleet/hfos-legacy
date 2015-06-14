@@ -18,7 +18,7 @@ from circuits import Component, handler
 
 from hfos.database import userobject, profileobject
 from hfos.events import authentication
-from hfos.logger import hfoslog, error, warn, critical
+from hfos.logger import hfoslog, error, warn
 
 
 class Authenticator(Component):

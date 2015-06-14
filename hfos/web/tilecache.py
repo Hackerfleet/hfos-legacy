@@ -22,15 +22,15 @@ from circuits.web.controllers import Controller
 
 from hfos.logger import hfoslog, error
 
+# TODO: Find a better (newer) way for this.
 try:
-    from urllib import quote, unquote, urlopen
+    from urllib import unquote, urlopen
 except ImportError:
-    hfoslog("V3")
     from urllib.request import urlopen
-    from urllib.parse import quote, unquote  # NOQA
+    from urllib.parse import unquote  # NOQA
 
 
-def get_tile(url, *args, **kwargs):
+def get_tile(url):
     """
     Threadable function to retrieve map tiles from the internet
     """
@@ -84,7 +84,7 @@ class TileCache(Controller):
         self.defaulttile = defaulttile
         self._tilelist = []
 
-    def tilecache(self, event, *args, **kwargs):
+    def tilecache(self, event):
         """Checks and caches a requested tile to disk, then delivers it to client"""
         request, response = event.args[:2]
 

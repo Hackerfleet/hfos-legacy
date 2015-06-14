@@ -24,7 +24,7 @@ import sys
 
 import warmongo
 
-from six.moves import input  # Lazily loaded, may be marked as error, e.g. in IDEs
+from six.moves import input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
 from hfos.logger import hfoslog, warn
 from hfos.schemata.profile import Profile
 from hfos.schemata.user import User

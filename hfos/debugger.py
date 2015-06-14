@@ -15,7 +15,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits import Component
 
-from hfos.logger import hfoslog, error, critical
+from hfos.logger import hfoslog, critical
 
 from uuid import uuid4
 

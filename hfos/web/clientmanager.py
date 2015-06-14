@@ -15,13 +15,11 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 import json
 from uuid import uuid4
-from time import time
-from random import randint
 
 from circuits.net.events import write
 from circuits import Component, handler
 
-from hfos.events import send, broadcast, authenticationrequest, clientdisconnect, AuthorizedEvents
+from hfos.events import send, authenticationrequest, clientdisconnect, AuthorizedEvents
 from hfos.logger import hfoslog, error, warn, critical, debug, info
 
 
