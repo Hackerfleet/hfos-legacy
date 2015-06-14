@@ -1,6 +1,8 @@
 max-line-length: 120
 pep8:
-    full: true
+   disable:
+    - E402
+    - E501
 ignore-paths:
     - docs
     - tests
