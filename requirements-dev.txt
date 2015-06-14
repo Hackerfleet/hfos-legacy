@@ -5,6 +5,9 @@ jsonschema==2.5.1
 git+https://github.com/hackerfleet/pynmea.git
 git+https://github.com/hackerfleet/warmongo.git
 
+# Compat
+six
+
 # Linting, QA
 pyflakes
 pep8
