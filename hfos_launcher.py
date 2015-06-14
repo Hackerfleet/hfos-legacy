@@ -39,7 +39,7 @@ from hfos.web.chat import Chat
 from hfos.web.tilecache import TileCache
 from hfos.web.demo import WebDemo
 
-from hfos.logger import hfoslog
+from hfos.logger import hfoslog, verbose
 from hfos.debugger import HFDebugger
 
 from hfos.nmea import NMEAParser
@@ -50,47 +50,53 @@ class App(Component):
 
     def __init__(self):
         super(App, self).__init__()
-        hfoslog("Firing up HFOS")
+        hfoslog("[HFOS] Booting.")
 
     def started(self, component):
-        """Sets up the not-yet-so-useful Ping timer for demo purposes"""
-        hfoslog("App: Creating timer for CA")
-        # Timer(5, Event.create("ping"), channels='wsserver', persist=True).register(self)
-        # Timer(5, rudder(20), channels='machineroom', persist=True).register(self)
+        """Sets up the application after startup."""
+        hfoslog("[HFOS] Running.")
+        hfoslog("[HFOS] Started event origin: ", component, lvl=verbose)
 
 
+def main():
+    """Preliminary HFOS application Launcher"""
 
-server = Server(("0.0.0.0", 8055))
+    hfoslog("[HFOS] Beginning graph assembly.")
+    server = Server(("0.0.0.0", 8055))
 
-HFDebugger().register(server)
+    HFDebugger().register(server)
 
-app = App().register(server)
+    app = App().register(server)
 
-#Machineroom().register(app)
-NMEAParser().register(app)
+    # Machineroom().register(app)
+    NMEAParser().register(app)
 
-TileCache().register(server)
-Static("/", docroot="/var/lib/hfos/static").register(server)
-WebSocketsDispatcher("/websocket").register(server)
+    TileCache().register(server)
+    Static("/", docroot="/var/lib/hfos/static").register(server)
+    WebSocketsDispatcher("/websocket").register(server)
 
-clientmanager = ClientManager().register(server)
-SchemaManager().register(clientmanager)
-Authenticator().register(clientmanager)
-Chat().register(clientmanager)
-MapViewManager().register(clientmanager)
-RemoteControlManager().register(clientmanager)
-WebDemo().register(clientmanager)
-#CameraManager().register(clientmanager)
+    clientmanager = ClientManager().register(server)
+    SchemaManager().register(clientmanager)
+    Authenticator().register(clientmanager)
+    Chat().register(clientmanager)
+    MapViewManager().register(clientmanager)
+    RemoteControlManager().register(clientmanager)
+    WebDemo().register(clientmanager)
+    # CameraManager().register(clientmanager)
 
-#Logger().register(server)
+    # Logger().register(server)
 
-dbg = Debugger()
-# dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
-dbg.register(server)
+    dbg = Debugger()
+    # dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
+    dbg.register(server)
+
+    # webbrowser.open("http://127.0.0.1:8055")
+
+    # graph(server)
+
+    hfoslog("[HFOS] Graph assembly done.")
+    server.run()
 
 
-#webbrowser.open("http://127.0.0.1:8055")
-
-hfoslog("Running...")
-#graph(server)
-server.run()
+if __name__ == "__main__":
+    main()
