@@ -30,7 +30,10 @@ class Authenticator(Component):
 
     @handler("authenticationrequest", channel="auth")
     def authenticationrequest(self, event):
-        """Handles authentication requests from clients"""
+        """Handles authentication requests from clients
+        :param event: AuthenticationRequest with user's credentials
+        """
+
         hfoslog("Auth: Auth request for ", event.username)
 
         useraccount = None
@@ -85,10 +88,12 @@ class Authenticator(Component):
                                               event.sock),
                                "auth")
             except Exception as e:
-                hfoslog("Auth: Error during new account confirmation transmission")
+                hfoslog("Auth: Error during new account confirmation transmission", e)
 
     def profilerequest(self, event):
-        """Handles client profile actions"""
+        """Handles client profile actions
+        :param event:
+        """
 
         hfoslog("Auth: Profile update %s" % event)
 

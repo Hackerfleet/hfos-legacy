@@ -24,6 +24,7 @@ import sys
 
 import warmongo
 
+# noinspection PyUnresolvedReferences
 from six.moves import input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
 from hfos.logger import hfoslog, warn
 from hfos.schemata.profile import Profile
@@ -36,6 +37,10 @@ from hfos.schemata.controller import Controller
 
 
 def clear_all():
+    """DANGER!
+    *This command is a maintenance tool and clears the complete database.*
+    """
+
     sure = input("Are you sure to drop the complete database content?")
     if not (sure.upper() in ("Y", "J")):
         sys.exit(5)

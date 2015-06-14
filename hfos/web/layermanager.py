@@ -53,7 +53,7 @@ class LayerManager(Component):
         """
         Handles new layer category requests
 
-        Action types:
+        :param event: LayerRequest Event with basic action types:
         * put
         * get
         * delete
@@ -90,7 +90,7 @@ class LayerManager(Component):
                 try:
                     dblayer = layerobject.find_one({'uuid': useruuid})
                 except Exception as e:
-                    hfoslog("LM: Get for MapView failed, creating new one.")
+                    hfoslog("LM: Get for MapView failed, creating new one.", e)
 
                 if not dblayer:
                     try:
@@ -178,7 +178,7 @@ class LayerManager(Component):
                     else:
                         hfoslog("LM: Not shared.")
                 except Exception as e:
-                    hfoslog("LM: Update error during final layer handling")
+                    hfoslog("LM: Update error during final layer handling", e)
 
         except Exception as e:
             hfoslog("LM: Global Error: '%s' %s" % (e, type(e)), lvl=error)

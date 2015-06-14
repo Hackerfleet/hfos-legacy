@@ -15,6 +15,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 import socket
 import os
+import six
 
 from circuits import Worker, task
 from circuits.web.tools import serve_file
@@ -23,23 +24,30 @@ from circuits.web.controllers import Controller
 from hfos.logger import hfoslog, error
 
 # TODO: Find a better (newer) way for this.
-try:
+if six.PY2:
     from urllib import unquote, urlopen
-except ImportError:
+else:
+    # noinspection PyUnresolvedReferences
     from urllib.request import urlopen
+    # noinspection PyUnresolvedReferences
     from urllib.parse import unquote  # NOQA
 
 
 def get_tile(url):
     """
     Threadable function to retrieve map tiles from the internet
+    :param url: Tile URL to fetch and cache
     """
     log = "TCT: INFO Getting tile: %s" % url
 
     connection = None
 
     try:
-        connection = urlopen(url=url, timeout=2)
+        if six.PY3:
+            # noinspection PyArgumentList
+            connection = urlopen(url=url, timeout=2)
+        else:
+            connection = urlopen(url=url)
     except Exception as e:
         log += "TCT: ERROR Tilegetter error: %s " % str([type(e), e, url])
 
@@ -85,7 +93,9 @@ class TileCache(Controller):
         self._tilelist = []
 
     def tilecache(self, event):
-        """Checks and caches a requested tile to disk, then delivers it to client"""
+        """Checks and caches a requested tile to disk, then delivers it to client
+        :param event: Request from client
+        """
         request, response = event.args[:2]
 
         origpath = request.path
@@ -180,7 +190,7 @@ class TileCache(Controller):
                     hfoslog("Delivering tile")
                     yield serve_file(request, response, filename)
                 except Exception as e:
-                    hfoslog("TC: Couldn't deliver.", lvl=error)
+                    hfoslog("TC: Couldn't deliver.", e, lvl=error)
                     event.stop()
                 hfoslog("TC: Tile stored and delivered.")
             else:

@@ -72,6 +72,8 @@ schemastore = _build_schemastore()
 
 
 def test():
+    """Tests all included schemata against the Draft4Validator"""
+
     from jsonschema import Draft4Validator
 
     for schemaname, schema in schemastore.items():

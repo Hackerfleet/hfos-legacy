@@ -25,6 +25,12 @@ class SchemaManager(Component):
     channel = "hfosweb"
 
     def schemarequest(self, event):
+        """Handles schema requests.
+
+        :param event: SchemaRequest with actions
+        * Get
+        * All
+        """
         if event.action == "Get":
             hfoslog("SM: Schemarequest for ", event.data, "from", event.user, lvl=info)
             if event.data in hfos.schemata.schemastore:

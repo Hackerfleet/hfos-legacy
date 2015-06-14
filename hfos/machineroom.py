@@ -26,6 +26,12 @@ from hfos.logger import hfoslog, critical, debug
 
 
 class MachineroomEvent(Event):
+    """
+
+    :param value:
+    :param args:
+    """
+
     def __init__(self, value, *args):
         super(MachineroomEvent, self).__init__(*args)
         self.controlvalue = value
@@ -58,6 +64,7 @@ class Machineroom(Component):
     if six.PY2:
         terminator = chr(13)
     else:
+        # noinspection PyArgumentList
         terminator = bytes(chr(13), encoding="ascii")
 
     def __init__(self, port="/dev/ttyUSB0", baudrate=9600, buffersize=4096, *args):
@@ -81,6 +88,10 @@ class Machineroom(Component):
 
     @handler("opened", channel="port")
     def opened(self, *args):
+        """Initiates communication with the remote controlled device.
+
+        :param args:
+        """
         hfoslog("[MR] Opened: ", args, lvl=debug)
         self._sendcommand(b'l,1')  # Saying hello, shortly
         hfoslog("[MR] Turning off engine, pump and neutralizing rudder")
@@ -93,36 +104,77 @@ class Machineroom(Component):
         self._sendcommand(b'm,HFOS Control')
 
     def _handleServo(self, channel, value):
+        """
+
+        :param channel:
+        :param value:
+        """
         self._sendcommand(self.servo + self.sep + bytes([channel]) + self.sep + bytes([value]))
 
     def _setDigitalPin(self, pin, value):
+        """
+
+        :param pin:
+        :param value:
+        """
         mode = 255 if value >= 127 else 0
         self._sendcommand(self.pin + self.sep + bytes([pin]) + self.sep + bytes([mode]))
 
     @handler("remotecontrolupdate")
     def on_remotecontrolupdate(self, event):
+        """
+        A remote control update request containing control data that has to be
+        analysed according to the selected controller configuration.
+
+        :param event: RemotecontrolUpdate
+        """
         hfoslog("[MR] Control updaterequest: ", event.controldata, lvl=critical)
 
     @handler("machine")
     def on_machinerequest(self, event):
+        """
+        Sets a new machine speed.
+
+        :param event:
+        """
         hfoslog("[MR] Updating new machine power: ", event.controlvalue)
         self._handleServo(self._machinechannel, event.controlvalue)
 
     @handler("rudder")
     def on_rudderrequest(self, event):
+        """
+        Sets a new rudder angle.
+
+        :param event:
+        """
         hfoslog("[MR] Updating new rudder angle: ", event.controlvalue)
         self._handleServo(self._rudderchannel, event.controlvalue)
 
     @handler("pump")
     def on_pumprequest(self, event):
+        """
+        Activates or deactivates a connected pump.
+
+        :param event:
+        """
         hfoslog("[MR] Updating pump status: ", event.controlvalue)
         self._setDigitalPin(self._pumpchannel, event.controlvalue)
 
     @handler("read", channel="port")
     def read(self, *args):
+        """
+        Handles incoming data from the machine room hardware control system.
+
+        :param args:
+        """
         hfoslog("[MR] Data received from machineroom: ", args)
 
     @handler("ping")
     def on_ping(self):
+        """
+        Demo function for debugging purposes.
+
+        """
+        # TODO: Delete me
         hfoslog("[MR] Pinging")
         self._handleServo(self._rudderchannel, randint(0, 255))

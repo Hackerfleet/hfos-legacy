@@ -56,7 +56,9 @@ class NMEAParser(Component):
             # return sentences
 
     def read(self, *args):
-        """Handles incoming raw sensor data"""
+        """Handles incoming raw sensor data
+        :param args: Circuits Serial incoming data
+        """
 
         data = args
         self._parse(data)

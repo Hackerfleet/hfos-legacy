@@ -58,6 +58,7 @@ class CameraManager(Component):
         hfoslog("CAM: Started")
 
     def rec(self):
+        """Records a single snapshot"""
 
         try:
             self._snapshot()
@@ -79,6 +80,7 @@ class CameraManager(Component):
                                            'action': 'update',
                                            }
                         if six.PY3:
+                            # noinspection PyArgumentList
                             campacket = bytes(str(campacketheader), encoding="UTF8") + cvresult.tostring()
                         else:
                             campacket = bytes(str(campacketheader)) + cvresult.tostring()
@@ -93,6 +95,8 @@ class CameraManager(Component):
             hfoslog("CAM: ", self._framecount, " frames taken.", lvl=debug)
 
     def toggleFilming(self):
+        """Toggles the camera system recording state"""
+
         if self._filming:
             hfoslog("CAM: Stopping operation")
             self._filming = False
@@ -132,6 +136,11 @@ class CameraManager(Component):
                 hfoslog("CAM: Subscription deleted: ", camerauuid, clientuuid)
 
     def client_disconnect(self, event):
+        """
+        A client has disconnected, update possible subscriptions accordingly.
+
+        :param event:
+        """
         hfoslog("CAM: Removing disconnected client from subscriptions", lvl=debug)
         clientuuid = event.clientuuid
         self._unsubscribe(clientuuid)
@@ -141,7 +150,7 @@ class CameraManager(Component):
         """
         Handles new camera category requests
 
-        Types:
+        :param event: CameraRequest with actions
         * subscribe
         * unsubscribe
         * update

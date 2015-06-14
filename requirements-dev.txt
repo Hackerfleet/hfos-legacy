@@ -1,3 +1,10 @@
+# Basics
+circuits==3.1.0
+pymongo==3.0.2
+jsonschema==2.5.1
+git+https://github.com/hackerfleet/pynmea.git
+git+https://github.com/hackerfleet/warmongo.git
+
 # Linting, QA
 pyflakes
 pep8

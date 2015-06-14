@@ -21,7 +21,10 @@ from hfos.logger import hfoslog, warn
 
 
 def provisionList(items, dbobject):
-    """Provisions a list of items according to their schema"""
+    """Provisions a list of items according to their schema
+    :param items: A list of provisionable items.
+    :param dbobject: A warmongo database object
+    """
 
     for item in items:
         itemname = item['name']

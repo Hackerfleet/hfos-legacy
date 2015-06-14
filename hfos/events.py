@@ -81,13 +81,16 @@ class broadcast(Event):
 
 
 class clientdisconnect(Event):
-    def __init__(self, clientuuid, useruuid=None, *args):
-        """
+    """
+    A client has disconnected from the system. This has to propagate to all
+    subscription based and other user aware components.
 
-        :param uuid: Unique User ID of known connection
-        :param packet: Data packet to transmit to client
-        :param args: Further Args
-        """
+    :param clientuuid: UUID of disconnecting client
+    :param useruuid: UUID of disconnecting user
+    :param args:
+
+    """
+    def __init__(self, clientuuid, useruuid=None, *args):
         super(clientdisconnect, self).__init__(*args)
         self.clientuuid = clientuuid
         self.useruuid = useruuid

@@ -44,7 +44,9 @@ class Chat(Component):
         return username
 
     def chatrequest(self, event):
-        """Chat event handler for incoming events"""
+        """Chat event handler for incoming events
+        :param event: ChatRequest with incoming chat message
+        """
 
         hfoslog("CHAT: Event: '%s'" % event.__dict__)
         try:

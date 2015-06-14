@@ -65,6 +65,10 @@ class MapViewManager(Component):
                 hfoslog("MVS: Subscription deleted: ", mapuuid, clientuuid)
 
     def client_disconnect(self, event):
+        """Handles unsubscription of disconnected clients
+        :param event:
+        """
+
         hfoslog("MVS: Removing disconnected client from subscriptions", lvl=debug)
         clientuuid = event.clientuuid
         self._unsubscribe(clientuuid)
@@ -73,10 +77,12 @@ class MapViewManager(Component):
         """
         Handles new mapview category requests
 
-        Types:
-        * subscribe
-        * unsubscribe
-        * update
+        :param event: MapviewRequest with basic action types:
+            * subscribe
+            * unsubscribe
+            * update
+            * list
+            * get
         """
 
         hfoslog("MVS: Event: '%s'" % event.__dict__)
@@ -105,7 +111,7 @@ class MapViewManager(Component):
                 try:
                     dbmapview = mapviewobject.find_one({'uuid': useruuid})
                 except Exception as e:
-                    hfoslog("MVS: Get for MapView failed, creating new one.")
+                    hfoslog("MVS: Get for MapView failed, creating new one.", e)
 
                 if not dbmapview:
                     try:
@@ -150,7 +156,7 @@ class MapViewManager(Component):
                 return
 
             if action == 'update':
-                dbmapview = None
+
                 hfoslog("MVS: Update begin")
                 try:
                     uuid = mapview.uuid
@@ -160,17 +166,16 @@ class MapViewManager(Component):
                     hfoslog("MVS: Couldn't get mapview", (data, e, type(e)), lvl=error)
                     return
 
-                try:
+                if dbmapview:
+                    try:
+                        dbmapview.update(mapview._fields)
+                        dbmapview.save()
 
-                    dbmapview.update(mapview._fields)
-                    dbmapview.save()
-
-                    hfoslog("MVS: Valid update stored.")
-                except Exception as e:
-                    hfoslog("MVS: Database mapview update failed: ", (uuid, e, type(e)), lvl=error)
-                    return
-
-                if not dbmapview:
+                        hfoslog("MVS: Valid update stored.")
+                    except Exception as e:
+                        hfoslog("MVS: Database mapview update failed: ", (uuid, e, type(e)), lvl=error)
+                        return
+                else:
                     try:
                         hfoslog("MVS: New MapView: ", mapview)
                         mapview.uuid = uuid  # make sure
@@ -205,7 +210,7 @@ class MapViewManager(Component):
                     else:
                         hfoslog("MVS: Not shared.")
                 except Exception as e:
-                    hfoslog("MVS: Update error during final mapview handling")
+                    hfoslog("MVS: Update error during final mapview handling", e)
 
         except Exception as e:
             hfoslog("MVS: Global Error: '%s' %s" % (e, type(e)), lvl=error)

@@ -27,7 +27,9 @@ class WebDemo(Component):
     channel = "hfosweb"
 
     def ping(self, *args):
-        """Pings all connected clients with stupid ping/demo messages (for now)"""
+        """Pings all connected clients with stupid ping/demo messages (for now)
+        :param args:
+        """
 
         self._count += 1
         hfoslog("[DEMO] Ping %i:" % self._count, args)

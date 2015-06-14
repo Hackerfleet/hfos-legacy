@@ -18,6 +18,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Module: Logger
+==============
+
+HFOS own logger to avoid namespace clashes etc. Comes with some fancy functions.
+
+Log Levels
+----------
+
+verbose = 5
+debug = 10
+info = 20
+warn = 30
+error = 40
+critical = 50
+off = 100
+
+:copyright: (C) 2011-2015 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
 
 import time
 import sys
@@ -50,6 +74,11 @@ start = time.time()
 
 
 def hfoslog(*what, **kwargs):
+    """Logs all args except "lvl" which is used to determine the incident log level.
+    :param kwargs: Debug message level
+    :param what: Loggable objects (i.e. they have a string representation)
+    """
+
     if 'lvl' in kwargs:
         lvl = kwargs['lvl']
         if lvl < verbosity['global']:

@@ -20,8 +20,12 @@ from hfos.events import remotecontrolupdate, send
 from hfos.database import controllableobject, controllerobject
 
 
-class Manager(Component):
+class DBAccessManager(Component):
+    """Experimental: A component that is database aware and can retrieve certain things via warmongo"""
+
     def _getobjectlist(self, objecttype, conditions=None):
+        """Gets objects off the database"""
+
         try:
             result = {}
             for item in objecttype.find(conditions):
@@ -31,7 +35,7 @@ class Manager(Component):
             hfoslog("Error during list retrieval:", e, type(e), lvl=error)
 
 
-class RemoteControlManager(Manager):
+class RemoteControlManager(DBAccessManager):
     """
     Remote Control manager
 
@@ -49,6 +53,10 @@ class RemoteControlManager(Manager):
         hfoslog("RMTCTRL: Started")
 
     def clientdisconnect(self, event):
+        """Handler to deal with a possibly disconnected remote controlling client
+        :param event: ClientDisconnect Event
+        """
+
         try:
             if event.clientuuid == self.remotecontroller:
                 hfoslog("RMTRCTRL: Remote controller disconnected!", lvl=critical)
@@ -57,7 +65,10 @@ class RemoteControlManager(Manager):
             hfoslog("RMTRCTRL: Strange thing while client disconnected", e, type(e))
 
     def remotecontrolrequest(self, event):
-        """Remote control event handler for incoming events"""
+        """Remote control event handler for incoming events
+        :param event: RemoteControlRequest with action being one of
+            ['list', 'takeControl', 'leaveControl', 'controlData']
+        """
 
         hfoslog("RMTCTRL: Event: '%s'" % event.__dict__)
         try:
