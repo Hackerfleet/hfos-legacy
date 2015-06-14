@@ -11,3 +11,5 @@ __pycache__
 debian/python-hfos*
 debian/files
 
+
+coverage
