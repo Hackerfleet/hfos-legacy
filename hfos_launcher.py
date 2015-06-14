@@ -30,7 +30,7 @@ from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 # from circuits.tools import graph
 
-from hfos.web.remotecontrolmanager import RemoteControlManager
+from hfos.web.rcmanager import RemoteControlManager
 from hfos.web.clientmanager import ClientManager
 from hfos.web.mapviewmanager import MapViewManager
 from hfos.web.schemamanager import SchemaManager
@@ -86,9 +86,9 @@ def main():
 
     # Logger().register(server)
 
-    dbg = Debugger()
+    # dbg = Debugger()
     # dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
-    dbg.register(server)
+    # dbg.register(server)
 
     # webbrowser.open("http://127.0.0.1:8055")
 
