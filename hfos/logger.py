@@ -46,6 +46,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 import time
 import sys
 import inspect
+import six
 
 verbose = 5
 debug = 10
@@ -62,6 +63,7 @@ lvldata = {5: ['VERBOSE', '\033[1;97m'],
            40: ['ERROR', '\033[1;91m'],
            50: ['CRITICAL', '\033[1;95m'],
            }
+terminator = '\033[0m'
 
 count = 0
 
@@ -124,4 +126,7 @@ def hfoslog(*what, **kwargs):
             sys.exit(23)
 
     if lvl >= verbosity['console']:
-        print(lvldata[lvl][1], str(msg), '\033[0m')
+        output = str(msg)
+        if six.PY3:
+            output = lvldata[lvl][1] + output + terminator
+        print(output)
