@@ -59,7 +59,8 @@ See https://github.com/hackerfleet/hfos""",
                         'pymongo>=3.0.2',
                         'jsonschema>=2.5.1',
                         'pynmea==0.7.0',
-                        'warmongo==0.5.3.hf'
+                        'warmongo==0.5.3.hf',
+                        'six'
                         ],
       test_suite="tests.main.main",
       )
