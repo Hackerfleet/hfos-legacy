@@ -16,17 +16,17 @@ FROM library/debian
 MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
 
 RUN apt-get update && \
-    apt-get install -qy \
+    apt-get install -qy --no-install-recommends \
         mongodb \
         git \
-        python3.4 \
-        python3-pip \
-        python3-grib \
-        npm && \
+        python-pip \
+        python-grib && \
     apt-get clean
 
-RUN pip3 install -r requirements.txt
-RUN python3 setup.py install
+RUN git clone https://github.com/Hackerfleet/hfos
+WORKDIR hfos
+RUN pip install -r requirements.txt
+RUN pip install .
 
 #  Services
 EXPOSE 8055 9000
