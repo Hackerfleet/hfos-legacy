@@ -4,13 +4,12 @@
 # into a Docker Image/Container.
 #
 # Usage Examples(s)::
-#     
-#     $ docker run -d -v /path/to/www:/var/www Hackerfleet/hfos hfos.web /var/www
-#     $ docker run -i -t Hackerfleet/hfos hfos_test
 #
-# VERSION: 0.0.2
+#     $ docker run -i -t hackerfleet/hfos hfos_launcher.py
 #
-# Last Updated: 20141115
+# VERSION: 0.0.1
+#
+# Last Updated: 20150626
 
 FROM library/debian
 MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
@@ -19,7 +18,12 @@ RUN apt-get update && \
     apt-get install -qy --no-install-recommends \
         mongodb \
         git \
+        bzip2 \
+        npm \
+        nodejs-legacy \
         python-pip \
+        python-bson \
+        python-bson-ext \
         python-grib && \
     apt-get clean
 
@@ -27,6 +31,10 @@ RUN git clone https://github.com/Hackerfleet/hfos
 WORKDIR hfos
 RUN pip install -r requirements.txt
 RUN pip install .
+RUN git submodule init && git submodule update
+WORKDIR frontend
+RUN npm config set prefix /usr/local && npm install -g --prefix=/usr/local
+RUN bower install --config.interactive=false --allow-root
 
 #  Services
 EXPOSE 8055 9000
