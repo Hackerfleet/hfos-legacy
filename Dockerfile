@@ -34,7 +34,9 @@ RUN pip install .
 RUN git submodule init && git submodule update
 WORKDIR frontend
 RUN npm config set prefix /usr/local && npm install -g --prefix=/usr/local
+RUN npm -g install bower grunt-cli
 RUN bower install --config.interactive=false --allow-root
+RUN grunt install
 
 #  Services
 EXPOSE 8055 9000
