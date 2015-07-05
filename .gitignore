@@ -1,8 +1,9 @@
 # build data
 build
 dist
+docs/build
 __pycache__
-*.egg-info
+*.egg*
 
 # cache
 *.pyc
@@ -12,4 +13,7 @@ debian/python-hfos*
 debian/files
 
 
+# Testing stuff
+.tox
 coverage
+.coverage
