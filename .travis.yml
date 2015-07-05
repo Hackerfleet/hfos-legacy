@@ -7,6 +7,7 @@ python:
 cache:
   directories:
     - $HOME/.pip-cache/
-install: 
-  - pip install -r requirements.txt --download-cache $HOME/.pip-cache .
+install:
+  - pip install --upgrade pip
+  - pip install -r requirements.txt --allow-external --cache-dir $HOME/.pip-cache .
 script: python setup.py test
