@@ -8,7 +8,13 @@ Welcome to the HFOS Sailor's Manual!
 Detailed Feature Overview
 -------------------------
 
-    * Basic overview
-    * Configuration and set up
-    * Data Dashboard
-    * Navigational tasks involving the map
+.. toctree::
+    :maxdepth: 2
+
+    dashboard
+    logbook
+    map
+    layers
+    mapviews
+
+
