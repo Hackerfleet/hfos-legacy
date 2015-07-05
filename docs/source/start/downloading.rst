@@ -6,7 +6,7 @@ Latest Stable Release
 ---------------------
 
 The latest stable releases can be downloaded from the
-`Releases <https://github.com/hfos/hfos/releases>`_ page
+`Releases <https://github.com/hackerfleet/hfos/releases>`_ page
 (*specifically the Tags tab*).
 
 
@@ -19,7 +19,7 @@ The latest development branch can be cloned using the following command:
 
 .. code-block:: sh
    
-   $ git clone https://github.com/hfos/hfos.git
+   $ git clone https://github.com/hackerfleet/hfos.git
    
 For further instructions on how to use Git, please refer to the
 `Git Website <https://git-scm.com/>`_.
