@@ -4,5 +4,9 @@ python:
   - "3.3"
   - "3.4"
   - "pypy"
-install: python setup.py install
+cache:
+  directories:
+    - $HOME/.pip-cache/
+install: 
+  - pip install -r requirements.txt --download-cache $HOME/.pip-cache
 script: python setup.py test
