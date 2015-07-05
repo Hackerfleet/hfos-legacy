@@ -13,9 +13,10 @@ Sailor's Manual
 ===============
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
+    :glob:
 
-    manual/index
+    manual/*
 
 Developer Documentation
 =======================
