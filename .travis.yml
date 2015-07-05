@@ -8,5 +8,5 @@ cache:
   directories:
     - $HOME/.pip-cache/
 install: 
-  - pip install -r requirements.txt --download-cache $HOME/.pip-cache
+  - pip install -r requirements.txt --download-cache $HOME/.pip-cache .
 script: python setup.py test
