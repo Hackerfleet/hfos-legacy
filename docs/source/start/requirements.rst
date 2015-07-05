@@ -10,8 +10,9 @@ Backend
 -------
 
 HFOS' backend has a few dependencies:
-- Database: `MongoDb`_.
-- Python: >= 2.7 (or possibly pypy >= 2.0)
+
+    - Database: `MongoDb`_.
+    - Python: >= 2.7 (or possibly pypy >= 2.0)
 
 :Supported Platforms: Linux
 
@@ -21,9 +22,10 @@ Frontend
 --------
 
 The frontend uses a lot of Javascript libraries:
-- `AngularJS`_
-- `Bootstrap`_
-- `Leaflet`_
+
+    - `AngularJS`_
+    - `Bootstrap`_
+    - `Leaflet`_
 
 and others. The detailed list can be found in frontend/bower.json
 after you pulled the frontend submodule.
