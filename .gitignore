@@ -4,6 +4,7 @@ dist
 docs/build
 __pycache__
 *.egg*
+docs/hfos-docs-docs.xml
 
 # cache
 *.pyc
