@@ -51,10 +51,6 @@ A modern, opensource approach to maritime navigation.
 
 This software package is supposed to run on your ship/car/plane/ufo's board computer.
 See https://github.com/hackerfleet/hfos""",
-      dependency_links=[
-          'https://github.com/Hackerfleet/pynmea/archive/master.zip#egg=pynmea-0.7.0',
-          'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.3.hf'
-      ],
       install_requires=['circuits==3.1.0',
                         'pymongo>=3.0.2',
                         'jsonschema>=2.5.1',
