@@ -10,4 +10,5 @@ cache:
 install:
   - pip install --upgrade pip
   - pip install -r requirements.txt --allow-external --cache-dir=$HOME/.pip-cache .
+  - python setup.py install
 script: python setup.py test
