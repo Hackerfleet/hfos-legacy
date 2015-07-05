@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-# Hackerfleet Technology Demonstrator License
-# ===========================================
+# HFOS - Hackerfleet Operating System
+# ===================================
 # Copyright (C) 2011-2015 riot <riot@hackerfleet.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -51,10 +51,13 @@ A modern, opensource approach to maritime navigation.
 
 This software package is supposed to run on your ship/car/plane/ufo's board computer.
 See https://github.com/hackerfleet/hfos""",
+      dependency_links=[
+          'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.3.hf'
+      ],
       install_requires=['circuits==3.1.0',
-                        'pymongo>=3.0.2',
+                        'pymongo>=3.0.3',
                         'jsonschema>=2.5.1',
-                        'pynmea==0.7.0',
+                        'pynmea2==1.3.7',
                         'warmongo==0.5.3.hf',
                         'six'
                         ],
