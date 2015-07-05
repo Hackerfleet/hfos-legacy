@@ -7,17 +7,16 @@
     :alt: Quality
 
 .. image:: https://requires.io/github/Hackerfleet/hfos/requirements.svg?branch=master
-    :target: https://requires.io/github/hackerfleet/hfos/requirements?branch=default
+    :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
 .. image:: https://badge.waffle.io/hackerfleet/hfos.png?label=ready&title=Ready 
     :target: https://waffle.io/hackerfleet/hfos
     :alt: Stories Ready
 
-.. image:: https://coveralls.io/repos/hackerfleet/hfos/badge.png
-    :target: https://coveralls.io/r/hackerfleet/hfos
+.. image:: https://coveralls.io/repos/Hackerfleet/hfos/badge.svg
+    :target: https://coveralls.io/r/Hackerfleet/hfos
     :alt: Coverage
-
 
 HFOS - The Hackerfleet Operating System
 =======================================
