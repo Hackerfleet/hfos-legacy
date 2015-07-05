@@ -1,30 +1,47 @@
 Quick Start Guide
 =================
 
-Warning: **HFOS is not compatible with Python 3.2!**
+Docker
+------
+
+We're preparing a Docker image for installation and another one for development, which is already pretty
+mature.
+
+The command to get the current testing release is:
+
+  ``$ docker run -i -t hackerfleet/hfos hfos_launcher.py``
+
+
+Manual Installation
+-------------------
+
+If you don't want or cannot run the docker image, you can set HFOS up manually.
+
 
 Preparation
------------
+^^^^^^^^^^^
 
-Before doing anything with HFOS, be sure you have all the dependencies installed via your distribution's package manager.
-For Debian Unstable use this:
+Before doing anything with HFOS, be sure you have all the dependencies installed via your distribution's
+package manager.
+
+For Debian Unstable use this::
 
     sudo apt-get install mongodb python3.4 python3-pip python3-grib \
                          python3-bson python3-pymongo python3-serial
 
-If you want (and can), install the mongo and bson extensions:
+If you want (and can), install the mongo and bson extensions::
 
     sudo apt-get install python3-pymongo-ext python3-bson-ext
 
-You will need to set up a bunch of more dependencies via npm to set up the frontend:
+You will need to set up a bunch of more dependencies via npm to set up the frontend::
 
     sudo apt-get install npm
 
 Backend
--------
+^^^^^^^
 
 No installation/daemon yet. Just set up a virtual env and install it.
-You may want to create a path in /var/cache for hfos' tilecache and other stuff:
+You may want to create a path in /var/cache for hfos' tilecache and other stuff::
 
     sudo mkdir -p /var/cache/hfos/tilecache
     git clone https://github.com/hackerfleet/hfos
@@ -39,9 +56,9 @@ You may need to adapt permissions for that folder to accomodate the user you let
 add the daemon and package support foam, that does that automatically.
 
 Frontend
---------
+^^^^^^^^
 
-To install the frontend, update and pull the submodule, then change into it and either install or develop.
+To install the frontend, update and pull the submodule, then change into it and either install or develop::
 
     git submodule init
     git submodule update
@@ -55,17 +72,19 @@ Point your browser to localhost:9000 to observe the magic. Don't forget to start
 Development
 -----------
 
+You can also install the package in development mode, so you don't have to deploy everytime you changed something::
+
     cd hfos
     virtualenv -p /usr/bin/python3.4 --system-site-packages
 
-Activate venv and run setup.py:
+Activate venv and run setup.py::
 
     source venv/bin/activate
     python setup.py develop
 
-Run hfos:
+Run hfos::
 
-    python hfos.py
+    python hfos_launcher.py
 
 You should see some info/debug output and the web engine as well as other components starting up.
 Currently it is set up to serve only on http://localhost:8055 - so point your browser there and explore HFOS.
