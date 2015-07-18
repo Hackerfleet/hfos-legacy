@@ -22,66 +22,7 @@ from circuits import Component, handler
 from hfos.events import send, authenticationrequest, clientdisconnect, AuthorizedEvents
 from hfos.logger import hfoslog, error, warn, critical, debug, info, verbose
 
-
-class Socket(object):
-    """
-    Socket metadata object
-    """
-
-    def __init__(self, ip, clientuuid):
-        """
-
-        :param ip: Associated Internet protocol address
-        :param clientuuid: Unique Uniform ID of this client
-        """
-        super(Socket, self).__init__()
-        self.ip = ip
-        self.clientuuid = clientuuid
-
-
-class Client(object):
-    """
-    Client metadata object
-    """
-
-    def __init__(self, sock, ip, clientuuid, useruuid=None, name=''):
-        """
-
-        :param sock: Associated connection
-        :param ip: Associated Internet protocol address
-        :param clientuuid: Unique Uniform ID of this client
-        """
-        super(Client, self).__init__()
-        self.sock = sock
-        self.ip = ip
-        self.clientuuid = clientuuid
-        self.useruuid = useruuid
-        if name == '':
-            self.name = clientuuid
-        else:
-            self.name = name
-
-
-class User(object):
-    """
-    Authenticated clients with profile etc
-    """
-
-    def __init__(self, account, profile, useruuid):
-        """
-
-        :param account: userobject
-        :param profile: profileobject
-        :param useruuid: profileobject
-        :param clients: List of clients' UUIDs
-        :param args:
-        """
-        super(User, self).__init__()
-        self.clients = []
-        self.useruuid = useruuid
-        self.profile = profile
-        self.account = account
-
+from clientobjects import Socket, Client, User
 
 class ClientManager(Component):
     """
@@ -230,6 +171,7 @@ class ClientManager(Component):
     @handler("read", channel="wsserver")
     def read(self, *args):
         """Handles raw client requests and distributes them to the appropriate components"""
+        hfoslog("[CM] Beginning new transaction: ", args, lvl=verbose)
         try:
             sock, msg = args[0], args[1]
             user = password = client = clientuuid = useruuid = requestdata = requestaction = None
@@ -241,6 +183,7 @@ class ClientManager(Component):
 
         try:
             msg = json.loads(msg)
+            hfoslog("[CM] Message from client received: ", msg, lvl=verbose)
         except Exception as e:
             hfoslog("[CM] JSON Decoding failed! %s (%s of %s)" % (msg, e, type(e)))
             return
