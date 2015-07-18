@@ -34,6 +34,7 @@ from hfos.web.rcmanager import RemoteControlManager
 from hfos.web.clientmanager import ClientManager
 from hfos.web.mapviewmanager import MapViewManager
 from hfos.web.schemamanager import SchemaManager
+from hfos.web.layermanager import LayerManager
 from hfos.web.auth import Authenticator
 from hfos.web.chat import Chat
 from hfos.web.tilecache import TileCache
@@ -80,6 +81,7 @@ def main():
     Authenticator().register(clientmanager)
     Chat().register(clientmanager)
     MapViewManager().register(clientmanager)
+    LayerManager().register(clientmanager)
     RemoteControlManager().register(clientmanager)
     WebDemo().register(clientmanager)
     # CameraManager().register(clientmanager)
@@ -88,7 +90,7 @@ def main():
 
     # dbg = Debugger()
     # dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
-    # dbg.register(server)
+    # dbg.register(lm)
 
     # webbrowser.open("http://127.0.0.1:8055")
 
