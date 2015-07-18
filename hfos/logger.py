@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-# Hackerfleet Technology Demonstrator
-# =====================================================================
-# Copyright (C) 2011-2014 riot <riot@hackerfleet.org> and others.
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2015 riot <riot@hackerfleet.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,11 +70,20 @@ terminator = '\033[0m'
 count = 0
 
 logfile = "/var/log/hfos/service.log"
-verbosity = {'global': info,
+verbosity = {'global': debug,
              'file': off,
              'console': debug}
 
+mute = ['MVM']
+
 start = time.time()
+
+
+def isMuted(what):
+    global mute
+    for item in mute:
+        if item in what:
+            return True
 
 
 def hfoslog(*what, **kwargs):
@@ -84,7 +93,6 @@ def hfoslog(*what, **kwargs):
     """
 
     # TODO: Filter out log levels BEFORE doing _anything_ here
-
     if 'lvl' in kwargs:
         lvl = kwargs['lvl']
         if lvl < verbosity['global']:
@@ -118,6 +126,9 @@ def hfoslog(*what, **kwargs):
     for thing in what:
         msg += " "
         msg += str(thing)
+
+    if isMuted(msg):
+        return
 
     if lvl >= verbosity['file']:
         try:
