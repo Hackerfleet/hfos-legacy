@@ -19,12 +19,51 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from setuptools import setup
+from setuptools import Command
+from distutils.log import INFO, WARN
+
+import os
+from shutil import rmtree
 
 # TODO:
 # Classifiers
 # Keywords
 # download_url
 # platform
+
+class install_var(Command):
+    description = "Installs frontend library and cache directories"
+    user_options = [
+        # The format is (long option, short option, description).
+        ('clean-all', None, 'Clear frontend and HFOS cache data'),
+        ('clean', None, 'Clear HFOS cache')
+    ]
+
+    def initialize_options(self):
+        """Set default values for options."""
+        self.clean_all = False
+        self.clean = False
+
+    def finalize_options(self):
+        """Post-process options."""
+
+    def run(self):
+        self.announce("Checking frontend library and cache directories", INFO)
+
+        # If these need changes, make sure they are watertight and don't remove wanted stuff!
+        paths = ('/var/lib/hfos', '/var/cache/hfos', '/var/cache/hfos/tilecache')
+
+        for item in paths:
+            if os.path.exists(item):
+                self.announce("Path already exists: " + item)
+                if self.clean_all or (self.clean and 'cache' in item):
+                    self.announce("Cleaning up: " + item, WARN)
+                    rmtree(item)
+
+            if not os.path.exists(item):
+                self.announce("Creating path: " + item, INFO)
+                os.mkdir(item)
+
 
 setup(name="hfos",
       version="1.0.0",
@@ -41,9 +80,7 @@ setup(name="hfos",
       scripts=[
           'hfos_launcher.py',
       ],
-      data_files=[
-      ],
-
+      cmdclass={'install_var': install_var},
       long_description="""HFOS - The Hackerfleet Operating System
 =======================================
 
