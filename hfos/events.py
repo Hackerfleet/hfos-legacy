@@ -16,12 +16,25 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 from circuits.core import Event
 
 from hfos.logger import hfoslog, debug, critical, verbose, events
-
+from hfos.web.clientobjects import User
 
 class AuthorizedEvent(Event):
     """Base class for events for logged in users."""
 
     def __init__(self, user, action, data, client, *args):
+        """
+        Sets up an authorized event.
+
+        :param user: User object from :py:class:hfos.web.clientmanager.User
+        :param action:
+        :param data:
+        :param client:
+        :param args:
+        :return:
+        """
+
+        assert isinstance(user, User)
+
         super(AuthorizedEvent, self).__init__(*args)
         self.user = user
         self.action = action
@@ -230,40 +243,13 @@ class layermanagementrequest(Event):
         hfoslog("[LM-EVENT] Request generated", lvl=events)
 
 
-class layerrequest(Event):
+class layerrequest(AuthorizedEvent):
     """A geojson-layer data request"""
 
-    def __init__(self, sender, action, data, *args):
-        """
-
-        :param sender: Originating Client Object
-        :param requesttype: One of "Update", "Subscribe", "Unsubscribe"
-        :param mapview: The new mapview object
-        :param args: Further Args
-        """
+    def __init__(self, *args):
         super(layerrequest, self).__init__(*args)
-        self.sender = sender
-        self.action = action
-        self.data = data
 
         hfoslog("[LM-EVENT] Request generated", lvl=events)
-
-
-class layerbroadcast(Event):
-    """Something changed a layer and subscribers need to get notified"""
-
-    def __init__(self, sender, broadcastdata, *args):
-        """
-
-        :param sender: Originating User object
-        :param broadcast: New layer broadcast
-        :param args: Further Args
-        """
-        super(layerbroadcast, self).__init__(*args)
-        self.sender = sender
-        self.broadcastdata = broadcastdata
-
-        hfoslog("[LM-EVENT] Update-Event generated", lvl=events)
 
 
 # Sensor Events
@@ -303,6 +289,7 @@ AuthorizedEvents = {
     'mapview': mapviewrequest,
     'chat': chatrequest,
     'schema': schemarequest,
+    'layer': layerrequest,
     'remotectrl': remotecontrolrequest,
     'camera': camerarequest
 }
