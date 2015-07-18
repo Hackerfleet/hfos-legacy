@@ -14,6 +14,8 @@
 FROM library/debian
 MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
 
+# Install dependencies
+
 RUN apt-get update && \
     apt-get install -qy --no-install-recommends \
         mongodb \
@@ -21,25 +23,38 @@ RUN apt-get update && \
         bzip2 \
         npm \
         nodejs-legacy \
+        libfontconfig \
         python-pip \
         python-bson \
         python-bson-ext \
         python-grib && \
     apt-get clean
 
+# Get HFOS
+
 RUN git clone https://github.com/Hackerfleet/hfos
 WORKDIR hfos
+
+# Install HFOS
+
 RUN pip install -r requirements.txt
 RUN pip install .
+
+# Make sure /var/[cache,lib]/hfos etc exists
+
+RUN python setup.py install_var
+
+# Install Frontend
+
 RUN git submodule init && git submodule update
+
 WORKDIR frontend
-RUN npm config set prefix /usr/local && npm install -g --prefix=/usr/local
+RUN npm install
 RUN npm -g install bower grunt-cli
 RUN bower install --config.interactive=false --allow-root
-RUN grunt install
+RUN grunt install --force
 
 #  Services
-EXPOSE 8055 9000
 
-# Volumes
-VOLUME /var/www
+EXPOSE 80 8055 9000
+
