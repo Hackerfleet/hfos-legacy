@@ -14,19 +14,7 @@ Client: Clientprofile to store client specific settings
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-# {
-# 'type': "object",
-# 'name': 'Profile',
-# 'properties': {
-# 'name': {'type': "string", 'minLength': 2, 'title': "Name", 'description': "Name or alias"},
-#         'title': {
-#             'type': "string",
-#             'enum': ['dr','jr','sir','mrs','mr','NaN','dj']
-#         }
-#     }
-# }
-
-Profile = {
+Clientconfig = {
     'id': '#client',
     'type': 'object',
     'name': 'Client',
@@ -45,9 +33,9 @@ Profile = {
                      },
         'mapviewuuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                         'type': 'string',
-                        'title': 'Unique Client ID'
+                        'title': 'Unique Mapview ID'
                         },
     }
 }
 
-__schema__ = Profile
+__schema__ = Clientconfig
