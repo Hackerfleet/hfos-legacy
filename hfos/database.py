@@ -34,6 +34,7 @@ from hfos.schemata.layer import Layer
 from hfos.schemata.layergroup import LayerGroup
 from hfos.schemata.controllable import Controllable
 from hfos.schemata.controller import Controller
+from hfos.schemata.client import Clientconfig
 
 
 def clear_all():
@@ -61,6 +62,7 @@ warmongo.connect("hfos")
 
 userobject = warmongo.model_factory(User)
 profileobject = warmongo.model_factory(Profile)
+clientconfigobject = warmongo.model_factory(Clientconfig)
 
 mapviewobject = warmongo.model_factory(MapView)
 
