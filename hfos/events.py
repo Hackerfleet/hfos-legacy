@@ -117,7 +117,7 @@ class clientdisconnect(Event):
 class authenticationrequest(Event):
     """A client wants to authenticated a connection"""
 
-    def __init__(self, username, passhash, clientuuid, newclientuuid, sock, *args):
+    def __init__(self, username, passhash, clientuuid, requestedclientuuid, sock, *args):
         """
 
         :param username: Account username
@@ -132,7 +132,7 @@ class authenticationrequest(Event):
         self.passhash = passhash
         self.sock = sock
         self.clientuuid = clientuuid
-        self.newclientuuid = newclientuuid
+        self.requestedclientuuid = requestedclientuuid
 
 
 class authentication(Event):
