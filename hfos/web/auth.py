@@ -16,7 +16,7 @@ from uuid import uuid4
 
 from circuits import Component, handler
 
-from hfos.database import userobject, profileobject
+from hfos.database import userobject, profileobject, clientconfigobject
 from hfos.events import authentication
 from hfos.logger import hfoslog, error, warn, debug, verbose
 
@@ -34,9 +34,11 @@ class Authenticator(Component):
         :param event: AuthenticationRequest with user's credentials
         """
 
-        hfoslog("[AUTH] Auth request for ", event.username)
+        hfoslog("[AUTH] Auth request for ", event.username, event.clientuuid)
 
         useraccount = None
+        clientconfig = None
+        userprofile = None
 
         try:
             useraccount = userobject.find_one({'username': event.username})
@@ -48,14 +50,41 @@ class Authenticator(Component):
             hfoslog("[AUTH] User found.")
 
             if useraccount.passhash == event.passhash:
-                hfoslog("[AUTH] Passhash matches, fetching profile.", lvl=debug)
+                hfoslog("[AUTH] Passhash matches, checking client and profile.", lvl=debug)
+
+                if event.requestedclientuuid != event.clientuuid:
+                    # Client requests to get an existing client configuration
+
+                    clientconfig = clientconfigobject.find_one({'clientuuid': event.requestedclientuuid})
+
+                    if clientconfig:
+                        hfoslog("[AUTH] Checking client configuration permissions", lvl=debug)
+                        if clientconfig.useruuid != useraccount.uuid:
+                            clientconfig = None
+                            hfoslog("[AUTH] Unauthorized client configuration requested", lvl=warn)
+                    else:
+                        hfoslog("[AUTH] Unknown client configuration requested: ", event.requestedclientuuid, lvl=warn)
+
+                if not clientconfig:
+                    hfoslog("[AUTH] Creating new default client configuration")
+                    # Either no configuration was found or requested
+                    # -> Create a new client configuration
+
+                    clientconfig = clientconfigobject()
+                    clientconfig.clientuuid = event.clientuuid
+                    clientconfig.name = "New client"
+                    clientconfig.description = "New client configuration"
+                    clientconfig.useruuid = useraccount.uuid
+                    # TODO: Make sure the profile is only saved if the client could store it, too
+                    clientconfig.save()
 
                 try:
                     userprofile = profileobject.find_one({'uuid': str(useraccount.uuid)})
-                    hfoslog("[AUTH] Profile: ", userprofile, useraccount.uuid)
+                    hfoslog("[AUTH] Profile: ", userprofile, useraccount.uuid, lvl=debug)
+
                     useraccount.passhash = ""
                     self.fireEvent(
-                        authentication(useraccount.username, (useraccount, userprofile), event.clientuuid,
+                        authentication(useraccount.username, (useraccount, userprofile, clientconfig), event.clientuuid,
                                        useraccount.uuid,
                                        event.sock),
                         "auth")
@@ -63,6 +92,8 @@ class Authenticator(Component):
                     hfoslog("[AUTH] No profile due to error: ", e, type(e), lvl=error)
             else:
                 hfoslog("[AUTH] Password was wrong!", lvl=warn)
+
+            hfoslog("[AUTH] Done with Login request", lvl=debug)
 
         else:
             hfoslog("[AUTH] Creating user")
@@ -83,7 +114,20 @@ class Authenticator(Component):
                 return
 
             try:
-                self.fireEvent(authentication(newuser.username, (newuser, newprofile), event.clientuuid,
+                # TODO: Clone or reference systemwide default configuration
+                newclientconfig = clientconfigobject()
+                newclientconfig.clientuuid = event.clientuuid
+                newclientconfig.name = "New client"
+                newclientconfig.description = "New client configuration"
+                newclientconfig.useruuid = useraccount.uuid
+                newclientconfig.save()
+            except Exception as e:
+                hfoslog("[AUTH] Problem creating new clientconfig: ", type(e), e, lvl=error)
+                return
+
+            try:
+                self.fireEvent(
+                    authentication(newuser.username, (newuser, newprofile, newclientconfig), event.clientuuid,
                                               newuser.uuid,
                                               event.sock),
                                "auth")

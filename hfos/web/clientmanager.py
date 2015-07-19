@@ -156,10 +156,10 @@ class ClientManager(Component):
 
                 username = requestdata['username']
                 password = requestdata['password']
-                newclientuuid = requestdata['clientuuid']
+                requestedclientuuid = requestdata['clientuuid']
                 hfoslog("[CM] Auth request by ", username)
 
-                self.fireEvent(authenticationrequest(username, password, clientuuid, newclientuuid, sock), "auth")
+                self.fireEvent(authenticationrequest(username, password, clientuuid, requestedclientuuid, sock), "auth")
                 return
             except Exception as e:
                 hfoslog("[CM] Login failed: ", e, lvl=warn)
@@ -208,9 +208,9 @@ class ClientManager(Component):
             # Only for signed in users
             client = self._clients[clientuuid]
             useruuid = client.useruuid
-            hfoslog("[CM] Authenticated operation requested by ", client, lvl=debug)
+            hfoslog("[CM] Authenticated operation requested by ", client.config, lvl=debug)
         except Exception as e:
-            hfoslog("[CM] No useruuid!", lvl=critical)
+            hfoslog("[CM] No useruuid!", e, type(e), lvl=critical)
             return
         if requestcomponent == "auth":
             if requestaction == "logout":
@@ -236,25 +236,49 @@ class ClientManager(Component):
         try:
             hfoslog("[CM] Authorization has been granted by DB check: %s" % event)
 
-            account, profile = event.userdata
+            account, profile, clientconfig = event.userdata
 
-            clientuuid = event.clientuuid
+
             useruuid = event.useruuid
+            originatingclientuuid = event.clientuuid
+            clientuuid = clientconfig.clientuuid
 
-            signedinuser = User(account, profile, useruuid)
-            signedinuser.clients.append(clientuuid)
-            self._users[account.uuid] = signedinuser
+            # Assign client to user
+            if useruuid in self._users:
+                signedinuser = self._users[useruuid]
+            else:
+                signedinuser = User(account, profile, useruuid)
+                self._users[account.uuid] = signedinuser
 
-            self._clients[clientuuid].useruuid = useruuid
+            if clientuuid in signedinuser.clients:
+                hfoslog("[CM] Client already logged in?!", lvl=critical)
+            else:
+                signedinuser.clients.append(clientuuid)
+                hfoslog("[CM] Active client registered to user ", clientuuid, useruuid, lvl=info)
+
+            # Update socket..
+            socket = self._sockets[event.sock]
+            socket.clientuuid = clientuuid
+            self._sockets[event.sock] = socket
+
+            # ..and client lists
+            newclient = Client(event.sock, socket.ip, clientuuid, useruuid, clientconfig.name, clientconfig)
+            del (self._clients[originatingclientuuid])
+            self._clients[clientuuid] = newclient
 
             authpacket = {"component": "auth", "action": "login", "data": account.serializablefields()}
             hfoslog("[CM] Transmitting Authorization to client", authpacket, lvl=debug)
             self.fireEvent(write(event.sock, json.dumps(authpacket)), "wsserver")
 
-            if profile:
-                profilepacket = {"component": "profile", "action": "get", "data": profile.serializablefields()}
-                hfoslog("[CM] Transmitting Profile to client", profilepacket, lvl=debug)
-                self.fireEvent(write(event.sock, json.dumps(profilepacket)), "wsserver")
+            profilepacket = {"component": "profile", "action": "get", "data": profile.serializablefields()}
+            hfoslog("[CM] Transmitting Profile to client", profilepacket, lvl=debug)
+            self.fireEvent(write(event.sock, json.dumps(profilepacket)), "wsserver")
+
+            clientconfigpacket = {"component": "clientconfig", "action": "get",
+                                  "data": clientconfig.serializablefields()}
+            hfoslog("[CM] Transmitting client configuration to client", clientconfigpacket, lvl=debug)
+            self.fireEvent(write(event.sock, json.dumps(clientconfigpacket)), "wsserver")
+
 
             hfoslog("[CM] User configured:", signedinuser.__dict__, lvl=info)
 
