@@ -73,7 +73,7 @@ class Authenticator(Component):
                     clientconfig = clientconfigobject()
                     clientconfig.clientuuid = event.clientuuid
                     clientconfig.name = "New client"
-                    clientconfig.description = "New client configuration"
+                    clientconfig.description = "New client configuration from " + useraccount.username
                     clientconfig.useruuid = useraccount.uuid
                     # TODO: Make sure the profile is only saved if the client could store it, too
                     clientconfig.save()
@@ -118,7 +118,7 @@ class Authenticator(Component):
                 newclientconfig = clientconfigobject()
                 newclientconfig.clientuuid = event.clientuuid
                 newclientconfig.name = "New client"
-                newclientconfig.description = "New client configuration"
+                newclientconfig.description = "New client configuration from " + event.username
                 newclientconfig.useruuid = useraccount.uuid
                 newclientconfig.save()
             except Exception as e:
