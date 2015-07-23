@@ -35,6 +35,7 @@ from hfos.schemata.layergroup import LayerGroup
 from hfos.schemata.controllable import Controllable
 from hfos.schemata.controller import Controller
 from hfos.schemata.client import Clientconfig
+from hfos.schemata.wikipage import WikiPage
 
 
 def clear_all():
@@ -71,3 +72,5 @@ layergroupobject = warmongo.model_factory(LayerGroup)
 
 controllerobject = warmongo.model_factory(Controller)
 controllableobject = warmongo.model_factory(Controllable)
+
+wikipageobject = warmongo.model_factory(WikiPage)

@@ -49,7 +49,8 @@ __all__ = [
     'profile',
     'controllable',
     'controller',
-    'user'
+    'user',
+    'wikipage',
 ]
 
 from importlib import import_module

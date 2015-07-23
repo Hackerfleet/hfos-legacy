@@ -39,6 +39,7 @@ from hfos.web.auth import Authenticator
 from hfos.web.chat import Chat
 from hfos.web.tilecache import TileCache
 from hfos.web.demo import WebDemo
+from hfos.web.wiki import Wiki
 
 from hfos.logger import hfoslog, verbose
 from hfos.debugger import HFDebugger
@@ -84,6 +85,7 @@ def main():
     LayerManager().register(clientmanager)
     RemoteControlManager().register(clientmanager)
     WebDemo().register(clientmanager)
+    Wiki().register(clientmanager)
     # CameraManager().register(clientmanager)
 
     # Logger().register(server)
