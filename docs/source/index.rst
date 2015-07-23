@@ -55,6 +55,7 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 * :doc:`glossary`
+* :doc:`changes`
 
 .. ifconfig:: devel
 

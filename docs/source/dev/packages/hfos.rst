@@ -1,6 +1,8 @@
 hfos package
 ============
 
+.. uml:: ../../hfos
+
 Subpackages
 -----------
 

@@ -10,7 +10,9 @@ six
 
 # Linting, QA
 pyflakes
+pylint
 pep8
+doc8
 mccabe
 
 # Convenient Development Tasks
@@ -32,3 +34,12 @@ pytest-cov
 Sphinx
 releases
 Sphinx-PyPI-upload
+sphinx-issues
+sphinxcontrib-actdiag
+sphinxcontrib-nwdiag
+sphinxcontrib-seqdiag
+sphinxcontrib-blockdiag
+sphinxcontrib-spelling
+sphinxcontrib-autojs
+pyenchant
+sphinx-git

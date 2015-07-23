@@ -56,7 +56,15 @@ extensions = [
     'sphinx.ext.coverage',
     #    'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
+    'sphinx_git',
     'sphinx.ext.viewcode',
+    'sphinx_issues',
+    'sphinxcontrib.nwdiag',
+    'sphinxcontrib.rackdiag',
+    'sphinxcontrib.packetdiag',
+    'sphinxcontrib.seqdiag',
+    'sphinxcontrib.actdiag',
+    'sphinxcontrib.spelling'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -79,6 +87,8 @@ copyright = u'2015, Hackerfleet '
 author = u'Hackerfleet Contributors'
 url = u'http://github.com/hackerfleet/hfos'
 
+# Issue tracker info
+issues_github_path = 'hackerfleet/hfos'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -100,6 +110,9 @@ devel = version_module.version_info[-1] == "dev"
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
 language = None
+
+# Spellcheck configuration
+spelling_word_list_filename = 'dictionary.txt'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -137,6 +150,8 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = devel
+
+blockdiag_fontpath = seqdiag_fontpath = nwdiag_fontpath = actdiag_fontpath = 'source/fonts/clearsans/ClearSans-Medium.ttf'
 
 
 # -- Options for HTML output ----------------------------------------------

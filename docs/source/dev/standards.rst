@@ -2,7 +2,7 @@ Development Standards
 =====================
 
 
-We use the following development standards:
+We aim for the following development standards:
 
 
 Cyclomatic Complexity

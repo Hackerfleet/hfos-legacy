@@ -1,1 +1,4 @@
-.. include:: ../../CHANGES.rst
+Recent Changes
+--------------
+
+.. git_changelog::

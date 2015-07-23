@@ -58,6 +58,6 @@ We use the following tools to develop HFOS and share code:
 - **Package Hosting:**
   `Python Package Index (PyPi) <http://pypi.python.org/pypi/hfos>`_
 - **Continuous Integration:**
-  `Travis CI <https://travis-ci.org/hackerfleet/hfos>`_
+  `Travis CI <https://travis-ci.org/Hackerfleet/hfos>`_
 - **Code Quality:**
-  `Landscape <https://landscape.io/github/hackerfleet/hfos/>`_
+  `Landscape <https://landscape.io/github/Hackerfleet/hfos/>`_
