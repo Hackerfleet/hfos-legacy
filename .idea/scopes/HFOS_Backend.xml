@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="HFOS-Backend" pattern="file:hfos//*||file:hfos.py||file[hfos]:*/" />
+</component>

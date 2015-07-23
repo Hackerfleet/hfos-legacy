@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.4.1+ virtualenv at ~/src/hfos/venv" project-jdk-type="Python SDK" />
+  <component name="EntryPointsManager">
+    <entry_points version="2.0" />
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_3" default="false" assert-keyword="false" jdk-15="false" project-jdk-name="Python 2.7.8 virtualenv at ~/.virtualenvs/hfostest" project-jdk-type="Python SDK" />
+  <component name="TaskProjectConfiguration">
+    <server type="GitHub" url="https://github.com" />
+  </component>
   <component name="UnicodeBrowser">
     <option name="fontName" value="ProggyCleanTT" />
   </component>
 </project>
-

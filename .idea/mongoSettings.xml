@@ -4,9 +4,13 @@
     <option name="serverConfigurations">
       <list>
         <ServerConfiguration>
+          <option name="connectOnIdeStartup" value="true" />
           <option name="label" value="Localhost" />
-          <option name="serverName" value="localhost" />
-          <option name="serverPort" value="27017" />
+          <option name="serverUrls">
+            <list>
+              <option value="localhost:27017" />
+            </list>
+          </option>
           <option name="userDatabase" value="hfos" />
         </ServerConfiguration>
       </list>
@@ -14,4 +18,3 @@
     <option name="shellPath" value="/usr/bin/mongo" />
   </component>
 </project>
-

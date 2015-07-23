@@ -1,0 +1,9 @@
+<component name="CopyrightManager">
+  <settings default="">
+    <module2copyright>
+      <element module="HFOS-Backend" copyright="Default HFOS GPLv3" />
+      <element module="HFOS-Frontend" copyright="Frontend HFOS GPLv3" />
+      <element module="HFOS-Docs" copyright="Default HFOS GPLv3" />
+    </module2copyright>
+  </settings>
+</component>

@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/hfos.iml" filepath="$PROJECT_DIR$/.idea/hfos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hfos/hfos.iml" filepath="$PROJECT_DIR$/hfos/hfos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/docs/hfos-docs.iml" filepath="$PROJECT_DIR$/docs/hfos-docs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/frontend/hfos-frontend.iml" filepath="$PROJECT_DIR$/frontend/hfos-frontend.iml" />
     </modules>
   </component>
 </project>
-
