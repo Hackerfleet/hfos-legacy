@@ -52,7 +52,7 @@ WORKDIR frontend
 RUN npm install
 RUN npm -g install bower grunt-cli
 RUN bower install --config.interactive=false --allow-root
-RUN grunt install --force
+RUN grunt copy:dev --force
 
 #  Services
 
