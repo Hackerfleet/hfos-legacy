@@ -70,20 +70,35 @@ terminator = '\033[0m'
 count = 0
 
 logfile = "/var/log/hfos/service.log"
-verbosity = {'global': debug,
+verbosity = {'global': events,
              'file': off,
-             'console': debug}
+             'console': verbose
+             }
 
-mute = ['MVM']
+mute = []
+solo = []
 
 start = time.time()
 
 
 def isMuted(what):
-    global mute
+    global mute, solo
+
+    state = False
+
+    for item in solo:
+        if item not in what:
+            state = True
+        else:
+            state = False
+            break
+
     for item in mute:
         if item in what:
-            return True
+            state = True
+            break
+
+    return state
 
 
 def hfoslog(*what, **kwargs):
