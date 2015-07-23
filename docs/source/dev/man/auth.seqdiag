@@ -1,0 +1,19 @@
+seqdiag {
+    client -> cm [leftnote="username\npassword\nclientuuid", label="auth/login"];
+    cm -> auth [label="authenticationrequest*"];
+
+    auth --> db [label="find:\nusername"];
+    auth <-- db [note="userobject"];
+
+    cm <- auth [note="passhash wrong", failed];
+
+    auth --> db [label="find:\nrequestedclientuuid"];
+    auth <-- db [note="clientconfigobject"];
+
+    auth --> db [label="find:\nrequestedclientuuid"];
+    auth <-- db [note="profileobject"];
+
+
+    cm <- auth [label="authentication*"];
+    client <- cm [leftnote="userobject\nprofileobject\nclientconfigobject\n"];
+}
