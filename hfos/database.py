@@ -37,6 +37,8 @@ from hfos.schemata.controller import Controller
 from hfos.schemata.client import Clientconfig
 from hfos.schemata.wikipage import WikiPage
 
+from jsonschema import ValidationError
+
 
 def clear_all():
     """DANGER!
