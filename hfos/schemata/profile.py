@@ -74,6 +74,8 @@ Profile = {
                 'color': {'type': 'string', 'title': 'User Color', 'format': 'color',
                           'description': 'Color used for map annotations, chat etc'},
                 'theme': {'type': 'string', 'title': 'User Theme', 'description': 'Theme used for user interface'},
+                'notes': {'type': 'string', 'format': 'html', 'title': 'Profile notes',
+                          'description': 'Custom profile notes'},
             }
         }
     },
