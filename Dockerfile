@@ -24,10 +24,7 @@ RUN apt-get update && \
         npm \
         nodejs-legacy \
         libfontconfig \
-        python-pip \
-        python-bson \
-        python-bson-ext \
-        python-grib && \
+        python-pip && \
     apt-get clean
 
 # Get HFOS
