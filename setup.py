@@ -94,7 +94,7 @@ See https://github.com/hackerfleet/hfos""",
       install_requires=['circuits==3.1.0',
                         'pymongo>=3.0.3',
                         'jsonschema>=2.5.1',
-                        'pynmea2==1.3.7',
+                        'pynmea2==1.4.0',
                         'warmongo==0.5.3.hf',
                         'six'
                         ],
