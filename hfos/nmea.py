@@ -14,10 +14,9 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 import time
 
 from circuits import Component
-from pynmea.streamer import NMEAStream
+from pynmea2 import parse
 
-from hfos.events import sensordata
-
+from hfos.logger import hfoslog, warn, critical
 
 class NMEAParser(Component):
     """
@@ -28,8 +27,7 @@ class NMEAParser(Component):
 
     def __init__(self):
         super(NMEAParser, self).__init__()
-        self.streamer = NMEAStream()
-        # self.streamer.get_objects("\n")
+
 
     def _parse(self, data):
         """
@@ -44,14 +42,16 @@ class NMEAParser(Component):
         # gets lost in the NMEAStream object. WTF.
         # (That was possibly an Axon initialization issue and should be fixed now)
 
-        for sentence in self.streamer.get_objects(data, size=len(data) + 1):
-            nmeadata = sentence.__dict__
-            del (nmeadata['parse_map'])
-            del (nmeadata['nmea_sentence'])
-            nmeadata['time'] = sen_time
-            nmeadata['type'] = sentence.sen_type
-            # sentences.append(nmeadata)
-            self.fireEvent(sensordata(nmeadata))
+        for sentence in parse(data):
+            hfoslog("[NMEA] Sentence received: ", sentence)
+
+            # nmeadata = sentence.__dict__
+            # del (nmeadata['parse_map'])
+            # del (nmeadata['nmea_sentence'])
+            # nmeadata['time'] = sen_time
+            # nmeadata['type'] = sentence.sen_type
+            ## sentences.append(nmeadata)
+            # self.fireEvent(sensordata(nmeadata))
 
             # return sentences
 
