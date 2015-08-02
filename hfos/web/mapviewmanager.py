@@ -92,9 +92,14 @@ class MapViewManager(Component):
                 userobj = event.user
                 action = event.action
                 data = event.data
+                try:
+                    nickname = userobj.profile.nick
+                except AttributeError:
+                    nickname = userobj.account.username
 
-                useruuid = userobj.useruuid
-                clientuuid = event.client.clientuuid
+                useruuid = userobj.uuid
+                hfoslog("[MVM] client: ", event.client.__dict__)
+                clientuuid = event.client.uuid
             except Exception as e:
                 raise ValueError("[MVM] Problem during event unpacking:", e, type(e))
 
@@ -115,10 +120,6 @@ class MapViewManager(Component):
 
                 if not dbmapview:
                     try:
-                        try:
-                            nickname = userobj.profile.nick
-                        except AttributeError:
-                            nickname = userobj.account.username
                         # TODO: Move this into a seperate operation (create)
                         dbmapview = mapviewobject({'uuid': str(uuid4()),
                                                    'useruuid': useruuid,
@@ -134,13 +135,29 @@ class MapViewManager(Component):
                                                      'data': dbmapview.serializablefields()}))
                 return
             elif action == 'subscribe':
-                # TODO: Verify everything and send a response
+                try:
+                    dbmapview = mapviewobject.find_one({'uuid': data})
+                except Exception as e:
+                    hfoslog("[MVM] Get for MapView failed. Creating new one.", e)
+
+                if not dbmapview:
+                    dbmapview = mapviewobject({'uuid': str(uuid4()),
+                                               'useruuid': useruuid,
+                                               'name': '%s Default MapView' % nickname,
+                                               'shared': True,
+                                               })
+
                 if data in self._subscribers:
                     if clientuuid not in self._subscribers[data]:
                         self._subscribers[data].append(clientuuid)
                 else:
                     self._subscribers[data] = [clientuuid]
-                hfoslog("[MVM] Subscription registered: ", data, clientuuid)
+
+                hfoslog("[MVM] Subscription registered: ", data, clientuuid, dbmapview.to_dict())
+
+                self.fireEvent(send(clientuuid, {'component': 'mapview', 'action': 'get',
+                                                 'data': dbmapview.serializablefields()}))
+
                 return
             elif action == 'unsubscribe':
                 self._unsubscribe(clientuuid, data)
