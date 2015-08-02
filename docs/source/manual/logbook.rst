@@ -24,7 +24,7 @@ The log entries are categorized loosely after the `Solas specification`_, Annex 
 | Engine Movement Record Book  |                              | Both             | If technology allows              |
 +------------------------------+------------------------------+------------------+-----------------------------------+
 | Automatic Maneuver Record    | Engine/Propeller pitch       | Automatic        | If technology allows              |
-|                              | bow thruster mo^ement record |                  |                                   |
+|                              | bow thruster movement record |                  |                                   |
 +------------------------------+------------------------------+------------------+-----------------------------------+
 | Automatic Course Record      |                              | Automatic        | If technology allows              |
 +------------------------------+------------------------------+------------------+-----------------------------------+
