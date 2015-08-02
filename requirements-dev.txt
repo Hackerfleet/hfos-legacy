@@ -40,6 +40,6 @@ sphinxcontrib-nwdiag
 sphinxcontrib-seqdiag
 sphinxcontrib-blockdiag
 sphinxcontrib-spelling
-sphinxcontrib-autojs
+#sphinxcontrib-autojs
 pyenchant
 sphinx-git
