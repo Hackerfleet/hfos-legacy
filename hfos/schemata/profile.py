@@ -77,7 +77,17 @@ Profile = {
                 'notes': {'type': 'string', 'format': 'html', 'title': 'Profile notes',
                           'description': 'Custom profile notes'},
             }
+        },
+        "alertconfig": {
+            "id": "#profile.alertconfig",
+            "type": "object",
+            "properties": {
+                'ontime': {'type': 'string', 'title': 'Active',
+                           'description': 'Active alert times'}
+
+            }
         }
+
     },
     'required': [
         'uuid'
