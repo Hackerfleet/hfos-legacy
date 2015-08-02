@@ -26,7 +26,8 @@ import warmongo
 
 # noinspection PyUnresolvedReferences
 from six.moves import input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
-from hfos.logger import hfoslog, warn
+from hfos.logger import hfoslog, warn, critical
+from hfos.schemata import schemastore
 from hfos.schemata.profile import Profile
 from hfos.schemata.user import User
 from hfos.schemata.mapview import MapView
@@ -36,6 +37,9 @@ from hfos.schemata.controllable import Controllable
 from hfos.schemata.controller import Controller
 from hfos.schemata.client import Clientconfig
 from hfos.schemata.wikipage import WikiPage
+from hfos.schemata.vessel import VesselSchema
+from hfos.schemata.radio import RadioConfig
+
 
 from jsonschema import ValidationError
 
@@ -61,7 +65,30 @@ def clear_all():
 
 warmongo.connect("hfos")
 
-# TODO: This could be automated via the schemata-store. Hmm.
+
+def _buildModelFactories():
+    result = {}
+
+    for schemaname in schemastore:
+
+        schema = None
+
+        try:
+            schema = schemastore[schemaname]['schema']
+        except KeyError:
+            hfoslog("[DB] No schema found for ", schemaname, lvl=critical)
+
+        try:
+            result[schemaname] = warmongo.model_factory(schema)
+        except Exception as e:
+            hfoslog("[DB] Could not create factory for schema ", schemaname, schema, lvl=critical)
+
+    return result
+
+
+objectmodels = _buildModelFactories()
+
+# TODO: Export the following automatically from the objectmodels?
 
 userobject = warmongo.model_factory(User)
 profileobject = warmongo.model_factory(Profile)
@@ -76,3 +103,6 @@ controllerobject = warmongo.model_factory(Controller)
 controllableobject = warmongo.model_factory(Controllable)
 
 wikipageobject = warmongo.model_factory(WikiPage)
+
+vesselconfigobject = warmongo.model_factory(VesselSchema)
+radioconfigobject = warmongo.model_factory(RadioConfig)

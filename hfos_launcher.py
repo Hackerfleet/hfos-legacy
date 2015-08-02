@@ -30,6 +30,7 @@ from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 # from circuits.tools import graph
 
+from hfos.web.objectmanager import ObjectManager
 from hfos.web.rcmanager import RemoteControlManager
 from hfos.web.clientmanager import ClientManager
 from hfos.web.mapviewmanager import MapViewManager
@@ -41,7 +42,7 @@ from hfos.web.tilecache import TileCache
 from hfos.web.demo import WebDemo
 from hfos.web.wiki import Wiki
 
-from hfos.logger import hfoslog, verbose
+from hfos.logger import hfoslog, verbose, setup_root, Logger
 from hfos.debugger import HFDebugger
 
 from hfos.nmea import NMEAParser
@@ -63,8 +64,10 @@ class App(Component):
 def main():
     """Preliminary HFOS application Launcher"""
 
-    hfoslog("[HFOS] Beginning graph assembly.")
     server = Server(("0.0.0.0", 8055))
+    setup_root(server)
+    Logger().register(server)
+    hfoslog("[HFOS] Beginning graph assembly.")
 
     HFDebugger().register(server)
 
@@ -79,6 +82,7 @@ def main():
 
     clientmanager = ClientManager().register(server)
     SchemaManager().register(clientmanager)
+    ObjectManager().register(clientmanager)
     Authenticator().register(clientmanager)
     Chat().register(clientmanager)
     MapViewManager().register(clientmanager)

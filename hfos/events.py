@@ -179,6 +179,13 @@ class schemarequest(AuthorizedEvent):
     """A client requires a schema to validate data or display a form"""
 
 
+# Object Manager requests
+
+
+class objectmanagerrequest(AuthorizedEvent):
+    """A client requires a schema to validate data or display a form"""
+
+
 # Chat requests
 
 
@@ -299,5 +306,6 @@ AuthorizedEvents = {
     'layer': layerrequest,
     'remotectrl': remotecontrolrequest,
     'camera': camerarequest,
-    'wiki': wikirequest
+    'wiki': wikirequest,
+    'objectmanager': objectmanagerrequest
 }
