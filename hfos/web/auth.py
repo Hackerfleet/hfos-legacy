@@ -52,10 +52,12 @@ class Authenticator(Component):
             if useraccount.passhash == event.passhash:
                 hfoslog("[AUTH] Passhash matches, checking client and profile.", lvl=debug)
 
-                if event.requestedclientuuid != event.clientuuid:
-                    # Client requests to get an existing client configuration
+                requestedclientuuid = event.requestedclientuuid
 
-                    clientconfig = clientconfigobject.find_one({'clientuuid': event.requestedclientuuid})
+                if requestedclientuuid != event.clientuuid:
+                    # Client requests to get an existing client configuration or has none
+
+                    clientconfig = clientconfigobject.find_one({'uuid': requestedclientuuid})
 
                     if clientconfig:
                         hfoslog("[AUTH] Checking client configuration permissions", lvl=debug)
@@ -63,7 +65,8 @@ class Authenticator(Component):
                             clientconfig = None
                             hfoslog("[AUTH] Unauthorized client configuration requested", lvl=warn)
                     else:
-                        hfoslog("[AUTH] Unknown client configuration requested: ", event.requestedclientuuid, lvl=warn)
+                        hfoslog("[AUTH] Unknown client configuration requested: ", requestedclientuuid, event.__dict__,
+                                lvl=warn)
 
                 if not clientconfig:
                     hfoslog("[AUTH] Creating new default client configuration")
@@ -71,7 +74,7 @@ class Authenticator(Component):
                     # -> Create a new client configuration
 
                     clientconfig = clientconfigobject()
-                    clientconfig.clientuuid = event.clientuuid
+                    clientconfig.uuid = event.clientuuid
                     clientconfig.name = "New client"
                     clientconfig.description = "New client configuration from " + useraccount.username
                     clientconfig.useruuid = useraccount.uuid
@@ -107,7 +110,7 @@ class Authenticator(Component):
                 newprofile = profileobject({'uuid': str(newuser.uuid)})
                 hfoslog("[AUTH] New profile uuid: ", newprofile.uuid, lvl=verbose)
 
-                newprofile.components = {'enabled': ["dasboard", "map", "weather", "settings"]}
+                newprofile.components = {'enabled': ["dashboard", "map", "weather", "settings"]}
                 newprofile.save()
             except Exception as e:
                 hfoslog("[AUTH] Problem creating new profile: ", type(e), e, lvl=error)
@@ -116,10 +119,10 @@ class Authenticator(Component):
             try:
                 # TODO: Clone or reference systemwide default configuration
                 newclientconfig = clientconfigobject()
-                newclientconfig.clientuuid = event.clientuuid
+                newclientconfig.uuid = event.clientuuid
                 newclientconfig.name = "New client"
-                newclientconfig.description = "New client configuration from " + event.username
-                newclientconfig.useruuid = useraccount.uuid
+                newclientconfig.description = "New client configuration from " + newuser.username
+                newclientconfig.useruuid = newuser.uuid
                 newclientconfig.save()
             except Exception as e:
                 hfoslog("[AUTH] Problem creating new clientconfig: ", type(e), e, lvl=error)
@@ -128,9 +131,9 @@ class Authenticator(Component):
             try:
                 self.fireEvent(
                     authentication(newuser.username, (newuser, newprofile, newclientconfig), event.clientuuid,
-                                              newuser.uuid,
-                                              event.sock),
-                               "auth")
+                                   newuser.uuid,
+                                   event.sock),
+                    "auth")
             except Exception as e:
                 hfoslog("[AUTH] Error during new account confirmation transmission", e, lvl=error)
 
@@ -149,11 +152,7 @@ class Authenticator(Component):
             newprofile = event.data
             hfoslog("[AUTH] Updating with %s " % newprofile, lvl=debug)
 
-            userprofile = profileobject.find_one({'uuid': event.user.useruuid})
-
-            if event.user.useruuid != userprofile.uuid:
-                hfoslog("[AUTH] User tried to manipulate wrong profile.", lvl=warn)
-                return
+            userprofile = profileobject.find_one({'uuid': event.user.uuid})
 
             hfoslog("[AUTH] Updating %s" % userprofile, lvl=debug)
 

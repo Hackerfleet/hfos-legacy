@@ -163,7 +163,7 @@ class CameraManager(Component):
                 action = event.action
                 data = event.data
 
-                clientuuid = event.client.clientuuid
+                clientuuid = event.client.uuid
             except Exception as e:
                 raise ValueError("[CAM] Problem during event unpacking:", e, type(e))
 

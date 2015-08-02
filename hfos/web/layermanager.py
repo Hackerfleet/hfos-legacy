@@ -54,7 +54,7 @@ class LayerManager(Component):
                 try:
                     dblist = self._generatelayerlist()
                     self.fireEvent(
-                        send(event.client.clientuuid, {'component': 'layers', 'action': 'list', 'data': dblist}))
+                        send(event.client.uuid, {'component': 'layers', 'action': 'list', 'data': dblist}))
                 except Exception as e:
                     hfoslog("[LM] Listing error: ", e, type(e), lvl=error)
                 return

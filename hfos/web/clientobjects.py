@@ -33,7 +33,7 @@ class Client(object):
 
         self.sock = sock
         self.ip = ip
-        self.clientuuid = clientuuid
+        self.uuid = clientuuid
         self.useruuid = useruuid
         if name == '':
             self.name = clientuuid
@@ -47,17 +47,17 @@ class User(object):
     Authenticated clients with profile etc
     """
 
-    def __init__(self, account, profile, useruuid):
+    def __init__(self, account, profile, uuid):
         """
 
         :param account: userobject
         :param profile: profileobject
-        :param useruuid: profileobject
+        :param uuid: profileobject
         :param clients: List of clients' UUIDs
         :param args:
         """
         super(User, self).__init__()
         self.clients = []
-        self.useruuid = useruuid
+        self.uuid = uuid
         self.profile = profile
         self.account = account

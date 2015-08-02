@@ -38,10 +38,10 @@ class SchemaManager(Component):
                             'action': 'Get',
                             'data': self.schemata[event.data]
                             }
-                self.fireEvent(send(event.client.clientuuid, response))
+                self.fireEvent(send(event.client.uuid, response))
         elif event.action == "All":
             hfoslog("[SM] Schemarequest for all schemata from ", event.user, lvl=info)
             response = {'component': 'schema',
                         'action': 'All',
                         'data': hfos.schemata.schemastore}
-            self.fireEvent(send(event.client.clientuuid, response))
+            self.fireEvent(send(event.client.uuid, response))

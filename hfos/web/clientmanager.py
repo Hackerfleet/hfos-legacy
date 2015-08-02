@@ -241,8 +241,10 @@ class ClientManager(Component):
 
             useruuid = event.useruuid
             originatingclientuuid = event.clientuuid
-            clientuuid = clientconfig.clientuuid
+            clientuuid = clientconfig.uuid
 
+            if clientuuid != originatingclientuuid:
+                hfoslog("[CM] Mutating client uuid to request id: ", clientuuid, lvl=debug)
             # Assign client to user
             if useruuid in self._users:
                 signedinuser = self._users[useruuid]
@@ -251,7 +253,11 @@ class ClientManager(Component):
                 self._users[account.uuid] = signedinuser
 
             if clientuuid in signedinuser.clients:
-                hfoslog("[CM] Client already logged in?!", lvl=critical)
+                hfoslog("[CM] Client configuration already logged in.", lvl=critical)
+                # TODO: What now??
+                # Probably senseful would be to add the socket to the client's other socket
+                # The clients would be identical then - that could cause problems
+                # which could be remedied by duplicating the configuration
             else:
                 signedinuser.clients.append(clientuuid)
                 hfoslog("[CM] Active client registered to user ", clientuuid, useruuid, lvl=info)

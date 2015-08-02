@@ -65,7 +65,7 @@ class Wiki(Component):
 
                 if not wikipage:
                     hfoslog("[WIKI] Page not found: ", data)
-                    wikipage = wikipageobject({'pageuuid': str(uuid4()),
+                    wikipage = wikipageobject({'uuid': str(uuid4()),
                                                'name': data,
                                                })
                 else:
@@ -76,15 +76,15 @@ class Wiki(Component):
                               'data': wikipage.serializablefields()
                               }
             elif action == "put":
-                if data['pageuuid']:
-                    wikipage = wikipageobject.find_one({'pageuuid': data['pageuuid']})
+                if data['uuid']:
+                    wikipage = wikipageobject.find_one({'uuid': data['uuid']})
 
                     if wikipage:
                         hfoslog("[WIKI] Updating old page.")
                         wikipage.update(data)
                     else:
                         wikipage = wikipageobject(data)
-                        hfoslog("[WIKI] Storing a new page:", wikipage._fields, lvl=warn)
+                        hfoslog("[WIKI] Storing a new page:", wikipage._fields)
                         try:
                             wikipage.validate()
                             wikipage.save()
@@ -100,7 +100,7 @@ class Wiki(Component):
                                   'data': (True, wikipage.name),
                                   }
                 else:
-                    hfoslog("[WIKI] Weird request without pageuuid! Trying to create completely new page.", lvl=warn)
+                    hfoslog("[WIKI] Weird request without uuid! Trying to create completely new page.", lvl=warn)
                     wikipage = wikipageobject(data)
                     wikipage.uuid = str(uuid4())
                     if wikipage.validate():
@@ -116,7 +116,7 @@ class Wiki(Component):
                 return
 
             try:
-                self.fireEvent(send(event.client.clientuuid, wikipacket))
+                self.fireEvent(send(event.client.uuid, wikipacket))
             except Exception as e:
                 hfoslog("[WIKI] Transmission error before broadcast: %s" % e, lvl=error)
 

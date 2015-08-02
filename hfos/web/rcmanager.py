@@ -76,7 +76,7 @@ class RemoteControlManager(DBAccessManager):
             data = event.data
             username = event.user.account.username
             clientname = event.client.name
-            clientuuid = event.client.clientuuid
+            clientuuid = event.client.uuid
 
             if action == 'list':
                 try:
@@ -101,7 +101,7 @@ class RemoteControlManager(DBAccessManager):
                 return
             elif action == "leaveControl":
 
-                if self.remotecontroller == event.client.clientuuid:
+                if self.remotecontroller == event.client.uuid:
                     hfoslog("[RCM] Client leaves control!", username, clientname, lvl=warn)
                     self.remotecontroller = None
                     self.fireEvent(
@@ -109,7 +109,7 @@ class RemoteControlManager(DBAccessManager):
                 return
             elif action == "controlData":
                 hfoslog("[RCM] Control data received: ", data)
-                if event.client.clientuuid == self.remotecontroller:
+                if event.client.uuid == self.remotecontroller:
                     hfoslog("[RCM] Valid data, handing on to ControlDataManager.")
                     self.fireEvent(remotecontrolupdate(data), "machineroom")
                 else:
