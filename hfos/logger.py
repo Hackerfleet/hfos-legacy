@@ -40,13 +40,21 @@ off = 100
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+from circuits import Component, handler
+from circuits.core import Event
+from circuits.tools import findroot
+
+from uuid import uuid4
+
+import json
 
 
 import time
 import sys
 import inspect
 import six
+
+root = None
 
 events = 4
 verbose = 5
@@ -72,7 +80,7 @@ count = 0
 logfile = "/var/log/hfos/service.log"
 verbosity = {'global': events,
              'file': off,
-             'console': verbose
+             'console': debug,
              }
 
 mute = []
@@ -80,6 +88,16 @@ solo = []
 
 start = time.time()
 
+
+class LogEvent(Event):
+    def __init__(self, msg, severity, *args):
+        super(LogEvent, self).__init__(*args)
+
+        self.msg = msg
+        self.severity = severity
+
+    def __str__(self):
+        return str(self.msg)
 
 def isMuted(what):
     global mute, solo
@@ -101,6 +119,11 @@ def isMuted(what):
     return state
 
 
+def setup_root(newroot):
+    global root
+
+    root = newroot
+
 def hfoslog(*what, **kwargs):
     """Logs all args except "lvl" which is used to determine the incident log level.
     :param kwargs: Debug message level
@@ -117,6 +140,7 @@ def hfoslog(*what, **kwargs):
 
     global count
 
+    output = None
     count += 1
 
     now = time.time() - start
@@ -160,3 +184,25 @@ def hfoslog(*what, **kwargs):
         if six.PY3:
             output = lvldata[lvl][1] + output + terminator
         print(output)
+    if root and output:
+        root.fire(LogEvent(str(output), lvl), "logger")
+
+
+class Logger(Component):
+    """
+    System logger
+
+    Handles all the logging aspects.
+
+    """
+
+    channels = "logger"
+
+    def __init__(self, *args):
+        super(Logger, self).__init__(*args)
+
+        hfoslog("[LOGGER] Started.")
+
+    @handler("LogEvent")
+    def LogEvent(self, event):
+        pass
