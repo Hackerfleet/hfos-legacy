@@ -62,6 +62,9 @@ def get_tile(url):
     return content, log
 
 
+class UrlError(Exception):
+    pass
+
 class TileCache(Controller):
     """
     Threaded, disk-caching tile delivery component
@@ -85,14 +88,19 @@ class TileCache(Controller):
         self._tilelist = []
 
     def _splitURL(self, url):
-        if self.path is not None:
-            url = url[len(self.path):]
-
-        url = unquote(url)
-        spliturl = url.split("/")
-        service = "/".join(spliturl[1:-3])  # get all but the coords as service
-
         try:
+            if self.path is not None:
+                url = url[len(self.path):]  # Cut off server's url path
+
+            url = unquote(url)
+
+            if '..' in url:  # Does this need more safety checks?
+                hfoslog("[TC] Fishy url with parent path: ", url, lvl=error)
+                raise UrlError
+
+            spliturl = url.split("/")
+            service = "/".join(spliturl[1:-3])  # get all but the coords as service
+
             x = spliturl[-3]
             y = spliturl[-2]
             z = spliturl[-1].split('.')[0]
@@ -101,15 +109,17 @@ class TileCache(Controller):
             realurl = "http://" + service + "/" + x + "/" + y + "/" + z + ".png"
         except Exception as e:
             hfoslog("[TC] ERROR (%s) in URL: %s" % (e, url))
-            filename = ""
-            realurl = ""
+            raise UrlError
 
         return filename, realurl
 
     def tilecache(self, event, *args, **kwargs):
         """Checks and caches a requested tile to disk, then delivers it to client"""
         request, response = event.args[:2]
-        filename, url = self._splitURL(request.path)
+        try:
+            filename, url = self._splitURL(request.path)
+        except UrlError:
+            return
 
         # Do we have the tile already?
         if os.path.isfile(filename):
