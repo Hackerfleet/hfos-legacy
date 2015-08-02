@@ -51,11 +51,14 @@ __all__ = [
     'controller',
     'user',
     'wikipage',
+    'vessel',
+    'radio'
 ]
 
 from importlib import import_module
 
-from hfos.logger import hfoslog, verbose
+from hfos.logger import hfoslog, verbose, debug, warn
+from hfos.schemata.defaultform import defaultform
 
 
 def _build_schemastore():
@@ -64,7 +67,20 @@ def _build_schemastore():
     for schemaname in __all__:
         hfoslog('[SCHEMATA] Adding Schema:', schemaname, lvl=verbose)
         schemamodule = import_module('hfos.schemata.' + schemaname)
-        result[schemaname] = schemamodule.__schema__
+        schema = None
+        form = defaultform
+        try:
+            form = schemamodule.__form__
+        except AttributeError:
+            hfoslog("[SCHEMATA] No form found for schema %s, using defaultform." % schemaname, lvl=debug)
+
+        try:
+            schema = schemamodule.__schema__
+        except AttributeError:
+            hfoslog("[SCHEMATA] No schema found in schema %s!." % schemaname, lvl=warn)
+
+        if schema and form:
+            result[schemaname] = {'schema': schema, 'form': form}
 
     return result
 
@@ -77,9 +93,11 @@ def test():
 
     from jsonschema import Draft4Validator
 
-    for schemaname, schema in schemastore.items():
+    for schemaname, schemadata in schemastore.items():
         hfoslog("[SCHEMATA] Validating schema ", schemaname)
-        Draft4Validator.check_schema(schema)
+        Draft4Validator.check_schema(schemadata['schema'])
+        if 'uuid' not in schemadata['schema']:
+            hfoslog("[SCHEMATA] Schema without uuid encountered: ", schemaname, lvl=debug)
 
 # https://github.com/fge/sample-json-schemas/tree/master/geojson
 
