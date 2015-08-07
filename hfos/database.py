@@ -39,7 +39,7 @@ from hfos.schemata.client import Clientconfig
 from hfos.schemata.wikipage import WikiPage
 from hfos.schemata.vessel import VesselSchema
 from hfos.schemata.radio import RadioConfig
-
+from hfos.schemata.sensordata import SensorData
 
 from jsonschema import ValidationError
 
@@ -106,3 +106,5 @@ wikipageobject = warmongo.model_factory(WikiPage)
 
 vesselconfigobject = warmongo.model_factory(VesselSchema)
 radioconfigobject = warmongo.model_factory(RadioConfig)
+
+sensordataobject = warmongo.model_factory(SensorData)

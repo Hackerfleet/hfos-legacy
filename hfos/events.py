@@ -219,6 +219,18 @@ class mapviewrequest(AuthorizedEvent):
         hfoslog("[MVS-EVENT] Request generated", lvl=events)
 
 
+# Mapview Events
+
+
+class alertrequest(AuthorizedEvent):
+    """A client related alert event"""
+
+    def __init__(self, *args):
+        super(alertrequest, self).__init__(*args)
+
+        hfoslog("[ALERT-EVENT] Request generated", lvl=events)
+
+
 class mapviewbroadcast(Event):
     """A user changed his mapview and subscribers need to get notified"""
 
@@ -281,6 +293,21 @@ class sensordata(Event):
         self.data = data
 
 
+# Navigation Data Events
+
+class referenceframe(Event):
+    """New sensordata has been parsed"""
+
+    def __init__(self, data):
+        """
+
+        :param data: Parsed NMEA? Data
+        """
+        super(referenceframe, self).__init__()
+        self.data = data
+        hfoslog("[NAVDATA-EVENT] Reference frame generated: ", data, lvl=events)
+
+
 # Remote Control requests
 
 class remotecontrolrequest(AuthorizedEvent):
@@ -307,5 +334,6 @@ AuthorizedEvents = {
     'remotectrl': remotecontrolrequest,
     'camera': camerarequest,
     'wiki': wikirequest,
-    'objectmanager': objectmanagerrequest
+    'objectmanager': objectmanagerrequest,
+    'alert': alertrequest
 }
