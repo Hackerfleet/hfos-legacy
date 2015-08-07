@@ -35,6 +35,7 @@ from hfos.web.rcmanager import RemoteControlManager
 from hfos.web.clientmanager import ClientManager
 from hfos.web.mapviewmanager import MapViewManager
 from hfos.web.schemamanager import SchemaManager
+from hfos.web.alertmanager import AlertManager
 from hfos.web.layermanager import LayerManager
 from hfos.web.auth import Authenticator
 from hfos.web.chat import Chat
@@ -45,7 +46,9 @@ from hfos.web.wiki import Wiki
 from hfos.logger import hfoslog, verbose, setup_root, Logger
 from hfos.debugger import HFDebugger
 
-from hfos.nmea import NMEAParser
+from hfos.protocols.nmea import NMEAParser
+
+from hfos.navdata import NavData
 
 
 class App(Component):
@@ -74,13 +77,16 @@ def main():
     app = App().register(server)
 
     # Machineroom().register(app)
-    NMEAParser().register(app)
+
+    navdata = NavData().register(server)
+    NMEAParser('localhost', 2222).register(navdata)
 
     TileCache().register(server)
     Static("/", docroot="/var/lib/hfos/static").register(server)
     WebSocketsDispatcher("/websocket").register(server)
 
     clientmanager = ClientManager().register(server)
+    AlertManager().register(clientmanager)
     SchemaManager().register(clientmanager)
     ObjectManager().register(clientmanager)
     Authenticator().register(clientmanager)
