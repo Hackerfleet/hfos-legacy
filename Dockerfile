@@ -6,6 +6,7 @@
 # Usage Examples(s)::
 #
 #     $ docker run -i -t hackerfleet/hfos hfos_launcher.py
+#     $ docker run -i -t -p 127.0.0.1:8055:8055 --name hfos-test-live -t hackerfleet/hfos
 #
 # VERSION: 0.0.1
 #
@@ -50,6 +51,11 @@ RUN npm install
 RUN npm -g install bower grunt-cli
 RUN bower install --config.interactive=false --allow-root
 RUN grunt copy:dev --force
+
+# Mongo config (smallfiles) and startup
+
+RUN echo smallfiles = true >> /etc/mongodb.conf
+RUN /etc/init.d/mongodb start
 
 #  Services
 
