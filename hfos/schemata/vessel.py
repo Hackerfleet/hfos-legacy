@@ -24,6 +24,8 @@ VesselSchema = {
                  'title': 'Unique Vessel ID'
                  },
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Vessel name'},
+        'mmsi': {'type': 'string', 'minLength': 9, 'maxLength': 9, 'title': 'MMSI',
+                 'description': 'Martime Mobile Service Identity'},
         'vesseltype': {'type': 'string', 'title': 'Vessel Type', 'enum': ['Sailboat', 'Motorboat', 'Platform'],
                        'description': 'General classification of vessel'},
         'color': {'type': 'string', 'title': 'Vessel Color', 'format': 'color',
