@@ -110,7 +110,7 @@ class ClientManager(Component):
                     self.fireEvent(write(sock, event.packet), "wsserver")
 
         except Exception as e:
-            hfoslog("[CM] Exception during sending: %.50s (%s)" % (e, type(e)))
+            hfoslog("[CM] Exception during sending: %s (%s)" % (e, type(e)), lvl=critical)
 
     def broadcast(self, event):
         """Broadcasts an event either to all users or clients, depending on event flag"""
