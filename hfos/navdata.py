@@ -33,6 +33,8 @@ class NavData(Component):
         self.changed = False
 
         self.interval = 1
+        self.passiveinterval = 10
+        self.intervalcount = 0
 
         Timer(self.interval, Event.create('navdatapush'), self.channel, persist=True).register(self)
 
@@ -59,14 +61,18 @@ class NavData(Component):
 
         try:
             self.fireEvent(referenceframe({'data': self.referenceframe, 'ages': self.referenceages}), "navdata")
-            self.fireEvent(broadcast('users', {
-                'component': 'navdata',
-                'action': 'update',
-                'data': {
-                    'data': self.referenceframe.serializablefields(),
-                    'ages': self.referenceages
-                }
-            }), "hfosweb")
+            self.intervalcount += 1
+
+            if self.intervalcount == self.passiveinterval:
+                self.fireEvent(broadcast('users', {
+                    'component': 'navdata',
+                    'action': 'update',
+                    'data': {
+                        'data': self.referenceframe.serializablefields(),
+                        'ages': self.referenceages
+                    }
+                }), "hfosweb")
+                self.intervalcount = 0
             hfoslog("[NAVDATA] Reference frame successfully pushed.", lvl=debug)
         except Exception as e:
             hfoslog("[NAVDATA] Could not push referenceframe: ", e, type(e), lvl=critical)
