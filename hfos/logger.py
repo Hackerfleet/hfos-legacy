@@ -172,7 +172,7 @@ def hfoslog(*what, **kwargs):
     if lvl >= verbosity['file']:
         try:
             f = open(logfile, "a")
-            f.write(msg)
+            f.write(msg + '\n')
             f.flush()
             f.close()
         except IOError:
