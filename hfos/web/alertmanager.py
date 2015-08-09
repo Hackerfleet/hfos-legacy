@@ -14,9 +14,8 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits import Component, handler
 
-from hfos.logger import hfoslog, error, warn, verbose
+from hfos.logger import hfoslog, error, warn, verbose, critical
 from hfos.events import broadcast
-
 
 class AlertManager(Component):
     """
@@ -57,6 +56,7 @@ class AlertManager(Component):
 
             if action == 'mob':
                 if data == True:
+                    hfoslog("[ALERT] MOB ALERT ACTIVATED.", lvl=critical)
                     alertpacket = {'component': 'alert', 'action': 'mob', 'data': True}
                 else:
                     hfoslog("[ALERT] MOB deactivation requested by ", event.user.account.username, lvl=warn)
