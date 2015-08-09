@@ -17,7 +17,7 @@ from uuid import uuid4
 from circuits import Component, handler
 
 from hfos.database import userobject, profileobject, clientconfigobject
-from hfos.events import authentication
+from hfos.events import authentication, send
 from hfos.logger import hfoslog, error, warn, debug, verbose
 
 
@@ -134,6 +134,10 @@ class Authenticator(Component):
                                    newuser.uuid,
                                    event.sock),
                     "auth")
+                self.fireEvent(send(event.clientuuid, {'component': 'auth',
+                                                       'action': 'new',
+                                                       'data': 'registration successful'
+                                                       }, sendtype="client"), "hfosweb")
             except Exception as e:
                 hfoslog("[AUTH] Error during new account confirmation transmission", e, lvl=error)
 
