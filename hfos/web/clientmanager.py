@@ -45,36 +45,70 @@ class ClientManager(Component):
 
         hfoslog("[CM] Disconnect ", sock)
 
-        if sock in self._sockets:
-            hfoslog("[CM] Deleting socket")
-            sockobj = self._sockets[sock]
-            clientuuid = sockobj.clientuuid
+        try:
+            if sock in self._sockets:
+                hfoslog("[CM] Getting socket", lvl=debug)
+                sockobj = self._sockets[sock]
+                hfoslog("[CM] Getting clientuuid", lvl=debug)
+                clientuuid = sockobj.clientuuid
+                hfoslog("[CM] getting useruuid", lvl=debug)
+                useruuid = self._clients[clientuuid].useruuid
 
-            self.fireEvent(clientdisconnect(clientuuid, self._clients[clientuuid].useruuid))
+                hfoslog("[CM] Firing disconnect event", lvl=debug)
+                self.fireEvent(clientdisconnect(clientuuid, self._clients[clientuuid].useruuid))
 
-            del self._sockets[sock]
-            del self._clients[clientuuid]
+                hfoslog("[CM] Logging out relevant client", lvl=debug)
+                if useruuid != None:
+                    hfoslog("[CM] Client was logged in", lvl=debug)
+                    try:
+                        self._logoutclient(useruuid, clientuuid)
+                        hfoslog("[CM] Client logged out", clientuuid)
+                    except Exception as e:
+                        hfoslog("[CM] Couldn't clean up logged in user! ", self._users[useruuid], e, type(e),
+                                lvl=critical)
+                hfoslog("[CM] Deleting Client (", self._clients.keys, ")", lvl=debug)
+                del self._clients[clientuuid]
+                hfoslog("[CM] Deleting Socket", lvl=debug)
+                del self._sockets[sock]
+        except Exception as e:
+            hfoslog("[CM] Error during disconnect handling: ", e, type(e), lvl=critical)
+
+    def _logoutclient(self, useruuid, clientuuid):
+        hfoslog("[CM] Cleaning up client of logged in user.")
+        try:
+            self._users[useruuid].clients.remove(clientuuid)
+            if len(self._users[useruuid].clients) == 0:
+                hfoslog("[CM] Last client of user disconnected.")
+                del self._users[useruuid]
+            self._clients[clientuuid].useruuid = None
+        except Exception as e:
+            hfoslog("[CM] Error during client logout: ", e, type(e), lvl=error)
+
 
     @handler("connect", channel="wsserver")
     def connect(self, *args):
         """Registers new sockets and their clients and allocates uuids"""
 
         hfoslog("[CM] Connect ", args)
-        sock = args[0]
-        ip = args[1]
 
-        if sock not in self._sockets:
-            hfoslog("[CM] New ip!", ip)
-            clientuuid = str(uuid4())
-            self._sockets[sock] = Socket(ip, clientuuid)
-            # Key uuid is temporary, until signin, will then be replaced with account uuid
-            self._clients[clientuuid] = Client(sock, ip, clientuuid)
-            self.fireEvent(write(sock, json.dumps({'type': 'info', 'content': 'Connected'})))
-            hfoslog("[CM] Client connected:", clientuuid)
-        else:
-            hfoslog("[CM] Strange! Old IP reconnected!" + "#" * 15)
-            #     self.fireEvent(write(sock, "Another client is connecting from your IP!"))
-            #     self._sockets[sock] = (ip, uuid.uuid4())
+        try:
+            sock = args[0]
+            ip = args[1]
+
+            if sock not in self._sockets:
+                hfoslog("[CM] New ip!", ip)
+                clientuuid = str(uuid4())
+                self._sockets[sock] = Socket(ip, clientuuid)
+                # Key uuid is temporary, until signin, will then be replaced with account uuid
+                self._clients[clientuuid] = Client(sock, ip, clientuuid)
+                self.fireEvent(write(sock, json.dumps({'type': 'info', 'content': 'Connected'})))
+                hfoslog("[CM] Client connected:", clientuuid)
+            else:
+                hfoslog("[CM] Strange! Old IP reconnected!" + "#" * 15)
+                #     self.fireEvent(write(sock, "Another client is connecting from your IP!"))
+                #     self._sockets[sock] = (ip, uuid.uuid4())
+        except Exception as e:
+            hfoslog("[CM] Error during connect: ", e, type(e), lvl=critical)
 
     def send(self, event):
         """Sends a packet to an already known user or one of his clients by UUID"""
@@ -116,19 +150,27 @@ class ClientManager(Component):
         """Broadcasts an event either to all users or clients, depending on event flag"""
         try:
             if event.broadcasttype == "users":
-                hfoslog("[CM] Broadcasting to all users:", event.content)
-                for useruuid in self._users.keys():
-                    self.fireEvent(send(useruuid, event.content, sendtype="user"))
+                if len(self._users) > 0:
+                    hfoslog("[CM] Broadcasting to all users:", event.content)
+                    for useruuid in self._users.keys():
+                        self.fireEvent(send(useruuid, event.content, sendtype="user"))
+                else:
+                    hfoslog("[CM] Not broadcasting, no users connected.", lvl=debug)
 
             elif event.broadcasttype == "clients":
-                hfoslog("[CM] Broadcasting to all clients: ", event.content)
-                for client in self._clients.values():
-                    self.fireEvent(write(client.sock, event.content), "wsserver")
-
+                if len(self._clients) > 0:
+                    hfoslog("[CM] Broadcasting to all clients: ", event.content)
+                    for client in self._clients.values():
+                        self.fireEvent(write(client.sock, event.content), "wsserver")
+                else:
+                    hfoslog("[CM] Not broadcasting, no clients connected.", lvl=debug)
             elif event.broadcasttype == "socks":
-                hfoslog("[CM] Emergency?! Broadcasting to all sockets: ", event.content)
-                for sock in self._sockets:
-                    self.fireEvent(write(sock, event.content), "wsserver")
+                if len(self._sockets) > 0:
+                    hfoslog("[CM] Emergency?! Broadcasting to all sockets: ", event.content)
+                    for sock in self._sockets:
+                        self.fireEvent(write(sock, event.content), "wsserver")
+                else:
+                    hfoslog("[CM] Not broadcasting, no sockets connected.", lvl=debug)
 
         except Exception as e:
             hfoslog("[CM] Error during broadcast: ", e, type(e), lvl=critical)
@@ -165,7 +207,16 @@ class ClientManager(Component):
                 hfoslog("[CM] Login failed: ", e, lvl=warn)
         elif requestaction == "logout":
             hfoslog("[CM] User logged out, refreshing client.")
-            self.fireEvent(clientdisconnect(clientuuid))
+            try:
+                if clientuuid in self._clients:
+                    client = self._clients[clientuuid]
+                    if client.useruuid:
+                        self._logoutclient(client.useruuid, clientuuid)
+                    self.fireEvent(clientdisconnect(clientuuid))
+                else:
+                    hfoslog("[CM] Client is not connected!", lvl=warn)
+            except Exception as e:
+                hfoslog("[CM] Error during client logout: ", e, type(e), lvl=error)
 
 
     @handler("read", channel="wsserver")
@@ -203,6 +254,7 @@ class ClientManager(Component):
 
         if requestcomponent == "auth":
             self._handleAuthenticationEvents(requestdata, requestaction, clientuuid, sock)
+            return
 
         try:
             # Only for signed in users
@@ -211,12 +263,6 @@ class ClientManager(Component):
             hfoslog("[CM] Authenticated operation requested by ", client.config, lvl=debug)
         except Exception as e:
             hfoslog("[CM] No useruuid!", e, type(e), lvl=critical)
-            return
-        if requestcomponent == "auth":
-            if requestaction == "logout":
-                hfoslog("[CM] Client logged out:")
-                self._users[useruuid].clients.remove(clientuuid)
-                self._clients[clientuuid].useruuid = None
             return
 
         try:
