@@ -115,7 +115,7 @@ class ClientManager(Component):
 
         try:
             if event.sendtype == "user":
-                hfoslog("[CM] Broadcasting to all of users clients: '%s': '%s" % (event.uuid, event.packet))
+                hfoslog("[CM] Broadcasting to all of users clients: '%s': '%s" % (event.uuid, event.packet), lvl=debug)
                 if event.uuid not in self._users:
                     hfoslog('[CM] Unknown user! ', event, lvl=critical)
                     return
