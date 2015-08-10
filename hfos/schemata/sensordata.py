@@ -57,6 +57,11 @@ SensorData = {
     }
 }
 
+SensorValueTypes = []
+for key in SensorData['properties']:
+    if key not in ('uuid', 'Time_Created'):
+        SensorValueTypes.append(key)
+
 SensorDataForm = [
     {
         'type': 'section',
