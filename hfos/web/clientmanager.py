@@ -182,10 +182,9 @@ class ClientManager(Component):
             if not user and component in AuthorizedEvents.keys():
                 hfoslog("[CM] Unknown client tried to do an authenticated operation: %s", component, action, data, user)
                 return
-
             event = AuthorizedEvents[component]
             # hfoslog(event, lvl=critical)
-            hfoslog("[CM] Firing authorized event.", lvl=debug)
+            hfoslog("[CM] Firing authorized event: ", component, action, str(data)[:20], lvl=debug)
             # hfoslog("[CM] ", (user, action, data, client), lvl=critical)
             self.fireEvent(event(user, action, data, client))
         except Exception as e:
