@@ -54,19 +54,18 @@ class Authenticator(Component):
 
                 requestedclientuuid = event.requestedclientuuid
 
-                if requestedclientuuid != event.clientuuid:
-                    # Client requests to get an existing client configuration or has none
+                # Client requests to get an existing client configuration or has none
 
-                    clientconfig = clientconfigobject.find_one({'uuid': requestedclientuuid})
+                clientconfig = clientconfigobject.find_one({'uuid': requestedclientuuid})
 
-                    if clientconfig:
-                        hfoslog("[AUTH] Checking client configuration permissions", lvl=debug)
-                        if clientconfig.useruuid != useraccount.uuid:
-                            clientconfig = None
-                            hfoslog("[AUTH] Unauthorized client configuration requested", lvl=warn)
-                    else:
-                        hfoslog("[AUTH] Unknown client configuration requested: ", requestedclientuuid, event.__dict__,
-                                lvl=warn)
+                if clientconfig:
+                    hfoslog("[AUTH] Checking client configuration permissions", lvl=debug)
+                    if clientconfig.useruuid != useraccount.uuid:
+                        clientconfig = None
+                        hfoslog("[AUTH] Unauthorized client configuration requested", lvl=warn)
+                else:
+                    hfoslog("[AUTH] Unknown client configuration requested: ", requestedclientuuid, event.__dict__,
+                            lvl=warn)
 
                 if not clientconfig:
                     hfoslog("[AUTH] Creating new default client configuration")
