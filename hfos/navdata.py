@@ -16,7 +16,7 @@ from circuits import Timer
 
 from hfos.database import sensordataobject, ValidationError
 from hfos.events import referenceframe, broadcast
-from hfos.logger import hfoslog, debug, warn, error, critical
+from hfos.logger import hfoslog, verbose, debug, warn, error, critical
 
 from time import time
 from json import dumps
@@ -73,6 +73,6 @@ class NavData(Component):
                     }
                 }), "hfosweb")
                 self.intervalcount = 0
-            hfoslog("[NAVDATA] Reference frame successfully pushed.", lvl=debug)
+            hfoslog("[NAVDATA] Reference frame successfully pushed.", lvl=verbose)
         except Exception as e:
             hfoslog("[NAVDATA] Could not push referenceframe: ", e, type(e), lvl=critical)
