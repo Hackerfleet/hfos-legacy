@@ -40,6 +40,10 @@ Clientconfig = {
                         'type': 'string',
                         'title': 'Associated Unique Mapview ID'
                         },
+        'dashboarduuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                          'type': 'string',
+                          'title': 'Associated Unique Dashboard ID'
+                          }
     }
 }
 

@@ -52,7 +52,8 @@ __all__ = [
     'user',
     'wikipage',
     'vessel',
-    'radio'
+    'radio',
+    'dashboard'
 ]
 
 from importlib import import_module

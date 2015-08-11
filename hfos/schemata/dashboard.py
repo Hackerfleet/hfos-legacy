@@ -16,7 +16,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from sensordata import SensorValueTypes
 
-Dashboardconfig = {
+Dashboard = {
     'id': '#Dashboard',
     'type': 'object',
     'name': 'Dashboard',
@@ -41,13 +41,18 @@ Dashboardconfig = {
                       'name': 'DashboardCard',
                       'properties': {
                           'id': {'type': 'string', 'enum': ['bearing', 'gauge', 'digital']},
+                          'title': {'type': 'string'},
                           'size': {'type': 'object',
                                    'properties': {
                                        'x': {'type': 'number'},
                                        'y': {'type': 'number'}
                                    }
                                    },
-                          'position': {'type': 'array', 'items': {'type': 'number'}},
+                          'position': {'type': 'object',
+                                       'properties': {
+                                           'width': {'type': 'number'},
+                                           'height': {'type': 'number'}
+                                       }},
                           'value': {'type': 'string', 'enum': SensorValueTypes}
                       }
                   }
@@ -55,7 +60,7 @@ Dashboardconfig = {
     }
 }
 
-DashboardconfigForm = [
+DashboardForm = [
     {
         'type': 'section',
         'htmlClass': 'row',
@@ -64,24 +69,54 @@ DashboardconfigForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'name', 'theme'
+                    'name'
                 ]
             },
             {
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    {'key': 'active', 'readonly': True}, 'locked'
+                    'locked'
                 ]
             }
         ]
     },
     'description',
+    {'key': 'cards',
+     'add': "Add widget",
+     'style': {
+         'add': "btn-success"
+     },
+     'items': [
+         'cards[].title',
+         'cards[].id',
+         'cards[].value',
+         {'type': 'section',
+          'htmlClass': 'row',
+          'items': [
+              {
+                  'type': 'section',
+                  'htmlClass': 'col-xs-4',
+                  'items': [
+                      'cards[].position'
+                  ]
+              },
+              {
+                  'type': 'section',
+                  'htmlClass': 'col-xs-4',
+                  'items': [
+                      'cards[].size'
+                  ]
+              }
+          ]
+          }
+     ]
+     },
     {
         'type': 'submit',
         'title': 'Save Dashboard configuration',
     }
 ]
 
-__schema__ = Dashboardconfig
-__form__ = DashboardconfigForm
+__schema__ = Dashboard
+__form__ = DashboardForm
