@@ -9,9 +9,9 @@ cache:
   directories:
     - $HOME/.pip-cache/
 install:
-  - pip install --upgrade pip
+  - pip install --upgrade pip coveralls pytest-cov pytest
   - python setup.py install
-  - pip install -r requirements-dev.txt --allow-external --cache-dir=$HOME/.pip-cache .
+  - pip install -r requirements.txt --allow-external --cache-dir=$HOME/.pip-cache .
 script: python setup.py test
 after_success:
   - coveralls
