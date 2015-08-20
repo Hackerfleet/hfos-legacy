@@ -12,8 +12,6 @@ Wiki manager
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from time import time
-from __builtin__ import str as text
 from uuid import uuid4
 
 from circuits import Component

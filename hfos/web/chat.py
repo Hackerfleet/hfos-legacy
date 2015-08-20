@@ -13,7 +13,6 @@ Chat manager
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from time import time
-from __builtin__ import str as text
 from circuits import Component
 
 from hfos.logger import hfoslog, error, warn

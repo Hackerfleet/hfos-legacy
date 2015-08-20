@@ -42,11 +42,9 @@ off = 100
 
 from circuits import Component, handler
 from circuits.core import Event
-from circuits.tools import findroot
 
-from uuid import uuid4
-
-import json
+# from uuid import uuid4
+# import json
 
 
 import time
@@ -99,6 +97,7 @@ class LogEvent(Event):
     def __str__(self):
         return str(self.msg)
 
+
 def isMuted(what):
     global mute, solo
 
@@ -123,6 +122,7 @@ def setup_root(newroot):
     global root
 
     root = newroot
+
 
 def hfoslog(*what, **kwargs):
     """Logs all args except "lvl" which is used to determine the incident log level.

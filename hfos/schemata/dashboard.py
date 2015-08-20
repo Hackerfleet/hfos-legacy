@@ -14,7 +14,7 @@ Dashboard: Dashboard config to store deckster settings
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from sensordata import SensorValueTypes
+from .sensordata import SensorValueTypes
 
 Dashboard = {
     'id': '#Dashboard',

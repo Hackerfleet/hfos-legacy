@@ -22,7 +22,7 @@ from circuits import Component, handler
 from hfos.events import send, authenticationrequest, clientdisconnect, AuthorizedEvents
 from hfos.logger import hfoslog, error, warn, critical, debug, info, verbose
 
-from clientobjects import Socket, Client, User
+from .clientobjects import Socket, Client, User
 
 class ClientManager(Component):
     """
