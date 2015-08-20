@@ -10,7 +10,7 @@
     :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://badge.waffle.io/hackerfleet/hfos.png?label=ready&title=Ready 
+.. image:: https://badge.waffle.io/hackerfleet/hfos.png?label=ready&title=Ready
     :target: https://waffle.io/hackerfleet/hfos
     :alt: Stories Ready
 
@@ -52,11 +52,30 @@ Work in progress (1.0)
 -  Crew management, safety tools
 -  wireless crew network and general communications
 
+License
+=======
+
+Copyright (C) 2011-2015 riot <riot@hackerfleet.org> and others.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 Bugs & Discussion
 =================
 
 Please research any bugs you find via our `Github issue tracker for
-HFOS <https://github.com/hackerfleet/hfos/issues>`__ and report them if they're still unknown.
+HFOS <https://github.com/hackerfleet/hfos/issues>`__ and report them,
+if they're still unknown.
 
 If you want to discuss (opensource) maritime technology in general
 incl. where we're heading, head over to our `Github discussion
@@ -98,7 +117,7 @@ Backend
 -------
 
 No installation/daemon yet. Just set up a virtual env and install it.
-You may want to create a path in /var/cache for hfos' tilecache and
+We also create a path in /var/cache for hfos' tilecache and
 other stuff:
 
 .. code-block:: bash
@@ -109,10 +128,12 @@ other stuff:
     $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
     $ source venv/bin/activate
     $ python setup.py install
-    $ python hfos.py
+    $ sudo python setup.py install_var
+    $ python hfos_launcher.py
 
-You may need to adapt permissions for that folder to accomodate the
-user you let hfos run with, until we re-add the daemon and package support foam, that does that automatically.
+You may need to adapt permissions for the /var folders to accomodate the
+user you let hfos run with, until we re-add the daemon and package support
+foam, that does that automatically.
 
 Frontend
 --------
@@ -126,11 +147,21 @@ it and either install or develop.
     $ git submodule update
     $ cd frontend
     $ npm install
+    $ sudo npm install -g bower grunt grunt-cli
     $ bower install
     $ grunt serve
 
 Point your browser to localhost:9000 to observe the magic. Don't forget
 to start the backend!
+
+You can also copy a static version of the frontend by instructing grunt to:
+
+.. code-block:: bash
+
+    $ sudo grunt copy:dev
+
+Using this method is not meant for live editing, but for the final production 
+installation.
 
 Development
 -----------
@@ -151,7 +182,7 @@ Run hfos:
 
 .. code-block:: bash
 
-    $ python hfos.py
+    $ python hfos_launcher.py
 
 You should see some info/debug output and the web engine as well as
 other components starting up.
