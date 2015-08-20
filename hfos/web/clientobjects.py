@@ -53,9 +53,8 @@ class User(object):
         :param account: userobject
         :param profile: profileobject
         :param uuid: profileobject
-        :param clients: List of clients' UUIDs
-        :param args:
         """
+
         super(User, self).__init__()
         self.clients = []
         self.uuid = uuid

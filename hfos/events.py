@@ -18,6 +18,7 @@ from circuits.core import Event
 from hfos.logger import hfoslog, debug, critical, verbose, events
 from hfos.web.clientobjects import User
 
+
 class AuthorizedEvent(Event):
     """Base class for events for logged in users."""
 
@@ -103,6 +104,7 @@ class clientdisconnect(Event):
     :param args:
 
     """
+
     def __init__(self, clientuuid, useruuid=None, *args):
         super(clientdisconnect, self).__init__(*args)
         self.clientuuid = clientuuid

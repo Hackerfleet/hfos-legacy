@@ -26,7 +26,7 @@ from hfos.logger import hfoslog, error, verbose
 if six.PY2:
     from urllib import unquote, urlopen
 else:
-    from urllib.request import urlopen
+    from urllib.request import urlopen  # NOQA
     from urllib.parse import unquote  # NOQA
 
 
@@ -40,7 +40,7 @@ def get_tile(url):
 
     try:
         if six.PY3:
-            connection = urlopen(url=url, timeout=2)
+            connection = urlopen(url=url, timeout=2)  # NOQA
         else:
             connection = urlopen(url=url)
     except Exception as e:

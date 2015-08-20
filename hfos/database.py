@@ -41,7 +41,7 @@ from hfos.schemata.vessel import VesselSchema
 from hfos.schemata.radio import RadioConfig
 from hfos.schemata.sensordata import SensorData
 
-from jsonschema import ValidationError
+from jsonschema import ValidationError  # NOQA
 
 
 def clear_all():

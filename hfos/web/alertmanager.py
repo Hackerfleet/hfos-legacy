@@ -17,6 +17,7 @@ from circuits import Component, handler
 from hfos.logger import hfoslog, error, warn, verbose, critical
 from hfos.events import broadcast
 
+
 class AlertManager(Component):
     """
     AlertManager manager
@@ -38,7 +39,10 @@ class AlertManager(Component):
     @handler('referenceframe', channel='navdata')
     def referenceframe(self, event):
         """Handles navigational reference frame updates.
-        These are necessary to assign geo coordinates to alerts and other misc things."""
+        These are necessary to assign geo coordinates to alerts and other misc things.
+
+        :param event with incoming referenceframe message
+        """
 
         hfoslog("[ALERT] Got a reference frame update! ", event, lvl=verbose)
 
@@ -46,6 +50,7 @@ class AlertManager(Component):
 
     def alertrequest(self, event):
         """AlertManager event handler for incoming events
+
         :param event with incoming AlertManager message
         """
 
