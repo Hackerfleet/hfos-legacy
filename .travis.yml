@@ -5,15 +5,27 @@ python:
   - "3.3"
   - "3.4"
   - "pypy"
+service:
+  - mongodb
 cache:
   directories:
     - $HOME/.pip-cache/
 install:
-  - pip install --upgrade pip coveralls pytest-cov pytest
-  - python setup.py install
+  - pip install --upgrade pip coveralls pytest-cov
   - pip install -r requirements.txt --allow-external --cache-dir=$HOME/.pip-cache .
+  - python setup.py install
 script: python setup.py test
 after_success:
   - coveralls
 notifications:
   irc: "chat.freenode.org#hackerfleet"
+    on_success: change
+    use_notice: true
+    skip_join: true
+    template:
+        - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} ( %{duration}, %{build_url} )"
+  email:
+    recipients:
+        - riot@hackerfleet.org
+    on_success: change
+
