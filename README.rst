@@ -6,6 +6,10 @@
     :target: https://landscape.io/github/Hackerfleet/hfos/master
     :alt: Quality
 
+.. image:: https://coveralls.io/repos/Hackerfleet/hfos/badge.svg
+    :target: https://coveralls.io/r/Hackerfleet/hfos
+    :alt: Coverage
+
 .. image:: https://requires.io/github/Hackerfleet/hfos/requirements.svg?branch=master
     :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
@@ -14,9 +18,6 @@
     :target: https://waffle.io/hackerfleet/hfos
     :alt: Stories Ready
 
-.. image:: https://coveralls.io/repos/Hackerfleet/hfos/badge.svg
-    :target: https://coveralls.io/r/Hackerfleet/hfos
-    :alt: Coverage
 
 HFOS - The Hackerfleet Operating System
 =======================================
@@ -189,23 +190,6 @@ other components starting up.
 Currently it is set up to serve only on http://localhost:8055 - so
 point your browser there and explore HFOS.
 
-Debian PKG Generation
----------------------
-
-*Outdated - these do not work without some additional work* Debian
-instructions:
-
-If you're using Debian, we provide a skeleton to build a cleanly
-installable dpkg package:
-
-.. code-block:: bash
-
-    $ sudo apt-get install dpkg-dev
-    $ dpkg-buildpackage
-
-Run buildpackage in the top source directory to generate a debian
-package.
-
 Configuration
 -------------
 
@@ -218,11 +202,14 @@ Contributors
 We like to hang out on irc, if you want to chat or help out,
 join irc://freenode.org/hackerfleet :)
 
+Missing in the list below? Add yourself or ping us ;)
+
 Code
 ----
 
 -  Heiko 'riot' Weinen riot@hackerfleet.org
 -  Johannes 'ijon' Rundfeldt ijon@hackerfleet.org
+-  Martin Ling
 
 Assets
 ------
@@ -233,6 +220,5 @@ This is migrating over to hfos-frontend submodule.
 -  Tumbeasts from http://theoatmeal.com/pl/state_web_winter/tumblr for
    the error page (CC-BY)
 
-Missing? Add yourself or ping us ;)
 
 -- :boat: :+1:

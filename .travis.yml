@@ -18,12 +18,14 @@ script: python setup.py test
 after_success:
   - coveralls
 notifications:
-  irc: "chat.freenode.org#hackerfleet"
+  irc:
+    channels:
+      - "chat.freenode.org#hackerfleet"
     on_success: change
     use_notice: true
     skip_join: true
     template:
-        - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} ( %{duration}, %{build_url} )"
+      - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} ( %{duration}, %{build_url} )"
   email:
     recipients:
         - riot@hackerfleet.org
