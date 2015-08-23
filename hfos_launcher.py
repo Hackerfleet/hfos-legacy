@@ -46,7 +46,7 @@ from hfos.web.wiki import Wiki
 from hfos.logger import hfoslog, verbose, setup_root, Logger
 from hfos.debugger import HFDebugger
 
-from hfos.protocols.nmea import NMEAParser
+from hfos.protocols.nmea import NMEAParser, NMEAPlayback
 
 from hfos.navdata import NavData
 
@@ -79,7 +79,8 @@ def main():
     # Machineroom().register(app)
 
     navdata = NavData().register(server)
-    NMEAParser('localhost', 2222).register(navdata)
+    nmeaparser = NMEAParser('localhost', 2222).register(navdata)
+    NMEAPlayback('/home/riot/tmp/nmea.log').register(nmeaparser)
 
     TileCache().register(server)
     Static("/", docroot="/var/lib/hfos/static").register(server)

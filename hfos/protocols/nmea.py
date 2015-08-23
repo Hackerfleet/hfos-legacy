@@ -13,9 +13,9 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 import time
 
-from circuits import Component
+from circuits import Component, Timer, Event
 from circuits.net.sockets import TCPClient
-from circuits.net.events import connect
+from circuits.net.events import connect, read
 
 from pynmea2 import parse
 from pynmea2 import types
@@ -119,3 +119,37 @@ class NMEAParser(Component):
         nmeadata = self._parse(data)
 
         self._handle(nmeadata)
+
+
+
+class NMEAPlayback(Component):
+    """
+    Plays back previously recorded NMEA log files. Handy for debugging and demoing purposes.
+    """
+
+    channel = "nmea"
+
+    def init(self, logfilename, delay=5000):
+        hfoslog("[NMEA] Playback component started")
+
+        with open(logfilename, 'r') as logfile:
+            self.logdata = logfile.readlines()
+
+        hfoslog("[NMEA] Logfile contains ", len(self.logdata), " items.")
+
+        self.delay = delay
+        self.position = 0
+
+        Timer(self.delay, Event.create('nmeaplayback'), self.channel, persist=True).register(self)
+
+    def nmeaplayback(self,*args):
+        try:
+            if self.position == len(self.logdata):
+                hfoslog("[NMEA] Playback looping")
+                self.position = 0
+            else:
+                self.position += 1
+
+            self.fireEvent(read(self.logdata[self.position]), "nmea")
+        except Exception as e:
+            hfoslog("[NMEA] Error during logdata playback: ", e, type(e), lvl=error)
