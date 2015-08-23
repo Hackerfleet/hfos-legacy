@@ -15,7 +15,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 from circuits import Component, handler
 
 from hfos.logger import hfoslog, error, warn, verbose, critical
-from hfos.events import broadcast
+from hfos.events import broadcast, send
 
 
 class AlertManager(Component):
@@ -35,6 +35,8 @@ class AlertManager(Component):
         hfoslog("[ALERT] Started")
 
         self.referenceframe = None
+        self.mobalert = False
+        self.alertlist = []
 
     @handler('referenceframe', channel='navdata')
     def referenceframe(self, event):
@@ -47,6 +49,18 @@ class AlertManager(Component):
         hfoslog("[ALERT] Got a reference frame update! ", event, lvl=verbose)
 
         self.referenceframe = event.data
+
+    def userlogin(self, event):
+        """Checks if an alert is ongoing and alerts the newly connected client, if so."""
+
+        clientuuid = event.clientuuid
+
+        if self.mobalert:
+            alertpacket = {'component': 'alert', 'action': 'mob', 'data': True}
+            self.fireEvent(send(clientuuid, alertpacket))
+
+    def _recordMobAlert(self):
+        self.alertlist.append(self.referenceframe)
 
     def alertrequest(self, event):
         """AlertManager event handler for incoming events
@@ -62,9 +76,15 @@ class AlertManager(Component):
             if action == 'mob':
                 if data == True:
                     hfoslog("[ALERT] MOB ALERT ACTIVATED.", lvl=critical)
+
+                    self.mobalert = True
+                    self._recordMobAlert()
+
                     alertpacket = {'component': 'alert', 'action': 'mob', 'data': True}
                 else:
                     hfoslog("[ALERT] MOB deactivation requested by ", event.user.account.username, lvl=warn)
+                    self.mobalert = False
+
                     alertpacket = {'component': 'alert', 'action': 'mob', 'data': False}
             else:
                 hfoslog("[ALERT] Unsupported action requested: ", event, lvl=warn)
