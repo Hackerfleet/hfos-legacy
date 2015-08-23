@@ -83,6 +83,7 @@ def _build_schemastore():
         if schema and form:
             result[schemaname] = {'schema': schema, 'form': form}
 
+    hfoslog("[SCHEMATA] Registered schemata: ", result.keys())
     return result
 
 
