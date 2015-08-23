@@ -94,13 +94,14 @@ class ObjectManager(Component):
 
             elif action == "get":
                 uuid = data['uuid']
+
                 obj = None
 
-                if schema in objectmodels.keys():
+                if schema in objectmodels.keys() and uuid.upper != "CREATE":
                     obj = objectmodels[schema].find_one({'uuid': uuid})
 
                 if not obj:
-                    hfoslog("[OM] Object not found: ", data)
+                    hfoslog("[OM] Object not found, creating: ", data)
                     obj = objectmodels[schema]({'uuid': str(uuid4())})
                 else:
                     hfoslog("[OM] Object found, delivering: ", data)
@@ -119,9 +120,11 @@ class ObjectManager(Component):
                     return
 
                 try:
-                    obj = objectmodels[schema].find_one({'uuid': uuid})
+                    if uuid != 'create':
+                        obj = objectmodels[schema].find_one({'uuid': uuid})
+                    else:
+                        putobj['uuid'] = uuid4()
                     if obj:
-
                         hfoslog("[OM] Updating object:", obj._fields, lvl=debug)
                         obj.update(putobj)
 
