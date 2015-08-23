@@ -109,7 +109,7 @@ other stuff:
     $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
     $ source venv/bin/activate
     $ python setup.py install
-    $ python hfos.py
+    $ python hfos_launcher.py
 
 You may need to adapt permissions for that folder to accomodate the
 user you let hfos run with, until we re-add the daemon and package support foam, that does that automatically.
