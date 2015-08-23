@@ -36,6 +36,10 @@ class Authenticator(Component):
 
         hfoslog("[AUTH] Auth request for ", event.username, event.clientuuid)
 
+        if (len(event.username) < 3) or (len(event.passhash) < 3):
+            hfoslog("[AUTH] Illegal username or password received, login cancelled", lvl=warn)
+            return
+
         useraccount = None
         clientconfig = None
         userprofile = None

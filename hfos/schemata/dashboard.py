@@ -28,6 +28,7 @@ Dashboard = {
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Dashboard name'},
         'locked': {'type': 'boolean', 'title': 'Locked Dashboard',
                    'description': 'Determines whether the Dashboard should be locked against changes.'},
+        'refreshrate': {'title': 'Refreshrate', 'type': 'number', 'description': 'General refresh rate of dashboard'},
         'shared': {'type': 'boolean', 'title': 'Shared Dashboard', 'description': 'Share Dashboard with the crew'},
         'description': {'type': 'string', 'format': 'html', 'title': 'Dashboard description',
                         'description': 'Dashboard description'},
@@ -63,7 +64,10 @@ Dashboard = {
                 }
             }
         }
-    }
+    },
+    "required": [
+        'uuid'
+    ]
 }
 
 DashboardForm = [
@@ -75,19 +79,18 @@ DashboardForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'name'
+                    'name', 'refreshrate'
                 ]
             },
             {
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'locked', 'shared'
+                    'shared', 'locked'
                 ]
-            }
+            },
         ]
     },
-    'description',
     {'key': 'cards',
      'add': "Add widget",
      'style': {
@@ -118,6 +121,7 @@ DashboardForm = [
           }
      ]
      },
+    'description',
     {
         'type': 'submit',
         'title': 'Save Dashboard configuration',

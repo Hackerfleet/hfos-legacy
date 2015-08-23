@@ -101,7 +101,7 @@ class ClientManager(Component):
                 self._sockets[sock] = Socket(ip, clientuuid)
                 # Key uuid is temporary, until signin, will then be replaced with account uuid
                 self._clients[clientuuid] = Client(sock, ip, clientuuid)
-                self.fireEvent(write(sock, json.dumps({'type': 'info', 'content': 'Connected'})))
+                # self.fireEvent(write(sock, json.dumps({'type': 'info', 'content': 'Connected'})))
                 hfoslog("[CM] Client connected:", clientuuid)
             else:
                 hfoslog("[CM] Strange! Old IP reconnected!" + "#" * 15)

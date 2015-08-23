@@ -43,7 +43,7 @@ MapView = {
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Name of view'},
         'color': {'type': 'string', 'title': 'View Color', 'format': 'color',
                   'description': 'This views color indicator'},
-        'shared': {'type': 'boolean', 'title': 'Shared view', 'description': 'Share view with the crew'},
+        'shared': {'type': 'boolean', 'title': 'Shared', 'description': 'Share mapview with the crew'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'},
         'layergroups': {'type': 'array',
                         'items': {
