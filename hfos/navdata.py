@@ -11,18 +11,28 @@ Module NavData
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from circuits import Component, Event, handler
+from circuits import Component, Event
 from circuits import Timer
 
 from hfos.database import sensordataobject, ValidationError
 from hfos.events import referenceframe, broadcast
-from hfos.logger import hfoslog, verbose, debug, warn, error, critical
+from hfos.logger import hfoslog, verbose, error, critical
 
 
 class NavData(Component):
+    """
+    The NavData (Navigation Data) component receives new sensordata and generates a new :referenceframe:
+
+
+    """
     channel = "navdata"
 
     def __init__(self, *args):
+        """
+        Initialize the navigation data component.
+
+        :param args:
+        """
         super(NavData, self).__init__(*args)
 
         self.referenceframe = sensordataobject()
@@ -36,12 +46,17 @@ class NavData(Component):
         Timer(self.interval, Event.create('navdatapush'), self.channel, persist=True).register(self)
 
     def sensordata(self, event):
+        """
+        Generates a new reference frame from incoming sensordata
+
+        :param event: new sensordata to be merged into referenceframe
+        """
         newdata = event.data
 
         try:
             newdata.validate()
         except ValidationError as e:
-            hfoslog("[NAVDATA] Invalid sensordata received: ", newdata, lvl=error)
+            hfoslog("[NAVDATA] Invalid sensordata received: ", newdata, e, lvl=error)
 
         try:
             for key in newdata._fields:
@@ -55,6 +70,11 @@ class NavData(Component):
             hfoslog("[NAVDATA] Problem during sensordata evaluation: ", newdata, e, type(e), lvl=error)
 
     def navdatapush(self):
+        """
+        Pushes the current :referenceframe: out to clients.
+
+        :return:
+        """
 
         try:
             self.fireEvent(referenceframe({'data': self.referenceframe, 'ages': self.referenceages}), "navdata")

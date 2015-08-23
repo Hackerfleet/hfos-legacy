@@ -87,9 +87,17 @@ solo = []
 start = time.time()
 
 
-class LogEvent(Event):
+class logevent(Event):
+    """
+    Generates a new log event to be logged to the system log
+
+    :param msg: Description of event
+    :param severity:  Severity of event
+    :param args:
+    """
+
     def __init__(self, msg, severity, *args):
-        super(LogEvent, self).__init__(*args)
+        super(logevent, self).__init__(*args)
 
         self.msg = msg
         self.severity = severity
@@ -98,7 +106,15 @@ class LogEvent(Event):
         return str(self.msg)
 
 
-def isMuted(what):
+def ismuted(what):
+    """
+    Checks if a logged event is to be muted for debugging purposes.
+
+    Also goes through the solo list - only items in there will be logged!
+
+    :param what:
+    :return:
+    """
     global mute, solo
 
     state = False
@@ -119,6 +135,11 @@ def isMuted(what):
 
 
 def setup_root(newroot):
+    """
+    Sets up the root component, so the logger knows where to send logging signals.
+
+    :param newroot:
+    """
     global root
 
     root = newroot
@@ -166,7 +187,7 @@ def hfoslog(*what, **kwargs):
         msg += " "
         msg += str(thing)
 
-    if isMuted(msg):
+    if ismuted(msg):
         return
 
     if lvl >= verbosity['file']:
@@ -185,7 +206,7 @@ def hfoslog(*what, **kwargs):
             output = lvldata[lvl][1] + output + terminator
         print(output)
     if root and output:
-        root.fire(LogEvent(str(output), lvl), "logger")
+        root.fire(logevent(str(output), lvl), "logger")
 
 
 class Logger(Component):
@@ -203,6 +224,12 @@ class Logger(Component):
 
         hfoslog("[LOGGER] Started.")
 
-    @handler("LogEvent")
-    def LogEvent(self, event):
+    @handler("logevent")
+    def logevent(self, event):
+        """
+        Should once in a time log events to the live system log.
+
+        :param event: Log event to log.
+        """
+
         pass
