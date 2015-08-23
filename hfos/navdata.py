@@ -18,9 +18,6 @@ from hfos.database import sensordataobject, ValidationError
 from hfos.events import referenceframe, broadcast
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical
 
-from time import time
-from json import dumps
-
 
 class NavData(Component):
     channel = "navdata"

@@ -18,6 +18,7 @@ from circuits.core import Event
 from hfos.logger import hfoslog, debug, critical, verbose, events
 from hfos.web.clientobjects import User
 
+
 class AuthorizedEvent(Event):
     """Base class for events for logged in users."""
 
@@ -103,12 +104,32 @@ class clientdisconnect(Event):
     :param args:
 
     """
+
     def __init__(self, clientuuid, useruuid=None, *args):
         super(clientdisconnect, self).__init__(*args)
         self.clientuuid = clientuuid
         self.useruuid = useruuid
 
         hfoslog("[CM-EVENT] Client disconnect event generated:", clientuuid, useruuid, lvl=debug)
+
+
+class userlogin(Event):
+    """
+    A user has logged in to the system. This has to propagate to all
+    subscription based and other user aware components.
+
+    :param clientuuid: UUID of disconnecting client
+    :param useruuid: UUID of disconnecting user
+    :param args:
+
+    """
+
+    def __init__(self, clientuuid, useruuid, *args):
+        super(userlogin, self).__init__(*args)
+        self.clientuuid = clientuuid
+        self.useruuid = useruuid
+
+        hfoslog("[CM-EVENT] User login event generated:", clientuuid, useruuid, lvl=debug)
 
 
 # Authenticator Events

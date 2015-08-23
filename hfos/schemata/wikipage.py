@@ -19,10 +19,11 @@ WikiPage = {
     'type': 'object',
     'name': 'WikiPage',
     'properties': {
-        'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                     'type': 'string',
-                     'title': 'Unique WikiPage ID'
-                     },
+        'uuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Unique WikiPage ID'
+        },
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Page name (url slug)'},
         'title': {'type': 'string', 'title': 'Page Title', 'description': 'Short title'},
         'text': {'type': 'string', 'format': 'html', 'title': 'Page content',

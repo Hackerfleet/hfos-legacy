@@ -21,6 +21,7 @@
 from setuptools import setup
 from setuptools import Command
 from distutils.log import INFO, WARN
+from distutils.dir_util import copy_tree
 
 import os
 from shutil import rmtree
@@ -30,6 +31,41 @@ from shutil import rmtree
 # Keywords
 # download_url
 # platform
+
+class install_doc(Command):
+    description = "Installs documentation into frontend library directory"
+    user_options = [
+        # The format is (long option, short option, description).
+        ('clean', None, 'Clear docs first')
+    ]
+
+    def initialize_options(self):
+        """Set default values for options."""
+        self.clean = False
+
+    def finalize_options(self):
+        """Post-process options."""
+
+    def run(self):
+        self.announce("Updating documentation directory", INFO)
+
+        # If these need changes, make sure they are watertight and don't remove wanted stuff!
+        target = '/var/lib/hfos/static/docs'
+        source = 'docs/build/html'
+
+        if not os.path.exists(os.path.join(os.path.curdir, source)):
+            self.announce("Documentation not existing yet. Run python setup.py build_sphinx first.")
+            return
+
+        if os.path.exists(target):
+            self.announce("Path already exists: " + target)
+            if self.clean:
+                self.announce("Cleaning up " + target, WARN)
+                rmtree(target)
+
+        self.announce("Copying docs to " + target, INFO)
+        copy_tree(source, target)
+
 
 class install_var(Command):
     description = "Installs frontend library and cache directories"
@@ -80,7 +116,10 @@ setup(name="hfos",
       scripts=[
           'hfos_launcher.py',
       ],
-      cmdclass={'install_var': install_var},
+      cmdclass={
+          'install_var': install_var,
+          'install_doc': install_doc
+      },
       long_description="""HFOS - The Hackerfleet Operating System
 =======================================
 

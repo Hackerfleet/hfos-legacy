@@ -14,7 +14,7 @@ Dashboard: Dashboard config to store deckster settings
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from sensordata import SensorValueTypes
+from .sensordata import SensorValueTypes
 
 Dashboard = {
     'id': '#Dashboard',
@@ -28,38 +28,42 @@ Dashboard = {
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Dashboard name'},
         'locked': {'type': 'boolean', 'title': 'Locked Dashboard',
                    'description': 'Determines whether the Dashboard should be locked against changes.'},
-        'shared': {'type': 'boolean', 'title': 'Shared', 'description': 'Share dashboard with the crew'},
         'refreshrate': {'title': 'Refreshrate', 'type': 'number', 'description': 'General refresh rate of dashboard'},
+        'shared': {'type': 'boolean', 'title': 'Shared Dashboard', 'description': 'Share Dashboard with the crew'},
         'description': {'type': 'string', 'format': 'html', 'title': 'Dashboard description',
                         'description': 'Dashboard description'},
         'useruuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                      'type': 'string',
                      'title': 'Associated Unique User ID'
                      },
-        'cards': {'type': 'array',
-                  'items': {
-                      'type': 'object',
-                      'id': '#Card',
-                      'name': 'DashboardCard',
-                      'properties': {
-                          'id': {'type': 'string', 'enum': ['bearing', 'gauge', 'digital']},
-                          'title': {'type': 'string'},
-                          'size': {'type': 'object',
-                                   'properties': {
-                                       'x': {'type': 'number'},
-                                       'y': {'type': 'number'}
-                                   }
-                                   },
-                          'position': {'type': 'object',
-                                       'properties': {
-                                           'width': {'type': 'number'},
-                                           'height': {'type': 'number'}
-                                       }},
-                          'value': {'type': 'string', 'enum': SensorValueTypes}
-                      }
-                  }
-                  }
-
+        'cards': {
+            'type': 'array',
+            'default': [],
+            'items': {
+                'type': 'object',
+                'id': '#Card',
+                'name': 'DashboardCard',
+                'properties': {
+                    'widgettype': {'type': 'string', 'enum': ['bearing', 'gauge', 'DigitalDashboardCtrl']},
+                    'valuetype': {'type': 'string', 'enum': SensorValueTypes},
+                    'title': {'type': 'string'},
+                    'size': {
+                        'type': 'object',
+                        'properties': {
+                            'x': {'type': 'number'},
+                            'y': {'type': 'number'}
+                        }
+                    },
+                    'position': {
+                        'type': 'object',
+                        'properties': {
+                            'width': {'type': 'number'},
+                            'height': {'type': 'number'}
+                        }
+                    },
+                }
+            }
+        }
     },
     "required": [
         'uuid'
@@ -94,8 +98,8 @@ DashboardForm = [
      },
      'items': [
          'cards[].title',
-         'cards[].id',
-         'cards[].value',
+         'cards[].widgettype',
+         'cards[].valuetype',
          {'type': 'section',
           'htmlClass': 'row',
           'items': [

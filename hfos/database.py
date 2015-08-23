@@ -40,8 +40,9 @@ from hfos.schemata.wikipage import WikiPage
 from hfos.schemata.vessel import VesselSchema
 from hfos.schemata.radio import RadioConfig
 from hfos.schemata.sensordata import SensorData
+from hfos.schemata.dashboard import Dashboard
 
-from jsonschema import ValidationError
+from jsonschema import ValidationError  # NOQA
 
 
 def clear_all():
@@ -108,3 +109,4 @@ vesselconfigobject = warmongo.model_factory(VesselSchema)
 radioconfigobject = warmongo.model_factory(RadioConfig)
 
 sensordataobject = warmongo.model_factory(SensorData)
+dashboardobject = warmongo.model_factory(Dashboard)

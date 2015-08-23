@@ -19,10 +19,10 @@ from uuid import uuid4
 from circuits.net.events import write
 from circuits import Component, handler
 
-from hfos.events import send, authenticationrequest, clientdisconnect, AuthorizedEvents
+from hfos.events import send, authenticationrequest, clientdisconnect, userlogin, AuthorizedEvents
 from hfos.logger import hfoslog, error, warn, critical, debug, info, verbose
 
-from clientobjects import Socket, Client, User
+from .clientobjects import Socket, Client, User
 
 class ClientManager(Component):
     """
@@ -330,6 +330,7 @@ class ClientManager(Component):
             hfoslog("[CM] Transmitting client configuration to client", clientconfigpacket, lvl=debug)
             self.fireEvent(write(event.sock, json.dumps(clientconfigpacket)), "wsserver")
 
+            self.fireEvent(userlogin(clientuuid, useruuid))
 
             hfoslog("[CM] User configured:", signedinuser.__dict__, lvl=info)
 

@@ -19,8 +19,6 @@ from jsonschema import ValidationError
 
 from hfos.logger import hfoslog, warn
 
-from pymongo import database
-
 
 def provisionList(items, dbobject, overwrite=False, clear=False):
     """Provisions a list of items according to their schema
