@@ -21,7 +21,7 @@ from hfos.logger import hfoslog
 
 WikiPages = [
     {'name': 'Index',
-     'pageuuid': '8cc76c46-7488-4a0d-8ab9-1ca7c17f1b75',
+     'uuid': '8cc76c46-7488-4a0d-8ab9-1ca7c17f1b75',
      'title': 'Page Index',
      'text': 'No Index has been generated yet. This usually means, no pages exist.'
      }
