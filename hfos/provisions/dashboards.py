@@ -30,6 +30,9 @@ Dashboards = [
     }
 ]
 
-if __name__ == "__main__":
+def provision():
     provisionList(Dashboards, dashboardobject)
     hfoslog('[PROV] Provisioning: Dashboards: Done.')
+
+if __name__ == "__main__":
+    provision()

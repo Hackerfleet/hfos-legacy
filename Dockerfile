@@ -41,6 +41,7 @@ RUN pip install .
 # Make sure /var/[cache,lib]/hfos etc exists
 
 RUN python setup.py install_var
+RUN python setup.py install_provisions
 
 # Install Frontend
 

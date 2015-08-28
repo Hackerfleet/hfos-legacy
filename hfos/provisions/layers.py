@@ -167,6 +167,9 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
     }
 ]
 
-if __name__ == "__main__":
+def provision():
     provisionList(layers, layerobject, overwrite=True, clear=True)
     hfoslog('[PROV] Provisioning: Layers: Done.')
+
+if __name__ == "__main__":
+    provision()

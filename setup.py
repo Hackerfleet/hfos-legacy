@@ -101,6 +101,29 @@ class install_var(Command):
                 os.mkdir(item)
 
 
+class install_provisions(Command):
+    description = "Installs HFOS data provisions"
+    user_options = [
+        # The format is (long option, short option, description).
+        ('clean', None, 'Clear HFOS provisions')
+    ]
+
+    def initialize_options(self):
+        """Set default values for options."""
+        self.clean = False
+
+    def finalize_options(self):
+        """Post-process options."""
+
+    def run(self):
+        self.announce("Installing HFOS default provisions.", INFO)
+
+        from hfos.provisions import provisionstore
+        for provisionname in provisionstore:
+            self.announce("Provisioning " + provisionname, INFO)
+            provisionstore[provisionname]()
+
+
 setup(name="hfos",
       version="1.0.0",
       description="hfos",
@@ -118,7 +141,8 @@ setup(name="hfos",
       ],
       cmdclass={
           'install_var': install_var,
-          'install_doc': install_doc
+          'install_doc': install_doc,
+          'install_provisions': install_provisions,
       },
       long_description="""HFOS - The Hackerfleet Operating System
 =======================================

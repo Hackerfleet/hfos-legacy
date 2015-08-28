@@ -79,6 +79,9 @@ Controllables = [
     },
 ]
 
-if __name__ == "__main__":
+def provision():
     provisionList(Controllables, controllableobject)
     hfoslog('[PROV] Provisioning: Controllables: Done.')
+
+if __name__ == "__main__":
+    provision()

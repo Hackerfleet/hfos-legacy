@@ -14,7 +14,7 @@
     :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://badge.waffle.io/hackerfleet/hfos.png?label=ready&title=Ready
+.. image:: https://badge.waffle.io/hackerfleet/hfos.svg?label=ready&title=Ready
     :target: https://waffle.io/hackerfleet/hfos
     :alt: Stories Ready
 
@@ -34,23 +34,26 @@ HFOS - The Hackerfleet Operating System
 Included modules
 ----------------
 
-Note: the frontend is now included as submodule!
-
 -  webui (compatible with all modern browsers)
 -  nmea bus parser
--  offline (cached) moving seamap incl.
+-  dashboard
+-  offline (cached) moving maps
 -  openseamap
 -  openstreetmap
 -  openweathermap
+-  ship info wiki
+-  man over board alert system
 -  and lots of other useful layers
 
-Work in progress (1.0)
+Work in progress (1.1)
 ----------------------
 
--  Navigation, GRIB data (in charts)
+-  Full GDAL based raster chart support
+-  Dynamic Logbook
+-  GRIB data (in charts)
 -  Navigation aides, planning
 -  Datalog, automated navigational data exchange
--  Crew management, safety tools
+-  Crew management, more safety tools
 -  wireless crew network and general communications
 
 License
@@ -86,7 +89,20 @@ forum <https://github.com/hackerfleet/discussion/issues>`__
 Installation
 ============
 
+We encourage you to use Python 3.4 for HFOS, but the system is
+built (and checked against) 2.7, too.
+
 Warning: **HFOS is not compatible with Python 3.2!**
+
+Quickie-Install
+---------------
+
+There is a Docker image available. This is usually the quickest
+way to install HFOS:
+
+.. code-block:: bash
+    $ docker run -i -t -p 127.0.0.1:8055:8055 --name hfos-test-live \
+       -t hackerfleet/hfos
 
 Preparation
 -----------
@@ -108,18 +124,22 @@ If you want (and can), install the mongo and bson extensions:
     $ sudo apt-get install python3-pymongo-ext python3-bson-ext
 
 You will need to set up a bunch of more dependencies via npm to set up
-the frontend:
+the frontend, so install npm and if necessary the nodejs-legacy-symlink
+package:
 
 .. code-block:: bash
 
-    $ sudo apt-get install npm
+    $ sudo apt-get install npm nodejs-legacy
 
 Backend
 -------
 
-No installation/daemon yet. Just set up a virtual env and install it.
-We also create a path in /var/cache for hfos' tilecache and
-other stuff:
+There is no fully automatic installation/daemon yet. Just set up a virtual
+environment and install HFOS into it.
+
+We also create two folders in /var (lib/hfos and cache/hfos) for hfos' tile-
+cache and other stuff as well as install basic default provisions into the
+database:
 
 .. code-block:: bash
 
@@ -129,6 +149,7 @@ other stuff:
     $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
     $ source venv/bin/activate
     $ python setup.py install
+    $ python setup.py install_provisions
     $ sudo python setup.py install_var
     $ python hfos_launcher.py
 
@@ -164,6 +185,34 @@ You can also copy a static version of the frontend by instructing grunt to:
 Using this method is not meant for live editing, but for the final production 
 installation.
 
+Documentation
+-------------
+
+The documentation is available online on `ReadTheDocs.org 
+<https://hfos.readthedocs.org>`__.
+If you wish to build and install the included documentation for offline use,
+run these commands:
+
+.. code-block:: bash
+
+    $ pip install -r requirements-dev.txt
+    $ python setup.py build_sphinx
+    $ sudo python setup.py install_doc
+
+This installs all necessary documentation tools and copies the files to the
+expected HFOS web data folder.
+
+You can also build the PDF file (and various other formats) by using the 
+Makefile inside the docs directory.
+
+.. code-block:: bash
+
+    $ cd docs
+    $ make pdf
+
+Just running make without arguments gives you a list of the other available
+documentation formats.
+
 Development
 -----------
 
@@ -189,12 +238,6 @@ You should see some info/debug output and the web engine as well as
 other components starting up.
 Currently it is set up to serve only on http://localhost:8055 - so
 point your browser there and explore HFOS.
-
-Configuration
--------------
-
-Lives in ``/etc/hfos/config.json`` after installation, but is currently
-not used.
 
 Contributors
 ============

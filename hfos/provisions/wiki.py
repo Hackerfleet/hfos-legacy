@@ -27,6 +27,9 @@ WikiPages = [
      }
 ]
 
-if __name__ == "__main__":
+def provision():
     provisionList(WikiPages, wikipageobject)
     hfoslog('[PROV] Provisioning: WikiPages: Done.')
+
+if __name__ == "__main__":
+    provision()

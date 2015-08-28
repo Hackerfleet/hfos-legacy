@@ -56,6 +56,10 @@ Controllers = [
          },
      ]}
 ]
-if __name__ == "__main__":
+
+def provision():
     provisionList(Controllers, controllerobject)
     hfoslog('[PROV] Provisioning: Controllers: Done.')
+
+if __name__ == "__main__":
+    provision()
