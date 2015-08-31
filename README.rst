@@ -86,6 +86,16 @@ incl. where we're heading, head over to our `Github discussion
 forum <https://github.com/hackerfleet/discussion/issues>`__
 ...which is cleverly disguised as a Github issue tracker.
 
+You can also find us here:
+* irc: #hackerfleet on freenode
+* `hackerfleet.org <http://hackerfleet.org/>`
+* `github.com/Hackerfleet <https://github.com/Hackerfleet>`
+* `waffle.io <https://waffle.io/hackerfleet/hfos>`
+* `twitter <https://twitter.com/hackerfleet>`
+* `fb <https://www.facebook.com/Hackerfleet>`
+* `soup.io <http://hackerfleet.soup.io/>`
+* `G+ <https://plus.google.com/105528689027070271173>`
+
 Installation
 ============
 
