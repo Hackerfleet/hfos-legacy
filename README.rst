@@ -60,24 +60,6 @@ Work in progress (1.1)
 -  Crew management, more safety tools
 -  wireless crew network and general communications
 
-License
-=======
-
-Copyright (C) 2011-2015 riot <riot@hackerfleet.org> and others.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 Bugs & Discussion
 =================
 
@@ -116,6 +98,7 @@ There is a Docker image available. This is usually the quickest
 way to install HFOS:
 
 .. code-block:: bash
+
     $ docker run -i -t -p 127.0.0.1:8055:8055 --name hfos-test-live \
        -t hackerfleet/hfos
 
@@ -277,6 +260,24 @@ This is migrating over to hfos-frontend submodule.
 -  Fabulous icons by iconmonstr.com and Hackerfleet contributors
 -  Tumbeasts from http://theoatmeal.com/pl/state_web_winter/tumblr for
    the error page (CC-BY)
+
+License
+=======
+
+Copyright (C) 2011-2015 riot <riot@hackerfleet.org> and others.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 -- :boat: :+1:
