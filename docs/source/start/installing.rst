@@ -40,3 +40,15 @@ repository by simply performing the following in the hfos working directory:
 .. note::
    You do not need to reinstall if you have installed with setuptools via
    the hfos repository and used setuptools to install in "develop" mode.
+
+Windows & OS X installation notes
+---------------------------------
+*These instructions are WiP. The easiest way to get HFOS on Win7 or newer
+is to install and user Docker*
+
+To install on Windows, you'll need to install these packages first:
+
+ * Python 3.5 https://www.python.org/downloads/windows/
+ * MongoDB https://www.mongodb.org/downloads#production
+ * pymongo
+ * numpy
