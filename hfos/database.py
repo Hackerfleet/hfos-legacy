@@ -26,7 +26,7 @@ import warmongo
 
 # noinspection PyUnresolvedReferences
 from six.moves import input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
-from hfos.logger import hfoslog, warn, critical
+from hfos.logger import hfoslog, debug, warn, critical
 from hfos.schemata import schemastore
 from hfos.schemata.profile import Profile
 from hfos.schemata.user import User
@@ -41,6 +41,7 @@ from hfos.schemata.vessel import VesselSchema
 from hfos.schemata.radio import RadioConfig
 from hfos.schemata.sensordata import SensorData
 from hfos.schemata.dashboard import Dashboard
+from hfos.schemata.project import Project
 
 from jsonschema import ValidationError  # NOQA
 
@@ -87,7 +88,31 @@ def _buildModelFactories():
     return result
 
 
+def _buildCollections():
+    result = {}
+
+    import pymongo
+    client = pymongo.MongoClient(host='localhost', port=27017)
+    db = client['hfos']
+
+    for schemaname in schemastore:
+
+        schema = None
+
+        try:
+            schema = schemastore[schemaname]['schema']
+        except KeyError:
+            hfoslog("[DB] No schema found for ", schemaname, lvl=critical)
+
+        try:
+            result[schemaname] = db[schemaname]
+        except Exception as e:
+            hfoslog("[DB] Could not get collection for schema ", schemaname, schema, lvl=critical)
+
+    return result
+
 objectmodels = _buildModelFactories()
+collections = _buildCollections()
 
 # TODO: Export the following automatically from the objectmodels?
 
@@ -108,5 +133,37 @@ wikipageobject = warmongo.model_factory(WikiPage)
 vesselconfigobject = warmongo.model_factory(VesselSchema)
 radioconfigobject = warmongo.model_factory(RadioConfig)
 
+projectobject = warmongo.model_factory(Project)
+
 sensordataobject = warmongo.model_factory(SensorData)
 dashboardobject = warmongo.model_factory(Dashboard)
+from pprint import pprint
+
+
+def profile(schemaname='sensordata', profiletype='pjs'):
+    hfoslog("[SCHEMATA] Profiling ", schemaname)
+
+    schema = schemastore[schemaname]['schema']
+
+    hfoslog("[SCHEMATA] Schema: ", schema, lvl=debug)
+
+    if profiletype == 'warmongo':
+        hfoslog("[SCHEMATA] Running Warmongo benchmark")
+        testclass = warmongo.model_factory(schema)
+    elif profiletype == 'pjs':
+        hfoslog("[SCHEMATA] Running PJS benchmark")
+        import python_jsonschema_objects as pjs
+        hfoslog()
+        builder = pjs.ObjectBuilder(schema)
+        ns = builder.build_classes()
+        pprint(ns)
+        testclass = ns[schemaname]
+        hfoslog("[SCHEMATA] ns: ", ns, lvl=warn)
+
+    hfoslog("[SCHEMATA] Instantiating 100 elements...")
+    for i in range(100):
+        testobject = testclass()
+
+    hfoslog("[SCHEMATA] Profiling done")
+
+# profile(schemaname='sensordata', profiletype='warmongo')
