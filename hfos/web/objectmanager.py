@@ -13,13 +13,12 @@ OM manager
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from uuid import uuid4
-
 from circuits import Component
-
 from hfos.logger import hfoslog, debug, error, warn, critical
-from hfos.events import send
-
-from hfos.database import objectmodels, ValidationError
+from hfos.events import send, objectcreation, objectchange, objectdeletion
+from hfos.database import objectmodels, collections, ValidationError
+from hfos.schemata import schemastore
+import pymongo
 
 WARNSIZE = 500
 
@@ -37,6 +36,8 @@ class ObjectManager(Component):
     def __init__(self, *args):
         super(ObjectManager, self).__init__(*args)
 
+        self.subscriptions = {}
+
         hfoslog("[OM] Started")
 
     def objectmanagerrequest(self, event):
@@ -48,16 +49,18 @@ class ObjectManager(Component):
         try:
             action = event.action
             data = event.data
-            schema = data['schema']
+            if 'schema' in data:
+                schema = data['schema']
 
             result = None
+            notification = None
 
             if action == "list":
                 if schema in objectmodels.keys():
                     if 'filter' in data:
-                        filter = data['filter']
+                        objectfilter = data['filter']
                     else:
-                        filter = {}
+                        objectfilter = {}
 
                     if 'fields' in data:
                         fields = data['fields']
@@ -66,12 +69,15 @@ class ObjectManager(Component):
 
                     objlist = []
 
-                    if objectmodels[schema].count(filter) > WARNSIZE:
+                    if objectmodels[schema].count(objectfilter) > WARNSIZE:
                         hfoslog("[OM] Getting a very long list of items for ", schema, lvl=warn)
 
-                    for item in objectmodels[schema].find(filter):
+                    for item in objectmodels[schema].find(objectfilter):
                         try:
-                            listitem = {'uuid': item.uuid, 'name': item.name}
+                            listitem = {'uuid': item.uuid}
+                            if 'name' in item._fields:
+                                listitem['name'] = item.name
+
                             for field in fields:
                                 if field in item._fields:
                                     listitem[field] = item._fields[field]
@@ -80,7 +86,7 @@ class ObjectManager(Component):
 
                             objlist.append(listitem)
                         except Exception as e:
-                            hfoslog("[OM] Faulty object or field: ", item._fields, fields, lvl=error)
+                            hfoslog("[OM] Faulty object or field: ", e, type(e), item._fields, fields, lvl=error)
                     hfoslog("[OM] Generated object list: ", objlist)
 
                     result = {'component': 'objectmanager',
@@ -92,70 +98,217 @@ class ObjectManager(Component):
                 else:
                     hfoslog("[OM] List for unavailable schema requested: ", schema, lvl=warn)
 
+            elif action == "search":
+                if schema in objectmodels.keys():
+                    if 'filter' in data:
+                        objectfilter = data['filter']
+                    else:
+                        objectfilter = {}
+
+                    # objectfilter['$text'] = {'$search': str(data['search'])}
+                    objectfilter = {'name': {'$regex': str(data['search']), '$options': '$i'}}
+
+                    # if 'fields' in data:
+                    #    fields = data['fields']
+                    # else:
+                    fields = []
+
+                    reqid = data['req']
+
+                    objlist = []
+
+                    if collections[schema].count() > WARNSIZE:
+                        hfoslog("[OM] Getting a very long list of items for ", schema, lvl=warn)
+
+                    hfoslog('[OM] Objectfilter: ', objectfilter, ' Schema: ', schema, lvl=warn)
+                    # for item in collections[schema].find(objectfilter):
+                    for item in collections[schema].find(objectfilter):
+                        hfoslog("[OM] Search found item: ", item, lvl=warn)
+                        try:
+                            # TODO: Fix bug in warmongo that needs this workaround:
+                            item = objectmodels[schema](item)
+                            listitem = {'uuid': item.uuid}
+                            if 'name' in item._fields:
+                                listitem['name'] = item.name
+
+                            for field in fields:
+                                if field in item._fields:
+                                    listitem[field] = item._fields[field]
+                                else:
+                                    listitem[field] = None
+
+                            objlist.append(listitem)
+                        except Exception as e:
+                            hfoslog("[OM] Faulty object or field: ", e, type(e), item._fields, fields, lvl=error)
+                    hfoslog("[OM] Generated object search list: ", objlist)
+
+                    result = {'component': 'objectmanager',
+                              'action': 'search',
+                              'data': {'schema': schema,
+                                       'list': objlist,
+                                       'req': reqid
+                                       }
+                              }
+                else:
+                    hfoslog("[OM] List for unavailable schema requested: ", schema, lvl=warn)
+
             elif action == "get":
                 uuid = data['uuid']
 
-                obj = None
+                storageobject = None
 
                 if schema in objectmodels.keys() and uuid.upper != "CREATE":
-                    obj = objectmodels[schema].find_one({'uuid': uuid})
+                    storageobject = objectmodels[schema].find_one({'uuid': uuid})
 
-                if not obj:
+                if not storageobject:
                     hfoslog("[OM] Object not found, creating: ", data)
-                    obj = objectmodels[schema]({'uuid': str(uuid4())})
+
+                    storageobject = objectmodels[schema]({'uuid': str(uuid4())})
+
+                    if "useruuid" in schemastore[schema]['schema']['properties']:
+                        storageobject.useruuid = event.user.uuid
+                        hfoslog("[OM] Attached initial owner's id: ", event.user.uuid)
                 else:
                     hfoslog("[OM] Object found, delivering: ", data)
 
                 result = {'component': 'objectmanager',
                           'action': 'get',
-                          'data': obj.serializablefields()
+                          'data': storageobject.serializablefields()
+                          }
+
+            elif action == "subscribe":
+                uuid = data
+
+                if uuid in self.subscriptions:
+                    self.subscriptions[uuid].append(event.client.uuid)
+                else:
+                    self.subscriptions[uuid] = [event.client.uuid]
+
+                result = {'component': 'objectmanager',
+                          'action': 'subscribe',
+                          'data': {'uuid': uuid, 'success': True}
+                          }
+
+            elif action == "unsubscribe":
+                # TODO: Automatic Unsubscription
+                uuid = data
+
+                if uuid in self.subscriptions:
+                    self.subscriptions[uuid].remove(event.client.uuid)
+
+                    if len(self.subscriptions[uuid]) == 0:
+                        del (self.subscriptions[uuid])
+
+                result = {'component': 'objectmanager',
+                          'action': 'unsubscribe',
+                          'data': {'uuid': uuid, 'success': True}
                           }
 
             elif action == "put":
                 try:
-                    putobj = data['obj']
-                    uuid = putobj['uuid']
+                    clientobject = data['obj']
+                    uuid = clientobject['uuid']
                 except KeyError:
                     hfoslog("[OM] Put request with missing arguments!", event, lvl=critical)
                     return
 
                 try:
                     if uuid != 'create':
-                        obj = objectmodels[schema].find_one({'uuid': uuid})
+                        storageobject = objectmodels[schema].find_one({'uuid': uuid})
                     else:
-                        putobj['uuid'] = uuid4()
-                    if obj:
-                        hfoslog("[OM] Updating object:", obj._fields, lvl=debug)
-                        obj.update(putobj)
+                        clientobject['uuid'] = str(uuid4())
+                        storageobject = objectmodels[schema](clientobject)
+
+                    if storageobject:
+                        hfoslog("[OM] Updating object:", storageobject._fields, lvl=debug)
+                        storageobject.update(clientobject)
 
                     else:
-                        obj = objectmodels[schema](putobj)
-                        hfoslog("[OM] Storing object:", obj._fields, lvl=debug)
+                        storageobject = objectmodels[schema](clientobject)
+                        hfoslog("[OM] Storing object:", storageobject._fields, lvl=debug)
                         try:
-                            obj.validate()
+                            storageobject.validate()
                         except ValidationError:
-                            hfoslog("[OM] Validation of new object failed!", data, lvl=warn)
+                            hfoslog("[OM] Validation of new object failed!", clientobject, lvl=warn)
+                            return
 
-                    obj.save()
+                    storageobject.save()
 
                     hfoslog("[OM] Object stored.")
 
+                    # Notify backend listeners
+
+                    if uuid == 'create':
+                        notification = objectcreation(storageobject.uuid, schema)
+                    else:
+                        notification = objectchange(storageobject.uuid, schema)
+
+                    # Notify frontend subscribers
+
+                    if uuid in self.subscriptions:
+                        update = {'component': 'objectmanager',
+                                  'action': 'update',
+                                  'data': storageobject.serializablefields()
+                                  }
+
+                        for recipient in self.subscriptions[uuid]:
+                            self.fireEvent(send(recipient, update))
+
                     result = {'component': 'objectmanager',
                               'action': 'put',
-                              'data': (True, obj.uuid),
+                              'data': (True, storageobject.uuid),
                               }
                 except Exception as e:
-                    hfoslog("[OM] Error during object storage:", e, type(e), lvl=error)
+                    hfoslog("[OM] Error during object storage:", e, type(e), data, lvl=error)
+
+            elif action == 'delete':
+                try:
+                    uuid = data['uuid']
+
+                    if schema in objectmodels.keys():
+                        hfoslog("[OM] Looking for object to be deleted.", lvl=debug)
+                        storageobject = objectmodels[schema].find_one({'uuid': uuid})
+                        hfoslog("[OM] Found object.", lvl=debug)
+
+                        hfoslog("[OM] Fields:", storageobject._fields, "\n\n\n", storageobject.__dict__)
+                        storageobject.delete()
+
+                        hfoslog("[OM] Preparing notification.", lvl=debug)
+                        notification = objectdeletion(uuid, schema)
+
+                        if uuid in self.subscriptions:
+                            deletion = {'component': 'objectmanager',
+                                        'action': 'deletion',
+                                        'data': uuid
+                                        }
+                            for recipient in self.subscriptions[uuid]:
+                                self.fireEvent(send(recipient, deletion))
+
+                            del (self.subscriptions[uuid])
+
+                        result = {'component': 'objectmanager',
+                                  'action': 'delete',
+                                  'data': (True, storageobject.uuid),
+                                  }
+                except Exception as e:
+                    hfoslog("[OM] Error during delete request: ", e, type(e), lvl=error)
 
             else:
                 hfoslog("[OM] Unsupported action: ", action, event, event.__dict__, lvl=warn)
                 return
 
+            if notification:
+                try:
+                    self.fireEvent(notification)
+                except Exception as e:
+                    hfoslog("[OM] Transmission error during notification: %s" % e, lvl=error)
+
             if result:
                 try:
                     self.fireEvent(send(event.client.uuid, result))
                 except Exception as e:
-                    hfoslog("[OM] Transmission error before broadcast: %s" % e, lvl=error)
+                    hfoslog("[OM] Transmission error during response: %s" % e, lvl=error)
 
         except Exception as e:
-            hfoslog("[OM] Error: '%s' %s" % (e, type(e)), lvl=error)
+            print()
+            hfoslog("[OM] Overall Error: '%s' %s" % (e, type(e)), exc=True)
