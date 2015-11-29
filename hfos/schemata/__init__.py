@@ -41,19 +41,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 __all__ = [
+    'book',
     'client',
+    'controllable',
+    'controller',
     'coords',
+    'dashboard',
     'layer',
     'layergroup',
     'mapview',
     'profile',
-    'controllable',
-    'controller',
-    'user',
-    'wikipage',
-    'vessel',
+    'project',
     'radio',
-    'dashboard'
+    'sensordata',
+    'tag',
+    'task',
+    'user',
+    'vessel',
+    'wikipage'
 ]
 
 from importlib import import_module
@@ -102,6 +107,3 @@ def test():
             hfoslog("[SCHEMATA] Schema without uuid encountered: ", schemaname, lvl=debug)
 
 # https://github.com/fge/sample-json-schemas/tree/master/geojson
-
-if __name__ == "__main__":
-    test()
