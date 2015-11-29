@@ -15,13 +15,17 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits import Component
 
-from hfos.logger import hfoslog, critical
+from hfos.logger import hfoslog, critical, warn
 
 from uuid import uuid4
 
 import json
-import objgraph
-from guppy import hpy
+try:
+    import objgraph
+    from guppy import hpy
+except ImportError:
+    hfoslog("[DBG] Debugger couldn't import objgraph and/or guppy.", lvl=warn)
+
 import inspect
 
 class HFDebugger(Component):
@@ -42,8 +46,10 @@ class HFDebugger(Component):
             self.root = root
         else:
             self.root = root
-
-        self.heapy = hpy()
+        try:
+            self.heapy = hpy()
+        except:
+            hfoslog("[DBG] Can't use heapy. guppy package missing?")
 
         hfoslog("[DBG] Started")
 
