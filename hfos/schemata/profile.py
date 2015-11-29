@@ -76,6 +76,28 @@ Profile = {
                 'theme': {'type': 'string', 'title': 'User Theme', 'description': 'Theme used for user interface'},
                 'notes': {'type': 'string', 'format': 'html', 'title': 'Profile notes',
                           'description': 'Custom profile notes'},
+                'menu': {
+                    "type": "array",
+                    "items": {
+                        "id": "menuentry",
+                        "title": "Menu entry",
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string", "title": "Menuitem title"},
+                            "url": {"type": "string", "title": "Menuitem url slug"},
+                            "svg": {"type": "string", "title": "Menuitem icon name"},
+                            "row": {"type": "integer", "title": "Menuitem row"},
+                            "col": {"type": "integer", "title": "Menuitem column"},
+                            "sizeX": {"type": "integer", "title": "Menuitem horizontal size"},
+                            "sizeY": {"type": "integer", "title": "Menuitem vertical size"}
+                        }
+                    }
+                },
+                'mapviewuuid': {
+                    'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                    'type': 'string',
+                    'title': 'Default Unique Mapview ID'
+                }
             }
         },
         "alertconfig": {
