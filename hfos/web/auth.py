@@ -45,7 +45,7 @@ class Authenticator(Component):
         userprofile = None
 
         try:
-            useraccount = userobject.find_one({'username': event.username})
+            useraccount = userobject.find_one({'name': event.username})
             hfoslog("[AUTH] Account: %s" % useraccount._fields, lvl=debug)
         except Exception as e:
             hfoslog("[AUTH] No userobject due to error: ", e, type(e), lvl=error)
@@ -79,7 +79,7 @@ class Authenticator(Component):
                     clientconfig = clientconfigobject()
                     clientconfig.uuid = event.clientuuid
                     clientconfig.name = "New client"
-                    clientconfig.description = "New client configuration from " + useraccount.username
+                    clientconfig.description = "New client configuration from " + useraccount.name
                     clientconfig.useruuid = useraccount.uuid
                     # TODO: Make sure the profile is only saved if the client could store it, too
                     clientconfig.save()
@@ -90,7 +90,7 @@ class Authenticator(Component):
 
                     useraccount.passhash = ""
                     self.fireEvent(
-                        authentication(useraccount.username, (useraccount, userprofile, clientconfig), event.clientuuid,
+                        authentication(useraccount.name, (useraccount, userprofile, clientconfig), event.clientuuid,
                                        useraccount.uuid,
                                        event.sock),
                         "auth")
@@ -104,7 +104,7 @@ class Authenticator(Component):
         else:
             hfoslog("[AUTH] Creating user")
             try:
-                newuser = userobject({'username': event.username, 'passhash': event.passhash, 'uuid': str(uuid4())})
+                newuser = userobject({'name': event.username, 'passhash': event.passhash, 'uuid': str(uuid4())})
                 newuser.save()
             except Exception as e:
                 hfoslog("[AUTH] Problem creating new user: ", type(e), e, lvl=error)
@@ -124,7 +124,7 @@ class Authenticator(Component):
                 newclientconfig = clientconfigobject()
                 newclientconfig.uuid = event.clientuuid
                 newclientconfig.name = "New client"
-                newclientconfig.description = "New client configuration from " + newuser.username
+                newclientconfig.description = "New client configuration from " + newuser.name
                 newclientconfig.useruuid = newuser.uuid
                 newclientconfig.save()
             except Exception as e:
@@ -133,7 +133,7 @@ class Authenticator(Component):
 
             try:
                 self.fireEvent(
-                    authentication(newuser.username, (newuser, newprofile, newclientconfig), event.clientuuid,
+                    authentication(newuser.name, (newuser, newprofile, newclientconfig), event.clientuuid,
                                    newuser.uuid,
                                    event.sock),
                     "auth")
