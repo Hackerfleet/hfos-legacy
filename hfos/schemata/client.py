@@ -43,7 +43,7 @@ Clientconfig = {
         'dashboarduuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                           'type': 'string',
                           'title': 'Associated Unique Dashboard ID'
-                          }
+                          },
     }
 }
 
@@ -67,6 +67,26 @@ ClientconfigForm = [
                 ]
             }
         ]
+    },
+    {
+        'key': 'dashboarduuid',
+        'type': 'uiselect',
+        'placeholder': 'Select a Dashboard',
+        'options': {
+            "type": "dashboard",
+            "asyncCallback": "  getFormData",
+            "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+        }
+    },
+    {
+        'key': 'mapviewuuid',
+        'type': 'uiselect',
+        'placeholder': 'Select a MapView',
+        'options': {
+            "type": "mapview",
+            "asyncCallback": "getFormData",
+            "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+        }
     },
     'description',
     {
