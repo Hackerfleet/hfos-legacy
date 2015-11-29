@@ -52,6 +52,8 @@ Included modules
 Work in progress (1.1)
 ----------------------
 
+-  Taskgrid based project planning
+-  Simple book library management system
 -  Full GDAL based raster chart support
 -  Dynamic Logbook
 -  GRIB data (in charts)
