@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """
 Schema: Vessel
 ==============
@@ -29,11 +31,14 @@ VesselSchema = {
         'vesseltype': {'type': 'string', 'title': 'Vessel Type', 'enum': ['Sailboat', 'Motorboat', 'Platform'],
                        'description': 'General classification of vessel'},
         'color': {'type': 'string', 'title': 'Vessel Color', 'format': 'color',
-                  'description': 'Color used for map annotations etc'},
+                  'description': 'Color used for annotations'},
         'registration': {'type': 'string', 'minLength': 1, 'title': 'Registration',
                          'description': 'Official registration'},
         'origin': {'type': 'string', 'minLength': 1, 'title': 'Country of origin',
                    'description': 'Registration country'},
+        'hullplan': {'type': 'string', 'title': 'Hull-plan', 'description': 'Hull-plan configuration',
+                     'enum': ['Monohull', 'Catamaran', 'Trimaran', 'Quadrimaran', 'Pentamaran']
+                     },
         'loa': {'type': 'number', 'title': 'LOA', 'description': 'Length-over-all'},
         'lwl': {'type': 'number', 'title': 'LWL', 'description': 'Length-water-line'},
         'beam': {'type': 'number', 'title': 'Beam', 'description': 'Breadth amidships'},
@@ -52,9 +57,7 @@ VesselSchema = {
                               'Topsail Schooner', 'Two-topsail Schooner', 'Yawl'
                               ]
                      },
-        'hullplan': {'type': 'string', 'title': 'Hull-plan', 'description': 'Hull-plan configuration',
-                     'enum': ['Monohull', 'Catamaran', 'Trimaran', 'Quadrimaran', 'Pentamaran']
-                     },
+        'sailarea': {'type': 'number', 'title': 'Sail area', 'description': 'Maximum unfolded usable sail area (m²)'},
         'water-production': {'type': 'number', 'title': 'Water (production)',
                              'description': 'Potable water production l/day'},
         'water-storage': {'type': 'number', 'title': 'Water (storage)',
@@ -74,35 +77,122 @@ VesselSchema = {
 
 VesselForm = [
     {
-        'type': 'section',
-        'htmlClass': 'row',
-        'items': [
+        'type': 'tabs',
+        'tabs': [
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-3',
+                'title': 'General',
                 'items': [
-                    'name', 'loa', 'height-max', 'hullplan', 'fuel-storage', 'color'
+                    {
+                        'type': 'section',
+                        'htmlClass': 'row',
+                        'items': [
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-4',
+                                'items': [
+                                    'name', 'vesseltype', 'hullplan'
+                                ]
+                            },
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-4',
+                                'items': [
+                                    'color', 'registration'
+                                ]
+                            },
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-4',
+                                'items': [
+                                    'mmsi', 'origin'
+                                ]
+                            }
+                        ]
+                    }
+
+                ],
+            },
+            {
+                'title': 'Geometry',
+                'items': [
+                    {
+                        'type': 'section',
+                        'htmlClass': 'row',
+                        'items': [
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-4',
+                                'items': [
+                                    'loa', 'draft', 'height-max'
+                                ]
+                            },
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-4',
+                                'items': [
+                                    'lwl', 'beam', 'height-min'
+                                ]
+                            },
+
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-4',
+                                'items': [
+                                    'cabins', 'bunks'
+                                ]
+                            }
+                        ]
+                    },
                 ]
             },
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-3',
+                'title': 'Sails & Engines',
                 'items': [
-                    'registration', 'lwl', 'height-min', 'sailplan', 'fuel-consumption'
+                    {
+                        'type': 'section',
+                        'htmlClass': 'row',
+                        'items': [
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-6',
+                                'items': [
+                                    'motors', 'sailplan'
+                                ]
+                            },
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-6',
+                                'items': [
+                                    'motorpower', 'sailarea'
+                                ]
+                            }
+                        ]
+                    }
                 ]
             },
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-3',
+                'title': 'Bunkers & Consumption',
                 'items': [
-                    'vesseltype', 'draft', 'motors', 'cabins', 'water-storage'
-                ]
-            },
-            {
-                'type': 'section',
-                'htmlClass': 'col-xs-3',
-                'items': [
-                    'origin', 'beam', 'motorpower', 'bunks', 'water-production', 'waste-storage'
+                    {
+                        'type': 'section',
+                        'htmlClass': 'row',
+                        'items': [
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-6',
+                                'items': [
+                                    'fuel-storage', 'water-storage', 'waste-storage'
+                                ]
+                            },
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-6',
+                                'items': [
+                                    'fuel-consumption', 'water-production'
+                                ]
+                            }
+                        ]
+                    }
                 ]
             }
 
