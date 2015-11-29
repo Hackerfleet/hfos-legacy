@@ -239,14 +239,14 @@ class ClientManager(Component):
             return
 
         try:
-            requestcomponent = msg['message']['component']
-            requestaction = msg['message']['action']
+            requestcomponent = msg['component']
+            requestaction = msg['action']
         except (KeyError, AttributeError) as e:
             hfoslog("[CM] Unpacking error: ", msg, e, type(e), lvl=error)
             return
 
         try:
-            requestdata = msg['message']['data']
+            requestdata = msg['data']
         except (KeyError, AttributeError) as e:
             hfoslog("[CM] No payload.", lvl=verbose)
             requestdata = None
