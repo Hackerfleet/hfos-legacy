@@ -22,7 +22,7 @@ User = {
     'type': 'object',
     'name': 'User',
     'properties': {
-        'username': {'type': 'string'},
+        'name': {'type': 'string'},
         'passhash': {'type': 'string'},
         'groups': {'type': 'array',
                    'items': {
