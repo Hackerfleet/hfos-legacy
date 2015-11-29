@@ -18,11 +18,12 @@ from circuits.net.sockets import TCPClient
 from circuits.net.events import connect, read
 
 from pynmea2 import parse
-from pynmea2 import types
+from hfos.schemata.sensordata import sensordatatypes
+from decimal import Decimal
 
 from hfos.database import sensordataobject
 from hfos.events import sensordata
-from hfos.logger import hfoslog, debug, warn, critical, error
+from hfos.logger import hfoslog, verbose, debug, warn, critical, error
 
 
 class NMEAParser(Component):
@@ -37,11 +38,15 @@ class NMEAParser(Component):
         self.host = host
         self.port = port
 
+        self.unhandled = []
+        self.unparsable = []
+
         TCPClient(channel=self.channel).register(self)
 
     def ready(self, socket):
         hfoslog("[NMEA] Connecting...")
         self.fire(connect(self.host, self.port))
+
 
     def _parse(self, data):
         """
@@ -74,41 +79,71 @@ class NMEAParser(Component):
 
         try:
             for sentence in sentences:
-                parsed_data = parse(sentence)
-                nmeadata.append((parsed_data, sen_time))
+                if sentence[0] == '!':
+                    # This is an AIS sentence or something else
+                    hfoslog("[NMEA] Not yet implemented: AIS Sentence received.")
+                else:
+                    parsed_data = parse(sentence)
+                    nmeadata.append((parsed_data, sen_time))
         except Exception as e:
             hfoslog("[NMEA] Error during parsing: ", e, lvl=critical)
+            self.unparsable.append(sentences)
 
-        if len(nmeadata) > 0:
-            hfoslog("[NMEA] Parsed sentences: ", len(nmeadata), lvl=debug)
-            return nmeadata
+        return nmeadata
 
     def _handle(self, nmeadata):
+        try:
+            if len(nmeadata) == 0:
+                hfoslog("[NMEA] Nothing to handle.", lvl=debug)
+                return
 
-        for sentence, sen_time in nmeadata:
-            try:
-                if type(sentence) in [types.GGA, types.GLL, types.GSV, types.MWD]:
-                    data = sensordataobject()
-                    data.Time_Created = sen_time
-                    if type(sentence) == types.GGA:
-                        data.GPS_LatLon = str((sentence.lat, sentence.lat_dir,
-                                               sentence.lon, sentence.lon_dir))
-                        data.GPS_SatCount = int(sentence.num_sats)
-                        data.GPS_Quality = int(sentence.gps_qual)
-                    elif type(sentence) == types.GLL:
-                        data.GPS_LatLon = str((sentence.lat, sentence.lat_dir,
-                                               sentence.lon, sentence.lon_dir))
-                    elif type(sentence) == types.GSV:
-                        data.GPS_SatCount = int(sentence.num_sv_in_view)
-                    elif type(sentence) == types.MWD:
-                        data.Wind_Direction_True = int(sentence.direction_true)
-                        data.Wind_Speed_True = int(sentence.wind_speed_meters)
+            rawdata = {}
+            for sentence, sen_time in nmeadata:
+                hfoslog("[NMEA] Sentence: ", sentence.fields, lvl=verbose)
 
-                    self.fireEvent(sensordata(data), "navdata")
-                else:
-                    hfoslog("[NMEA] Unhandled sentence acquired: ", sentence)
-            except Exception as e:
-                hfoslog("[NMEA] Error during sending: ", nmeadata, e, type(e), lvl=error)
+                for item in sentence.fields:
+                    itemname = item[1]
+                    # hfoslog(itemname, lvl=critical)
+                    value = getattr(sentence, itemname)
+                    if value:
+                        if len(item) == 3:
+                            if item[2] in (Decimal, float):
+                                value = float(value)
+                            elif item[2] == int:
+                                value = int(value)
+                        if sensordatatypes[itemname]['type'] == "string" or (type(value) not in (str, int, float)):
+                            value = str(value)
+                        # hfoslog("{",itemname,": ",value, "}", lvl=critical)
+                        rawdata.update({itemname: value})
+
+                        # data.update(rawdata)
+                        # hfoslog(data, lvl=critical)
+
+
+                        # if type(sentence) in [types.GGA, types.GLL, types.GSV, types.MWD]:
+                        #     data = sensordataobject()
+                        #     data.Time_Created = sen_time
+                        #     if type(sentence) == types.GGA:
+                        #         data.GPS_LatLon = str((sentence.lat, sentence.lat_dir,
+                        #                                sentence.lon, sentence.lon_dir))
+                        #         data.GPS_SatCount = int(sentence.num_sats)
+                        #         data.GPS_Quality = int(sentence.gps_qual)
+                        #     elif type(sentence) == types.GLL:
+                        #         data.GPS_LatLon = str((sentence.lat, sentence.lat_dir,
+                        #                                sentence.lon, sentence.lon_dir))
+                        #     elif type(sentence) == types.GSV:
+                        #         data.GPS_SatCount = int(sentence.num_sv_in_view)
+                        #     elif type(sentence) == types.MWD:
+                        #         data.Wind_Direction_True = int(sentence.direction_true)
+                        #         data.Wind_Speed_True = int(sentence.wind_speed_meters)
+
+            return rawdata
+            # else:
+            #    hfoslog("[NMEA] Unhandled sentence acquired: ", sentence)
+            #    if not type(sentence) in self.unhandled:
+            #        self.unhandled.append(type(sentence))
+        except Exception as e:
+            hfoslog("[NMEA] Error during sending: ", nmeadata, e, type(e), lvl=error)
 
     def read(self, data):
         """Handles incoming raw sensor data
@@ -118,7 +153,10 @@ class NMEAParser(Component):
         hfoslog("[NMEA] Incoming data: ", '%.50s ...' % data, lvl=debug)
         nmeadata = self._parse(data)
 
-        self._handle(nmeadata)
+        data = sensordataobject(self._handle(nmeadata))
+
+        self.fireEvent(sensordata(data), "navdata")
+        #hfoslog("[NMEA] Unhandled data: \n", self.unparsable, "\n", self.unhandled, lvl=warn)
 
 
 
@@ -129,27 +167,37 @@ class NMEAPlayback(Component):
 
     channel = "nmea"
 
-    def init(self, logfilename, delay=5000):
-        hfoslog("[NMEA] Playback component started")
+    def init(self, logfilename, delay=5):
+        hfoslog("[NMEAP] Playback component started with", delay,"seconds interval.")
 
         with open(logfilename, 'r') as logfile:
             self.logdata = logfile.readlines()
+        self.length = len(self.logdata)
 
-        hfoslog("[NMEA] Logfile contains ", len(self.logdata), " items.")
+        hfoslog("[NMEAP] Logfile contains", self.length, "items.")
 
         self.delay = delay
         self.position = 0
 
         Timer(self.delay, Event.create('nmeaplayback'), self.channel, persist=True).register(self)
 
-    def nmeaplayback(self,*args):
+    def nmeaplayback(self, *args):
+        hfoslog("[NMEAP] Playback time", lvl=verbose)
         try:
             if self.position == len(self.logdata):
-                hfoslog("[NMEA] Playback looping")
+                hfoslog("[NMEAP] Playback looping", lvl=warn)
                 self.position = 0
             else:
                 self.position += 1
 
-            self.fireEvent(read(self.logdata[self.position]), "nmea")
+            data = self.logdata[self.position]
+
+            hfoslog("[NMEAP] Transmitting: ", data, lvl=verbose)
+
+            self.fireEvent(read(data), "nmea")
+
+            if self.position % 100 == 0:
+                hfoslog("[NMEAP] Played back", self.position, "sentences.")
+
         except Exception as e:
-            hfoslog("[NMEA] Error during logdata playback: ", e, type(e), lvl=error)
+            hfoslog("[NMEAP] Error during logdata playback: ", e, type(e), lvl=error)

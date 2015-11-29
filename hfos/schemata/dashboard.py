@@ -45,7 +45,7 @@ Dashboard = {
                 'name': 'DashboardCard',
                 'properties': {
                     'widgettype': {'type': 'string', 'enum': ['bearing', 'gauge', 'DigitalDashboardCtrl']},
-                    'valuetype': {'type': 'string', 'enum': SensorValueTypes},
+                    'valuetype': {'type': 'string', 'enum': sorted(SensorValueTypes)},
                     'title': {'type': 'string'},
                     'size': {
                         'type': 'object',
