@@ -74,7 +74,7 @@ class send(Event):
         self.sendtype = sendtype
         self.raw = raw
 
-        hfoslog("[CM-EVENT] Send event generated:", uuid, packet, sendtype, lvl=verbose)
+        hfoslog("[CM-EVENT] Send event generated:", uuid, packet, sendtype, lvl=events)
 
 
 class broadcast(Event):
@@ -91,7 +91,7 @@ class broadcast(Event):
         self.broadcasttype = broadcasttype
         self.content = content
 
-        hfoslog("[CM-EVENT] Broadcast event generated:", broadcasttype, content, lvl=debug)
+        hfoslog("[CM-EVENT] Broadcast event generated:", broadcasttype, content, lvl=events)
 
 
 class clientdisconnect(Event):
@@ -110,7 +110,7 @@ class clientdisconnect(Event):
         self.clientuuid = clientuuid
         self.useruuid = useruuid
 
-        hfoslog("[CM-EVENT] Client disconnect event generated:", clientuuid, useruuid, lvl=debug)
+        hfoslog("[CM-EVENT] Client disconnect event generated:", clientuuid, useruuid, lvl=events)
 
 
 class userlogin(Event):
@@ -129,7 +129,7 @@ class userlogin(Event):
         self.clientuuid = clientuuid
         self.useruuid = useruuid
 
-        hfoslog("[CM-EVENT] User login event generated:", clientuuid, useruuid, lvl=debug)
+        hfoslog("[CM-EVENT] User login event generated:", clientuuid, useruuid, lvl=events)
 
 
 # Authenticator Events
@@ -206,6 +206,31 @@ class schemarequest(AuthorizedEvent):
 class objectmanagerrequest(AuthorizedEvent):
     """A client requires a schema to validate data or display a form"""
 
+
+class objectevent(Event):
+    """A unspecified objectevent"""
+
+    def __init__(self, uuid, schema, *args):
+        super(objectevent, self).__init__(*args)
+
+        self.uuid = uuid
+        self.schema = schema
+
+        hfoslog("[OBJECT-EVENT] Object event created: ", self.__doc__, self.__dict__, lvl=events)
+
+
+## Object change
+
+class objectchange(objectevent):
+    """A stored object has been successfully modified"""
+
+
+class objectcreation(objectevent):
+    """A new object has been successfully created"""
+
+
+class objectdeletion(objectevent):
+    """A stored object has been successfully deleted"""
 
 # Chat requests
 
