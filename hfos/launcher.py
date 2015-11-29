@@ -25,6 +25,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits import Component
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
+
 from circuits.web import Server, Static
 
 from hfos.web.objectmanager import ObjectManager
@@ -39,13 +40,10 @@ from hfos.web.chat import Chat
 from hfos.web.tilecache import TileCache
 from hfos.web.demo import WebDemo
 from hfos.web.wiki import Wiki
+from hfos.web.library import Library
 
 from hfos.logger import hfoslog, verbose, setup_root, Logger
 from hfos.debugger import HFDebugger
-
-from hfos.protocols.nmea import NMEAParser
-
-from hfos.navdata import NavData
 
 
 class App(Component):
@@ -64,22 +62,27 @@ class App(Component):
 def construct_graph(dodebug=False, dograph=False, dogui=False):
     """Preliminary HFOS application Launcher"""
 
+    server = Server(("0.0.0.0", 8055))
+    setup_root(server)
+
     if dodebug:
         from circuits import Debugger
 
-    server = Server(("0.0.0.0", 8055))
-    setup_root(server)
+        dbg = Debugger()
+        dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
+
+        HFDebugger(root=server).register(server)
+
     Logger().register(server)
     hfoslog("[HFOS] Beginning graph assembly.")
-
-    HFDebugger().register(server)
 
     app = App().register(server)
 
     # Machineroom().register(app)
 
-    navdata = NavData().register(server)
-    NMEAParser('localhost', 2222).register(navdata)
+    # navdata = NavData().register(server)
+    # NMEAParser('localhost', 2222).register(navdata)
+    # NMEAPlayback('/home/riot/src/hfos/nmealog.txt', 1).register(navdata)
 
     TileCache().register(server)
     Static("/", docroot="/var/lib/hfos/static").register(server)
@@ -96,14 +99,10 @@ def construct_graph(dodebug=False, dograph=False, dogui=False):
     RemoteControlManager().register(clientmanager)
     WebDemo().register(clientmanager)
     Wiki().register(clientmanager)
+    Library().register(clientmanager)
     # CameraManager().register(clientmanager)
 
     # Logger().register(server)
-
-    if dodebug:
-        dbg = Debugger()
-        dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
-        # dbg.register(lm)
 
     if dograph:
         from circuits.tools import graph
@@ -125,5 +124,5 @@ def run_graph(server):
 
 
 def launch():
-    server = construct_graph()
+    server = construct_graph(dodebug=True)
     run_graph(server)

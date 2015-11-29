@@ -48,6 +48,7 @@ from circuits.core import Event
 
 
 import time
+import os
 import sys
 import inspect
 import six
@@ -76,9 +77,9 @@ terminator = '\033[0m'
 count = 0
 
 logfile = "/var/log/hfos/service.log"
-verbosity = {'global': events,
+verbosity = {'global': debug,
              'file': off,
-             'console': debug,
+             'console': debug
              }
 
 mute = []
@@ -159,16 +160,21 @@ def hfoslog(*what, **kwargs):
     else:
         lvl = info
 
+    if 'exc' in kwargs:
+        exception = True
+    else:
+        exception = False
+
     global count
 
     output = None
     count += 1
 
     now = time.time() - start
-    msg = "[%s] : %8s : %.5f : %i :" % (time.asctime(),
-                                        lvldata[lvl][0],
-                                        now,
-                                        count)
+
+    line_no = None
+    callee = None
+
     if verbosity['global'] <= debug:
         # Automatically log the current function details.
 
@@ -176,11 +182,26 @@ def hfoslog(*what, **kwargs):
         # be this function!!!
         func = inspect.currentframe().f_back.f_code
         # Dump the message + the name of this function to the log.
+
+        if exception:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            line_no = exc_tb.tb_lineno
+            lvl = error
+        else:
+            line_no = func.co_firstlineno
+
         callee = "[%.10s@%s:%i]" % (
             func.co_name,
             func.co_filename,
-            func.co_firstlineno
+            line_no
         )
+
+    msg = "[%s] : %8s : %.5f : %i :" % (time.asctime(),
+                                        lvldata[lvl][0],
+                                        now,
+                                        count)
+
+    if callee:
         msg += "%-60s" % callee
 
     for thing in what:

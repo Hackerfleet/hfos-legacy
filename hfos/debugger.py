@@ -20,7 +20,9 @@ from hfos.logger import hfoslog, critical
 from uuid import uuid4
 
 import json
-
+import objgraph
+from guppy import hpy
+import inspect
 
 class HFDebugger(Component):
     """
@@ -32,8 +34,16 @@ class HFDebugger(Component):
 
     channel = "hfosweb"
 
-    def __init__(self, *args):
+    def __init__(self, root=None, *args):
         super(HFDebugger, self).__init__(*args)
+
+        if not root:
+            from hfos.logger import root
+            self.root = root
+        else:
+            self.root = root
+
+        self.heapy = hpy()
 
         hfoslog("[DBG] Started")
 
@@ -46,5 +56,19 @@ class HFDebugger(Component):
                 fp = open('/tmp/hfosdebugger_' + str(event.user.useruuid) + "_" + str(uuid4()), "w")
                 json.dump(event.data, fp, indent=True)
                 fp.close()
+            if event.action == "memdebug":
+                hfoslog("[DBG] Memory hogs:", lvl=critical)
+                objgraph.show_most_common_types(limit=20)
+            if event.action == "growth":
+                hfoslog("[DBG] Memory growth since last call:", lvl=critical)
+                objgraph.show_growth()
+            if event.action == "graph":
+                objgraph.show_backrefs([self.root], max_depth=42, filename='backref-graph.png')
+                hfoslog("[DBG] Backref graph written.", lvl=critical)
+            if event.action == "heap":
+                hfoslog("[DBG] Heap log:", self.heapy.heap(), lvl=critical)
+
+
+
         except Exception as e:
             hfoslog("[DBG] Exception during debug handling:", e, type(e), lvl=critical)
