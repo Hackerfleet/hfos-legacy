@@ -74,19 +74,23 @@ class ObjectManager(Component):
 
                     for item in objectmodels[schema].find(objectfilter):
                         try:
-                            listitem = {'uuid': item.uuid}
-                            if 'name' in item._fields:
-                                listitem['name'] = item.name
+                            if fields == ['*']:
+                                objlist.append(item.serializablefields())
+                            else:
+                                listitem = {'uuid': item.uuid}
+                                if 'name' in item._fields:
+                                    listitem['name'] = item.name
 
-                            for field in fields:
-                                if field in item._fields:
-                                    listitem[field] = item._fields[field]
-                                else:
-                                    listitem[field] = None
+                                for field in fields:
+                                    if field in item._fields:
+                                        listitem[field] = item._fields[field]
+                                    else:
+                                        listitem[field] = None
 
-                            objlist.append(listitem)
+                                objlist.append(listitem)
                         except Exception as e:
-                            hfoslog("[OM] Faulty object or field: ", e, type(e), item._fields, fields, lvl=error)
+                            hfoslog("[OM] Faulty object or field: ", e, type(e), item._fields, fields, lvl=error,
+                                    exc=True)
                     hfoslog("[OM] Generated object list: ", objlist)
 
                     result = {'component': 'objectmanager',
