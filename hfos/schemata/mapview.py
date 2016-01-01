@@ -30,7 +30,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 MapView = {
     'type': 'object',
     'id': '#mapview',
-    'name': 'Mapview',
+    'name': 'mapview',
     'properties': {
         'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                  'type': 'string',

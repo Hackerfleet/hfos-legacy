@@ -17,9 +17,9 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 from .sensordata import SensorValueTypes
 
 Dashboard = {
-    'id': '#Dashboard',
+    'id': '#dashboard',
     'type': 'object',
-    'name': 'Dashboard',
+    'name': 'dashboard',
     'properties': {
         'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                  'type': 'string',
@@ -91,36 +91,37 @@ DashboardForm = [
             },
         ]
     },
-    {'key': 'cards',
-     'add': "Add widget",
-     'style': {
-         'add': "btn-success"
-     },
-     'items': [
-         'cards[].title',
-         'cards[].widgettype',
-         'cards[].valuetype',
-         {'type': 'section',
-          'htmlClass': 'row',
-          'items': [
-              {
-                  'type': 'section',
-                  'htmlClass': 'col-xs-4',
-                  'items': [
-                      'cards[].position'
-                  ]
-              },
-              {
-                  'type': 'section',
-                  'htmlClass': 'col-xs-4',
-                  'items': [
-                      'cards[].size'
-                  ]
-              }
-          ]
-          }
-     ]
-     },
+    {
+        'key': 'cards',
+        'add': "Add widget",
+        'style': {
+            'add': "btn-success"
+        },
+        'items': [
+            'cards[].title',
+            'cards[].widgettype',
+            'cards[].valuetype',
+            {'type': 'section',
+             'htmlClass': 'row',
+             'items': [
+                 {
+                     'type': 'section',
+                     'htmlClass': 'col-xs-4',
+                     'items': [
+                         'cards[].position'
+                     ]
+                 },
+                 {
+                     'type': 'section',
+                     'htmlClass': 'col-xs-4',
+                     'items': [
+                         'cards[].size'
+                     ]
+                 }
+             ]
+             }
+        ]
+    },
     'description',
     {
         'type': 'submit',

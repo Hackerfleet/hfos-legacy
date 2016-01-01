@@ -17,12 +17,12 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 MapCoords = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "/mapcoords",
+    "id": "mapcoords",
     "type": "object",
     "additionalProperties": True,
     "title": "Root schema.",
     "description": "An explanation about the puropose of this instance described by this schema.",
-    "name": "/mapcoords",
+    "name": "mapcoords",
     "properties": {
         "lat": {
             "id": "lat",

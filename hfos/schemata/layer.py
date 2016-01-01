@@ -22,8 +22,8 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 Layer = {
     'type': 'object',
-    'id': '#Layer',
-    'name': 'Layer',
+    'id': '#layer',
+    'name': 'layer',
     'properties': {
         'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Layer ID', 'description': 'HIDDEN'},
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Name of view'},

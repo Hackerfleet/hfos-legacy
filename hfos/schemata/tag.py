@@ -22,8 +22,8 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 Tag = {
     'type': 'object',
-    'id': '#Tag',
-    'name': 'Tag',
+    'id': '#tag',
+    'name': 'tag',
     'properties': {
         'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Tag ID', 'description': 'HIDDEN'},
         'name': {'type': 'string', 'title': 'Name', 'description': 'Name of Tag'},

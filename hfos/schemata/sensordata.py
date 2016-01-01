@@ -103,10 +103,10 @@ Props = {
 Props.update(sensordatatypes)
 
 SensorData = {
-    'id': 'SensorData',
+    'id': '#sensorData',
     'title': 'SensorData',
     'type': 'object',
-    'name': 'SensorData',
+    'name': 'sensordata',
     'properties': Props  # TODO: This doesn't work out. Too huge, too slow!
 }
 

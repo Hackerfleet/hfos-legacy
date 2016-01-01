@@ -15,9 +15,9 @@ Radio: Radio configurations to store onboard radio system data
 __author__ = 'riot'
 
 RadioConfig = {
-    'id': '#Radio',
+    'id': '#radio',
     'type': 'object',
-    'name': 'Radio',
+    'name': 'radio',
     'properties': {
         'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                  'type': 'string',

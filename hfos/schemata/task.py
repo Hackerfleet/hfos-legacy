@@ -22,8 +22,8 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 Task = {
     'type': 'object',
-    'id': '#Task',
-    'name': 'Task',
+    'id': '#task',
+    'name': 'task',
     'properties': {
         'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Task ID', 'description': 'HIDDEN'},
         'name': {'type': 'string', 'title': 'Name', 'description': 'Name of Task'},

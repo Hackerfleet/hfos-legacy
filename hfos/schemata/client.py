@@ -17,7 +17,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 Clientconfig = {
     'id': '#client',
     'type': 'object',
-    'name': 'Client',
+    'name': 'client',
     'properties': {
         'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                  'type': 'string',

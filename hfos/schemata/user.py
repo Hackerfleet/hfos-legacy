@@ -20,7 +20,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 User = {
     'id': '#user',
     'type': 'object',
-    'name': 'User',
+    'name': 'user',
     'properties': {
         'name': {'type': 'string'},
         'passhash': {'type': 'string'},

@@ -17,9 +17,9 @@ Vessel: Vesselprofile to store Vessel specific settings
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 VesselSchema = {
-    'id': '#Vessel',
+    'id': '#vessel',
     'type': 'object',
-    'name': 'Vessel',
+    'name': 'vessel',
     'properties': {
         'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                  'type': 'string',

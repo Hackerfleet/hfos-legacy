@@ -26,8 +26,8 @@ Incident = {
 
 Logbook = {
     'type': 'object',
-    'id': '#Logbook',
-    'name': 'Logbook',
+    'id': '#logbook',
+    'name': 'logbook',
     'properties': {
         'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Logbook Event ID', 'description': 'HIDDEN'},
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Name of logbook entry'},
