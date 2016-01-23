@@ -1,0 +1,19 @@
+# build data
+build
+dist
+docs/build
+__pycache__
+*.egg*
+
+# cache
+*.pyc
+
+# Testing stuff
+.tox
+coverage
+.coverage
+
+# IntelliJ IDEA
+workspace.xml
+tasks.xml
+shelf

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/alert" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/chat" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/dash" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/library" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/maps" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/nmea" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/project" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/robot" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/shareables" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wiki" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/navdata" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/comms" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/camera" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ldap" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
