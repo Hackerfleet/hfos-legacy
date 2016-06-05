@@ -1,0 +1,11 @@
+# NMEA Parser
+pynmea2==1.5.1
+
+# Wiki
+docutils==0.12
+
+# Library
+isbntools==4.2.6
+
+# LDAP support
+git+https://github.com/jaseg/python-lmap.git

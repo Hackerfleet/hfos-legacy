@@ -22,9 +22,9 @@ from setuptools import setup
 from setuptools import Command
 from distutils.log import INFO, WARN
 from distutils.dir_util import copy_tree
-
 import os
 from shutil import rmtree
+
 
 # TODO:
 # Classifiers
@@ -32,7 +32,7 @@ from shutil import rmtree
 # download_url
 # platform
 
-class install_doc(Command):
+class install_docs(Command):
     description = "Installs documentation into frontend library directory"
     user_options = [
         # The format is (long option, short option, description).
@@ -50,7 +50,7 @@ class install_doc(Command):
         self.announce("Updating documentation directory", INFO)
 
         # If these need changes, make sure they are watertight and don't remove wanted stuff!
-        target = '/var/lib/hfos/static/docs'
+        target = '/var/lib/hfos/frontend/docs'
         source = 'docs/build/html'
 
         if not os.path.exists(os.path.join(os.path.curdir, source)):
@@ -141,7 +141,7 @@ setup(name="hfos",
       ],
       cmdclass={
           'install_var': install_var,
-          'install_doc': install_doc,
+          'install_docs': install_docs,
           'install_provisions': install_provisions,
       },
       long_description="""HFOS - The Hackerfleet Operating System
@@ -154,12 +154,30 @@ See https://github.com/hackerfleet/hfos""",
       dependency_links=[
           'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.3.hf'
       ],
-      install_requires=['circuits==3.1.0',
-                        'pymongo>=3.1.1',
+      install_requires=['pymongo>=3.2',
                         'jsonschema>=2.5.1',
-                        'pynmea2==1.5.1',
+                        'pynmea2>=1.5.2',
                         'warmongo==0.5.3.hf',
+                        'pyserial==3.0.1',
                         'six'
                         ],
+      entry_points=
+      """[hfos.base]
+    debugger=hfos.debugger:HFDebugger
+    cli=hfos.debugger:CLI
+    logger=hfos.debugger:Logger
+
+    [hfos.sails]
+    auth=hfos.web.auth:Authenticator
+    clientmanager=hfos.web.clientmanager:ClientManager
+    objectmanager=hfos.web.objectmanager:ObjectManager
+    schemamanager=hfos.web.schemamanager:SchemaManager
+
+    [hfos.schemata]
+    client=hfos.schemata:Client
+    profile=hfos.schemata:Profile
+    user=hfos.schemata:User
+    logmessage=hfos.schemata:LogMessage
+    """,
       test_suite="tests.main.main",
       )

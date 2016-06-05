@@ -26,6 +26,27 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from hfos import launcher
+import argparse
 
 if __name__ == "__main__":
-    launcher.launch()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--port", help="Define port for server",
+                        type=int, default=80)
+    parser.add_argument("--host", help="Define hostname for server",
+                        type=str, default='0.0.0.0')
+    parser.add_argument("--profile", help="Enable profiler", action="store_true")
+    parser.add_argument("--opengui", help="Launch webbrowser for GUI "
+                                          "inspection after startup",
+                        action="store_true")
+    parser.add_argument("--drawgraph", help="Draw a snapshot of the "
+                                            "component graph "
+                                            "after construction",
+                        action="store_true")
+    parser.add_argument("--log", help="Define log level (0-100)",
+                        type=int, default=20)
+
+    parser.add_argument("--insecure", help="Keep privileges - INSECURE",
+                    action="store_true")
+
+    args = parser.parse_args()
+    launcher.launch(args)

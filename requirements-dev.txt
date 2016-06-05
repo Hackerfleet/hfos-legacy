@@ -1,12 +1,5 @@
 # Basics
-circuits==3.1.0
-pymongo==3.1.1
-jsonschema==2.5.1
-pynmea2==1.5.1
-git+https://github.com/hackerfleet/warmongo.git
-
-# Compat
-six
+-r requirements.txt
 
 # Linting, QA
 pyflakes
@@ -21,7 +14,7 @@ Fabric
 # Debugging
 pudb
 objgraph
-guppy
+#guppy
 
 # Packaging
 wheel
@@ -33,9 +26,15 @@ coveralls
 pytest-cov
 
 # Generating Documentation
+MarkupSafe
+gitdb
+funcparserlib
+webcolors
+
 Sphinx
+sphinx_bootstrap_theme
 releases
-Sphinx-PyPI-upload
+#Sphinx-PyPI-upload
 sphinx-issues
 sphinxcontrib-actdiag
 sphinxcontrib-nwdiag

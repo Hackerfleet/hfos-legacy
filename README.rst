@@ -25,10 +25,9 @@
 
 HFOS - The Hackerfleet Operating System
 =======================================
+    A modern, opensource approach to collaboration and maritime navigation.
 
-    A modern, opensource approach to maritime navigation.
-
-    This software package is supposed to run on your ship/car/plane/ufo's
+    This software package is supposed to run on your home/ship/plane/ufo/*space's
     board computer.
 
 *Obligatory Warning*: **Do not use for navigational purposes!**
@@ -38,23 +37,32 @@ HFOS - The Hackerfleet Operating System
 Included modules
 ----------------
 
--  webui (compatible with all modern browsers)
--  nmea bus parser
--  dashboard
--  offline (cached) moving maps
--  openseamap
--  openstreetmap
--  openweathermap
--  ship info wiki
--  man over board alert system
--  and lots of other useful layers
+============ ===================================================
+  Name        Description
+============ ===================================================
+  sails       Web UI, compatible with all modern browsers
+  alert       Crew alerting and notification system
+  camera      Camera support
+  chat        Integrated chat (gateways planned)
+  comms       Communication package
+  dash        Dashboard information system
+  ldap        LDAP crew authorization
+  library     Library management
+  maps        (Offline) moving maps with shareable views/layers
+  navdata     Navigational data aspects
+  nmea        NMEA-0183 Navigation bus parser
+  project     Lightweight project management tool
+  robot       RC remote control unit
+  shareables  Shared resource blocking tool
+  wiki        Etherpad + Wiki = awesomeness
 
-Work in progress (1.1)
-----------------------
 
--  Full GDAL based raster chart support
+Outlook (2.0)
+-------------
+
 -  Dynamic Logbook
 -  GRIB data (in charts)
+-  GDAL based raster chart support
 -  Navigation aides, planning
 -  Datalog, automated navigational data exchange
 -  Crew management, more safety tools
@@ -67,8 +75,8 @@ Please research any bugs you find via our `Github issue tracker for
 HFOS <https://github.com/hackerfleet/hfos/issues>`__ and report them,
 if they're still unknown.
 
-If you want to discuss (opensource) maritime technology in general
-incl. where we're heading, head over to our `Github discussion
+If you want to discuss distributed, opensource (or maritime) technology
+in general incl. where we're heading, head over to our `Github discussion
 forum <https://github.com/hackerfleet/discussion/issues>`__
 ...which is cleverly disguised as a Github issue tracker.
 
@@ -115,7 +123,8 @@ For Debian Unstable use this:
     $ sudo apt-get install mongodb python3.4 python3-pip python3-grib \
                            python3-bson python3-pymongo python3-serial
 
-If you want (and can), install the mongo and bson extensions:
+If you want (and can), install the mongo and bson extensions for
+speedups:
 
 .. code-block:: bash
 
@@ -154,6 +163,15 @@ database:
 You may need to adapt permissions for the /var folders to accomodate the
 user you let hfos run with, until we re-add the daemon and package support
 foam, that does that automatically.
+
+For some modules, there are additional libraries to install, until we
+have those separated cleanly with their own dependencies, we suggest
+installing all of them now:
+
+.. code-block:: bash
+
+    $ pip install -r requirements-optional.txt
+
 
 Frontend
 --------

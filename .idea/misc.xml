@@ -5,7 +5,10 @@
     <entry_points version="2.0" />
   </component>
   <component name="IdProvider" IDEtalkID="EE2310A247ADD07826F351D41709DCD6" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_3" assert-keyword="false" jdk-15="false" project-jdk-name="Python 2.7.8 virtualenv at ~/.virtualenvs/hfostest" project-jdk-type="Python SDK" />
+  <component name="JavaScriptSettings">
+    <option name="languageLevel" value="ES6" />
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="HFOS" project-jdk-type="Python SDK" />
   <component name="TaskProjectConfiguration">
     <server type="GitHub" url="https://github.com" />
   </component>
