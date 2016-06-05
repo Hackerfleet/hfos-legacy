@@ -9,6 +9,15 @@ HFOS Documentation
 
 .. _documentation-index:
 
+About
+=====
+
+.. toctree::
+    :maxdepth: 1
+
+    about/hackerfleet
+    about/hfos
+
 Sailor's Manual
 ===============
 
@@ -26,10 +35,10 @@ Developer Documentation
     :maxdepth: 1
 
     start/index
-    tutorials/index
-    dev/index
-    dev/man/index
-    dev/api/index
+    #tutorials/index
+    #dev/index
+    #dev/man/index
+    #dev/api/index
     changes
     roadmap
     contributors

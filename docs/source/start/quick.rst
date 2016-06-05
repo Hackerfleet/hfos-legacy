@@ -1,5 +1,8 @@
 Quick Start Guide
 =================
+.. DANGER::
+   These instructions are not up to date and may cause problems! The build system has been
+   changed slightly and these manual parts will soon be updated.
 
 Docker
 ------

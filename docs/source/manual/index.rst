@@ -1,8 +1,8 @@
-HFOS Sailor's Manual
+HFOS User's Manual
 ====================
 
-Welcome to the HFOS Sailor's Manual!
- This part of the documentation explains how to work with HFOS and solve the various tasks around seamanship.
+Welcome to the HFOS Users Manual!
+ This part of the documentation explains how to work with HFOS and use the core modules.
 
 
 Detailed Feature Overview
@@ -10,11 +10,4 @@ Detailed Feature Overview
 
 .. toctree::
     :maxdepth: 2
-
-    dashboard
-    logbook
-    map
-    layers
-    mapviews
-
 

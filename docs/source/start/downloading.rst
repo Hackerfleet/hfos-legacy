@@ -5,7 +5,9 @@ Downloading
 Latest Stable Release
 ---------------------
 
-The latest stable releases can be downloaded from the
+By design, there is currently no stable release planned.
+
+The latest stable releases (if there should ever be one) could be downloaded from the
 `Releases <https://github.com/hackerfleet/hfos/releases>`_ page
 (*specifically the Tags tab*).
 
