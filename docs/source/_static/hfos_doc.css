@@ -1,0 +1,8 @@
+.navbar-brand > img {
+    display: inline-block;
+}
+
+body > .container {
+    min-height: 95vh;
+    font-size: 1.5em;
+}
