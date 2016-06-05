@@ -38,7 +38,7 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=['hfos==1.0.0'],
-      entry_points="""[hfos.plugins]
+      entry_points="""[hfos.components]
     camera=hfos.camera.manager:CameraManager
 [hfos.schemata]
     """,

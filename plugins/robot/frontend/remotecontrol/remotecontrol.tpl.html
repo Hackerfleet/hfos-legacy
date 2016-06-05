@@ -1,0 +1,16 @@
+<div class="well">
+    <H1>Remote Control</H1>
+
+    <div class="well" id="controllers">
+        <H2>Controller overview</H2>
+        <span id="controllerstatus" ng-bind="$ctrl.status"></span>
+        <br/>
+        <span>Remote control:</span>
+        <input type="checkbox" id="cbcontrolActive" ng-model="$ctrl.controlActive" ng-change="$ctrl.toggleControl();"/>
+        <span>Requested</span>
+        <input type="checkbox" id="cbcontrolling" ng-model="$ctrl.controlling"/>
+        <span>Controlling</span>
+        <br/>
+    </div>
+</div>
+

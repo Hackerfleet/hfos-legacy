@@ -42,8 +42,10 @@ This software package is a plugin module for HFOS.
           'hfos-navdata>=0.0.1'
       ],
       entry_points=
-      """[hfos.schemata]
+      """[hfos.components]
     dashboard=hfos.dashboard.dashboard:Dashboard
+    [hfos.schemata]
+    dashboardconfig=hfos.dashboard.dashboardconfig:DashboardConfig
     """,
       test_suite="tests.main.main",
       )

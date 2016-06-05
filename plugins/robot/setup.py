@@ -40,7 +40,7 @@ This software package is a plugin module for HFOS.
           'hfos==1.0.0',
           'pyserial==3.0.1'
       ],
-      entry_points="""[hfos.plugins]
+      entry_points="""[hfos.components]
     rcmanager=hfos.robot.rcmanager:RemoteControlManager
     machineroom=hfos.robot.machineroom:Machineroom
 [hfos.schemata]

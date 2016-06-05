@@ -41,7 +41,7 @@ This software package is a plugin module for HFOS.
           'hfos==1.0.0',
           'pynmea2>=1.5.1'
       ],
-      entry_points="""[hfos.plugins]
+      entry_points="""[hfos.components]
     nmeaparser=hfos.nmea.nmea:NMEAParser
     nmeaplayback=hfos.nmea.nmea:NMEAPlayback
     """,

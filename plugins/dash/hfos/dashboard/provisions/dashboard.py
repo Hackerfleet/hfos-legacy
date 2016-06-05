@@ -16,7 +16,7 @@ Dashboards for ships
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from hfos.provisions.base import provisionList
-from hfos.database import dashboardobject
+from hfos.database import objects
 from hfos.logger import hfoslog
 
 Dashboards = [
@@ -31,7 +31,7 @@ Dashboards = [
 ]
 
 def provision():
-    provisionList(Dashboards, dashboardobject)
+    provisionList(Dashboards, objects['dashboardconfig'])
     hfoslog('[PROV] Provisioning: Dashboards: Done.')
 
 if __name__ == "__main__":

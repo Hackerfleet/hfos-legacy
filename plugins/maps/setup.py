@@ -39,8 +39,8 @@ This software package is a plugin module for HFOS.
       dependency_links=[],
       install_requires=['hfos==1.0.0'],
       entry_points=
-      """[hfos.plugins]
-    tilecache=hfos.map.tilecache:TileCache
+      """[hfos.components]
+    map=hfos.map.maptileservice:MaptileService
 [hfos.schemata]
     layer=hfos.map.layer:Layer
     layergroup=hfos.map.layergroup:LayerGroup

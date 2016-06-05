@@ -1,0 +1,4 @@
+<div class="container" ng-controller="LibraryCtrl">
+    <h1>{{pluginname}} View</h1>
+    <span>This is your newly created view and here is a scopevariable: \{{variable}}</span>
+</div>

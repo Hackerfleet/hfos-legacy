@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+"""
+
+Schema: {{description}}
+========{{descriptionheader}}
+
+Contains
+--------
+
+Schemata entries for {{pluginname}}
+
+:copyright: (C) {{year}} {{authorname}} {{authoremail}}
+:license: {{license}}
+
+"""
+
+{{componentname}}
+Schema = {
+    'type': 'object',
+    'id': '#{{pluginname}}',
+    'name': '{{pluginname}}',
+    'properties': {
+        'uuid': {
+            'type': 'string', 'minLength': 36, 'title': 'Unique {{componentname}} data object ID',
+            'description': 'HIDDEN'
+        },
+        'owneruuid': {
+            'type': 'string', 'minLength': 36, 'title': "Owner's Unique ID", 'description': 'HIDDEN'
+        },
+        'name': {
+            'type': 'string', 'title': 'Name', 'description': 'Name of {{componentname}} data object'
+        }
+    }
+}
+
+{{componentname}}
+Form = [
+    '*',
+    {
+        'type': 'submit',
+        'title': 'Save {{componentname}}',
+    }
+]
+
+{{componentname}} = {
+                        'schema': {{componentname}}Schema,
+                    'form': {{componentname}}
+Form
+}

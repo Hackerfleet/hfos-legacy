@@ -1,0 +1,56 @@
+<div class="container">
+    <div class="well">
+        <h1>Garden</h1>
+        <span>Manage garden watering</span>
+
+        <div class="panel-group" ng-model="panels.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
+            <div class="panel panel-default">
+                <div class="panel-heading panel-hover" role="tab">
+                    <h4 class="panel-title">
+                        <a bs-collapse-toggle>
+                            Rules
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <div class="panel-body">
+                        <span>Start pump
+                            <select>
+                                <option>Main</option>
+                                <option>Auxillary</option>
+                            </select>
+                            for
+                            <select>
+                                <option>30 seconds</option>
+                                <option>1 minute</option>
+                                <option>2 minutes</option>
+                                <option>5 minutes</option>
+                            </select>
+                            at
+                            <input type="time">
+                            every
+                            <select>
+                                <option>day</option>
+                                <option>second day</option>
+                                <option>third day</option>
+                            </select>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading panel-hover" role="tab">
+                    <h4 class="panel-title">
+                        <a bs-collapse-toggle>
+                            Statistics
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <div class="panel-body">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

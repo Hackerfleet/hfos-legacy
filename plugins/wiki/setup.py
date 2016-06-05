@@ -41,7 +41,7 @@ This software package is a plugin module for HFOS.
           'hfos==1.0.0',
           'docutils==0.12'
       ],
-      entry_points="""[hfos.plugins]
+      entry_points="""[hfos.components]
     wiki=hfos.wiki.wiki:Wiki
 [hfos.schemata]
     wikipage=hfos.wiki.wikipage:WikiPage

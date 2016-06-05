@@ -1,0 +1,21 @@
+{
+  "name": "hfos-{{pluginname}}",
+  "version": "{{version}}",
+  "description": "HFOS - {{description}}",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/{{githuburl}}.git"
+  },
+  "keywords": [
+    {{keywordlist}}
+  ],
+  "author": "{{authorname}}",
+  "license": "{{license}}",
+  "bugs": {
+    "url": "https://github.com/{{githuburl}}/issues"
+  }
+}

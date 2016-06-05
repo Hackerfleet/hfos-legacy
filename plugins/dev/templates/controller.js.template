@@ -1,0 +1,20 @@
+'use strict';
+
+/**
+ * @ngdoc function
+ * @name hfosFrontendApp.controller:{{componentname}}Controller
+ * @description
+ * # {{componentname}}Controller
+ * Controller of the hfosFrontendApp {{pluginname}} module
+ */
+angular.module('hfosFrontendApp')
+    .controller('{{componentname}}Controller', function ($scope, ObjectProxy) {
+        $scope.variable = 'Hello World!';
+
+    })
+    .config(function ($routeProvider) {
+        $routeProvider
+            .when('/{{pluginname}}', {
+                templateUrl: '{{pluginname}}/views/{{pluginname}}.html'
+            });
+    });

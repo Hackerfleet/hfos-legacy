@@ -38,8 +38,6 @@ libraryfieldmapping = {
 class Library(ConfigurableComponent):
     """
     The Library manages stored media objects
-
-
     """
     channel = "hfosweb"
 
@@ -56,6 +54,7 @@ class Library(ConfigurableComponent):
         """
 
         super(Library, self).__init__("Library", *args)
+        self.config.creator = "Hackerfleet"
 
         self.log("Started")
 

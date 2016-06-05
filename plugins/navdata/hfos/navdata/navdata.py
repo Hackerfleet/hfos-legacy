@@ -11,14 +11,16 @@ Module NavData
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from circuits import Component, Event
+from circuits import Event
 from circuits import Timer
 from hfos.database import objectmodels, ValidationError
 from hfos.events import referenceframe, broadcast
 from hfos.logger import hfoslog, verbose, error, critical
 
+from hfos.component import ConfigurableComponent
 
-class NavData(Component):
+
+class NavData(ConfigurableComponent):
     """
     The NavData (Navigation Data) component receives new sensordata and generates a new :referenceframe:
 
@@ -26,13 +28,16 @@ class NavData(Component):
     """
     channel = "navdata"
 
+    configprops = {}
+
     def __init__(self, *args):
         """
         Initialize the navigation data component.
 
         :param args:
         """
-        super(NavData, self).__init__(*args)
+
+        super(NavData, self).__init__('NAVDATA', *args)
 
         self.referenceframe = objectmodels['sensordata']()
         self.referenceages = {}
@@ -90,6 +95,7 @@ class NavData(Component):
                     }
                 }), "hfosweb")
                 self.intervalcount = 0
-            hfoslog("[NAVDATA] Reference frame successfully pushed.", lvl=verbose)
+                # hfoslog("[NAVDATA] Reference frame successfully pushed.",
+                # lvl=verbose)
         except Exception as e:
             hfoslog("[NAVDATA] Could not push referenceframe: ", e, type(e), lvl=critical)

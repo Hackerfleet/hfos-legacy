@@ -1,0 +1,13 @@
+<leaflet defaults="defaults" center="$ctrl.center" controls="$ctrl.controls" height="100%" width="100%"
+         layers="$ctrl.layers"></leaflet>
+<div class="well hidden">
+    <span>Events</span>
+
+    <p></p><strong ng-bind="eventDetected"></strong></p>
+    <span>Center</span>
+    {{$ctrl.center}}
+    <span>Layers</span>
+    {{$ctrl.layers}}
+    <span>Defaults</span>
+    {{$ctrl.defaults}}
+</div>

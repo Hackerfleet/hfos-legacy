@@ -44,7 +44,7 @@ def get_tile(url):
         else:
             connection = urlopen(url=url)
     except Exception as e:
-        log += "TCT: ERROR Tilegetter error: %s " % str([type(e), e, url])
+        log += "MTST: ERROR Tilegetter error: %s " % str([type(e), e, url])
 
     content = ""
 
@@ -53,11 +53,11 @@ def get_tile(url):
         try:
             content = connection.read()
         except (socket.timeout, socket.error) as e:
-            log += "TCT: ERROR Tilegetter error: %s " % str([type(e), e])
+            log += "MTST: ERROR Tilegetter error: %s " % str([type(e), e])
 
         connection.close()
     else:
-        log += "TCT: ERROR Got no connection."
+        log += "MTST: ERROR Got no connection."
 
     return content, log
 
@@ -65,11 +65,14 @@ def get_tile(url):
 class UrlError(Exception):
     pass
 
-class TileCache(Controller):
+
+class MaptileService(Controller):
     """
     Threaded, disk-caching tile delivery component
     """
     # channel = "web"
+
+    configprops = {}
 
     def __init__(self, path="/tilecache", tilepath="/var/cache/hfos/tilecache", defaulttile=None, **kwargs):
         """
@@ -79,7 +82,7 @@ class TileCache(Controller):
         :param defaulttile: Used, when no tile can be cached
         :param kwargs:
         """
-        super(TileCache, self).__init__(**kwargs)
+        super(MaptileService, self).__init__(**kwargs)
         self.worker = Worker(process=False, workers=2, channel="tcworkers").register(self)
 
         self.tilepath = tilepath
@@ -95,7 +98,7 @@ class TileCache(Controller):
             url = unquote(url)
 
             if '..' in url:  # Does this need more safety checks?
-                hfoslog("[TC] Fishy url with parent path: ", url, lvl=error)
+                hfoslog("[MTS] Fishy url with parent path: ", url, lvl=error)
                 raise UrlError
 
             spliturl = url.split("/")
@@ -108,7 +111,7 @@ class TileCache(Controller):
             filename = os.path.join(self.tilepath, service, x, y) + "/" + z + ".png"
             realurl = "http://" + service + "/" + x + "/" + y + "/" + z + ".png"
         except Exception as e:
-            hfoslog("[TC] ERROR (%s) in URL: %s" % (e, url))
+            hfoslog("[MTS] ERROR (%s) in URL: %s" % (e, url))
             raise UrlError
 
         return filename, realurl
@@ -123,7 +126,7 @@ class TileCache(Controller):
 
         # Do we have the tile already?
         if os.path.isfile(filename):
-            hfoslog("[TC] Tile exists in cache")
+            hfoslog("[MTS] Tile exists in cache")
             # Don't set cookies for static content
             response.cookie.clear()
             try:
@@ -132,17 +135,17 @@ class TileCache(Controller):
                 event.stop()
         else:
             # We will have to get it first.
-            hfoslog("[TC] Tile not cached yet. Tile data: ", filename, url)
+            hfoslog("[MTS] Tile not cached yet. Tile data: ", filename, url)
             if url in self._tilelist:
-                hfoslog("[TC] Getting a tile for the second time?!", lvl=error)
+                hfoslog("[MTS] Getting a tile for the second time?!", lvl=error)
             else:
                 self._tilelist += url
             try:
                 tile, log = yield self.call(task(get_tile, url), "tcworkers")
                 if log:
-                    hfoslog("[TC] Thread error: ", log)
+                    hfoslog("[MTS] Thread error: ", log)
             except Exception as e:
-                hfoslog("[TC]", e, type(e))
+                hfoslog("[MTS]", e, type(e))
                 tile = None
 
             tilepath = os.path.dirname(filename)
@@ -152,31 +155,31 @@ class TileCache(Controller):
                     os.makedirs(tilepath)
                 except OSError as e:
                     if e.errno != errno.EEXIST:
-                        hfoslog("[TC] Couldn't create path: %s (%s)" % (e, type(e)))
+                        hfoslog("[MTS] Couldn't create path: %s (%s)" % (e, type(e)), exc=True)
 
-                hfoslog("[TC] Caching tile.", lvl=verbose)
+                hfoslog("[MTS] Caching tile.", lvl=verbose)
                 try:
                     with open(filename, "wb") as tilefile:
                         try:
                             tilefile.write(bytes(tile))
                         except Exception as e:
-                            hfoslog("[TC] Writing error: %s" % str([type(e), e]))
+                            hfoslog("[MTS] Writing error: %s" % str([type(e), e]))
 
                 except Exception as e:
-                    hfoslog("[TC] Open error: %s" % str([type(e), e]))
+                    hfoslog("[MTS] Open error: %s" % str([type(e), e]))
                     return
                 finally:
                     event.stop()
 
                 try:
-                    hfoslog("[TC] Delivering tile.", lvl=verbose)
+                    hfoslog("[MTS] Delivering tile.", lvl=verbose)
                     yield serve_file(request, response, filename)
                 except Exception as e:
-                    hfoslog("[TC] Couldn't deliver tile: ", e, lvl=error)
+                    hfoslog("[MTS] Couldn't deliver tile: ", e, lvl=error)
                     event.stop()
-                hfoslog("[TC] Tile stored and delivered.", lvl=verbose)
+                hfoslog("[MTS] Tile stored and delivered.", lvl=verbose)
             else:
-                hfoslog("[TC] Got no tile, serving defaulttile: %s" % url)
+                hfoslog("[MTS] Got no tile, serving defaulttile: %s" % url)
                 if self.defaulttile:
                     try:
                         yield serve_file(request, response, self.defaulttile)

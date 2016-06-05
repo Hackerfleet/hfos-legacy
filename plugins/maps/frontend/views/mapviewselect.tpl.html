@@ -1,0 +1,27 @@
+<form>
+    <div class="list-group">
+        <div id="activeMapView" class="list-group-item active">
+            <h4 class="list-group-item-heading">Current MapView</h4>
+
+            <p class="list-group-item-text">
+                <span ng-bind="mapview.name"></span>
+                <span ng-bind="mapview.notes"></span>
+                <span ng-bind="mapview.coords"></span>
+            </p>
+        </div>
+
+        <div ng-click="selectMV(uuid)" ng-repeat="(uuid, view) in mapviews track by uuid" class="list-group-item">
+            <h4 class="list-group-item-heading"><span ng-bind="view.data.name"></span></h4>
+
+            <p class="list-group-item-text">
+                <span ng-bind="uuid"></span>
+                <span ng-bind="view.data.notes"></span>
+                <span ng-bind="view.data.coords"></span>
+                <span>{{view.data.uuid}}</span>
+                <span>{{view.data.notes}}</span>
+                <span>{{view.data.name}}</span>
+
+            </p>
+        </div>
+    </div>
+</form>

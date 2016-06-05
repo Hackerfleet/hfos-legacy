@@ -38,7 +38,7 @@ This software package is a plugin module for HFOS.
       dependency_links=[],
       install_requires=['hfos==1.0.0'],
       entry_points=
-      """[hfos.plugins]
+      """[hfos.components]
     ldap=hfos.ldap.ldap:LDAPAdaptor
     """,
       test_suite="tests.main.main",

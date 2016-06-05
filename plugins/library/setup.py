@@ -22,8 +22,7 @@ from setuptools import setup, find_packages
 
 setup(name="hfos-library",
       version="0.0.1",
-      description="hfos-library",
-
+      description="hfos-library - a federated small library management system",
       author="Hackerfleet Community",
       author_email="packages@hackerfleet.org",
       url="https://github.com/hackerfleet/hfos-library",
@@ -41,7 +40,7 @@ This software package is a plugin module for HFOS.
           'hfos==1.0.0',
           'isbntools==4.2.6'
       ],
-      entry_points="""[hfos.plugins]
+      entry_points="""[hfos.components]
     library=hfos.library.library:Library
 [hfos.schemata]
     book=hfos.library.book:Book

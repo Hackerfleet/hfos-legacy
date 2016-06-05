@@ -1,0 +1,37 @@
+'use strict';
+
+class librarycomponent {
+
+    constructor(objectproxy, $state, $rootScope) {
+        this.op = objectproxy;
+        this.state = $state;
+        this.rootscope = $rootScope;
+        this.searchISBN = '';
+        this.searchMeta = '';
+
+        this.searching = false;
+
+        var self = this;
+
+        this.searchByISBN = function () {
+            self.searching = true;
+
+            console.log('Searching for book by ISBN:', self.searchISBN);
+            self.op.getlist('book', {'isbn': self.searchISBN}, ['*']);
+        };
+
+        this.rootscope.$on('OP.ListUpdate', function (ev, update) {
+            console.log('OH, HELLO!', ev, update);
+            self.state.go('app.list', {schema: 'book'});
+        });
+
+        this.searchByMeta = function () {
+            console.log('Searching for book by Metadata:', self.searchMeta);
+
+        };
+    }
+}
+
+librarycomponent.$inject = ['objectproxy', '$state', '$rootScope'];
+
+export default librarycomponent;

@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+"""
+
+{{description}}
+{{descriptionheader}}
+
+Contains
+--------
+
+{{longdescription}}
+
+:copyright: (C) {{year}} {{authorname}} <{{authoremail}}>
+:license: {{license}}
+
+"""
+
+from hfos.component import ConfigurableComponent
+from hfos.logger import warn, critical, error, debug, verbose
+
+__author__ = "{{authorname}} <{{authoremail}}>"
+
+
+class {{componentname}}Component(ConfigurableComponent):
+    configprops = {
+        'setting': {'type': 'string', 'title': 'Some Setting',
+                    'description': 'Some string setting.', 'default': 'DefaultValue'},
+    }
+
+    def __init__(self, *args, **kwargs):
+        super({{componentname}}
+        Component, self).__init__("{{pluginname}}", *args, **kwargs)
+
+        self.log("{{componentname}} started.")
+        # self.log(self.config)

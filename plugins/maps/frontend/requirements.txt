@@ -1,0 +1,15 @@
+angular-leaflet-directive@~0.10.0
+leaflet-minimap@~3.3.1
+leaflet-fullscreen@~1.0.1
+leaflet-toolbar@~0.1.2
+leaflet-draw@~0.3.0
+leaflet-omnivore@~0.3.2
+leaflet-terminator@~0.1.0
+leaflet-easybutton@~1.2.0
+leaflet-area-select@~0.2.8
+leaflet-overpass-layer@~2.0.0
+leaflet-rotatedmarker@~0.1.0
+leaflet-schematic@~0.1.3
+gridsby-leaflet-label@~0.2.1-1
+leaflet.coordinates@~0.1.5
+leaflet.timeline@~1.0.0-beta
