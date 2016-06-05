@@ -56,10 +56,12 @@ Included modules
   shareables  Shared resource blocking tool
   wiki        Etherpad + Wiki = awesomeness
 
+Work in progress (1.1)
+----------------------
 
-Outlook (2.0)
--------------
-
+-  Taskgrid based project planning
+-  Simple book library management system
+-  Full GDAL based raster chart support
 -  Dynamic Logbook
 -  GRIB data (in charts)
 -  GDAL based raster chart support
