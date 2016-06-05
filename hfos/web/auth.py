@@ -14,19 +14,26 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from uuid import uuid4
 
-from circuits import Component, handler
+from circuits import handler
 
 from hfos.database import userobject, profileobject, clientconfigobject
 from hfos.events import authentication, send
 from hfos.logger import hfoslog, error, warn, debug, verbose
 
+from hfos.component import ConfigurableComponent
 
-class Authenticator(Component):
+
+class Authenticator(ConfigurableComponent):
     """
     Authenticates users against the database.
     """
 
     channel = "hfosweb"
+
+    configprops = {}
+
+    def __init__(self, *args):
+        super(Authenticator, self).__init__('AUTH', *args)
 
     @handler("authenticationrequest", channel="auth")
     def authenticationrequest(self, event):
@@ -34,115 +41,202 @@ class Authenticator(Component):
         :param event: AuthenticationRequest with user's credentials
         """
 
-        hfoslog("[AUTH] Auth request for ", event.username, event.clientuuid)
+        # TODO: Refactor to simplify
 
-        if (len(event.username) < 3) or (len(event.passhash) < 3):
-            hfoslog("[AUTH] Illegal username or password received, login cancelled", lvl=warn)
-            return
+        if event.auto:
+            hfoslog("[AUTH] Automatic login request:")
 
-        useraccount = None
-        clientconfig = None
-        userprofile = None
+            e = None
+            try:
+                clientconfig = clientconfigobject.find_one({'uuid':
+                                                                event.requestedclientuuid})
+            except Exception as e:
+                clientconfig = None
 
-        try:
-            useraccount = userobject.find_one({'name': event.username})
-            hfoslog("[AUTH] Account: %s" % useraccount._fields, lvl=debug)
-        except Exception as e:
-            hfoslog("[AUTH] No userobject due to error: ", e, type(e), lvl=error)
+            if clientconfig == None or clientconfig.autologin == False:
+                hfoslog("[AUTH] Autologin failed:", e, lvl=error)
+                return
 
-        if useraccount:
-            hfoslog("[AUTH] User found.")
-
-            if useraccount.passhash == event.passhash:
-                hfoslog("[AUTH] Passhash matches, checking client and profile.", lvl=debug)
-
-                requestedclientuuid = event.requestedclientuuid
-
-                # Client requests to get an existing client configuration or has none
-
-                clientconfig = clientconfigobject.find_one({'uuid': requestedclientuuid})
-
-                if clientconfig:
-                    hfoslog("[AUTH] Checking client configuration permissions", lvl=debug)
-                    if clientconfig.useruuid != useraccount.uuid:
-                        clientconfig = None
-                        hfoslog("[AUTH] Unauthorized client configuration requested", lvl=warn)
-                else:
-                    hfoslog("[AUTH] Unknown client configuration requested: ", requestedclientuuid, event.__dict__,
-                            lvl=warn)
-
-                if not clientconfig:
-                    hfoslog("[AUTH] Creating new default client configuration")
-                    # Either no configuration was found or requested
-                    # -> Create a new client configuration
-
-                    clientconfig = clientconfigobject()
-                    clientconfig.uuid = event.clientuuid
-                    clientconfig.name = "New client"
-                    clientconfig.description = "New client configuration from " + useraccount.name
-                    clientconfig.useruuid = useraccount.uuid
-                    # TODO: Make sure the profile is only saved if the client could store it, too
-                    clientconfig.save()
+            if clientconfig.autologin == True:
 
                 try:
-                    userprofile = profileobject.find_one({'uuid': str(useraccount.uuid)})
-                    hfoslog("[AUTH] Profile: ", userprofile, useraccount.uuid, lvl=debug)
+                    useraccount = userobject.find_one({'uuid':
+                                                           clientconfig.useruuid})
+                    hfoslog("[AUTH] Account: %s" % useraccount._fields, lvl=debug)
+                except Exception as e:
+                    hfoslog("[AUTH] No userobject due to error: ", e, type(e),
+                            lvl=error)
+
+                try:
+                    userprofile = profileobject.find_one(
+                            {'uuid': str(useraccount.uuid)})
+                    hfoslog("[AUTH] Profile: ", userprofile,
+                            useraccount.uuid, lvl=debug)
 
                     useraccount.passhash = ""
                     self.fireEvent(
-                        authentication(useraccount.name, (useraccount, userprofile, clientconfig), event.clientuuid,
-                                       useraccount.uuid,
-                                       event.sock),
+                            authentication(useraccount.name, (
+                                useraccount, userprofile, clientconfig),
+                                           event.clientuuid,
+                                           useraccount.uuid,
+                                           event.sock),
                         "auth")
+                    hfoslog("[AUTH] Autologin successful!", lvl=error)
                 except Exception as e:
-                    hfoslog("[AUTH] No profile due to error: ", e, type(e), lvl=error)
-            else:
-                hfoslog("[AUTH] Password was wrong!", lvl=warn)
-
-            hfoslog("[AUTH] Done with Login request", lvl=debug)
-
+                    hfoslog("[AUTH] No profile due to error: ", e, type(e),
+                            lvl=error)
         else:
-            hfoslog("[AUTH] Creating user")
-            try:
-                newuser = userobject({'name': event.username, 'passhash': event.passhash, 'uuid': str(uuid4())})
-                newuser.save()
-            except Exception as e:
-                hfoslog("[AUTH] Problem creating new user: ", type(e), e, lvl=error)
-                return
-            try:
-                newprofile = profileobject({'uuid': str(newuser.uuid)})
-                hfoslog("[AUTH] New profile uuid: ", newprofile.uuid, lvl=verbose)
+            hfoslog("[AUTH] Auth request for ", event.username,
+                    event.clientuuid)
 
-                newprofile.components = {'enabled': ["dashboard", "map", "weather", "settings"]}
-                newprofile.save()
-            except Exception as e:
-                hfoslog("[AUTH] Problem creating new profile: ", type(e), e, lvl=error)
+            if (len(event.username) < 3) or (len(event.passhash) < 3):
+                hfoslog(
+                        "[AUTH] Illegal username or password received, "
+                        "login cancelled",
+                        lvl=warn)
                 return
 
-            try:
-                # TODO: Clone or reference systemwide default configuration
-                newclientconfig = clientconfigobject()
-                newclientconfig.uuid = event.clientuuid
-                newclientconfig.name = "New client"
-                newclientconfig.description = "New client configuration from " + newuser.name
-                newclientconfig.useruuid = newuser.uuid
-                newclientconfig.save()
-            except Exception as e:
-                hfoslog("[AUTH] Problem creating new clientconfig: ", type(e), e, lvl=error)
-                return
+            useraccount = None
+            clientconfig = None
+            userprofile = None
 
             try:
-                self.fireEvent(
-                    authentication(newuser.name, (newuser, newprofile, newclientconfig), event.clientuuid,
+                useraccount = userobject.find_one({'name': event.username})
+                hfoslog("[AUTH] Account: %s" % useraccount._fields, lvl=debug)
+            except Exception as e:
+                hfoslog("[AUTH] No userobject due to error: ", e, type(e),
+                        lvl=error)
+
+            if useraccount:
+                hfoslog("[AUTH] User found.")
+
+                if useraccount.passhash == event.passhash:
+                    hfoslog(
+                            "[AUTH] Passhash matches, checking client and "
+                            "profile.",
+                            lvl=debug)
+
+                    requestedclientuuid = event.requestedclientuuid
+
+                    # Client requests to get an existing client
+                    # configuration or has none
+
+                    clientconfig = clientconfigobject.find_one(
+                            {'uuid': requestedclientuuid})
+
+                    if clientconfig:
+                        hfoslog(
+                                "[AUTH] Checking client configuration permissions",
+                                lvl=debug)
+                        if clientconfig.useruuid != useraccount.uuid:
+                            clientconfig = None
+                            hfoslog(
+                                    "[AUTH] Unauthorized client configuration "
+                                    "requested",
+                                    lvl=warn)
+                    else:
+                        hfoslog(
+                                "[AUTH] Unknown client configuration requested: ",
+                                requestedclientuuid, event.__dict__,
+                                lvl=warn)
+
+                    if not clientconfig:
+                        hfoslog(
+                                "[AUTH] Creating new default client configuration")
+                        # Either no configuration was found or requested
+                        # -> Create a new client configuration
+
+                        clientconfig = clientconfigobject()
+                        clientconfig.uuid = event.clientuuid
+                        clientconfig.name = "New client"
+                        clientconfig.description = "New client configuration " \
+                                                   "from " + useraccount.name
+                        clientconfig.useruuid = useraccount.uuid
+                        # TODO: Make sure the profile is only saved if the
+                        # client could store it, too
+                        clientconfig.save()
+
+                    try:
+                        userprofile = profileobject.find_one(
+                                {'uuid': str(useraccount.uuid)})
+                        hfoslog("[AUTH] Profile: ", userprofile,
+                                useraccount.uuid, lvl=debug)
+
+                        useraccount.passhash = ""
+                        self.fireEvent(
+                                authentication(useraccount.name, (
+                                    useraccount, userprofile, clientconfig),
+                                               event.clientuuid,
+                                               useraccount.uuid,
+                                               event.sock),
+                                "auth")
+                    except Exception as e:
+                        hfoslog("[AUTH] No profile due to error: ", e, type(e),
+                                lvl=error)
+                else:
+                    hfoslog("[AUTH] Password was wrong!", lvl=warn)
+
+                hfoslog("[AUTH] Done with Login request", lvl=debug)
+
+            else:
+                self.createuser(event)
+
+    def createuser(self, event):
+        hfoslog("[AUTH] Creating user")
+        try:
+            newuser = userobject(
+                    {'name': event.username, 'passhash': event.passhash,
+                     'uuid': str(uuid4())})
+            newuser.save()
+        except Exception as e:
+            hfoslog("[AUTH] Problem creating new user: ", type(e), e,
+                    lvl=error)
+            return
+        try:
+            newprofile = profileobject({'uuid': str(newuser.uuid)})
+            hfoslog("[AUTH] New profile uuid: ", newprofile.uuid,
+                    lvl=verbose)
+
+            newprofile.components = {
+                'enabled': ["dashboard", "map", "weather", "settings"]}
+            newprofile.save()
+        except Exception as e:
+            hfoslog("[AUTH] Problem creating new profile: ", type(e),
+                    e, lvl=error)
+            return
+
+        try:
+            # TODO: Clone or reference systemwide default configuration
+            newclientconfig = clientconfigobject()
+            newclientconfig.uuid = event.clientuuid
+            newclientconfig.name = "New client"
+            newclientconfig.description = "New client configuration " \
+                                          "from " + newuser.name
+            newclientconfig.useruuid = newuser.uuid
+            newclientconfig.save()
+        except Exception as e:
+            hfoslog("[AUTH] Problem creating new clientconfig: ",
+                    type(e), e, lvl=error)
+            return
+
+        try:
+            self.fireEvent(
+                    authentication(newuser.name,
+                                   (newuser, newprofile, newclientconfig),
+                                   event.clientuuid,
                                    newuser.uuid,
                                    event.sock),
                     "auth")
-                self.fireEvent(send(event.clientuuid, {'component': 'auth',
-                                                       'action': 'new',
-                                                       'data': 'registration successful'
-                                                       }, sendtype="client"), "hfosweb")
-            except Exception as e:
-                hfoslog("[AUTH] Error during new account confirmation transmission", e, lvl=error)
+            self.fireEvent(send(event.clientuuid, {'component': 'auth',
+                                                   'action': 'new',
+                                                   'data': 'registration successful'
+                                                   },
+                                sendtype="client"), "hfosweb")
+        except Exception as e:
+            hfoslog(
+                    "[AUTH] Error during new account confirmation transmission",
+                    e, lvl=error)
+
 
     def profilerequest(self, event):
         """Handles client profile actions

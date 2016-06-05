@@ -14,7 +14,7 @@ Client: Clientprofile to store client specific settings
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-Clientconfig = {
+ClientconfigSchema = {
     'id': '#client',
     'type': 'object',
     'name': 'client',
@@ -24,6 +24,8 @@ Clientconfig = {
                  'title': 'Unique Client ID'
                  },
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Client name'},
+        'autologin': {'type': 'boolean', 'title': 'Automatic login',
+                   'description': 'Automatically logs in this client.'},
         'active': {'type': 'boolean', 'title': 'Active client',
                    'description': 'Indicates whether client is currently active.'},
         'locked': {'type': 'boolean', 'title': 'Locked client',
@@ -54,16 +56,16 @@ ClientconfigForm = [
         'items': [
             {
                 'type': 'section',
-                'htmlClass': 'col-xs-4',
+                'htmlClass': 'col-xs-6',
                 'items': [
                     'name', 'theme'
                 ]
             },
             {
                 'type': 'section',
-                'htmlClass': 'col-xs-4',
+                'htmlClass': 'col-xs-6',
                 'items': [
-                    {'key': 'active', 'readonly': True}, 'locked'
+                    {'key': 'active', 'readonly': True}, 'locked', 'autologin'
                 ]
             }
         ]
@@ -89,11 +91,9 @@ ClientconfigForm = [
         }
     },
     'description',
-    {
-        'type': 'submit',
-        'title': 'Save client configuration',
-    }
 ]
 
-__schema__ = Clientconfig
+Client = {'schema': ClientconfigSchema, 'form': ClientconfigForm}
+
+__schema__ = ClientconfigSchema
 __form__ = ClientconfigForm

@@ -27,23 +27,29 @@ import warmongo
 # noinspection PyUnresolvedReferences
 from six.moves import input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
 from hfos.logger import hfoslog, debug, warn, critical
-from hfos.schemata import schemastore
-from hfos.schemata.profile import Profile
-from hfos.schemata.user import User
-from hfos.schemata.mapview import MapView
-from hfos.schemata.layer import Layer
-from hfos.schemata.layergroup import LayerGroup
-from hfos.schemata.controllable import Controllable
-from hfos.schemata.controller import Controller
-from hfos.schemata.client import Clientconfig
-from hfos.schemata.wikipage import WikiPage
-from hfos.schemata.vessel import VesselSchema
-from hfos.schemata.radio import RadioConfig
-from hfos.schemata.sensordata import SensorData
-from hfos.schemata.dashboard import Dashboard
-from hfos.schemata.project import Project
+# from hfos.schemata import schemastore
+from hfos.schemata.profile import ProfileSchema
+from hfos.schemata.user import UserSchema
+# from hfos.schemata.mapview import MapView
+# from hfos.schemata.layer import Layer
+# from hfos.schemata.layergroup import LayerGroup
+# from hfos.schemata.controllable import Controllable
+# from hfos.schemata.controller import Controller
+from hfos.schemata.client import ClientconfigSchema
+# from hfos.schemata.wikipage import WikiPage
+# from hfos.schemata.vessel import VesselSchema
+# from hfos.schemata.radio import RadioConfig
+# from hfos.schemata.shareable import Shareable
+# from hfos.schemata.sensordata import SensorData
+# from hfos.schemata.dashboard import Dashboard
+# from hfos.schemata.project import Project
 
 from jsonschema import ValidationError  # NOQA
+
+from pprint import pprint
+
+from pkg_resources import iter_entry_points
+
 
 
 def clear_all():
@@ -68,12 +74,32 @@ def clear_all():
 warmongo.connect("hfos")
 
 
+def _build_schemastore_new():
+    available_schemata = {}
+
+    for schema_entrypoint in iter_entry_points(group='hfos.schemata', name=None):
+        hfoslog("[SCHEMATA] Schemata found: ", schema_entrypoint.name, lvl=debug)
+        try:
+            available_schemata[schema_entrypoint.name] = schema_entrypoint.load()
+        except ImportError as e:
+            hfoslog("[SCHEMATA] Problematic schema: ", e, type(e), schema_entrypoint.name, exc=True, lvl=warn)
+
+    hfoslog("[SCHEMATA] Found schemata: ", available_schemata.keys())
+    # pprint(available_schemata)
+
+    return available_schemata
+
+
+schemastore = _build_schemastore_new()
+
 def _buildModelFactories():
     result = {}
 
     for schemaname in schemastore:
 
         schema = None
+
+
 
         try:
             schema = schemastore[schemaname]['schema']
@@ -87,6 +113,8 @@ def _buildModelFactories():
 
     return result
 
+
+objectmodels = _buildModelFactories()
 
 def _buildCollections():
     result = {}
@@ -111,32 +139,48 @@ def _buildCollections():
 
     return result
 
-objectmodels = _buildModelFactories()
 collections = _buildCollections()
+
+
 
 # TODO: Export the following automatically from the objectmodels?
 
-userobject = warmongo.model_factory(User)
-profileobject = warmongo.model_factory(Profile)
-clientconfigobject = warmongo.model_factory(Clientconfig)
+# print(schemastore.keys())
+# pprint(schemastore['user'])
+userobject = warmongo.model_factory(schemastore['user']['schema'])
+#pprint(userobject)
 
-mapviewobject = warmongo.model_factory(MapView)
+objects = {}
 
-layerobject = warmongo.model_factory(Layer)
-layergroupobject = warmongo.model_factory(LayerGroup)
+for schemaname, meta in schemastore.items():
+    objects[schemaname] = warmongo.model_factory(
+            schemastore[schemaname]['schema'])
 
-controllerobject = warmongo.model_factory(Controller)
-controllableobject = warmongo.model_factory(Controllable)
+#pprint(objects)
 
-wikipageobject = warmongo.model_factory(WikiPage)
+# userobject = warmongo.model_factory(UserSchema)
+profileobject = warmongo.model_factory(ProfileSchema)
+clientconfigobject = warmongo.model_factory(ClientconfigSchema)
 
-vesselconfigobject = warmongo.model_factory(VesselSchema)
-radioconfigobject = warmongo.model_factory(RadioConfig)
+#mapviewobject = warmongo.model_factory(MapView)
 
-projectobject = warmongo.model_factory(Project)
+# layerobject = warmongo.model_factory(Layer)
+#layergroupobject = warmongo.model_factory(LayerGroup)
 
-sensordataobject = warmongo.model_factory(SensorData)
-dashboardobject = warmongo.model_factory(Dashboard)
+# controllerobject = warmongo.model_factory(Controller)
+# controllableobject = warmongo.model_factory(Controllable)
+
+# wikipageobject = warmongo.model_factory(WikiPage)
+
+# vesselconfigobject = warmongo.model_factory(VesselSchema)
+# radioconfigobject = warmongo.model_factory(RadioConfig)
+
+# projectobject = warmongo.model_factory(Project)
+
+# sensordataobject = warmongo.model_factory(SensorData)
+# dashboardobject = warmongo.model_factory(Dashboard)
+
+#schedulableobject = warmongo.model_factory(Shareable)
 from pprint import pprint
 
 

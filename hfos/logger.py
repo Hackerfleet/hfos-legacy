@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # HFOS - Hackerfleet Operating System
@@ -22,7 +22,8 @@
 Module: Logger
 ==============
 
-HFOS own logger to avoid namespace clashes etc. Comes with some fancy functions.
+HFOS own logger to avoid namespace clashes etc. Comes with some fancy
+functions.
 
 Log Levels
 ----------
@@ -42,7 +43,6 @@ off = 100
 
 from circuits import Component, handler
 from circuits.core import Event
-
 # from uuid import uuid4
 # import json
 
@@ -55,7 +55,8 @@ import six
 
 root = None
 
-events = 4
+events = 2
+network = 4
 verbose = 5
 debug = 10
 info = 20
@@ -63,15 +64,17 @@ warn = 30
 error = 40
 critical = 50
 off = 100
-
-lvldata = {4: ['EVENTS', '\033[1:97m'],
-           5: ['VERBOSE', '\033[1;97m'],
+lvldata = {2: ['EVENT', '\033[1:36m'],
+           4: ['NET', '\033[1;30m'],
+           5: ['VERBOSE', '\033[1;30m'],
            10: ['DEBUG', '\033[1;97m'],
            20: ['INFO', '\033[1;92m'],
-           30: ['WARN', '\033[1;94m'],
-           40: ['ERROR', '\033[1;91m'],
-           50: ['CRITICAL', '\033[1;95m'],
+           30: ['WARN', '\033[1;91m'],
+           40: ['ERROR', '\033[1;31;43m'],
+           50: ['CRITICAL', '\033[1;33;41m'],
+           60: ['HILIGHT', '\033[1;4;30;106m']
            }
+
 terminator = '\033[0m'
 
 count = 0
@@ -79,6 +82,7 @@ count = 0
 logfile = "/var/log/hfos/service.log"
 verbosity = {'global': debug,
              'file': off,
+             'system': error,
              'console': debug
              }
 
@@ -97,14 +101,39 @@ class logevent(Event):
     :param args:
     """
 
-    def __init__(self, msg, severity, *args):
+    def __init__(self, timestamp, severity, emitter, sourceloc, content, *args):
         super(logevent, self).__init__(*args)
-
-        self.msg = msg
+        self.timestamp = timestamp
         self.severity = severity
+        self.emitter = emitter
+        self.sourceloc = sourceloc
+        self.content = content
+
 
     def __str__(self):
-        return str(self.msg)
+        return str(self.content)
+
+
+class send(Event):
+    """Send a packet to a known client by UUID"""
+
+    def __init__(self, uuid, packet, sendtype="client",
+                 raw=False, username=None, *args):
+        """
+
+        :param uuid: Unique User ID of known connection
+        :param packet: Data packet to transmit to client
+        :param args: Further Args
+        """
+        super(send, self).__init__(*args)
+
+        if uuid == None and username == None:
+            hfoslog("[SEND-EVENT] No recipient (uuid/name) given!", lvl=warn)
+        self.uuid = uuid
+        self.packet = packet
+        self.username = username
+        self.sendtype = sendtype
+        self.raw = raw
 
 
 def ismuted(what):
@@ -137,7 +166,8 @@ def ismuted(what):
 
 def setup_root(newroot):
     """
-    Sets up the root component, so the logger knows where to send logging signals.
+    Sets up the root component, so the logger knows where to send logging
+    signals.
 
     :param newroot:
     """
@@ -147,7 +177,8 @@ def setup_root(newroot):
 
 
 def hfoslog(*what, **kwargs):
-    """Logs all args except "lvl" which is used to determine the incident log level.
+    """Logs all args except "lvl" which is used to determine the incident
+    log level.
     :param kwargs: Debug message level
     :param what: Loggable objects (i.e. they have a string representation)
     """
@@ -159,6 +190,11 @@ def hfoslog(*what, **kwargs):
             return
     else:
         lvl = info
+
+    if 'emitter' in kwargs:
+        emitter = kwargs['emitter']
+    else:
+        emitter = 'UNKNOWN'
 
     if 'exc' in kwargs:
         exception = True
@@ -178,38 +214,50 @@ def hfoslog(*what, **kwargs):
     if verbosity['global'] <= debug:
         # Automatically log the current function details.
 
-        # Get the previous frame in the stack, otherwise it would
-        # be this function!!!
-        func = inspect.currentframe().f_back.f_code
-        # Dump the message + the name of this function to the log.
+        if not 'sourceloc' in kwargs:
 
-        if exception:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            line_no = exc_tb.tb_lineno
-            lvl = error
+            # Get the previous frame in the stack, otherwise it would
+            # be this function!!!
+            func = inspect.currentframe().f_back.f_code
+            # Dump the message + the name of this function to the log.
+
+            if exception:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                line_no = exc_tb.tb_lineno
+                lvl = error
+            else:
+                line_no = func.co_firstlineno
+
+            callee = "[%.10s@%s:%i]" % (
+                func.co_name,
+                func.co_filename,
+                line_no
+            )
         else:
-            line_no = func.co_firstlineno
+            callee = kwargs['sourceloc']
 
-        callee = "[%.10s@%s:%i]" % (
-            func.co_name,
-            func.co_filename,
-            line_no
-        )
+    msg = "[%s] : %8s : %.5f : %i : [%s]" % (time.asctime(),
+                                             lvldata[lvl][0],
+                                             now,
+                                             count,
+                                             emitter)
 
-    msg = "[%s] : %8s : %.5f : %i :" % (time.asctime(),
-                                        lvldata[lvl][0],
-                                        now,
-                                        count)
+    content = ""
 
     if callee:
         msg += "%-60s" % callee
 
     for thing in what:
-        msg += " "
-        msg += str(thing)
+        content += " "
+        content += str(thing)
+
+    msg += content
 
     if ismuted(msg):
         return
+
+    if len(msg) > 1000:
+        msg = msg[:1000]
 
     if lvl >= verbosity['file']:
         try:
@@ -226,31 +274,5 @@ def hfoslog(*what, **kwargs):
         if six.PY3:
             output = lvldata[lvl][1] + output + terminator
         print(output)
-    if root and output:
-        root.fire(logevent(str(output), lvl), "logger")
-
-
-class Logger(Component):
-    """
-    System logger
-
-    Handles all the logging aspects.
-
-    """
-
-    channels = "logger"
-
-    def __init__(self, *args):
-        super(Logger, self).__init__(*args)
-
-        hfoslog("[LOGGER] Started.")
-
-    @handler("logevent")
-    def logevent(self, event):
-        """
-        Should once in a time log events to the live system log.
-
-        :param event: Log event to log.
-        """
-
-        pass
+    if lvl >= verbosity['system'] and root and output:
+        root.fire(logevent(now, lvl, emitter, callee, content), "logger")

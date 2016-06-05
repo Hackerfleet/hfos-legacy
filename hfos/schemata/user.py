@@ -17,7 +17,7 @@ User: Useraccount object
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-User = {
+UserSchema = {
     'id': '#user',
     'type': 'object',
     'name': 'user',
@@ -36,4 +36,6 @@ User = {
     }
 }
 
-__schema__ = User
+User = {'schema': UserSchema, 'form': {}}
+
+__schema__ = UserSchema

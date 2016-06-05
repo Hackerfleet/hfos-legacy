@@ -39,3 +39,5 @@ defaultform = [
         'title': 'Save Object',
     }
 ]
+
+noform = []

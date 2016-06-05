@@ -40,70 +40,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__all__ = [
-    'book',
-    'client',
-    'controllable',
-    'controller',
-    'coords',
-    'dashboard',
-    'layer',
-    'layergroup',
-    'mapview',
-    'profile',
-    'project',
-    'radio',
-    'sensordata',
-    'tag',
-    'task',
-    'user',
-    'vessel',
-    'wikipage'
-]
-
-from importlib import import_module
-
-from hfos.logger import hfoslog, verbose, debug, warn
-from hfos.schemata.defaultform import defaultform
-
-
-def _build_schemastore():
-    result = {}
-
-    for schemaname in __all__:
-        hfoslog('[SCHEMATA] Adding Schema:', schemaname, lvl=verbose)
-        schemamodule = import_module('hfos.schemata.' + schemaname)
-        schema = None
-        form = defaultform
-        try:
-            form = schemamodule.__form__
-        except AttributeError:
-            hfoslog("[SCHEMATA] No form found for schema %s, using defaultform." % schemaname, lvl=debug)
-
-        try:
-            schema = schemamodule.__schema__
-        except AttributeError:
-            hfoslog("[SCHEMATA] No schema found in schema %s!." % schemaname, lvl=warn)
-
-        if schema and form:
-            result[schemaname] = {'schema': schema, 'form': form}
-
-    hfoslog("[SCHEMATA] Registered schemata: ", result.keys())
-    return result
-
-
-schemastore = _build_schemastore()
-
-
-def test():
-    """Tests all included schemata against the Draft4Validator"""
-
-    from jsonschema import Draft4Validator
-
-    for schemaname, schemadata in schemastore.items():
-        hfoslog("[SCHEMATA] Validating schema ", schemaname)
-        Draft4Validator.check_schema(schemadata['schema'])
-        if 'uuid' not in schemadata['schema']:
-            hfoslog("[SCHEMATA] Schema without uuid encountered: ", schemaname, lvl=debug)
-
-# https://github.com/fge/sample-json-schemas/tree/master/geojson
+from hfos.schemata.client import Client
+from hfos.schemata.user import User
+from hfos.schemata.profile import Profile
+from hfos.schemata.logmessage import LogMessage

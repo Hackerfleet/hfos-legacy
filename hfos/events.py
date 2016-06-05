@@ -15,7 +15,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits.core import Event
 
-from hfos.logger import hfoslog, debug, critical, verbose, events
+from hfos.logger import hfoslog, debug, critical, verbose, warn, events
 from hfos.web.clientobjects import User
 
 
@@ -61,7 +61,8 @@ class debugrequest(AuthorizedEvent):
 class send(Event):
     """Send a packet to a known client by UUID"""
 
-    def __init__(self, uuid, packet, sendtype="client", raw=False, *args):
+    def __init__(self, uuid, packet, sendtype="client",
+                 raw=False, username=None, *args):
         """
 
         :param uuid: Unique User ID of known connection
@@ -69,8 +70,12 @@ class send(Event):
         :param args: Further Args
         """
         super(send, self).__init__(*args)
+
+        if uuid == None and username == None:
+            hfoslog("[SEND-EVENT] No recipient (uuid/name) given!", lvl=warn)
         self.uuid = uuid
         self.packet = packet
+        self.username = username
         self.sendtype = sendtype
         self.raw = raw
 
@@ -138,7 +143,8 @@ class userlogin(Event):
 class authenticationrequest(Event):
     """A client wants to authenticated a connection"""
 
-    def __init__(self, username, passhash, clientuuid, requestedclientuuid, sock, *args):
+    def __init__(self, username, passhash, clientuuid, requestedclientuuid,
+                 sock, auto, *args):
         """
 
         :param username: Account username
@@ -154,6 +160,7 @@ class authenticationrequest(Event):
         self.sock = sock
         self.clientuuid = clientuuid
         self.requestedclientuuid = requestedclientuuid
+        self.auto = auto
 
 
 class authentication(Event):
@@ -210,8 +217,8 @@ class objectmanagerrequest(AuthorizedEvent):
 class objectevent(Event):
     """A unspecified objectevent"""
 
-    def __init__(self, uuid, schema, *args):
-        super(objectevent, self).__init__(*args)
+    def __init__(self, uuid, schema, *args, **kwargs):
+        super(objectevent, self).__init__(*args, **kwargs)
 
         self.uuid = uuid
         self.schema = schema
@@ -219,7 +226,20 @@ class objectevent(Event):
         hfoslog("[OBJECT-EVENT] Object event created: ", self.__doc__, self.__dict__, lvl=events)
 
 
-## Object change
+# Backend-side object change
+
+class updatesubscriptions(objectevent):
+    """A backend component needs to write changes to an object.
+    Clients that are subscribed should be notified etc.
+    """
+
+    def __init__(self, data, *args, **kwargs):
+        super(updatesubscriptions, self).__init__(*args, **kwargs)
+
+        self.data = data
+
+
+# Object change
 
 class objectchange(objectevent):
     """A stored object has been successfully modified"""
@@ -370,16 +390,35 @@ class remotecontrolupdate(Event):
         self.controldata = controldata
 
 
+class libraryrequest(AuthorizedEvent):
+    pass
+
+
+class frontendbuildrequest(Event):
+    def __init__(self, force=False, *args):
+        super(frontendbuildrequest, self).__init__(*args)
+        self.force = force
+
+
+class componentupdaterequest(frontendbuildrequest):
+    pass
+
+
+class logtailrequest(AuthorizedEvent):
+    pass
+
+
 AuthorizedEvents = {
-    'debugger': debugrequest,
-    'profile': profilerequest,
-    'mapview': mapviewrequest,
-    'chat': chatrequest,
-    'schema': schemarequest,
-    'layer': layerrequest,
-    'remotectrl': remotecontrolrequest,
+    'alert': alertrequest,
     'camera': camerarequest,
-    'wiki': wikirequest,
+    'chat': chatrequest,
+    'debugger': debugrequest,
+    'layer': layerrequest,
+    'library': libraryrequest,
+    'mapview': mapviewrequest,
     'objectmanager': objectmanagerrequest,
-    'alert': alertrequest
+    'profile': profilerequest,
+    'remotectrl': remotecontrolrequest,
+    'schema': schemarequest,
+    'wiki': wikirequest
 }

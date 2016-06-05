@@ -10,19 +10,24 @@ Module: SchemaManager
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from circuits import Component
+from hfos.component import ConfigurableComponent
 
-import hfos.schemata
-from hfos.logger import hfoslog, info
+from hfos.database import schemastore
+from hfos.logger import hfoslog, error
 from hfos.events import send
 
 
-class SchemaManager(Component):
+class SchemaManager(ConfigurableComponent):
     """
     Handles schemata requests from clients.
     """
 
     channel = "hfosweb"
+
+    configprops = {}
+
+    def __init__(self, *args):
+        super(SchemaManager, self).__init__('SM', *args)
 
     def schemarequest(self, event):
         """Handles schema requests.
@@ -31,17 +36,23 @@ class SchemaManager(Component):
         * Get
         * All
         """
-        if event.action == "Get":
-            hfoslog("[SM] Schemarequest for ", event.data, "from", event.user, lvl=info)
-            if event.data in hfos.schemata.schemastore:
+
+        try:
+
+            if event.action == "Get":
+                hfoslog("[SM] Schemarequest for ", event.data, "from", event.user)
+                if event.data in schemastore:
+                    response = {'component': 'schema',
+                                'action': 'Get',
+                                'data': self.schemata[event.data]
+                                }
+                    self.fireEvent(send(event.client.uuid, response))
+            elif event.action == "All":
+                hfoslog("[SM] Schemarequest for all schemata from ", event.user)
                 response = {'component': 'schema',
-                            'action': 'Get',
-                            'data': self.schemata[event.data]
-                            }
+                            'action': 'All',
+                            'data': schemastore}
                 self.fireEvent(send(event.client.uuid, response))
-        elif event.action == "All":
-            hfoslog("[SM] Schemarequest for all schemata from ", event.user, lvl=info)
-            response = {'component': 'schema',
-                        'action': 'All',
-                        'data': hfos.schemata.schemastore}
-            self.fireEvent(send(event.client.uuid, response))
+
+        except Exception as e:
+            hfoslog("[SM] Overall error: ", e, type(e), lvl=error, exc=True)

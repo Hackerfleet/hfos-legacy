@@ -52,10 +52,10 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
             except ValidationError as e:
                 raise ValidationError("Could not provision layerobject: " + str(itemname), e)
 
-    col = db[col_name]
-    for item in indexes:
-        col.ensure_index([(item, pymongo.TEXT)], unique=True)
-
     if indexes != None:
+        col = db[col_name]
+        for item in indexes:
+            col.ensure_index([(item, pymongo.TEXT)], unique=True)
+
         for index in col.list_indexes():
             hfoslog("Index: ", index)

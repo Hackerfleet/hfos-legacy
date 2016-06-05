@@ -10,12 +10,20 @@ Debugger overlord
 :license: GPLv3 (See LICENSE)
 
 """
+from circuits.core.workers import Worker, task
+
+from hfos.events import frontendbuildrequest, componentupdaterequest, logtailrequest
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from circuits import Component
+from circuits.core.events import Event
+from circuits.core.handlers import handler, reprhandler
+from circuits.io import stdin
 
+from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, critical, warn
+from hfos.events import send
+from hfos.database import objectmodels
 
 from uuid import uuid4
 
@@ -24,22 +32,28 @@ try:
     import objgraph
     from guppy import hpy
 except ImportError:
-    hfoslog("[DBG] Debugger couldn't import objgraph and/or guppy.", lvl=warn)
+    hfoslog("Debugger couldn't import objgraph and/or guppy.", lvl=warn)
 
 import inspect
 
-class HFDebugger(Component):
-    """
-    Debugger manager
 
+class HFDebugger(ConfigurableComponent):
+    """
     Handles various debug requests.
-
     """
-
+    configprops = {
+        'notificationusers': {
+            'type': 'array',
+            'title': 'Notification receivers',
+            'description': 'Users that should be notified about exceptions.',
+            'default': ['riot'],
+            'items': {'type': 'string'}
+        }
+    }
     channel = "hfosweb"
 
     def __init__(self, root=None, *args):
-        super(HFDebugger, self).__init__(*args)
+        super(HFDebugger, self).__init__("DBG", *args)
 
         if not root:
             from hfos.logger import root
@@ -49,32 +63,157 @@ class HFDebugger(Component):
         try:
             self.heapy = hpy()
         except:
-            hfoslog("[DBG] Can't use heapy. guppy package missing?")
+            self.log("Can't use heapy. guppy package missing?")
 
-        hfoslog("[DBG] Started")
+        self.log("Started. Notification users: ",
+                 self.config.settings.notificationusers)
+
+    @handler("exception", channel="*", priority=100.0)
+    def _on_exception(self, error_type, value, traceback,
+                      handler=None, fevent=None):
+
+        try:
+            s = []
+
+            if handler is None:
+                handler = ""
+            else:
+                handler = reprhandler(handler)
+
+            msg = "ERROR"
+            msg += "{0:s} ({1:s}) ({2:s}): {3:s}\n".format(
+                    handler, repr(fevent), repr(error_type), repr(value)
+            )
+
+            s.append(msg)
+            s.extend(traceback)
+            s.append("\n")
+
+            self.log("\n".join(s), lvl=critical)
+
+            alert = {
+                'component': 'alert',
+                'action': 'danger',
+                'data': {
+                    'message': "\n".join(s),
+                    'title': 'Exception Monitor'
+                }
+            }
+            for user in self.config.settings.notificationusers:
+                self.fireEvent(send(None, alert, username=user,
+                                    sendtype='user'))
+
+        except Exception as e:
+            self.log("Exception during exception handling: ", e, type(e), lvl=critical)
 
     def debugrequest(self, event):
         try:
-            hfoslog("[DBG] Event: ", event, lvl=critical)
+            self.log("Event: ", event.__dict__, lvl=critical)
 
             if event.action == "storejson":
-                hfoslog("[DBG] Storing received object to /tmp", lvl=critical)
+                self.log("Storing received object to /tmp", lvl=critical)
                 fp = open('/tmp/hfosdebugger_' + str(event.user.useruuid) + "_" + str(uuid4()), "w")
                 json.dump(event.data, fp, indent=True)
                 fp.close()
             if event.action == "memdebug":
-                hfoslog("[DBG] Memory hogs:", lvl=critical)
+                self.log("Memory hogs:", lvl=critical)
                 objgraph.show_most_common_types(limit=20)
             if event.action == "growth":
-                hfoslog("[DBG] Memory growth since last call:", lvl=critical)
+                self.log("Memory growth since last call:", lvl=critical)
                 objgraph.show_growth()
             if event.action == "graph":
                 objgraph.show_backrefs([self.root], max_depth=42, filename='backref-graph.png')
-                hfoslog("[DBG] Backref graph written.", lvl=critical)
-            if event.action == "heap":
-                hfoslog("[DBG] Heap log:", self.heapy.heap(), lvl=critical)
+                self.log("Backref graph written.", lvl=critical)
+            if event.action == "exception":
+                class TestException(BaseException):
+                    pass
 
+                raise TestException
+            if event.action == "heap":
+                self.log("Heap log:", self.heapy.heap(), lvl=critical)
+            if event.action == "buildfrontend":
+                self.log("Sending frontend build command")
+
+                self.fireEvent(frontendbuildrequest(force=True), "setup")
+            if event.action == "logtail":
+                self.fireEvent(logtailrequest(event.user, None, None,
+                                              event.client), "logger")
 
 
         except Exception as e:
-            hfoslog("[DBG] Exception during debug handling:", e, type(e), lvl=critical)
+            self.log("Exception during debug handling:", e, type(e), lvl=critical)
+
+
+from pprint import pprint
+
+
+class Logger(ConfigurableComponent):
+    """
+    System logger
+
+    Handles all the logging aspects.
+
+    """
+
+    channels = "logger"
+
+    def __init__(self, *args):
+        super(Logger, self).__init__('LOGGER', *args)
+
+        hfoslog("[LOGGER] Started.")
+
+    @handler("logevent")
+    def logevent(self, event):
+        """
+        Should once in a time log events to the live system log.
+
+        :param event: Log event to log.
+        """
+
+        logentry = objectmodels['logmessage']
+
+        logentry.timestamp = event.timestamp
+        logentry.severity = event.severity
+        logentry.emitter = event.emitter
+        logentry.sourceloc = event.sourceloc
+        logentry.content = event.content
+        logentry.uuid = str(uuid4())
+
+        logentry.save()
+
+
+class CLI(ConfigurableComponent):
+    """
+    Command Line Interface support
+    """
+
+    def __init__(self, *args):
+        super(CLI, self).__init__("CLI", *args)
+
+        self.log("Started")
+        stdin.register(self)
+
+    @handler("read", channel="stdin")
+    def stdin_read(self, data):
+        """read Event (on channel ``stdin``)
+        This is the event handler for ``read`` events specifically from the
+        ``stdin`` channel. This is triggered each time stdin has data that
+        it has read.
+        """
+
+        data = data.strip().decode("utf-8")
+        self.log("Incoming:", data)
+
+        if data[0] == "/":
+            cmd = data[1:].upper()
+            if ' ' in cmd:
+                cmd, args = cmd.split(' ', maxsplit=1)
+                args = args.split(' ')
+            if cmd == 'FRONTEND':
+                self.log("Sending frontend rebuild event")
+                self.fireEvent(frontendbuildrequest(force=True), "setup")
+            if cmd == 'BACKEND':
+                self.log("Sending backend reload event")
+                self.fireEvent(componentupdaterequest(force=True), "setup")
+            if cmd == 'WHO':
+                self.fireEvent()
