@@ -9,9 +9,7 @@ Contains the underlying object model manager and generates object factories from
 Contains
 ========
 
-userobject: User account factory
-profileobject: User profile factory
-mapviewobject: Mapview factory
+Schemastore and Objectstore builder functions.
 
 :copyright: (C) 2011-2015 riot@hackerfleet.org
 :license: GPLv3 (See LICENSE)
@@ -26,31 +24,13 @@ import warmongo
 
 # noinspection PyUnresolvedReferences
 from six.moves import input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
-from hfos.logger import hfoslog, debug, warn, critical
-# from hfos.schemata import schemastore
+from hfos.logger import hfoslog, debug, warn, critical, verbose
 from hfos.schemata.profile import ProfileSchema
-from hfos.schemata.user import UserSchema
-# from hfos.schemata.mapview import MapView
-# from hfos.schemata.layer import Layer
-# from hfos.schemata.layergroup import LayerGroup
-# from hfos.schemata.controllable import Controllable
-# from hfos.schemata.controller import Controller
 from hfos.schemata.client import ClientconfigSchema
-# from hfos.schemata.wikipage import WikiPage
-# from hfos.schemata.vessel import VesselSchema
-# from hfos.schemata.radio import RadioConfig
-# from hfos.schemata.shareable import Shareable
-# from hfos.schemata.sensordata import SensorData
-# from hfos.schemata.dashboard import Dashboard
-# from hfos.schemata.project import Project
 
 from jsonschema import ValidationError  # NOQA
 
-from pprint import pprint
-
 from pkg_resources import iter_entry_points
-
-
 
 def clear_all():
     """DANGER!
@@ -67,7 +47,7 @@ def clear_all():
     db = client["hfos"]
 
     for col in db.collection_names(include_system_collections=False):
-        hfoslog("[DB] Dropping collection ", col, lvl=warn)
+        hfoslog("Dropping collection ", col, lvl=warn, emitter='DB')
         db.drop_collection(col)
 
 
@@ -78,17 +58,19 @@ def _build_schemastore_new():
     available_schemata = {}
 
     for schema_entrypoint in iter_entry_points(group='hfos.schemata', name=None):
-        hfoslog("[SCHEMATA] Schemata found: ", schema_entrypoint.name, lvl=debug)
+        hfoslog("Schemata found: ", schema_entrypoint.name, lvl=debug, emitter='DB')
         try:
             available_schemata[schema_entrypoint.name] = schema_entrypoint.load()
         except ImportError as e:
-            hfoslog("[SCHEMATA] Problematic schema: ", e, type(e), schema_entrypoint.name, exc=True, lvl=warn)
+            hfoslog("Problematic schema: ", e, type(e),
+                    schema_entrypoint.name, exc=True, lvl=warn,
+                    emitter='SCHEMATA')
 
-    hfoslog("[SCHEMATA] Found schemata: ", available_schemata.keys())
-    # pprint(available_schemata)
+    hfoslog("Found schemata: ", available_schemata.keys(),
+            emitter='SCHEMATA')
+    #pprint(available_schemata)
 
     return available_schemata
-
 
 schemastore = _build_schemastore_new()
 
@@ -104,15 +86,14 @@ def _buildModelFactories():
         try:
             schema = schemastore[schemaname]['schema']
         except KeyError:
-            hfoslog("[DB] No schema found for ", schemaname, lvl=critical)
+            hfoslog("No schema found for ", schemaname, lvl=critical, emitter='DB')
 
         try:
             result[schemaname] = warmongo.model_factory(schema)
         except Exception as e:
-            hfoslog("[DB] Could not create factory for schema ", schemaname, schema, lvl=critical)
+            hfoslog("Could not create factory for schema ", schemaname, schema, lvl=critical, emitter='DB')
 
     return result
-
 
 objectmodels = _buildModelFactories()
 
@@ -130,12 +111,12 @@ def _buildCollections():
         try:
             schema = schemastore[schemaname]['schema']
         except KeyError:
-            hfoslog("[DB] No schema found for ", schemaname, lvl=critical)
+            hfoslog("No schema found for ", schemaname, lvl=critical, emitter='DB')
 
         try:
             result[schemaname] = db[schemaname]
         except Exception as e:
-            hfoslog("[DB] Could not get collection for schema ", schemaname, schema, lvl=critical)
+            hfoslog("Could not get collection for schema ", schemaname, schema, lvl=critical, emitter='DB')
 
     return result
 
@@ -145,8 +126,8 @@ collections = _buildCollections()
 
 # TODO: Export the following automatically from the objectmodels?
 
-# print(schemastore.keys())
-# pprint(schemastore['user'])
+#print(schemastore.keys())
+#pprint(schemastore['user'])
 userobject = warmongo.model_factory(schemastore['user']['schema'])
 #pprint(userobject)
 
@@ -154,60 +135,66 @@ objects = {}
 
 for schemaname, meta in schemastore.items():
     objects[schemaname] = warmongo.model_factory(
-            schemastore[schemaname]['schema'])
+        schemastore[schemaname]['schema'])
+    try:
+        testobject = objects[schemaname]()
+        testobject.validate()
+    except Exception as e:
+        hfoslog('Blank schema did not validate:', schemaname, e,
+                type(e),lvl=verbose, emitter='DB')
 
 #pprint(objects)
 
-# userobject = warmongo.model_factory(UserSchema)
+#userobject = warmongo.model_factory(UserSchema)
 profileobject = warmongo.model_factory(ProfileSchema)
 clientconfigobject = warmongo.model_factory(ClientconfigSchema)
 
 #mapviewobject = warmongo.model_factory(MapView)
 
-# layerobject = warmongo.model_factory(Layer)
+#layerobject = warmongo.model_factory(Layer)
 #layergroupobject = warmongo.model_factory(LayerGroup)
 
-# controllerobject = warmongo.model_factory(Controller)
-# controllableobject = warmongo.model_factory(Controllable)
+#controllerobject = warmongo.model_factory(Controller)
+#controllableobject = warmongo.model_factory(Controllable)
 
-# wikipageobject = warmongo.model_factory(WikiPage)
+#wikipageobject = warmongo.model_factory(WikiPage)
 
-# vesselconfigobject = warmongo.model_factory(VesselSchema)
-# radioconfigobject = warmongo.model_factory(RadioConfig)
+#vesselconfigobject = warmongo.model_factory(VesselSchema)
+#radioconfigobject = warmongo.model_factory(RadioConfig)
 
-# projectobject = warmongo.model_factory(Project)
+#projectobject = warmongo.model_factory(Project)
 
-# sensordataobject = warmongo.model_factory(SensorData)
-# dashboardobject = warmongo.model_factory(Dashboard)
+#sensordataobject = warmongo.model_factory(SensorData)
+#dashboardobject = warmongo.model_factory(Dashboard)
 
 #schedulableobject = warmongo.model_factory(Shareable)
 from pprint import pprint
 
 
 def profile(schemaname='sensordata', profiletype='pjs'):
-    hfoslog("[SCHEMATA] Profiling ", schemaname)
+    hfoslog("Profiling ", schemaname, emitter='DB')
 
     schema = schemastore[schemaname]['schema']
 
-    hfoslog("[SCHEMATA] Schema: ", schema, lvl=debug)
+    hfoslog("Schema: ", schema, lvl=debug, emitter='DB')
 
     if profiletype == 'warmongo':
-        hfoslog("[SCHEMATA] Running Warmongo benchmark")
+        hfoslog("Running Warmongo benchmark", emitter='DB')
         testclass = warmongo.model_factory(schema)
     elif profiletype == 'pjs':
-        hfoslog("[SCHEMATA] Running PJS benchmark")
+        hfoslog("Running PJS benchmark", emitter='DB')
         import python_jsonschema_objects as pjs
         hfoslog()
         builder = pjs.ObjectBuilder(schema)
         ns = builder.build_classes()
         pprint(ns)
         testclass = ns[schemaname]
-        hfoslog("[SCHEMATA] ns: ", ns, lvl=warn)
+        hfoslog("ns: ", ns, lvl=warn, emitter='DB')
 
-    hfoslog("[SCHEMATA] Instantiating 100 elements...")
+    hfoslog("Instantiating 100 elements...", emitter='DB')
     for i in range(100):
         testobject = testclass()
 
-    hfoslog("[SCHEMATA] Profiling done")
+    hfoslog("Profiling done", emitter='DB')
 
 # profile(schemaname='sensordata', profiletype='warmongo')
