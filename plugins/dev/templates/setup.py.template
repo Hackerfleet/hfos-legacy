@@ -22,7 +22,7 @@ setup(name="hfos-{{pluginname}}",
           {{keywordlist}}
       ],
       dependency_links=[],
-      install_requires=['hfos==1.0.0'],
+      install_requires=['hfos==1.1.0'],
       entry_points="""[hfos.components]
           {{componentname}}=hfos.{{pluginname}}.{{pluginname}}:{{componentname}}Component
 [hfos.schemata]
