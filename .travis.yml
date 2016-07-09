@@ -4,6 +4,7 @@ python:
   - "2.7"
   - "3.3"
   - "3.4"
+  - "3.5"
   - "pypy"
 service:
   - mongodb
@@ -28,6 +29,6 @@ notifications:
       - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} ( %{duration}, %{build_url} )"
   email:
     recipients:
-        - riot@hackerfleet.org
+        - riot@c-base.org
     on_success: change
 
