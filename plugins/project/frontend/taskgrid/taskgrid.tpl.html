@@ -1,0 +1,46 @@
+<div class="jumbotron" style="padding-top: 5px" class="well">
+    <ul class="nav nav-pills" role="tablist">
+        <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>
+        <li><a role="tab" ng-click="$ctrl.opentab('tasklist')" data-toggle="tab">Task List</a></li>
+        <li><a role="tab" ng-click="$ctrl.addTask()"><i class="fa fa-plus" aria-hidden="true"> </i> Add Task</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="taskgrid">
+
+            <div class='container-fluid'>
+                <div class="row col-wrap" style="height: 100%;">
+                    <div ng-repeat="(key, item) in $ctrl.columns"
+                         class="col-sm-2 taskList col"
+                         ng-drop="true" ng-drop-success="$ctrl.onDropComplete($data,$event,key)">
+
+                        <div class="taskHeader" id="{{key}}">{{key}}</div>
+                        <div class="taskBox" ng-repeat="task in $ctrl.columns[key]" ng-show="task.name"
+                             ng-drag="task.drag" ng-drag-data="task">
+                            <div class="taskBoxHeader">
+                                <span style="text-align: right">{{task.priority}}</span>
+                                <a style="text-align:right" href="#/editor/task/{{task.uuid}}/edit">
+                                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                            <a ng-click="showtask(task.uuid)">
+                                {{task.name}}
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="tab-pane" id="tasklist">
+            <div class="well">
+                {{$ctrl.directiveschema}}
+                {{$ctrl.schemaname}}
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -20,6 +20,8 @@ Provisions
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+from hfos.schemata.defaultform import editbuttons
+
 ProjectSchema = {
     'type': 'object',
     'id': '#project',
@@ -78,10 +80,7 @@ ProjectForm = [
     },
     'notes',
     'owneruuid',
-    {
-        'type': 'submit',
-        'title': 'Save Project',
-    }
+    editbuttons
 ]
 
 Project = {'schema': ProjectSchema, 'form': ProjectForm}

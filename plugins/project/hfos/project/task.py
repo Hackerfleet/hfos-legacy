@@ -20,6 +20,8 @@ Provisions
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+from hfos.schemata.defaultform import editbuttons
+
 TaskSchema = {
     'type': 'object',
     'id': '#task',
@@ -144,10 +146,7 @@ TaskForm = [
             }
         ]
     },
-    {
-        'type': 'submit',
-        'title': 'Save Task',
-    }
+    editbuttons
 ]
 
 Task = {'schema': TaskSchema, 'form': TaskForm}
