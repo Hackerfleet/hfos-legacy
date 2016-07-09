@@ -15,30 +15,31 @@ import time
 import sys
 import glob
 from circuits import Component, Timer, Event
-from circuits.io.serial import Serial
 from circuits.net.sockets import TCPClient
 from circuits.net.events import connect, read
+from circuits.io.serial import Serial
+
 from decimal import Decimal
 from hfos.component import ConfigurableComponent
-from hfos.navdata.sensordata import sensordatatypes
-from hfos.database import objectmodels
+
+from hfos.database import ValidationError
 from hfos.events import sensordata
-from hfos.logger import hfoslog, verbose, debug, warn, critical, error
+from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
 
 try:
     from pynmea2 import parse
 except ImportError:
     parse = None
-    hfoslog("[NMEA] No pynmea found, install requirements-optional.txt", lvl=warn)
+    hfoslog("No pynmea found, install requirements-optional.txt", lvl=warn,
+            emitter="NMEA")
 
 try:
     import serial
 except ImportError:
     serial = None
     hfoslog("[NMEA] No serialport found. Serial bus NMEA devices will be unavailable, install requirements.txt!",
-            lvl=critical)
+            lvl=critical, emitter="NMEA")
 
-from circuits.io.serial import Serial
 
 
 def serial_ports():
@@ -100,19 +101,27 @@ class NMEAParser(ConfigurableComponent):
             'enum': ports + [''],
             'title': 'Serial port device',
             'description': 'File descriptor to access serial port',
-            'default': ports[0] if len(ports) > 0 else ''
+            'default': ports[0] if len(ports) > 0 else '',
+            'allowadditional': True
         },
     }
 
     channel = "nmea"
 
     def __init__(self, *args, **kwargs):
-        super(NMEAParser, self).__init__('NMEA', *args, **kwargs)
+        try:
+            super(NMEAParser, self).__init__('NMEA', *args, **kwargs)
+        except ValidationError:
+            self.log('OUPS.', lvl=hilight)
+            # TODO: This was meant for catching unavailable serial-devices.
+            # Needs a better way of handling that.
 
         if not parse:
             self.log("NOT started.", lvl=warn)
             return
         self.log("Started")
+
+        self.bus = 'UNKNOWN'
 
         self.unhandled = []
         self.unparsable = []
@@ -120,24 +129,28 @@ class NMEAParser(ConfigurableComponent):
         portup = False
         if self.config.connectiontype == 'USB/Serial':
             self.log("Connecting to serial port:", self.config.serialfile, lvl=debug)
-            self.serial = Serial(self.config.serialfile, channel=self.channel).register(self)
-            portup = True
+            try:
+                self.serial = Serial(self.config.serialfile, channel=self.channel).register(self)
+                self.bus = self.config.serialfile
+                portup = True
+            except serial.SerialException as e:
+                self.log("Could not open configured serial port:", e,
+                         lvl=error)
         elif self.config.connectiontype == 'TCP':
             self.tcpclient = TCPClient(channel=self.channel).register(self)
+            self.bus = self.config.host + ":" + self.config.port
             portup = True
 
         if portup:
-            self.log("Connection type", self.config.connectiontype, "running.")
+            self.log("Connection type", self.config.connectiontype,
+                     "running. Bus known as ", self.bus)
         else:
             self.log("No port connected!", lvl=error)
-
 
     def ready(self, socket):
         if self.config.connectiontype == 'TCP':
             self.log("Connecting to tcp/ip GPS network service:", self.config.host, ':', self.config.port, lvl=debug)
             self.fire(connect(self.config.host, self.config.port))
-
-
 
     def _parse(self, data):
         """
@@ -150,8 +163,10 @@ class NMEAParser(ConfigurableComponent):
         sen_time = time.time()
 
         try:
-
             # Split up multiple sentences
+            if isinstance(data, bytes):
+                data = data.decode('ascii')
+
             dirtysentences = data.split("\n")
             sentences = [x for x in dirtysentences if x]
 
@@ -167,6 +182,7 @@ class NMEAParser(ConfigurableComponent):
             sentences = list(unique(sentences))
         except Exception as e:
             self.log("Error during data unpacking: ", e, type(e), lvl=error)
+            return
 
         try:
             for sentence in sentences:
@@ -175,12 +191,12 @@ class NMEAParser(ConfigurableComponent):
                     self.log("Not yet implemented: AIS Sentence received.")
                 else:
                     parsed_data = parse(sentence)
-                    nmeadata.append((parsed_data, sen_time))
+                    nmeadata.append(parsed_data)
         except Exception as e:
             self.log("Error during parsing: ", e, lvl=critical)
             self.unparsable.append(sentences)
 
-        return nmeadata
+        return nmeadata, sen_time
 
     def _handle(self, nmeadata):
         try:
@@ -189,7 +205,7 @@ class NMEAParser(ConfigurableComponent):
                 return
 
             rawdata = {}
-            for sentence, sen_time in nmeadata:
+            for sentence in nmeadata:
                 self.log("Sentence: ", sentence.fields, lvl=verbose)
 
                 for item in sentence.fields:
@@ -202,8 +218,9 @@ class NMEAParser(ConfigurableComponent):
                                 value = float(value)
                             elif item[2] == int:
                                 value = int(value)
-                        if sensordatatypes[itemname]['type'] == "string" or (type(value) not in (str, int, float)):
-                            value = str(value)
+                        #if sensordatatypes[itemname]['type'] == "string" or
+                                #  (type(value) not in (str, int, float)):
+                        #    value = str(value)
                         # hfoslog("{",itemname,": ",value, "}", lvl=critical)
                         rawdata.update({itemname: value})
 
@@ -244,12 +261,19 @@ class NMEAParser(ConfigurableComponent):
         if not parse:
             return
 
-        self.log("Incoming data: ", '%.50s ...' % data, lvl=debug)
-        nmeadata = self._parse(data)
+        #self.log("Incoming data: ", '%.50s ...' % data, lvl=debug)
+        nmeadata, nmeatime = self._parse(data)
 
-        data = objectmodels['sensordata'](self._handle(nmeadata))
+        #self.log("NMEA Parsed data:", nmeadata, lvl=debug)
 
-        self.fireEvent(sensordata(data), "navdata")
+        sensordatapackage = self._handle(nmeadata)
+
+
+        #self.log("Sensor data:", sensordatapackage, lvl=debug)
+
+        if sensordatapackage:
+            self.fireEvent(sensordata(sensordatapackage, nmeatime, self.bus),
+                       "navdata")
         # self.log("Unhandled data: \n", self.unparsable, "\n", self.unhandled, lvl=warn)
 
 
@@ -259,23 +283,11 @@ class NMEAPlayback(ConfigurableComponent):
     """
 
     configprops = {
-        'connectiontype': {
-            'enum': ['TCP', 'USB/Serial'],
-            'title': 'Type of NMEA adaptor',
-            'description': 'Determines how to get data from the bus.',
-            'default': 'USB/Serial'
-        },
         'delay': {
             'type': 'integer',
             'title': 'Delay',
-            'description': 'Delay between messages (seconds)',
-            'default': 5
-        },
-        'host': {
-            'type': 'string',
-            'title': 'TCP Host',
-            'description': 'Host to connect to',
-            'default': 'localhost'
+            'description': 'Delay between messages (milliseconds)',
+            'default': 5000
         },
         'logfile': {
             'type': 'string',
@@ -300,7 +312,8 @@ class NMEAPlayback(ConfigurableComponent):
 
             self.position = 0
 
-            Timer(self.config.delay, Event.create('nmeaplayback'), self.channel, persist=True).register(self)
+            Timer(self.config.delay/1000.0, Event.create('nmeaplayback'),
+                  self.channel, persist=True).register(self)
         else:
             self.log("No logfile specified.", lvl=warn)
 
@@ -324,3 +337,6 @@ class NMEAPlayback(ConfigurableComponent):
 
         except Exception as e:
             self.log("Error during logdata playback: ", e, type(e), lvl=error)
+
+    def cliCommand(self, event):
+        self.log('Executing CLI command: ', )
