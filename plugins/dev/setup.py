@@ -40,7 +40,7 @@ This package is a useful starter point to set up new HFOS modules.
 """,
       dependency_links=[],
       install_requires=[
-          'hfos==1.0.0',
+          'hfos==1.1.0',
           'camelcase>=0.2.0',
           'pystache>=0.5.4'
       ],

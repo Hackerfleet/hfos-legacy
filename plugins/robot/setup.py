@@ -37,8 +37,8 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=[
-          'hfos==1.0.0',
-          'pyserial==3.0.1'
+          'hfos>=1.1.0',
+          'pyserial>=3.1.1'
       ],
       entry_points="""[hfos.components]
     rcmanager=hfos.robot.rcmanager:RemoteControlManager

@@ -125,7 +125,7 @@ class install_provisions(Command):
 
 
 setup(name="hfos",
-      version="1.0.0",
+      version="1.1.0",
       description="hfos",
 
       author="Hackerfleet Community",
@@ -154,11 +154,10 @@ See https://github.com/hackerfleet/hfos""",
       dependency_links=[
           'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg=warmongo-0.5.3.hf'
       ],
-      install_requires=['pymongo>=3.2',
+      install_requires=['circuits>=3.1',
+                        'pymongo>=3.2',
                         'jsonschema>=2.5.1',
-                        'pynmea2>=1.5.2',
                         'warmongo==0.5.3.hf',
-                        'pyserial==3.0.1',
                         'six'
                         ],
       entry_points=

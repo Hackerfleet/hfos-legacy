@@ -37,8 +37,8 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=[
-          'hfos==1.0.0',
-          'isbntools==4.2.6'
+          'hfos==1.1.0',
+          'isbntools==4.3.1'
       ],
       entry_points="""[hfos.components]
     library=hfos.library.library:Library
