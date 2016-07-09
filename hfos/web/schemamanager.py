@@ -40,7 +40,7 @@ class SchemaManager(ConfigurableComponent):
         try:
 
             if event.action == "Get":
-                hfoslog("[SM] Schemarequest for ", event.data, "from", event.user)
+                self.log("Schemarequest for ", event.data, "from", event.user)
                 if event.data in schemastore:
                     response = {'component': 'schema',
                                 'action': 'Get',
@@ -48,11 +48,11 @@ class SchemaManager(ConfigurableComponent):
                                 }
                     self.fireEvent(send(event.client.uuid, response))
             elif event.action == "All":
-                hfoslog("[SM] Schemarequest for all schemata from ", event.user)
+                self.log("Schemarequest for all schemata from ", event.user)
                 response = {'component': 'schema',
                             'action': 'All',
                             'data': schemastore}
                 self.fireEvent(send(event.client.uuid, response))
 
         except Exception as e:
-            hfoslog("[SM] Overall error: ", e, type(e), lvl=error, exc=True)
+            self.log("Overall error: ", e, type(e), lvl=error, exc=True)

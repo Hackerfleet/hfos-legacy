@@ -23,31 +23,35 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
-from circuits import handler
+from circuits import handler, Timer, Event
 from hfos.schemata.component import ComponentBaseConfigSchema
 from hfos.database import schemastore
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
     setup_root
 import sys
+from glob import glob
 import os
 from subprocess import Popen, TimeoutExpired
 from shutil import copy
 import os, pwd, grp
 
-from pprint import pprint
+# from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-hfoslog("[CORE] Running with Python", sys.version.replace("\n", ""),
-        sys.platform, lvl=debug)
-hfoslog("[CORE] Interpreter executable:", sys.executable)
+hfoslog("Running with Python", sys.version.replace("\n", ""),
+        sys.platform, lvl=debug, emitter='CORE')
+hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
 
+
+class dropPrivs(Event):
+    pass
 
 def drop_privileges(uid_name='hfos', gid_name='hfos'):
     if os.getuid() != 0:
-        hfoslog("[CORE] Not root, cannot drop privileges. Probably opening "
-                "the web port failed as well", lvl=warn)
+        hfoslog("Not root, cannot drop privileges. Probably opening "
+                "the web port failed as well", lvl=warn, emitter='CORE')
         return
 
     # Get the uid/gid from the name
@@ -65,7 +69,7 @@ def drop_privileges(uid_name='hfos', gid_name='hfos'):
     # old_umask = os.umask(22)
 
 
-def copytree(root_src_dir, root_dst_dir):
+def copytree(root_src_dir, root_dst_dir, hardlink=True):
     for src_dir, dirs, files in os.walk(root_src_dir):
         dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
         if not os.path.exists(dst_dir):
@@ -74,13 +78,31 @@ def copytree(root_src_dir, root_dst_dir):
             src_file = os.path.join(src_dir, file_)
             dst_file = os.path.join(dst_dir, file_)
             if os.path.exists(dst_file):
-                hfoslog('Overwriting frontend file:', dst_file,
-                        lvl=verbose)
+                if hardlink:
+                    hfoslog('Removing frontend link:', dst_file,
+                            emitter='BUILDER', lvl=verbose)
+                    os.remove(dst_file)
+                else:
+                    hfoslog('Overwriting frontend file:', dst_file,
+                            emitter='BUILDER', lvl=verbose)
+
+            hfoslog('Hardlinking ', src_file, dst_dir, emitter='BUILDER',
+                    lvl=verbose)
             try:
-                copy(src_file, dst_dir)
+                if hardlink:
+                    os.link(src_file, dst_file)
+                else:
+                    copy(src_file, dst_dir)
             except PermissionError as e:
-                hfoslog("Could not create target copy for frontend:",
-                        dst_dir, e, lvl=error)
+                hfoslog("Could not create target %s for frontend:" % (
+                    'link' if hardlink else 'copy'),
+                        dst_dir, e, emitter='BUILDER', lvl=error)
+            except Exception as e:
+                hfoslog("Error during", 'link' if hardlink else 'copy',
+                        "creation:", type(e), e, emitter='BUILDER', lvl=error)
+
+            hfoslog('Done linking', root_dst_dir, emitter='BUILDER',
+                    lvl=verbose)
 
 
 class Core(ConfigurableComponent):
@@ -119,8 +141,10 @@ class Core(ConfigurableComponent):
         super(Core, self).__init__("CORE")
         self.log("Booting. ", self.channel)
 
+        self.args = args
+
         self.frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
-                __file__)) + "/../frontend")
+            __file__)) + "/../frontend")
 
         self.loadable_components = {}
         self.runningcomponents = {}
@@ -151,16 +175,23 @@ class Core(ConfigurableComponent):
         self._writeConfig()
 
         self.server = Server((args.host, args.port)).register(self)
-        if not args.insecure == True:
-            self.log("Dropping privileges.")
-            drop_privileges()
+
+        if self.args.insecure is not True:
+            self.log("Setting five second timer to drop privileges.",
+                     lvl=debug)
+            Timer(5, dropPrivs()).register(self)
         else:
             self.log("Not dropping privileges - this may be insecure!",
-                     lvl=warn)
+                 lvl=warn)
+
+    @handler("dropPrivs")
+    def dropPrivileges(self, *args):
+        self.log("Dropping privileges", lvl=warn)
+        drop_privileges()
 
     @handler("frontendbuildrequest", channel="setup")
     def triggerFrontendBuild(self, event):
-        self.updateComponents(forcerebuild=event.force)
+        self.updateComponents(forcerebuild=event.force, install=event.install)
 
     @handler("componentupdaterequest", channel="setup")
     def triggerComponentUpdate(self, event):
@@ -168,7 +199,7 @@ class Core(ConfigurableComponent):
 
     # TODO: Installation of frontend requirements is currently disabled
     def updateComponents(self, forcereload=False, forcerebuild=False,
-                         install=False):
+                         forcecopy=True, install=False):
         self.log("Updating components")
         components = {}
 
@@ -182,8 +213,6 @@ class Core(ConfigurableComponent):
                 iter_entry_points(group='hfos.components', name=None)
             )
 
-            added_frontends = []
-
             for iterator in entry_point_tuple:
                 for entry_point in iterator:
                     try:
@@ -191,34 +220,23 @@ class Core(ConfigurableComponent):
                         location = entry_point.dist.location
                         loaded = entry_point.load()
 
-                        self.log("Entry point: ", entry_point.dist.__dict__,
+                        self.log("Entry point: ", entry_point,
                                  name,
                                  entry_point.resolve(), lvl=verbose)
 
-                        # pprint(entry_point.dist.__dict__)
-
-                        # TODO: This is hacky and not nice at all. Find a better way!
-                        modulename = entry_point.dist.project_name.split('hfos-')[1:]
-                        # print(modulename)
-                        if isinstance(modulename, list) and len(modulename) > 0:
-                            modulename = modulename[0]
-                        if modulename == '':
-                            modulename = 'core'
-
                         self.log("Loaded: ", loaded, lvl=verbose)
                         comp = {
-                            'modulename': modulename,
                             'location': location,
                             'version': str(entry_point.dist.parsed_version),
                             'description': loaded.__doc__
                         }
 
                         frontend = os.path.join(location, 'frontend')
-                        self.log("Checking component plugin: ", frontend)
+                        self.log("Checking component frontend parts: ",
+                                 frontend, lvl=verbose)
                         if os.path.isdir(
-                                frontend) and frontend != self.frontendroot and not frontend in added_frontends:
+                                frontend) and frontend != self.frontendroot:
                             comp['frontend'] = frontend
-                            added_frontends.append(frontend)
 
                         components[name] = comp
                         self.loadable_components[name] = loaded
@@ -236,13 +254,16 @@ class Core(ConfigurableComponent):
                         #         self.log(self.loadable_components[name])
                         #         configobject = {
                         #             'type': 'object',
-                        #             'properties': self.loadable_components[name].configprops
+                        #             'properties':
+                        # self.loadable_components[name].configprops
                         #         }
-                        #         ComponentBaseConfigSchema['schema']['properties'][
+                        #         ComponentBaseConfigSchema['schema'][
+                        # 'properties'][
                         #             'settings'][
                         #             'oneOf'].append(configobject)
                         #     except (KeyError, AttributeError) as e:
-                        #         self.log('Problematic configuration properties in '
+                        #         self.log('Problematic configuration
+                        # properties in '
                         #                  'component ', name, exc=True)
                         #
                         # schemastore['component'] = ComponentBaseConfigSchema
@@ -255,19 +276,22 @@ class Core(ConfigurableComponent):
         self.log("Checking component frontend bits in ", self.frontendroot,
                  lvl=verbose)
 
-        pprint(self.config._fields)
+        # pprint(self.config._fields)
         diff = set(components) ^ set(self.config.components)
-        if len(diff) > 0 or forcerebuild and self.config.frontendenabled:
+        if diff or forcecopy and self.config.frontendenabled:
             self.log("Old component configuration differs:", diff, lvl=debug)
             self.log(self.config.components, components, lvl=verbose)
             self.config.components = components
 
             self.updateFrontends(install)
-            self.rebuildFrontend()
 
-            # We have to find a way to detect if we need to rebuild (and
-            # possibly wipe) stuff. This maybe the case, when a frontend has
-            # been updated.
+            if forcerebuild:
+                self.rebuildFrontend()
+
+                # We have to find a way to detect if we need to rebuild (and
+                # possibly wipe) stuff. This maybe the case, when a frontend
+                #  has
+                # been updated.
         else:
             self.log("No component configuration change. Proceeding.")
 
@@ -280,13 +304,14 @@ class Core(ConfigurableComponent):
                  self.config.components, lvl=debug)
 
         importlines = []
+        modules = []
 
         for name, component in self.config.components.items():
             if 'frontend' in component:
                 origin = component['frontend']
 
                 target = os.path.join(self.frontendroot, 'src', 'components',
-                                      component['modulename'])
+                                      name)
                 target = os.path.normpath(target)
 
                 if install:
@@ -321,9 +346,15 @@ class Core(ConfigurableComponent):
 
                 copytree(origin, target)
 
-                line = u"import {s} from './components/{s}/{s}.module';\n" \
-                       u"modules.push({s});\n".format(s=component['modulename'])
-                importlines += line
+                for modulefilename in glob(target + '/*.module.js'):
+                    modulename = os.path.basename(modulefilename).split(
+                        ".module.js")[0]
+                    line = u"import {s} from './components/{p}/{" \
+                           u"s}.module';\n" \
+                           u"modules.push({s});\n".format(s=modulename, p=name)
+                    if not modulename in modules:
+                        importlines += line
+                        modules.append(modulename)
 
         main = ""
         with open(os.path.join(self.frontendroot, 'src', 'main.tpl.js'),
@@ -361,9 +392,10 @@ class Core(ConfigurableComponent):
 
         self.log("Frontend build done: ", out, err, lvl=debug)
         copytree(os.path.join(self.frontendroot, 'build'),
-                 self.config.frontendtarget)
+                 self.config.frontendtarget, hardlink=False)
         copytree(os.path.join(self.frontendroot, 'assets'),
-                 os.path.join(self.config.frontendtarget, 'assets'))
+                 os.path.join(self.config.frontendtarget, 'assets'),
+                 hardlink=False)
         self.startFrontend()
         self.log("Frontend deployed")
 
@@ -375,7 +407,7 @@ class Core(ConfigurableComponent):
             self.log(self.config)
             self.static = Static("/",
                                  docroot=self.config.frontendtarget).register(
-                    self)
+                self)
             self.websocket = WebSocketsDispatcher("/websocket").register(self)
             self.frontendrunning = True
 
@@ -430,7 +462,7 @@ def construct_graph(args):
 
     # HFDebugger(root=server).register(server)
 
-    hfoslog("[HFOS] Beginning graph assembly.")
+    hfoslog("Beginning graph assembly.", emitter='GRAPH')
 
     if args.drawgraph:
         from circuits.tools import graph
@@ -442,7 +474,7 @@ def construct_graph(args):
 
         webbrowser.open("http://%s:%i/" % (args.host, args.port))
 
-    hfoslog("[HFOS] Graph assembly done.")
+    hfoslog("Graph assembly done.", emitter='GRAPH')
 
     return app
 

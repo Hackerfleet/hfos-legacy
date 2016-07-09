@@ -63,27 +63,32 @@ info = 20
 warn = 30
 error = 40
 critical = 50
+hilight = 60
 off = 100
-lvldata = {2: ['EVENT', '\033[1:36m'],
-           4: ['NET', '\033[1;30m'],
-           5: ['VERBOSE', '\033[1;30m'],
-           10: ['DEBUG', '\033[1;97m'],
-           20: ['INFO', '\033[1;92m'],
-           30: ['WARN', '\033[1;91m'],
-           40: ['ERROR', '\033[1;31;43m'],
-           50: ['CRITICAL', '\033[1;33;41m'],
-           60: ['HILIGHT', '\033[1;4;30;106m']
-           }
+lvldata = {
+    events: ['EVENT', '\033[1:36m'],
+    verbose: ['VERB', '\033[1;30m'],
+    network: ['NET', '\033[1;34m'],
+    debug: ['DEBUG', '\033[1;97m'],
+    info: ['INFO', '\033[1;92m'],
+    warn: ['WARN', '\033[1;91m'],
+    error: ['ERROR', '\033[1;31;43m'],
+    critical: ['CRIT', '\033[1;33;41m'],
+    hilight: ['HILIGHT', '\033[1;4;30;106m']
+}
 
 terminator = '\033[0m'
 
 count = 0
 
 logfile = "/var/log/hfos/service.log"
-verbosity = {'global': debug,
+
+console = debug
+
+verbosity = {'global': console,
              'file': off,
              'system': error,
-             'console': debug
+             'console': console
              }
 
 mute = []
@@ -101,7 +106,8 @@ class logevent(Event):
     :param args:
     """
 
-    def __init__(self, timestamp, severity, emitter, sourceloc, content, *args):
+    def __init__(self, timestamp, severity, emitter, sourceloc, content,
+                 *args):
         super(logevent, self).__init__(*args)
         self.timestamp = timestamp
         self.severity = severity
@@ -236,11 +242,11 @@ def hfoslog(*what, **kwargs):
         else:
             callee = kwargs['sourceloc']
 
-    msg = "[%s] : %8s : %.5f : %i : [%s]" % (time.asctime(),
-                                             lvldata[lvl][0],
-                                             now,
-                                             count,
-                                             emitter)
+    msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (time.asctime(),
+                                               lvldata[lvl][0],
+                                               now,
+                                               count,
+                                               emitter)
 
     content = ""
 
@@ -267,7 +273,7 @@ def hfoslog(*what, **kwargs):
             f.close()
         except IOError:
             print("Can't open logfile for writing!")
-            sys.exit(23)
+            # sys.exit(23)
 
     if lvl >= verbosity['console']:
         output = str(msg)

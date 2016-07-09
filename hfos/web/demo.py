@@ -13,13 +13,11 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 from random import randint
 import json
 
-from circuits import Component
-
-from hfos.logger import hfoslog
+from hfos.component import ConfigurableComponent
 from hfos.events import broadcast
 
 
-class WebDemo(Component):
+class WebDemo(ConfigurableComponent):
     """
     Demonstrates functionality by interactively playing back demo data.
     """
@@ -32,7 +30,7 @@ class WebDemo(Component):
         """
 
         self._count += 1
-        hfoslog("[DEMO] Ping %i:" % self._count, args)
+        self.log("Ping %i:" % self._count, args)
 
         data = {'component': 'ping',
                 'action': "Hello"

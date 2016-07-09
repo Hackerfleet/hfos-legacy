@@ -25,7 +25,7 @@ Users = [
 
 def provision():
     provisionList(Users, userobject, indexes=['name'], clear=True)
-    hfoslog('[PROV] Provisioning: Users: Done.')
+    hfoslog('Provisioning: Users: Done.', emitter="PROVISIONS")
 
 
 if __name__ == "__main__":

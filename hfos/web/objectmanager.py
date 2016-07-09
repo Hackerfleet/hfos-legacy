@@ -1,7 +1,7 @@
 """
 
 Module: OM
-============
+==========
 
 OM manager
 
@@ -13,9 +13,8 @@ OM manager
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from uuid import uuid4
-from circuits import Component
 from hfos.component import ConfigurableComponent
-from hfos.logger import hfoslog, debug, error, warn, critical
+from hfos.logger import debug, error, warn, critical
 from hfos.events import send, objectcreation, objectchange, objectdeletion
 from hfos.database import objects, collections, ValidationError, schemastore
 import pymongo
@@ -37,21 +36,22 @@ class ObjectManager(ConfigurableComponent):
 
         self.subscriptions = {}
 
-        hfoslog("[OM] Started")
+        self.log("Started")
 
     def objectmanagerrequest(self, event):
         """OM event handler for incoming events
         :param event: OMRequest with incoming OM pagename and pagedata
         """
 
-        hfoslog("[OM] Event: '%s'" % event.__dict__)
+        self.log("Event: '%s'" % event.__dict__)
         action = event.action
         data = event.data
-        if 'schema' in data:
-            schema = data['schema']
-        else:
-            hfoslog("No Schema given, cannot act!", lvl=critical)
-            return
+        if action not in ['subscribe', 'unsubscribe']:
+            if 'schema' in data:
+                schema = data['schema']
+            else:
+                self.log("No Schema given, cannot act!", lvl=critical)
+                return
 
         result = None
         notification = None
@@ -71,7 +71,7 @@ class ObjectManager(ConfigurableComponent):
                 objlist = []
 
                 if objects[schema].count(objectfilter) > WARNSIZE:
-                    hfoslog("[OM] Getting a very long list of items for ", schema, lvl=warn)
+                    self.log("Getting a very long list of items for ", schema, lvl=warn)
 
                 for item in objects[schema].find(objectfilter):
                     try:
@@ -90,9 +90,9 @@ class ObjectManager(ConfigurableComponent):
 
                             objlist.append(listitem)
                     except Exception as e:
-                        hfoslog("[OM] Faulty object or field: ", e, type(e), item._fields, fields, lvl=error,
+                        self.log("Faulty object or field: ", e, type(e), item._fields, fields, lvl=error,
                                 exc=True)
-                hfoslog("[OM] Generated object list: ", objlist)
+                self.log("Generated object list: ", objlist)
 
                 result = {'component': 'objectmanager',
                           'action': 'list',
@@ -101,8 +101,8 @@ class ObjectManager(ConfigurableComponent):
                                    }
                           }
             else:
-                hfoslog("[OM] Schemata: ", objects.keys())
-                hfoslog("[OM] List for unavailable schema requested: ", schema, lvl=warn)
+                self.log("Schemata: ", objects.keys())
+                self.log("List for unavailable schema requested: ", schema, lvl=warn)
 
         elif action == "search":
             if schema in objects.keys():
@@ -124,12 +124,12 @@ class ObjectManager(ConfigurableComponent):
                 objlist = []
 
                 if collections[schema].count() > WARNSIZE:
-                    hfoslog("[OM] Getting a very long list of items for ", schema, lvl=warn)
+                    self.log("Getting a very long list of items for ", schema, lvl=warn)
 
-                hfoslog('[OM] Objectfilter: ', objectfilter, ' Schema: ', schema, lvl=warn)
+                self.log("Objectfilter: ", objectfilter, ' Schema: ', schema, lvl=warn)
                 # for item in collections[schema].find(objectfilter):
                 for item in collections[schema].find(objectfilter):
-                    hfoslog("[OM] Search found item: ", item, lvl=warn)
+                    self.log("Search found item: ", item, lvl=warn)
                     try:
                         # TODO: Fix bug in warmongo that needs this workaround:
                         item = objects[schema](item)
@@ -145,8 +145,8 @@ class ObjectManager(ConfigurableComponent):
 
                         objlist.append(listitem)
                     except Exception as e:
-                        hfoslog("[OM] Faulty object or field: ", e, type(e), item._fields, fields, lvl=error)
-                hfoslog("[OM] Generated object search list: ", objlist)
+                        self.log("Faulty object or field: ", e, type(e), item._fields, fields, lvl=error)
+                self.log("Generated object search list: ", objlist)
 
                 result = {'component': 'objectmanager',
                           'action': 'search',
@@ -156,10 +156,16 @@ class ObjectManager(ConfigurableComponent):
                                    }
                           }
             else:
-                hfoslog("[OM] List for unavailable schema requested: ", schema, lvl=warn)
+                self.log("List for unavailable schema requested: ", schema, lvl=warn)
 
         elif action == "get":
-            uuid = data['uuid']
+            try:
+                uuid = data['uuid']
+            except KeyError:
+                self.log('Object with no uuid requested:', schema, data,
+                         lvl=error)
+                return
+
             if 'subscribe' in data:
                 subscribe = data['subscribe']
             else:
@@ -171,15 +177,15 @@ class ObjectManager(ConfigurableComponent):
                 storageobject = objects[schema].find_one({'uuid': uuid})
 
             if not storageobject:
-                hfoslog("[OM] Object not found, creating: ", data)
+                self.log("Object not found, creating: ", data)
 
                 storageobject = objects[schema]({'uuid': str(uuid4())})
 
                 if "useruuid" in schemastore[schema]['schema']['properties']:
                     storageobject.useruuid = event.user.uuid
-                    hfoslog("[OM] Attached initial owner's id: ", event.user.uuid)
+                    self.log("Attached initial owner's id: ", event.user.uuid)
             else:
-                hfoslog("[OM] Object found, delivering: ", data)
+                self.log("Object found, delivering: ", data)
 
             if subscribe:
                 if uuid in self.subscriptions:
@@ -228,44 +234,84 @@ class ObjectManager(ConfigurableComponent):
         elif action == 'delete':
             result, notification = self._delete(schema, data)
 
+        elif action == 'change':
+            result, notification = self._change(schema, data)
+
         else:
-            hfoslog("[OM] Unsupported action: ", action, event, event.__dict__, lvl=warn)
+            self.log("Unsupported action: ", action, event, event.__dict__, lvl=warn)
             return
 
         if notification:
             try:
                 self.fireEvent(notification)
             except Exception as e:
-                hfoslog("[OM] Transmission error during notification: %s" % e, lvl=error)
+                self.log("Transmission error during notification: %s" % e, lvl=error)
 
         if result:
             try:
                 self.fireEvent(send(event.client.uuid, result))
             except Exception as e:
-                hfoslog("[OM] Transmission error during response: %s" % e, lvl=error)
+                self.log("Transmission error during response: %s" % e, lvl=error)
 
     def updatesubscriptions(self, event):
         """OM event handler for to be stored and client shared objects
         :param event: OMRequest with uuid, schema and object data
         """
 
-        hfoslog("[OM] Event: '%s'" % event.__dict__)
+        self.log("Event: '%s'" % event.__dict__)
         try:
             data = event.data
             self._updateSubscribers(data)
 
         except Exception as e:
-            hfoslog("[OM] Error during backend object storage: ", type(e), e, exc=True)
+            self.log("Error during backend object storage: ", type(e), e, exc=True)
+
+    def _change(self, schema, data):
+        try:
+            uuid = data['uuid']
+
+            change = data['change']
+            field = change['field']
+            newdata = change['value']
+
+        except KeyError as e:
+            self.log("Update request with missing arguments!", data, e,
+                     lvl=critical)
+
+        storageobject= None
+
+        try:
+            storageobject = objects[schema].find_one({'uuid': uuid})
+        except Exception as e:
+            self.log('Change for unknown object requested:', schema,
+                     data, lvl=warn)
+
+        if storageobject != None:
+            self.log("Changing object:", storageobject._fields, lvl=debug)
+            storageobject._fields[field] = newdata
+
+            self.log("Storing object:", storageobject._fields, lvl=debug)
+            try:
+                storageobject.validate()
+            except ValidationError:
+                self.log("Validation of changed object failed!",
+                         storageobject, lvl=warn)
+
+            storageobject.save()
+
+            self.log("Object stored.")
+            return True, None
+        else:
+            self.log("Object update failed. No object.", lvl=warn)
+            return False, None
 
     def _put(self, schema, data):
-        hfoslog("PUT")
         try:
             clientobject = data['obj']
             uuid = clientobject['uuid']
         except KeyError:
-            hfoslog("[OM] Put request with missing arguments!", data, lvl=critical)
+            self.log("Put request with missing arguments!", data, lvl=critical)
 
-        hfoslog("ARGS SPLIT")
         try:
             if uuid != 'create':
                 storageobject = objects[schema].find_one({'uuid': uuid})
@@ -274,20 +320,20 @@ class ObjectManager(ConfigurableComponent):
                 storageobject = objects[schema](clientobject)
 
             if storageobject:
-                hfoslog("[OM] Updating object:", storageobject._fields, lvl=debug)
+                self.log("Updating object:", storageobject._fields, lvl=debug)
                 storageobject.update(clientobject)
 
             else:
                 storageobject = objects[schema](clientobject)
-                hfoslog("[OM] Storing object:", storageobject._fields, lvl=debug)
+                self.log("Storing object:", storageobject._fields, lvl=debug)
                 try:
                     storageobject.validate()
                 except ValidationError:
-                    hfoslog("[OM] Validation of new object failed!", clientobject, lvl=warn)
+                    self.log("Validation of new object failed!", clientobject, lvl=warn)
 
             storageobject.save()
 
-            hfoslog("[OM] Object stored.")
+            self.log("Object stored.")
 
             # Notify backend listeners
 
@@ -306,7 +352,7 @@ class ObjectManager(ConfigurableComponent):
             return result, notification
 
         except Exception as e:
-            hfoslog("[OM] Error during object storage:", e, type(e), data, lvl=error, exc=True)
+                self.log("Error during object storage:", e, type(e), data, lvl=error, exc=True)
 
     def _updateSubscribers(self, updateobject):
         # Notify frontend subscribers
@@ -320,19 +366,20 @@ class ObjectManager(ConfigurableComponent):
             for recipient in self.subscriptions[updateobject.uuid]:
                 self.fireEvent(send(recipient, update))
 
+
     def _delete(self, schema, data):
-        if True:  # try:
+        if True: #try:
             uuid = data['uuid']
 
             if schema in objects.keys():
-                hfoslog("[OM] Looking for object to be deleted.", lvl=debug)
+                self.log("Looking for object to be deleted.", lvl=debug)
                 storageobject = objects[schema].find_one({'uuid': uuid})
-                hfoslog("[OM] Found object.", lvl=debug)
+                self.log("Found object.", lvl=debug)
 
-                hfoslog("[OM] Fields:", storageobject._fields, "\n\n\n", storageobject.__dict__)
+                self.log("Fields:", storageobject._fields, "\n\n\n", storageobject.__dict__)
                 storageobject.delete()
 
-                hfoslog("[OM] Preparing notification.", lvl=debug)
+                self.log("Preparing notification.", lvl=debug)
                 notification = objectdeletion(uuid, schema)
 
                 if uuid in self.subscriptions:
@@ -351,7 +398,8 @@ class ObjectManager(ConfigurableComponent):
                           }
                 return result, notification
             else:
-                hfoslog("[OM] Unknown schema encountered: ", schema, lvl=warn)
-                # except Exception as e:
-                #    hfoslog("[OM] Error during delete request: ", e, type(e),
+                self.log("Unknown schema encountered: ", schema,  lvl=warn)
+        #except Exception as e:
+        #    self.log("Error during delete request: ", e, type(e),
                 # lvl=error)
+

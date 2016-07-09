@@ -21,13 +21,14 @@ Should be user configurable and toggleable, at least most parts/bits.
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from circuits import Component, handler
+from circuits import handler
+from hfos.component import ConfigurableComponent
 
 from hfos.logger import hfoslog, error, warn, verbose, critical
 from hfos.events import broadcast, send
 
 
-class ActivityMonitor(Component):
+class ActivityMonitor(ConfigurableComponent):
     """
     ActivityMonitor manager
 
@@ -39,9 +40,9 @@ class ActivityMonitor(Component):
     channel = "hfosweb"
 
     def __init__(self, *args):
-        super(ActivityMonitor, self).__init__(*args)
+        super(ActivityMonitor, self).__init__('ACTIVITY', *args)
 
-        hfoslog("[ACTIVITY] Started")
+        self.log("Started")
 
         self.referenceframe = None
         self.mobalert = False
@@ -55,7 +56,7 @@ class ActivityMonitor(Component):
         :param event with incoming referenceframe message
         """
 
-        hfoslog("[ACTIVITY] Got a reference frame update! ", event, lvl=verbose)
+        self.log("Got a reference frame update! ", event, lvl=verbose)
 
         self.referenceframe = event.data
 
@@ -77,11 +78,11 @@ class ActivityMonitor(Component):
         :param event with incoming ActivityMonitor message
         """
 
-        hfoslog("[ACTIVITY] Event: '%s'" % event.__dict__)
+        self.log("Event: '%s'" % event.__dict__)
         try:
             action = event.action
             data = event.data
 
 
         except Exception as e:
-            hfoslog("[ACTIVITY] Error: '%s' %s" % (e, type(e)), lvl=error)
+            self.log("Error: '%s' %s" % (e, type(e)), lvl=error)

@@ -32,10 +32,10 @@ try:
     import objgraph
     from guppy import hpy
 except ImportError:
-    hfoslog("Debugger couldn't import objgraph and/or guppy.", lvl=warn)
+    hfoslog("Debugger couldn't import objgraph and/or guppy.", lvl=warn,
+            emitter="DBG")
 
 import inspect
-
 
 class HFDebugger(ConfigurableComponent):
     """
@@ -66,7 +66,7 @@ class HFDebugger(ConfigurableComponent):
             self.log("Can't use heapy. guppy package missing?")
 
         self.log("Started. Notification users: ",
-                 self.config.settings.notificationusers)
+                 self.config.notificationusers)
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback,
@@ -82,7 +82,7 @@ class HFDebugger(ConfigurableComponent):
 
             msg = "ERROR"
             msg += "{0:s} ({1:s}) ({2:s}): {3:s}\n".format(
-                    handler, repr(fevent), repr(error_type), repr(value)
+                handler, repr(fevent), repr(error_type), repr(value)
             )
 
             s.append(msg)
@@ -91,7 +91,7 @@ class HFDebugger(ConfigurableComponent):
 
             self.log("\n".join(s), lvl=critical)
 
-            alert = {
+            alert =  {
                 'component': 'alert',
                 'action': 'danger',
                 'data': {
@@ -99,7 +99,7 @@ class HFDebugger(ConfigurableComponent):
                     'title': 'Exception Monitor'
                 }
             }
-            for user in self.config.settings.notificationusers:
+            for user in self.config.notificationusers:
                 self.fireEvent(send(None, alert, username=user,
                                     sendtype='user'))
 
@@ -127,7 +127,6 @@ class HFDebugger(ConfigurableComponent):
             if event.action == "exception":
                 class TestException(BaseException):
                     pass
-
                 raise TestException
             if event.action == "heap":
                 self.log("Heap log:", self.heapy.heap(), lvl=critical)
@@ -146,7 +145,6 @@ class HFDebugger(ConfigurableComponent):
 
 from pprint import pprint
 
-
 class Logger(ConfigurableComponent):
     """
     System logger
@@ -160,7 +158,7 @@ class Logger(ConfigurableComponent):
     def __init__(self, *args):
         super(Logger, self).__init__('LOGGER', *args)
 
-        hfoslog("[LOGGER] Started.")
+        self.log("Started.")
 
     @handler("logevent")
     def logevent(self, event):
@@ -181,14 +179,18 @@ class Logger(ConfigurableComponent):
 
         logentry.save()
 
-
 class CLI(ConfigurableComponent):
     """
     Command Line Interface support
     """
 
-    def __init__(self, *args):
+    configprops = {}
+
+
+    def __init__(self,  *args):
         super(CLI, self).__init__("CLI", *args)
+
+        self.hooks = {}
 
         self.log("Started")
         stdin.register(self)
@@ -206,14 +208,29 @@ class CLI(ConfigurableComponent):
 
         if data[0] == "/":
             cmd = data[1:].upper()
+            args = []
             if ' ' in cmd:
                 cmd, args = cmd.split(' ', maxsplit=1)
                 args = args.split(' ')
+            if cmd in self.hooks:
+                self.hooks[cmd](args)
             if cmd == 'FRONTEND':
-                self.log("Sending frontend rebuild event")
-                self.fireEvent(frontendbuildrequest(force=True), "setup")
+                self.log("Sending %s frontend rebuild event" % ("(forced)"
+                                                                if 'FORCE'
+                                                                   in args
+                else ''))
+                self.fireEvent(frontendbuildrequest(force='FORCE' in args,
+                                                    install='INSTALL' in args),
+                               "setup")
             if cmd == 'BACKEND':
                 self.log("Sending backend reload event")
-                self.fireEvent(componentupdaterequest(force=True), "setup")
+                self.fireEvent(componentupdaterequest(force=False), "setup")
             if cmd == 'WHO':
                 self.fireEvent()
+
+
+class cliCommand(Event):
+    def __init__(self, cmd, cmdargs, *args, **kwargs):
+        super(cliCommand, self).__init__(*args, **kwargs)
+        self.cmd = cmd
+        self.args = cmdargs

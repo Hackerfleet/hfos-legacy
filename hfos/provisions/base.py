@@ -34,23 +34,29 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
     col_name = dbobject.collection_name()
 
     if clear:
-        hfoslog('[PROV] Clearing collection for', col_name, lvl=warn)
+        hfoslog("Clearing collection for", col_name, lvl=warn,
+                emitter='PROVISIONS')
         db.drop_collection(col_name)
+    counter = 0
 
     for item in items:
-        itemname = item['name']
-        hfoslog('[PROV] Provisioning: Validating object: ', itemname)
+        itemuuid = item['uuid']
+        hfoslog("Provisioning: Validating object:", itemuuid,
+                emitter='PROVISIONS')
 
-        if dbobject.count({'name': itemname}) > 0 and not overwrite:
-            hfoslog('[PROV] Provisioning: Not updating item ', item, lvl=warn)
+        if dbobject.count({'uuid': itemuuid}) > 0 and not overwrite:
+            hfoslog("Provisioning: Not updating item", item, lvl=warn,
+                    emitter='PROVISIONS')
         else:
             newobject = dbobject(item)
 
             try:
                 newobject.validate()
                 newobject.save()
+                counter += 1
             except ValidationError as e:
-                raise ValidationError("Could not provision layerobject: " + str(itemname), e)
+                raise ValidationError(
+                    "Could not provision layerobject: " + str(itemuuid), e)
 
     if indexes != None:
         col = db[col_name]
@@ -58,4 +64,8 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
             col.ensure_index([(item, pymongo.TEXT)], unique=True)
 
         for index in col.list_indexes():
-            hfoslog("Index: ", index)
+            hfoslog("Index: ", index, emitter='PROVISIONS')
+
+    hfoslog("Provisioned %i out of %i items successfully." % (counter,
+                                                              len(items)),
+            emitter='PROVISIONS')
