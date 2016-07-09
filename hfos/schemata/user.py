@@ -14,6 +14,7 @@ User: Useraccount object
 :license: GPLv3 (See LICENSE)
 
 """
+from hfos.schemata.defaultform import noform
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -36,6 +37,4 @@ UserSchema = {
     }
 }
 
-User = {'schema': UserSchema, 'form': {}}
-
-__schema__ = UserSchema
+User = {'schema': UserSchema, 'form': noform}

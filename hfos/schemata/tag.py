@@ -17,6 +17,7 @@ Provisions
 :license: GPLv3 (See LICENSE)
 
 """
+from hfos.schemata.defaultform import savebutton
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -52,11 +53,7 @@ TagForm = [
     'name'
     'color'
     'notes',
-    {
-        'type': 'submit',
-        'title': 'Save Tag',
-    }
+    savebutton
 ]
 
-__form__ = TagForm
-__schema__ = Tag
+Tag = {'schema': Tag, 'form': TagForm}

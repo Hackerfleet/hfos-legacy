@@ -11,10 +11,11 @@ System: Global systemwide settings
 :license: GPLv3 (See LICENSE)
 
 """
+from hfos.schemata.defaultform import savebutton
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-Systemconfig = {
+SystemconfigSchema = {
     'id': '#systemconfig',
     'type': 'object',
     'name': 'systemconfig',
@@ -72,11 +73,7 @@ SystemconfigForm = [
         ]
     },
     'description',
-    {
-        'type': 'submit',
-        'title': 'Save client configuration',
-    }
+    savebutton
 ]
 
-__schema__ = Clientconfig
-__form__ = ClientconfigForm
+Systemconfig = {'schema': SystemconfigSchema, 'form': SystemconfigForm}

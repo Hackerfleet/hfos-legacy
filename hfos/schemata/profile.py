@@ -12,7 +12,7 @@ Profile: Userprofile with general flags and fields
 :license: GPLv3 (See LICENSE)
 
 """
-from hfos.schemata.defaultform import defaultform
+from hfos.schemata.defaultform import changeonlyform
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -156,6 +156,4 @@ ProfileSchema = {
     ]
 }
 
-Profile = {'schema': ProfileSchema, 'form': defaultform}
-
-__schema__ = ProfileSchema
+Profile = {'schema': ProfileSchema, 'form': changeonlyform}

@@ -14,7 +14,7 @@ LogMessage: LogMessage to store messages in rooms and private logs
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from hfos.schemata.defaultform import noform
+from hfos.schemata.defaultform import readonlyform
 
 LogMessageSchema = {
     'id': '#logmessage',
@@ -39,4 +39,4 @@ LogMessageSchema = {
     }
 }
 
-LogMessage = {'schema': LogMessageSchema, 'form': noform}
+LogMessage = {'schema': LogMessageSchema, 'form': readonlyform}

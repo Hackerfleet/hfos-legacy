@@ -14,6 +14,7 @@ Client: Clientprofile to store client specific settings
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+from hfos.schemata.defaultform import savebutton
 ClientconfigSchema = {
     'id': '#client',
     'type': 'object',
@@ -91,6 +92,7 @@ ClientconfigForm = [
         }
     },
     'description',
+    savebutton
 ]
 
 Client = {'schema': ClientconfigSchema, 'form': ClientconfigForm}

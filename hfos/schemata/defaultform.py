@@ -32,12 +32,43 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+savebutton = {
+    'type': 'button',
+    'title': 'Save Object',
+    'onClick': '$ctrl.submitObject()'
+}
+
+deletebutton = {
+    'type': 'button',
+    'title': 'Delete Object',
+    'onClick': '$ctrl.deleteObject()'
+}
+
+editbuttons = {
+    'type': 'actions',
+    'items': [
+        savebutton,
+        deletebutton
+    ]
+}
+
 defaultform = [
     '*',
+    editbuttons
+]
+
+changeonlyform = [
+    '*',
     {
-        'type': 'submit',
-        'title': 'Save Object',
+        'type': 'actions',
+        'items': [
+            savebutton
+        ]
     }
+]
+
+readonlyform = [
+    '*'
 ]
 
 noform = []
