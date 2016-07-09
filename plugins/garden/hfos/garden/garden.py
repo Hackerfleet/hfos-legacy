@@ -39,7 +39,7 @@ class Garden(ConfigurableComponent):
         :param args:
         """
 
-        super(Garden, self).__init__("Garden", *args)
+        super(Garden, self).__init__("GARDEN", *args)
 
         self.log("Started")
 
@@ -47,6 +47,8 @@ class Garden(ConfigurableComponent):
         self.log("Someone interacts with the garden! Yay!", lvl=warn)
 
     def objectcreation(self, event):
+        if event.schema == 'wateringrule':
+            self.log("Reloading rules")
         self._reloadWateringRules()
 
     def _reloadWateringRule(self):
