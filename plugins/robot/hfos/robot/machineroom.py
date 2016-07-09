@@ -28,8 +28,9 @@ try:
     import serial
 except ImportError:
     serial = None
-    self.log("No serialport found. Serial bus remote control devices will be unavailable, install requirements.txt!",
-             lvl=critical)
+    hfoslog("No serialport found. Serial bus remote control devices will be "
+         "unavailable, install requirements.txt!",
+             lvl=critical, emitter="MR")
 
 class MachineroomEvent(Event):
     """

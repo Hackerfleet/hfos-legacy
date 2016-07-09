@@ -13,13 +13,13 @@ Chat manager
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from circuits import Component
+from hfos.component import ConfigurableComponent
 
-from hfos.logger import hfoslog, error, warn, critical
+from hfos.logger import error, warn, critical
 from hfos.events import remotecontrolupdate, send
 
 
-class RemoteControlManager(Component):
+class RemoteControlManager(ConfigurableComponent):
     """
     Remote Control manager
 
@@ -27,14 +27,15 @@ class RemoteControlManager(Component):
     * incoming remote control messages
     """
 
+    configprops = {}
     channel = "hfosweb"
 
     def __init__(self, *args):
-        super(RemoteControlManager, self).__init__(*args)
+        super(RemoteControlManager, self).__init__("RCM", *args)
 
         self.remotecontroller = None
 
-        hfoslog("[RCM] Started")
+        self.log("Started")
 
     def clientdisconnect(self, event):
         """Handler to deal with a possibly disconnected remote controlling client
@@ -43,10 +44,10 @@ class RemoteControlManager(Component):
 
         try:
             if event.clientuuid == self.remotecontroller:
-                hfoslog("[RCM] Remote controller disconnected!", lvl=critical)
+                self.log("Remote controller disconnected!", lvl=critical)
                 self.remotecontroller = None
         except Exception as e:
-            hfoslog("[RCM] Strange thing while client disconnected", e, type(e))
+            self.log("Strange thing while client disconnected", e, type(e))
 
     def remotecontrolrequest(self, event):
         """Remote control event handler for incoming events
@@ -54,7 +55,7 @@ class RemoteControlManager(Component):
             ['takeControl', 'leaveControl', 'controlData']
         """
 
-        hfoslog("[RCM] Event: '%s'" % event.__dict__)
+        self.log("Event: '%s'" % event.__dict__)
         try:
             action = event.action
             data = event.data
@@ -63,30 +64,30 @@ class RemoteControlManager(Component):
             clientuuid = event.client.uuid
 
             if action == "takeControl":
-                hfoslog("[RCM] Client wants to remote control: ", username, clientname, lvl=warn)
+                self.log("Client wants to remote control: ", username, clientname, lvl=warn)
                 if not self.remotecontroller:
-                    hfoslog("[RCM] Success!")
+                    self.log("Success!")
                     self.remotecontroller = clientuuid
                     self.fireEvent(send(clientuuid, {'component': 'remotectrl', 'action': 'takeControl', 'data': True}))
                 else:
-                    hfoslog("[RCM] No, we're already being remote controlled!")
+                    self.log("No, we're already being remote controlled!")
                     self.fireEvent(
                         send(clientuuid, {'component': 'remotectrl', 'action': 'takeControl', 'data': False}))
                 return
             elif action == "leaveControl":
                 if self.remotecontroller == event.client.uuid:
-                    hfoslog("[RCM] Client leaves control!", username, clientname, lvl=warn)
+                    self.log("Client leaves control!", username, clientname, lvl=warn)
                     self.remotecontroller = None
                     self.fireEvent(
                         send(clientuuid, {'component': 'remotectrl', 'action': 'takeControl', 'data': False}))
                 return
             elif action == "controlData":
-                hfoslog("[RCM] Control data received: ", data)
+                self.log("Control data received: ", data)
                 if event.client.uuid == self.remotecontroller:
-                    hfoslog("[RCM] Valid data, handing on to machineroom.")
+                    self.log("Valid data, handing on to machineroom.")
                     self.fireEvent(remotecontrolupdate(data), "machineroom")
                 else:
-                    hfoslog("[RCM] Invalid control data update request!", lvl=warn)
+                    self.log("Invalid control data update request!", lvl=warn)
 
         except Exception as e:
-            hfoslog("[RCM] Error: '%s' %s" % (e, type(e)), lvl=error, exc=True)
+            self.log("Error: '%s' %s" % (e, type(e)), lvl=error, exc=True)

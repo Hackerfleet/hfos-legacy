@@ -14,6 +14,8 @@ Controllable: Patterns of remote control
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+from hfos.schemata.defaultform import defaultform
+
 ControllableSchema = {
     'id': '#controllable',
     'type': 'object',
@@ -32,4 +34,4 @@ ControllableSchema = {
     }
 }
 
-Controllable = {'schema': ControllableSchema, 'form': {}}
+Controllable = {'schema': ControllableSchema, 'form': defaultform}

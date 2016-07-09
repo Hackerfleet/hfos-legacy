@@ -15,6 +15,8 @@ Controller: Remote control input device to controllable mapping
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+from hfos.schemata.defaultform import defaultform
+
 ControllerSchema = {
     'id': '#controller',
     'type': 'object',
@@ -46,4 +48,4 @@ ControllerSchema = {
     }
 }
 
-Controller = {'schema': ControllerSchema, 'form': {}}
+Controller = {'schema': ControllerSchema, 'form': defaultform}
