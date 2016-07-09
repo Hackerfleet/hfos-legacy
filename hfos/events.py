@@ -350,13 +350,15 @@ class layerrequest(AuthorizedEvent):
 class sensordata(Event):
     """New sensordata has been parsed"""
 
-    def __init__(self, data):
+    def __init__(self, data, timestamp, bus):
         """
 
         :param data: Parsed NMEA? Data
         """
         super(sensordata, self).__init__()
         self.data = data
+        self.timestamp = timestamp
+        self.bus = bus
 
 
 # Navigation Data Events
@@ -393,16 +395,14 @@ class remotecontrolupdate(Event):
 class libraryrequest(AuthorizedEvent):
     pass
 
-
 class frontendbuildrequest(Event):
-    def __init__(self, force=False, *args):
+    def __init__(self, force=False, install=False,  *args):
         super(frontendbuildrequest, self).__init__(*args)
         self.force = force
-
+        self.install = install
 
 class componentupdaterequest(frontendbuildrequest):
     pass
-
 
 class logtailrequest(AuthorizedEvent):
     pass
