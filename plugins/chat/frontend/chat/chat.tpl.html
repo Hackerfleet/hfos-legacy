@@ -1,0 +1,23 @@
+<div class="jumbotron">
+    <h1>Chat</h1>
+
+    <div>
+        <ul>
+            <li ng-repeat="msg in $ctrl.messages">
+                <span>{{msg.timestamp | date: 'HH:mm:ss'}}</span>
+                <span>{{msg.sender}}</span>
+                <span>{{msg.content}}</span>
+            </li>
+        </ul>
+    </div>
+    <form>
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" id="chatinput" ng-model="$ctrl.input"/><br/>
+            </div>
+            <div class="col-md-8">
+                <button type="submit" class="btn btn-default" ng-click="$ctrl.chatsend()">Send</button>
+            </div>
+        </div>
+    </form>
+</div>

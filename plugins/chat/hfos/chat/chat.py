@@ -13,13 +13,13 @@ Chat manager
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from time import time
-from circuits import Component
+from hfos.component import ConfigurableComponent
 
 from hfos.logger import hfoslog, error, warn
 from hfos.events import broadcast
 
 
-class Chat(Component):
+class Chat(ConfigurableComponent):
     """
     Chat manager
 
@@ -28,28 +28,29 @@ class Chat(Component):
     * chat broadcasts
     """
 
+    configprops = {}
     channel = "hfosweb"
 
     def __init__(self, *args):
-        super(Chat, self).__init__(*args)
+        super(Chat, self).__init__("CHAT", *args)
 
-        hfoslog("[CHAT] Started")
+        self.log("Started")
 
     def _getusername(self, event):
         try:
             try:
                 username = event.user.profile.nick
             except AttributeError:
-                hfoslog("[CHAT] Nickname not found.")
+                self.log("Nickname not found.")
                 username = event.user.account.name
 
             try:
                 username += "@" + event.client.config.name
             except AttributeError:
-                hfoslog("[CHAT] Client name not found.")
+                self.log("Client name not found.")
 
         except:
-            hfoslog("[CHAT] Couldn't find user- or clientname: ",
+            self.log("Couldn't find user- or clientname: ",
                     event.user.profile.to_dict(),
                     event.client.config.to_dict(), lvl=warn)
             username = "NO USERNAME"
@@ -60,7 +61,7 @@ class Chat(Component):
         :param event: ChatRequest with incoming chat message
         """
 
-        hfoslog("[CHAT] Event: '%s'" % event.__dict__)
+        self.log("Event: '%s'" % event.__dict__)
         try:
             action = event.action
             data = event.data
@@ -72,17 +73,17 @@ class Chat(Component):
                               'data': {
                                   'sender': username,
                                   'timestamp': time(),
-                                  'content': data.encode('utf-8')
+                                  'content': str(data.encode('utf-8'))
                               }
                               }
             else:
-                hfoslog("[CHAT] Unsupported action: ", action, event, lvl=warn)
+                self.log("Unsupported action: ", action, event, lvl=warn)
                 return
 
             try:
                 self.fireEvent(broadcast("users", chatpacket))
             except Exception as e:
-                hfoslog("[CHAT] Transmission error before broadcast: %s" % e, lvl=error)
+                self.log("Transmission error before broadcast: %s" % e, lvl=error)
 
         except Exception as e:
-            hfoslog("[CHAT] Error: '%s' %s" % (e, type(e)), lvl=error)
+            self.log("Error: '%s' %s" % (e, type(e)), lvl=error)
