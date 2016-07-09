@@ -18,6 +18,8 @@ Provisions
 
 """
 
+from hfos.schemata.defaultform import editbuttons
+
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 BookSchema = {
@@ -121,10 +123,7 @@ BookForm = [
         'onClick': 'formAction("library", "augment", model.uuid)',
         'title': 'Augment Book from ISBN database'
     },
-    {
-        'type': 'submit',
-        'title': 'Save Book',
-    }
+    editbuttons
 ]
 
 Book = {'schema': BookSchema, 'form': BookForm}

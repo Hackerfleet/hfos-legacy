@@ -21,7 +21,8 @@ try:
     from isbntools.app import meta as isbnmeta
 except:
     isbnmeta = None
-    hfoslog("[LIB] No isbntools found, install requirements-optional.txt", lvl=warn)
+    hfoslog("No isbntools found, install requirements-optional.txt", 
+            lvl=warn, emitter="LIB")
 
 libraryfieldmapping = {
     'wcat': {
@@ -53,7 +54,7 @@ class Library(ConfigurableComponent):
         :param args:
         """
 
-        super(Library, self).__init__("Library", *args)
+        super(Library, self).__init__("LIB", *args)
         self.config.creator = "Hackerfleet"
 
         self.log("Started")
@@ -94,7 +95,9 @@ class Library(ConfigurableComponent):
             self.log("Error during library handling: ", type(e), e, lvl=critical, exc=True)
 
     def objectcreation(self, event):
-        self._augmentBook(event.schema, event.uuid, event.client)
+        if event.schema == 'book':
+            self.log("Augmenting book.")
+            self._augmentBook(event.schema, event.uuid, event.client)
 
     def _augmentBook(self, schema, uuid, client):
         """
@@ -107,14 +110,14 @@ class Library(ConfigurableComponent):
         try:
             if schema == 'book':
                 if not isbnmeta:
-                    self.log("[LIB] No isbntools found! Install it to get full functionality!", lvl=warn)
+                    self.log("No isbntools found! Install it to get full functionality!", lvl=warn)
                     return
 
                 newbook = objectmodels['book'].find_one({'uuid': uuid})
                 try:
                     if len(newbook.isbn) != 0:
 
-                        self.log('[LIB] Got a lookup candidate: ', newbook._fields)
+                        self.log('Got a lookup candidate: ', newbook._fields)
 
                         try:
                             meta = isbnmeta(newbook.isbn, service=self.config.isbnservice)
@@ -130,15 +133,15 @@ class Library(ConfigurableComponent):
 
                             newbook.update(meta)
                             newbook.save()
-                            self.log("[LIB] Book successfully augmented from ", self.config.isbnservice)
+                            self.log("Book successfully augmented from ", self.config.isbnservice)
                         except Exception as e:
-                            self.log("[LIB] Error during meta lookup: ", e, type(e), newbook.isbn, lvl=error, exc=True)
+                            self.log("Error during meta lookup: ", e, type(e), newbook.isbn, lvl=error, exc=True)
                             self.fireEvent(send(client.uuid, {'component': 'alert', 'action': 'error',
                                                               'data': 'Could not look up metadata, sorry:' + str(e)}))
                     else:
-                        self.log('[LIB] Saw something, but it is not to be looked up: ', newbook._fields)
+                        self.log('Saw something, but it is not to be looked up: ', newbook._fields)
                 except Exception as e:
-                    self.log("[LIB] Error during book update.")
+                    self.log("Error during book update.")
 
         except Exception as e:
-            self.log("[LIB] Book creation notification error: ", uuid, e, type(e), lvl=error, exc=True)
+            self.log("Book creation notification error: ", uuid, e, type(e), lvl=error, exc=True)

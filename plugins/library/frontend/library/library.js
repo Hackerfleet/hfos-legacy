@@ -20,10 +20,6 @@ class librarycomponent {
             self.op.getlist('book', {'isbn': self.searchISBN}, ['*']);
         };
 
-        this.rootscope.$on('OP.ListUpdate', function (ev, update) {
-            console.log('OH, HELLO!', ev, update);
-            self.state.go('app.list', {schema: 'book'});
-        });
 
         this.searchByMeta = function () {
             console.log('Searching for book by Metadata:', self.searchMeta);
