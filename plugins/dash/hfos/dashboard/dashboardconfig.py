@@ -12,30 +12,39 @@ Dashboard: Dashboard config to store deckster settings
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+from hfos.schemata.defaultform import *
 
-from hfos.navdata.sensordata import SensorValueTypes
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 DashboardSchema = {
     'id': '#dashboardconfig',
     'type': 'object',
     'name': 'dashboardconfig',
     'properties': {
-        'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                 'type': 'string',
-                 'title': 'Unique Dashboard ID'
-                 },
-        'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Dashboard name'},
+        'uuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Unique Dashboard ID'
+        },
+        'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
+                 'description': 'Dashboard name'},
         'locked': {'type': 'boolean', 'title': 'Locked Dashboard',
-                   'description': 'Determines whether the Dashboard should be locked against changes.'},
-        'refreshrate': {'title': 'Refreshrate', 'type': 'number', 'description': 'General refresh rate of dashboard'},
-        'shared': {'type': 'boolean', 'title': 'Shared Dashboard', 'description': 'Share Dashboard with the crew'},
-        'description': {'type': 'string', 'format': 'html', 'title': 'Dashboard description',
+                   'description': 'Determines whether the Dashboard should '
+                                  'be locked against changes.'},
+        'refreshrate': {'title': 'Refreshrate', 'type': 'number',
+                        'description': 'General refresh rate of dashboard'},
+        'shared': {'type': 'boolean', 'title': 'Shared Dashboard',
+                   'description': 'Share Dashboard with the crew'},
+        'description': {'type': 'string', 'format': 'html',
+                        'title': 'Dashboard description',
                         'description': 'Dashboard description'},
-        'useruuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                     'type': 'string',
-                     'title': 'Associated Unique User ID'
-                     },
+        'useruuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Associated Unique User ID'
+        },
         'cards': {
             'type': 'array',
             'default': [],
@@ -44,10 +53,14 @@ DashboardSchema = {
                 'id': '#Card',
                 'name': 'DashboardCard',
                 'properties': {
-                    'widgettype': {'type': 'string', 'enum': ['bearing',
-                                                              'gauge',
-                                                              'digitalreadout']},
-                    'valuetype': {'type': 'string', 'enum': sorted(SensorValueTypes)},
+                    'widgettype': {
+                        'type': 'string',
+                        'enum': [
+                            'simplebarreadout',
+                            'digitalreadout'
+                        ]
+                    },
+                    'valuetype': {'type': 'string'},
                     'title': {'type': 'string'},
                     'size': {
                         'type': 'object',
@@ -125,10 +138,7 @@ DashboardForm = [
         ]
     },
     'description',
-    {
-        'type': 'submit',
-        'title': 'Save Dashboard configuration',
-    }
+    editbuttons
 ]
 
 DashboardConfig = {'schema': DashboardSchema, 'form': DashboardForm}

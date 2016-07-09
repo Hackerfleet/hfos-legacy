@@ -1,0 +1,9 @@
+<div ng-controller="simplebarreadout as ctrl">
+    <span style="background: hotpink;" ng-style="{width: ctrl.scalevalue}">
+        <span class="digital center-block" ng-bind="ctrl.value">{{ctrl.value}}</span>
+    </span>
+    <span class="center-block small">
+        <span class="center-block">{{ctrl.valuetype}}</span>
+        <span class="center-block">{{ctrl.agehumanized}}</span>
+    </span>
+</div>

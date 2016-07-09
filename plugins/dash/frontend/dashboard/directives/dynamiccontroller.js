@@ -2,7 +2,7 @@
  * Created by riot on 14.05.16.
  */
 
-const widgettypes = ['digitalreadout'];
+const widgettypes = ['digitalreadout', 'simplebarreadout'];
 
 const widgettemplates = {};
 
@@ -10,33 +10,55 @@ for (var item of widgettypes) {
     widgettemplates[item] = require('../templates/' + item + '.tpl.html');
 }
 
-console.log(widgettemplates);
+console.log('[NGDC] Dynamic widgets:', widgettemplates);
 
-class ngDynamicController {
-    constructor($compile, $http) {
-        this.scope = {
-            widgettype: '=ngDynamicController',
-            valuetype: '='
-        };
-        this.restrict = 'A';
-        this.transclude = true;
-//            terminal: true,
-//            priority: 100000,
-        this.link = function (scope, elem, attrs) {
-            console.log('[NGDC] SCOPE:', scope, attrs);
-            elem.attr('ng-controller', scope.widgettype);
+var ngDynamicController = function ($compile, $http, $parse) {
+    console.log('[NGDC] Init.');
+    return {
+        restrict: 'A',
+        transclude: true,
+        terminal: true,
+        priority: 100000,
+        link: function (scope, elem, attrs) {
+            console.log('[NGDC] SCOPE:', scope, attrs, elem);
+            var ctrl = $parse(elem.attr('ng-dynamic-controller'))(scope);
+            var valuetype = $parse(elem.attr('valuetype'))(scope);
+            scope.valuetype = valuetype;
+            console.log('[NGDC] Link creating to:', ctrl, valuetype);
             elem.removeAttr('ng-dynamic-controller');
+            //elem.attr('ng-controller', ctrl);
+            console.log('[NGDC] Appending template:', widgettemplates[ctrl]);
+            elem.append(widgettemplates[ctrl]);
+            $compile(elem)(scope);
+            console.log('[NGDC] Done');
+        }
+    };
+    /*
+    console.log('[NGDC] Init.');
+    return {
+        scope: {
+            name: '=ngDynamicController',
+            valuetype: '='
+        },
+        restrict: 'A',
+        transclude: true,
+        terminal: true,
+        priority: 100000,
+        link: function (scope, elem, attrs) {
+            console.log('[NGDC] SCOPE:', scope, scope.name, attrs);
+            //var name = $parse(elem.attr('ng-dynamic-controller'))(scope);
+            console.log('[NGDC] Link creating to:', scope.name);
+            elem.removeAttr('ng-dynamic-controller');
+            elem.attr('ng-controller', scope.name);
+            console.log('[NGDC] Appending template:', widgettemplates[scope.name]);
+            elem.append(widgettemplates[scope.name]);
+            $compile(elem)(scope);
+            console.log('[NGDC] Done');
+        }
+    };
+    */
+};
 
-            $http.get('/views/cards/' + scope.widgettype + '.tpl.html')
-                .then(function (response) {
-                    console.log('[NGDC] Html Response:', response.data);
-                    elem.append(response.data);
-                    $compile(elem)(scope);
-                });
-        };
-    }
-}
-
-ngDynamicController.$inject = ['$compile', '$http'];
+ngDynamicController.$inject = ['$compile', '$http', '$parse'];
 
 export default ngDynamicController;

@@ -1,8 +1,8 @@
 <div class="jumbotron" style="padding-top: 5px">
     <ul class="nav nav-pills" role="tablist">
         <li class="active"><a role="tab" ng-click="$ctrl.opentab('dashboard')" data-toggle="tab">Dashboard</a></li>
-        <li><a role="tab" ng-click="$ctrl.opentab('referenceframe')" data-toggle="tab">Reference Frame</a></li>
-        <li><a role="tab" ng-click="$ctrl.configureCards()">Configure Dashboard</a></li>
+        <li><a role="tab" ng-click="$ctrl.opentab('sensed')" data-toggle="tab">Received Sensordata</a></li>
+        <li class="hidden"><a role="tab" ng-click="$ctrl.configureCards()">Configure Dashboard</a></li>
         <li><a role="tab" href="#/editor/dashboardconfig/{{$ctrl.dashboarduuid}}/edit">Edit Dashboard</a></li>
     </ul>
 
@@ -14,13 +14,13 @@
                     <li gridster-item="widget" ng-repeat="widget in $ctrl.dashboard.cards">
                         <div class="box">
                             <div class="box-header">
-                                <h3>{{ widget.title }}{{widget.widgettype}}</h3>
+                                <h3>{{ widget.title }} - {{widget.widgettype}}</h3>
 
                                 <div class="hidden box-header-btns pull-right">
                                     <a title="settings" ng-click="$ctrl.openSettings(widget)"><i
-                                            class="glyphicon glyphicon-cog"></i></a>
+                                        class="glyphicon glyphicon-cog"></i></a>
                                     <a title="Remove widget" ng-click="$ctrl.remove(widget)"><i
-                                            class="glyphicon glyphicon-trash"></i></a>
+                                        class="glyphicon glyphicon-trash"></i></a>
                                 </div>
                             </div>
                             <div class="box-content" ng-dynamic-controller="widget.widgettype"
@@ -31,26 +31,34 @@
                 </ul>
             </div>
         </div>
-        <!--
-                <div class="tab-pane" id="referenceframe">
-                    <div class="well" id="refFrame">
-                        <table class="table table-striped">
-                            <tr>
-                                <th>Sensor type</th>
-                                <th>Current value</th>
-                                <th>Last event</th>
-                                <th>Dashboard?</th>
-                            </tr>
-                            <tr ng-repeat="(key, item) in $ctrl.referenceframe | orderBy:'-key':true">
-                                <td>{{key}}</td>
-                                <td>{{item.value}}</td>
-                                <td>{{item.age}}</td>
-                                <td><input bs-switch ng-model="item.observed" ng-change="$ctrl.toggleDashboardItem(key)"
-                                           type="checkbox" switch-size="small"></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-                -->
+
+        <div class="tab-pane" id="sensed">
+            <div class="well" id="sensedFrame">
+                <h1>Recently sensed data</h1>
+                <table class="table table-striped">
+                    <tr>
+                        <th>#</th>
+                        <th>Identifier</th>
+                        <th>Sentence name</th>
+                        <th>Value title</th>
+                        <th>Last value</th>
+                        <th>Last sensed</th>
+                        <th>Record?</th>
+                        <th>Dashboard?</th>
+                    </tr>
+                    <tr ng-repeat="(key, item) in $ctrl.sensed | orderBy: 'sentence'">
+                        <td>{{key}}</td>
+                        <td>{{item.name}}</td>
+                        <td>{{item.sentence}}</td>
+                        <td>{{item.title}}</td>
+                        <td>{{item.lastvalue}}</td>
+                        <td>{{$ctrl.humanize($ctrl.now - item.timestamp, {round:true})}}</td>
+                        <td><input bs-switch ng-model="item.record" type="checkbox" switch-size="small"></td>
+                        <td><input bs-switch ng-model="item.observed" ng-change="$ctrl.toggleDashboardItem(key)"
+                                   type="checkbox" switch-size="small"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
     </div>
 </div>

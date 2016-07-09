@@ -20,12 +20,7 @@ from hfos.events import updatesubscriptions, send
 
 class Dashboard(ConfigurableComponent):
     """
-    The Dashboard component checks on the existing dashboard watering rules and
-    triggers pump start/stop events accordingly. It also accepts interrupt
-    notifications from authorized users to start/stop/suspend the watering
-    plan.
-    In future, it should also monitor weather and sensor data to water
-    efficiently.
+    The Dashboard component monitors dashboard changes. It does not do much.
     """
     channel = "hfosweb"
 
@@ -39,7 +34,7 @@ class Dashboard(ConfigurableComponent):
         :param args:
         """
 
-        super(Dashboard, self).__init__("Dashboard", *args)
+        super(Dashboard, self).__init__("DASH", *args)
 
         self.log("Started")
 
@@ -47,4 +42,6 @@ class Dashboard(ConfigurableComponent):
         self.log("Someone interacts with the dashboard! Yay!", lvl=warn)
 
     def objectcreation(self, event):
-        self.log("Foo, bar: ", event)
+        if event.schema == 'dashboardconfig':
+            self.log("Dashboarconfig was modified: ", event)
+

@@ -13,12 +13,18 @@ import configtemplate from './config.tpl.html';
  */
 class Dashboard {
 
-    constructor(rootscope, $modal, navdata, user, objectproxy) {
-        this.rootscope = rootscope;
+    constructor(scope, $modal, navdata, user, objectproxy, socket, menu) {
+        this.scope = scope;
         this.$modal = $modal;
         this.navdata = navdata;
         this.user = user;
-        this.objectproxy = objectproxy;
+        this.op = objectproxy;
+        this.socket = socket;
+        this.menu = menu;
+
+        this.humanize = humanizeDuration;
+
+        this.now = new Date() / 1000;
 
         this.deckOptions = {
             id: 'Dashboard',
@@ -32,7 +38,10 @@ class Dashboard {
         this.dashboarduuid = user.clientconfig.dashboarduuid;
         this.dashboard = {};
 
-        this.referenceframe = {};
+        this.sensed = {};
+
+        this.referencedata = {};
+        this.referenceages = {};
         this.observed = [];
 
         this.configmodal = this.$modal({
@@ -46,69 +55,130 @@ class Dashboard {
         });
 
 
-        this.objectproxy.getObject('dashboardconfig', this.dashboarduuid);
+        this.op.getObject('dashboardconfig', this.dashboarduuid);
 
         var self = this;
 
-        this.rootscope.$on('hfos.NavdataUpdate', function () {
-            var framedata = navdata.frame();
-            var frameages = navdata.ages();
-            var now = new Date().getTime();
+        /*
+        this.handleNavdata = function (msg) {
             console.log('Updating Dashboard');
-            var data;
+            self.referencedata[msg.data.type] = msg.data.value;
+            self.referenceages[msg.data.type] = msg.data.timestamp;
+        };
 
-            for (var property of framedata) {
-                data = {
-                    value: framedata[property],
-                    birth: frameages[property],
-                    age: humanizeDuration(((now / 1000) - frameages[property]) * 1000, {round: true}),
-                    observed: self.observed.indexOf(property) >= 0
-                };
-                self.referenceframe[property] = data;
+        self.socket.listen('navdata', this.handleNavdata);
+        */
+
+        this.handleNavdata = function (msg) {
+            if (msg.action === 'list') {
+                console.log('Got a navdata list:', msg.data);
+                if ('sensed' in msg.data) {
+                    console.log('Updating sensed list.');
+                    self.now = new Date() / 1000;
+                    self.sensed = msg.data.sensed;
+                }
             }
+        };
 
+        self.socket.listen('navdata', this.handleNavdata);
 
-        });
+        this.switchDashboard = function (uuid) {
+            self.dashboarduuid = uuid;
+            self.op.getObject('dashboardconfig', uuid);
+        };
 
-        rootscope.$on('OP.Get', function (ev, uuid) {
+        this.scope.$on('OP.Get', function (ev, uuid) {
             if (uuid === self.dashboarduuid) {
                 console.log('[DASH] Received dashboard configuration');
                 self.resetDashboard();
             }
         });
 
-        rootscope.$on('Clientconfig.Update', function () {
-            console.log('[DASH] New dashboard configured, adapting');
-            self.dashboarduuid = user.clientconfig.dashboarduuid;
-            self.objectproxy.getObject('dashboardconfig', self.dashboarduuid);
+        this.scope.$on('Clientconfig.Update', function () {
+            self.getDashboard();
         });
 
+        if (typeof user.clientconfig.dashboarduuid !== 'undefined')  {
+            this.getDashboard();
+        }
+
+        this.scope.$on('OP.ListUpdate', function (event, schema) {
+            if (schema === 'dashboardconfig') {
+                var dashboardlist = self.op.lists.dashboardconfig;
+                var dashboardmenu = [];
+                for (var dashboard of dashboardlist) {
+                    dashboardmenu.push({
+                        type: 'func',
+                        name: dashboard.uuid,
+                        text: dashboard.name,
+                        callback: self.switchDashboard,
+                        args: dashboard.uuid
+                    });
+                }
+                self.menu.addMenu('Dashboards', dashboardmenu);
+            }
+        });
+
+        this.requestDashboards = function() {
+            self.op.getList('dashboardconfig');
+        };
+
+        this.scope.$on('User.Login', function () {
+            console.log('Login successful - fetching dashboard data');
+            self.requestDashboards();
+        });
+
+        if (this.user.signedin === true) {
+            console.log('Logged in - fetching dashboard data');
+            this.requestDashboards();
+        }
     }
 
     updateObserved() {
         console.log('[DASH] Updating observed values from ', this.dashboard.cards);
         this.observed = [];
         for (var card of this.dashboard.cards) {
-            console.log('[DASH]', this.dashboard.cards[card]);
-            this.observed.push(this.dashboard.cards[card].valuetype);
+            console.log('[DASH]', card);
+            this.observed.push(card.valuetype);
         }
         console.log(this.observed);
+        var request = {
+            component: 'navdata',
+            action: 'subscribe',
+            data: this.observed
+        };
+        this.socket.send(request);
     }
 
     resetDashboard() {
         console.log('[DASH] Resetting dashboard to ', this.dashboarduuid);
-        this.dashboard = this.objectproxy.objects[this.dashboarduuid];
+        this.dashboard = this.op.objects[this.dashboarduuid];
         console.log(this.dashboard);
         //console.log(decksterConfig);
         this.updateObserved();
     }
 
+    getDashboard() {
+        console.log('[DASH] Getting newly configured dashboard');
+        this.dashboarduuid = this.user.clientconfig.dashboarduuid;
+        this.op.getObject('dashboardconfig', this.dashboarduuid);
+    }
+
     opentab(tabname) {
         console.log('[DASH] Switching tab to ', tabname);
+        if (tabname === 'sensed') {
+            var req = {
+                component: 'navdata',
+                action: 'list',
+                data: 'sensed'
+            };
+
+            console.log('Requesting sensed list.');
+            this.socket.send(req);
+        }
         $('.nav-pills .active, .tab-content .active').removeClass('active');
         $('#' + tabname).addClass('active');
     }
-
 
     toggleDashboardItem(key) {
         var card;
@@ -129,7 +199,7 @@ class Dashboard {
             this.dashboard.cards.push(card);
         }
         console.log('[DASH] Putting new dashboard: ', this.dashboard);
-        this.objectproxy.putObject('dashboardconfig', this.dashboard);
+        this.op.putObject('dashboardconfig', this.dashboard);
         this.updateObserved();
     }
 
@@ -145,65 +215,6 @@ class Dashboard {
     }
 }
 
-Dashboard.$inject = ['$rootScope', '$modal', 'navdata', 'user', 'objectproxy'];
+Dashboard.$inject = ['$scope', '$modal', 'navdata', 'user', 'objectproxy', 'socket', 'menu'];
 
 export default Dashboard;
-
-/*directive('ngDynamicController', ['$compile', '$http', function ($compile, $http) {
- return {
- scope: {
- widgettype: '=ngDynamicController',
- valuetype: '='
- },
- restrict: 'A',
- transclude: true,
- //            terminal: true,
- //            priority: 100000,
- link: function (scope, elem, attrs) {
- console.log('[NGDC] SCOPE:', scope, attrs);
- elem.attr('ng-controller', scope.widgettype);
- elem.removeAttr('ng-dynamic-controller');
-
- $http.get('/views/cards/' + scope.widgettype + '.html')
- .then(function (response) {
- console.log('[NGDC] Html Response:', response.data);
- elem.append(response.data);
- $compile(elem)(scope);
- });
- /*var build = function (html) {
- element.empty().append($compile(html)(scope));
- };
- scope.$watch('widget.template', function (newValue, oldValue){
- if (newValue) {
- build(newValue);
- }
- });
-
- /*
- var build = function (html) {
- //    $http.get('/views/cards/' + html + '.html')
- .then(function(response){
- //var linkFn = $compile(response.data)(scope);
- //elem.html(linkFn(scope));
- console.log(elem);
- elem.attr('ng-controller', scope.widgettype);
- console.log(elem);
- elem.removeAttr('ng-dynamic-controller');
- console.log(elem);
- elem.append($compile(response.data)(scope));
- console.log(elem);
- });
- //elem.empty().append($compile(html)(scope));
- };
- scope.$watch('widgettype', function (newValue, oldValue) {
- console.log('[NGDC] Adding html for widgettype: ', scope.widgettype);
- if (newValue) {
- build(newValue);
- }
- });*//*
-
- // $compile(elem)(scope);
- }
- };
- }]);*/
-

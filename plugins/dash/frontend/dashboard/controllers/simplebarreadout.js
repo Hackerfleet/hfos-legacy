@@ -2,7 +2,7 @@
 
 var humanizeDuration = require('humanize-duration');
 
-class DigitalReadout {
+class SimpleBarReadout {
     constructor($scope, socket, interval) {
         this.scope = $scope;
         this.socket = socket;
@@ -11,8 +11,9 @@ class DigitalReadout {
         this.valuetype = this.scope.$parent.valuetype;
         this.value = 0;
         this.age = 0;
+        this.max = 1;
 
-        console.log('[DASH-DR] Digitalreadout loaded, observing:', this.valuetype);
+        console.log('[DASH-SBR] SimpleBarReadout loaded, observing:', this.valuetype);
 
         var self = this;
 
@@ -26,14 +27,17 @@ class DigitalReadout {
         };
 
         this.handleNavdata = function (msg) {
-            //console.log('[DASH-DR] NAVDATA: ', msg, self.valuetype);
+            console.log('[DASH-SBR] NAVDATA: ', msg, self.valuetype);
             if (msg.data.type === self.valuetype) {
                 var data = msg.data;
 
-                //console.log('[DASH-DR] Updating Digitalreadout: ', data, data.value, data.type);
                 self.value = data.value;
+                self.max = Math.max(self.value, self.max);
+                self.scalevalue = String((data.value / self.max) * 100) + "%";
                 self.age = data.timestamp;
                 self.updateAge();
+
+                console.log('[DASH-SBR] Updating SimpleBarReadout: ', data, data.value, data.type, self.scalevalue);
                 self.scope.$apply();
             }
         };
@@ -44,6 +48,6 @@ class DigitalReadout {
     }
 }
 
-DigitalReadout.$inject = ['$scope', 'socket', '$interval'];
+SimpleBarReadout.$inject = ['$scope', 'socket', '$interval'];
 
-export default DigitalReadout;
+export default SimpleBarReadout;

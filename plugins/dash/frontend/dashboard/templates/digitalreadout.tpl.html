@@ -1,2 +1,8 @@
-<span class="digital center-block" ng-bind="value">{{value}}</span>
-<span style="background: hotpink;">Hallo Welt!</span>
+<div ng-controller="digitalreadout as ctrl">
+    <span class="digital center-block" ng-bind="ctrl.value">{{ctrl.value}}</span>
+
+    <span class="center-block small">
+        <span class="center-block">{{ctrl.valuetype}}</span>
+        <span class="center-block">{{ctrl.agehumanized}}</span>
+    </span>
+</div>
