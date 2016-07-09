@@ -1,4 +1,5 @@
 angular-leaflet-directive@~0.10.0
+leaflet@~0.7.7
 leaflet-minimap@~3.3.1
 leaflet-fullscreen@~1.0.1
 leaflet-toolbar@~0.1.2
@@ -13,3 +14,5 @@ leaflet-schematic@~0.1.3
 gridsby-leaflet-label@~0.2.1-1
 leaflet.coordinates@~0.1.5
 leaflet.timeline@~1.0.0-beta
+leaflet-mouse-position@~1.0.1
+leaflet.zoomslider@~0.7.0

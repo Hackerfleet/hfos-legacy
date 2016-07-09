@@ -20,6 +20,8 @@ Provisions
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+from hfos.schemata.defaultform import defaultform
+
 LayerSchema = {
     'type': 'object',
     'id': '#layer',
@@ -105,4 +107,4 @@ LayerSchema = {
     }
 }
 
-Layer = {'schema': LayerSchema, 'form': {}}
+Layer = {'schema': LayerSchema, 'form': defaultform}

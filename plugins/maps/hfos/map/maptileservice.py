@@ -65,7 +65,6 @@ def get_tile(url):
 class UrlError(Exception):
     pass
 
-
 class MaptileService(Controller):
     """
     Threaded, disk-caching tile delivery component
@@ -98,7 +97,8 @@ class MaptileService(Controller):
             url = unquote(url)
 
             if '..' in url:  # Does this need more safety checks?
-                hfoslog("[MTS] Fishy url with parent path: ", url, lvl=error)
+                hfoslog("Fishy url with parent path: ", url, lvl=error, 
+                        emitter="MTS")
                 raise UrlError
 
             spliturl = url.split("/")
@@ -111,7 +111,7 @@ class MaptileService(Controller):
             filename = os.path.join(self.tilepath, service, x, y) + "/" + z + ".png"
             realurl = "http://" + service + "/" + x + "/" + y + "/" + z + ".png"
         except Exception as e:
-            hfoslog("[MTS] ERROR (%s) in URL: %s" % (e, url))
+            hfoslog("ERROR (%s) in URL: %s" % (e, url), emitter="MTS")
             raise UrlError
 
         return filename, realurl
@@ -126,7 +126,7 @@ class MaptileService(Controller):
 
         # Do we have the tile already?
         if os.path.isfile(filename):
-            hfoslog("[MTS] Tile exists in cache")
+            hfoslog("Tile exists in cache", emitter="MTS")
             # Don't set cookies for static content
             response.cookie.clear()
             try:
@@ -135,15 +135,15 @@ class MaptileService(Controller):
                 event.stop()
         else:
             # We will have to get it first.
-            hfoslog("[MTS] Tile not cached yet. Tile data: ", filename, url)
+            hfoslog("Tile not cached yet. Tile data: ", filename, url, emitter="MTS")
             if url in self._tilelist:
-                hfoslog("[MTS] Getting a tile for the second time?!", lvl=error)
+                hfoslog("Getting a tile for the second time?!", lvl=error, emitter="MTS")
             else:
                 self._tilelist += url
             try:
                 tile, log = yield self.call(task(get_tile, url), "tcworkers")
                 if log:
-                    hfoslog("[MTS] Thread error: ", log)
+                    hfoslog("Thread error: ", log, emitter="MTS")
             except Exception as e:
                 hfoslog("[MTS]", e, type(e))
                 tile = None
@@ -155,31 +155,31 @@ class MaptileService(Controller):
                     os.makedirs(tilepath)
                 except OSError as e:
                     if e.errno != errno.EEXIST:
-                        hfoslog("[MTS] Couldn't create path: %s (%s)" % (e, type(e)), exc=True)
+                        hfoslog("Couldn't create path: %s (%s)" % (e, type(e)), exc=True, emitter="MTS")
 
-                hfoslog("[MTS] Caching tile.", lvl=verbose)
+                hfoslog("Caching tile.", lvl=verbose, emitter="MTS")
                 try:
                     with open(filename, "wb") as tilefile:
                         try:
                             tilefile.write(bytes(tile))
                         except Exception as e:
-                            hfoslog("[MTS] Writing error: %s" % str([type(e), e]))
+                            hfoslog("Writing error: %s" % str([type(e), e]), emitter="MTS")
 
                 except Exception as e:
-                    hfoslog("[MTS] Open error: %s" % str([type(e), e]))
+                    hfoslog("Open error: %s" % str([type(e), e]), emitter="MTS")
                     return
                 finally:
                     event.stop()
 
                 try:
-                    hfoslog("[MTS] Delivering tile.", lvl=verbose)
+                    hfoslog("Delivering tile.", lvl=verbose, emitter="MTS")
                     yield serve_file(request, response, filename)
                 except Exception as e:
-                    hfoslog("[MTS] Couldn't deliver tile: ", e, lvl=error)
+                    hfoslog("Couldn't deliver tile: ", e, lvl=error, emitter="MTS")
                     event.stop()
-                hfoslog("[MTS] Tile stored and delivered.", lvl=verbose)
+                hfoslog("Tile stored and delivered.", lvl=verbose, emitter="MTS")
             else:
-                hfoslog("[MTS] Got no tile, serving defaulttile: %s" % url)
+                hfoslog("Got no tile, serving defaulttile: %s" % url, emitter="MTS")
                 if self.defaulttile:
                     try:
                         yield serve_file(request, response, self.defaulttile)

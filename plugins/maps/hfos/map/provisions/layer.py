@@ -16,7 +16,7 @@ Predefined open layers.
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from hfos.provisions.base import provisionList
-from hfos.database import layerobject
+from hfos.database import objectmodels
 from hfos.logger import hfoslog
 
 layers = [
@@ -26,7 +26,7 @@ layers = [
         "shared": True,
         "description": "Open Street Map",
         "baselayer": True,
-        "url": "http://localhost:8055/tilecache/a.tile.osm.org/{z}/{x}/{y}.png",
+        "url": "http://hfoshost/tilecache/a.tile.osm.org/{z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": False,
             "attribution": "&copy; <a href=\"http://osm.org/copyright\">OpenStreetMap</a> contributors"
@@ -38,12 +38,14 @@ layers = [
         "uuid": "958b1006-2688-44b0-99be-a67728228e08",
         "shared": True,
         "description": "Open Topography Map",
-        "url": 'http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+        "url": 'http://hfoshost/tilecache/{s}.tile.opentopomap.org/{z}/{x}/{'
+               'y}.png',
         "layerOptions": {
             "maxZoom": 16,
             "attribution": '<a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy;\
 <a href="https://opentopomap.org">OpenTopoMap</a>'
-        }
+        },
+        "type": "xyz"
     },
     {
         "name": "ESRI-Sat-Shaded",
@@ -51,11 +53,13 @@ layers = [
         "shared": True,
         "description": "Shaded Satellite relief image data from ESRI",
         "baselayer": True,
-        "url": 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
+        "url": 'http://hfoshost/tilecache/server.arcgisonline.com/ArcGIS/rest'
+               '/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
         "layerOptions": {
             "attribution": 'Tiles &copy; Esri &mdash; Source: Esri',
             "maxZoom": 13
-        }
+        },
+        "type": "xyz"
     },
     {
         "name": "OpenCycleMap",
@@ -63,10 +67,22 @@ layers = [
         "shared": True,
         "baselayer": True,
         "description": "Open Cycle Map",
-        "url": "http://localhost:8055/tilecache/a.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png",
+        "url": "http://hfoshost/tilecache/a.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": True,
             "attribution": "&copy; <a href=\"http://www.opencyclemap.org/copyright\">OpenCycleMap</a> contributors"
+        },
+        "type": "xyz"
+    },
+    {
+        "name": "OpenSeaMapBase",
+        "uuid": "ab3f1d76-cb26-4ddf-9811-05527e0d3640",
+        "shared": True,
+        "description": "Open Sea Map Baselayer",
+        "baselayer": True,
+        "url": "http://hfoshost/tilecache/tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
+        "layerOptions": {
+            "attribution": "&copy; OpenSeaMap contributors"
         },
         "type": "xyz"
     },
@@ -75,11 +91,9 @@ layers = [
         "uuid": "2bedb0d2-be9f-479c-9516-256cd5a0baae",
         "shared": True,
         "description": "Open Sea Map",
-        "baselayer": True,
-        "url": "http://localhost:8055/tilecache/tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
+        "baselayer": False,
+        "url": "http://hfoshost/tilecache/tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
         "layerOptions": {
-            "tms": True,
-            "continuousWorld": True,
             "attribution": "&copy; OpenSeaMap contributors"
         },
         "type": "xyz"
@@ -91,7 +105,7 @@ layers = [
         "description": "Hillshade layer for Europe from GIScience",
         "baselayer": False,
         "visible": False,
-        "url": "http://localhost:8055/tilecache/129.206.228.72/cached/hillshade",
+        "url": "http://hfoshost/tilecache/129.206.228.72/cached/hillshade",
         "layerOptions": {
             "crs": {
                 "code": "EPSG:900913",
@@ -128,7 +142,7 @@ layers = [
         "description": "Shaded Satellite relief image data from ESRI as Overlay",
         "baselayer": False,
         "visible": False,
-        "url": "http://localhost:8055/tilecache/server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/\
+        "url": "http://hfoshost/tilecache/server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/\
 tile/{z}/{y}/{x}",
         "layerOptions": {
             "continuousWorld": True,
@@ -145,7 +159,7 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
         "description": "Open Fire Map containing data about local fire safety",
         "baselayer": False,
         "visible": False,
-        "url": "http://localhost:8055/tilecache/openfiremap.org/hytiles/{z}/{x}/{y}.png",
+        "url": "http://hfoshost/tilecache/openfiremap.org/hytiles/{z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": True,
             "attribution": "&copy; <a href=\"http://www.openfiremap.org\">OpenFireMap</a> contributors"
@@ -158,7 +172,7 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
         "shared": True,
         "description": "Open Weather Map showing clouds",
         "baselayer": False,
-        "url": "http://localhost:8055/tilecache/a.tile.openweathermap.org/map/clouds/{z}/{x}/{y}.png",
+        "url": "http://hfoshost/tilecache/a.tile.openweathermap.org/map/clouds/{z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": True,
             "attribution": "&copy; OpenWeatherMap"
@@ -168,8 +182,8 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
 ]
 
 def provision():
-    provisionList(layers, layerobject, overwrite=True, clear=True)
-    hfoslog('[PROV] Provisioning: Layers: Done.')
+    provisionList(layers, objectmodels['layer'], overwrite=True, clear=True)
+    hfoslog('Provisioning: Layers: Done.', emitter='PROVISIONS')
 
 if __name__ == "__main__":
     provision()

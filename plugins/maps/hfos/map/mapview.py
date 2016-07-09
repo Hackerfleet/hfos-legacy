@@ -12,6 +12,7 @@ MapView: User generated Mapviews
 :license: GPLv3 (See LICENSE)
 
 """
+from hfos.schemata.defaultform import defaultform
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -19,7 +20,8 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 # 'type': "object",
 # 'name': 'Profile',
 #     'properties': {
-#         'name': {'type': "string", 'minLength': 2, 'title': "Name", 'description': "Name or alias"},
+#         'name': {'type': "string", 'minLength': 2, 'title': "Name",
+# 'description': "Name or alias"},
 #         'title': {
 #             'type': "string",
 #             'enum': ['dr','jr','sir','mrs','mr','NaN','dj']
@@ -32,26 +34,35 @@ MapViewSchema = {
     'id': '#mapview',
     'name': 'mapview',
     'properties': {
-        'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                 'type': 'string',
-                 'title': 'Unique Mapview ID'
-                 },
-        'useruuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                     'type': 'string',
-                     'title': "Owner's unique user ID"
-                     },
-        'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'Name of view'},
+        'uuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Unique Mapview ID'
+            },
+        'useruuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': "Owner's unique user ID"
+            },
+        'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
+                 'description': 'Name of view'},
         'color': {'type': 'string', 'title': 'View Color', 'format': 'color',
                   'description': 'This views color indicator'},
-        'shared': {'type': 'boolean', 'title': 'Shared', 'description': 'Share mapview with the crew'},
-        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes', 'description': 'Custom user notes'},
-        'layergroups': {'type': 'array',
-                        'items': {
-                            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                            'type': 'string',
-                            'title': 'Unique Layergroup ID'
-                        }
-                        },
+        'shared': {'type': 'boolean', 'title': 'Shared',
+                   'description': 'Share mapview with the crew'},
+        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
+                  'description': 'Custom user notes'},
+        'layergroups': {
+            'type': 'array',
+            'items': {
+                'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                           'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                'type': 'string',
+                'title': 'Unique Layergroup ID'
+            }
+        },
         'coords': {
             "lat": {
                 "id": "lat",
@@ -63,8 +74,8 @@ MapViewSchema = {
                 "name": "lat",
                 "default": 54.17805
             },
-            "lon": {
-                "id": "lon",
+            "lng": {
+                "id": "lng",
                 "type": "number",
                 "maximum": -180,
                 "minimum": 180,
@@ -100,4 +111,4 @@ MapViewSchema = {
     ]
 }
 
-MapView = {'schema': MapViewSchema, 'form': {}}
+MapView = {'schema': MapViewSchema, 'form': defaultform}

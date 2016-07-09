@@ -6,24 +6,39 @@ import leafletterminator from 'leaflet-terminator/leaflet-terminator.js';
 import leafletcoordinates from 'leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js';
 import leafletrotatedmarker from 'leaflet-rotatedmarker';
 import leafleteasybutton from 'leaflet-easybutton';
+import zoomslider from 'leaflet.zoomslider';
+//import leafletgrid from 'L.Grid';
+
+import 'leaflet-easybutton/src/easy-button.css';
+import 'leaflet.zoomslider/src/L.Control.Zoomslider.css';
 
 class mapcomponent {
-
-    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user) {
+    
+    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert) {
         this.scope = scope;
         this.leaflet = leafletData;
         this.op = objectproxy;
         this.state = $state;
         this.rootscope = $rootScope;
         this.user = user;
+        this.schemata = schemata;
+        this.menu = menu;
+        this.alert = alert;
 
-        var host = socket.host;
+        this.drawnLayer = '';
+        this.map = '';
+        this.host = socket.host;
+
+        this.follow = false;
+        this.followlayers = false;
+
+        this.mapviewuuid = null;
 
         this.deviceinfo = {}; // TODO: Fix this one. Needs angular device detector service
 
         this.center = {
             lat: 0,
-            lon: 0,
+            lng: 0,
             zoom: 3,
             autoDiscover: true
         };
@@ -31,7 +46,7 @@ class mapcomponent {
         this.vessel = {
             coords: {
                 lat: 54.17825,
-                lon: 7.88888
+                lng: 7.88888
             },
             course: 0,
             speed: 0,
@@ -51,33 +66,12 @@ class mapcomponent {
                     name: 'OpenStreetMap',
                     type: 'xyz',
                     // url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-                    url: 'http://' + host + '/tilecache/a.tile.osm.org/{z}/{x}/{y}.png',
+                    url: 'http://' + this.host + '/tilecache/a.tile.osm.org/{z}/{x}/{y}.png',
                     layerOptions: {
                         //subdomains: ['a', 'b', 'c'],
                         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
                         continuousWorld: false,
                         minZoom: 3
-                    }
-                },
-                openseamap: {
-                    name: 'OpenSeaMap',
-                    type: 'xyz',
-                    // http://c.tile.openstreetmap.org/{z}/{x}/{y}.png
-                    url: 'http://' + host + '/tilecache/tiles.openseamap.org/seamark/{z}/{x}/{y}.png',
-                    layerOptions: {
-                        attribution: '&copy; OpenSeaMap contributors',
-                        minZoom: 10,
-                        maxZoom: 15
-                    }
-                },
-                cycle: {
-                    name: 'OpenCycleMap',
-                    type: 'xyz',
-                    url: 'http://' + host + '/tilecache/a.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
-                    layerOptions: {
-                        //subdomains: ['a', 'b', 'c'],
-                        attribution: '&copy; <a href="http://www.opencyclemap.org/copyright">OpenCycleMap</a> contributors - &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                        continuousWorld: true
                     }
                 }
             },
@@ -89,145 +83,362 @@ class mapcomponent {
                     layerParams: {
                         showOnSelector: false
                     }
-                },
-                openseamap: {
-                    name: 'OpenSeaMap',
-                    type: 'xyz',
-                    // http://c.tile.openstreetmap.org/{z}/{x}/{y}.png
-                    url: 'http://' + host + '/tilecache/t1.openseamap.org/seamark/{z}/{x}/{y}.png',
-                    layerOptions: {
-                        minZoom: 10,
-                        maxZoom: 14,
-                        attribution: '&copy; OpenSeaMap contributors'
-                    }
-                },
-                openweathermap: {
-                    name: 'OpenWeatherMap Clouds',
-                    type: 'xyz',
-                    url: 'http://' + host + '/tilecache/a.tile.openweathermap.org/map/clouds/{z}/{x}/{y}.png',
-                    layerOptions: {
-                        attribution: '&copy; OpenWeatherMap',
-                        continuousWorld: true
-                    }
-                },
-
-                hillshade: {
-                    name: 'Hillshade Europa',
-                    type: 'wms',
-                    url: 'http://' + host + '/tilecache/129.206.228.72/cached/hillshade',
-                    visible: false,
-                    layerOptions: {
-                        layers: 'europe_wms:hs_srtm_europa',
-                        format: 'image/png',
-                        opacity: 0.25,
-                        attribution: 'Hillshade layer by GIScience http://www.osm-wms.de',
-                        crs: L.CRS.EPSG900913
-                    }
-                },
-                fire: {
-                    name: 'OpenFireMap',
-                    type: 'xyz',
-                    url: 'http://' + host + '/tilecache/openfiremap.org/hytiles/{z}/{x}/{y}.png',
-                    visible: false,
-                    layerOptions: {
-                        attribution: '&copy; <a href="http://www.openfiremap.org">OpenFireMap</a> contributors - &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                        continuousWorld: true
-                    }
-                },
-                esriimagery: {
-                    name: 'Satellite ESRI World Imagery',
-                    type: 'xyz',
-                    url: 'http://' + host + '/tilecache/server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                    visible: false,
-                    layerOptions: {
-                        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-                        continuousWorld: true,
-                        opacity: 0.25
-                    }
                 }
             }
         };
 
         this.events = {
             map: {
-                enable: ['moveend', 'dblclick'],
+                enable: ['moveend', 'dblclick', 'mousemove'],
                 logic: 'emit'
             }
         };
 
         var self = this;
 
+        this.scope.$on('OP.Get', function (event, objuuid, obj, schema) {
+            console.log('[MAP] Object:', obj);
+            if (objuuid === self.mapviewuuid) {
+                self.updateMapview(objuuid);
+                self.clearLayers();
+            } else if (schema === 'geoobject') {
+                console.log('I think this is relevant: ', obj);
+            } else if (schema === 'layergroup') {
+                console.log('Layergroup received:', obj);
+
+                self.clearLayers();
+
+                if (typeof obj.layers !== 'undefined') {
+                    for (var layer of obj.layers){
+                        self.op.getObject('layer', layer);
+                    }
+                }
+            } else if (schema === 'layer') {
+                console.log('Received layer object: ', obj);
+                self.addLayer(objuuid);
+            }
+        });
+
+        this.clearLayers = function() {
+            self.layers.baselayers = {};
+            self.layers.overlays = {};
+        };
+
+        this.addLayer = function(uuid) {
+            var layer = self.op.objects[uuid];
+            layer.url = layer.url.replace(/hfoshost/, self.host);
+
+            console.log('Adding layer:', layer);
+            if (layer.baselayer === true) {
+                self.layers.baselayers[layer.uuid] = layer;
+            } else {
+                self.layers.overlays[layer.uuid] = layer;
+            }
+        };
+
+        this.removeLayer = function(uuid) {
+            var layer = self.op.objects[uuid];
+            console.log('Removing layer:', layer);
+            if (layer.baselayer === true) {
+                self.layers.baselayers.delete(uuid);
+            } else {
+                self.layers.overlays.delete(uuid);
+            }
+        };
+
+        this.toggleLayer = function(state, uuid) {
+            console.log('Oh, you selected layer:', state, uuid);
+            if (state === true) {
+                self.addLayer(uuid);
+            } else {
+                self.removeLayer(uuid);
+            }
+        };
+
+        this.switchLayergroup = function(uuid) {
+            console.log('Switching to new layergroup: ', uuid);
+            self.op.getObject('layergroup', uuid);
+        };
+
+        this.switchMapview = function(uuid) {
+            console.log('Switching to new mapview: ', uuid);
+            self.mapviewuuid = uuid;
+            self.op.getObject('mapview', uuid)
+        };
+
+        this.getLayergroups = function() {
+            console.log('[MAP] Checking layergroups:', self.mapview);
+            if (typeof self.mapview.layergroups !== 'undefined') {
+
+                for (var group of self.mapview.layergroups){
+                    self.op.getObject('layergroup', group);
+                }
+            }
+        };
+
+        this.scope.$on('OP.ListUpdate', function (event, schema) {
+            if (schema === 'geoobject') {
+                var list = self.op.lists.geoobject;
+
+                console.log('Map received a list of geoobjects: ', schema, list);
+
+                for (var item of list) {
+                    console.log('Item:', item);
+                    console.log('Layer:', self.drawnLayer);
+
+
+                    var myLayer = L.geoJson().addTo(self.map);
+                    console.log('This strange thing:', myLayer);
+                    myLayer.addData(item.geojson);
+
+                    //self.drawnLayer.addData(item.geojson);
+                }
+            } if (schema === 'layergroup') {
+                var grouplist = self.op.lists.layergroup;
+                var layermenu = [];
+                for (var group of grouplist) {
+                    layermenu.push({
+                        type: 'func',
+                        name: group.uuid,
+                        text: group.name,
+                        callback: self.switchLayergroup,
+                        args: group.uuid
+                    });
+                }
+                self.menu.addMenu('Layergroups', layermenu);
+            } if (schema === 'mapview') {
+                var mapviewlist = self.op.lists.mapview;
+                var mapviewmenu = [];
+                for (var mapview of mapviewlist) {
+                    mapviewmenu.push({
+                        type: 'func',
+                        name: mapview.uuid,
+                        text: mapview.name,
+                        callback: self.switchMapview,
+                        args: mapview.uuid
+                    });
+                }
+                self.menu.addMenu('Mapviews', mapviewmenu);
+            }
+        });
+
+        this.scope.$on('OP.Update', function (event, objuuid) {
+            if (objuuid === self.mapviewuuid) {
+                self.updateMapview(objuuid);
+                self.syncFromMapview();
+            }
+        });
+
+        this.syncToMapview = function () {
+            console.log('MAPVIEWUUID: ', self.mapviewuuid);
+            if (self.mapviewuuid !== null) {
+                self.mapview.coords = self.center;
+                console.log('Sync to MV: ', self.mapview);
+                if (self.sync) {
+                    self.op.putObject('mapview', self.mapview);
+                }
+            }
+        };
+
+        this.updateMapview = function (objuuid) {
+            if (objuuid === self.mapviewuuid) {
+                console.log('[MAP] Received associated mapview.');
+                self.mapview = self.op.objects[objuuid];
+                if (self.followlayers === true) {
+                    self.getLayergroups();
+                }
+            }
+        };
+
+        this.syncFromMapview = function () {
+            if (self.mapviewuuid !== null) {
+                self.center = self.mapview.coords;
+                self.scope.$apply();
+                console.log('Sync from MV: ', self.center);
+            }
+        };
+
+        this.getGeoobjects = function () {
+            console.log('Getting geoobjects');
+            self.op.getList('geoobject', {'owner': self.user.useruuid}, ['geojson']);
+        };
+
+        this.getMapview = function () {
+            console.log('[MAP] Getting associated mapview.');
+
+            self.mapviewuuid = self.user.clientconfig.mapviewuuid;
+
+            console.log('[MAP] Clientconfig Mapview UUID: ', self.mapviewuuid);
+
+            if (self.mapviewuuid === '' || typeof self.mapviewuuid === 'undefined') {
+                console.log('[MAP] Picking user profile mapview', self.user.profile);
+                self.mapviewuuid = self.user.profile.settings.mapviewuuid;
+            }
+            console.log('[MAP] Final Mapview UUID: ', self.mapviewuuid);
+
+            if (self.mapviewuuid !== null && typeof self.mapviewuuid !== 'undefined' && self.mapviewuuid !== '') {
+                self.op.getObject('mapview', self.mapviewuuid);
+            } else {
+                self.mapviewuuid = null; // Normalize unset mapview
+            }
+        };
+
+        this.getMapdataLists = function() {
+            console.log('[MAP] Getting available map data objects.');
+            self.op.getList('layergroup');
+            self.op.getList('mapview');
+        };
+
+        this.requestMapData = function() {
+            console.log('[MAP] Requesting mapdata from server.');
+
+            self.getMapview();
+            self.getGeoobjects();
+            self.getMapdataLists();
+        };
+
+        this.subscribe = function () {
+            self.op.subscribeObject(self.mapviewuuid, 'mapview');
+        };
+
+        this.unsubscribe = function () {
+            self.op.unsubscribeObject(self.mapviewuuid, 'mapview');
+        };
+
         var mapEvents = self.events.map.enable;
 
         var handleEvent = function (event) {
-            if (self.user.signedin) {
-                console.log('Map Event:', event);
+            if (self.user.signedin === true) {
+                //console.log('Map Event:', event);
                 if (event.name === 'leafletDirectiveMap.moveend') {
                     if (self.sync) {
                         console.log('Synchronizing map');
                         self.syncToMapview();
                     }
                 } else if (event.name === 'leafletDirectiveMap.dblclick') {
-                    var subscriptionuuid = prompt('Enter subscription uuid:');
-                    if (subscriptionuuid !== '') {
-                        self.objectproxy.get('mapview', subscriptionuuid);
-                    }
+                    console.log(self.layers);
+                } else if (event.name === 'leafletDirectiveMap.mousemove') {
+                    console.log(event);
                 }
             }
         };
 
-        for (var k in mapEvents) {
-            var eventName = 'leafletDirectiveMap.' + mapEvents[k];
+        for (var k of mapEvents) {
+            var eventName = 'leafletDirectiveMap.' + k;
             this.scope.$on(eventName, function (event) {
                 handleEvent(event);
             });
         }
 
-
         leafletData.getMap().then(function (map) {
             console.log('Setting up initial map settings.');
+            self.map = map;
+
+            map.on('click', function(e) {
+                alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+            });
+
+            // Resize map to accomodate for statusbar
+            //console.log('HEIGHTS:',  $('footer').height());
+            //$('.angular-leaflet-map').height($('.angular-leaflet-map').height() - $('footer').height());
+
             map.setZoom(2);
             //map.panTo({lat: 52.513, lon: 13.41998});
 
-            if (self.deviceinfo.type !== 'mobile') {
-                //var Zoomslider = new L.Control.Zoomslider().addTo(map);
-                //$('.leaflet-control-zoom').css('visibility', 'hidden');
-            }
+            //if (self.deviceinfo.type !== 'mobile') {
+            //    var Zoomslider = new L.Control.Zoomslider().addTo(map);
+            //    $('.leaflet-control-zoom').css('visibility', 'hidden');
+            //}
 
-            //var Terminator = terminator().addTo(map);
+            self.terminator = leafletterminator()
+                .setStyle({
+                    weight: 1,
+                    color: '#000',
+                    fill: '#000'
+                }).addTo(map);
             //var GraticuleOne = L.graticule({
             //    style: {color: '#55A', weight: 1, dashArray: '.'},
             //    interval: 1
             //}).addTo(map);
+
+            //var grid = L.grid({redraw: 'moveend'}).addTo(map);
             //var MousePosition = L.control.mousePosition().addTo(map);
             //var PanControl = L.control.pan().addTo(map);
-            var courseplot = L.polyline([], {color: 'red'}).addTo(map);
+            self.courseplot = L.polyline([], {color: 'red'}).addTo(map);
 
-            var togglefollow = L.easyButton({
-                id: 'btn_togglefollow',
+            self.toggledraw = L.easyButton({
+                id: 'btn_toggledraw',
                 states: [{
-                    stateName: 'following',
-                    icon: 'fa-eye',
+                    stateName: 'disabled',
+                    icon: 'fa-pencil',
                     onClick: function (control) {
-                        self.follow = false;
-                        unsubscribe();
-                        control.state('static');
+                        self.drawing = true;
+                        $('.leaflet-draw').show();
+                        control.state('enabled');
+                        $('#btn_toggledraw').attr('background', 'hotpink');
                     }
                 }, {
+                    stateName: 'enabled',
+                    icon: 'fa-pencil',
+                    onClick: function (control) {
+                        self.drawing = false;
+                        $('.leaflet-draw').hide();
+                        control.state('disabled');
+                        $('#btn_toggledraw').attr('background', 'white');
+                    }
+                }],
+                title: 'Toggle editing of GeoObjects'
+            });
+
+            self.togglefollow = L.easyButton({
+                id: 'btn_togglefollow',
+                states: [{
                     stateName: 'static',
                     icon: 'fa-eye-slash',
                     onClick: function (control) {
+                        if (self.mapviewuuid === null) {
+                            self.alert.add('warning', 'No mapview', 'There is no mapview selected that you could follow. Use the menu to select one.');
+                            return;
+                        }
                         self.follow = true;
-                        subscribe();
+                        self.followlayers = true;
+                        self.subscribe();
                         control.state('following');
+                    }
+                }, {
+                    stateName: 'following',
+                    icon: 'fa-eye',
+                    onClick: function (control) {
+                        self.followlayers = false;
+                        control.state('followinglimited');
+                    }
+                }, {
+                    stateName: 'followinglimited',
+                    icon: 'fa-low-vision',
+                    onClick: function (control) {
+                        self.follow = false;
+                        self.unsubscribe();
+                        control.state('static');
                     }
                 }],
                 title: 'Toggle map following'
             });
 
-            var togglesync = L.easyButton({
+            self.togglesync = L.easyButton({
                 id: 'btn_togglesync',
                 states: [{
+                    stateName: 'unsynchronized',
+                    icon: 'fa-chain-broken',
+                    onClick: function (control) {
+                        if (self.mapviewuuid === null) {
+                            self.alert.add('warning', 'No mapview', 'There is no mapview selected that you could follow. Use the menu to select one.');
+                            return;
+                        }
+                        console.log('[MAP] Enabling synchronization');
+                        self.sync = true;
+                        control.state('synchronized');
+                    }
+                }, {
                     stateName: 'synchronized',
                     icon: 'fa-chain',
                     onClick: function (control) {
@@ -235,36 +446,13 @@ class mapcomponent {
                         self.sync = false;
                         control.state('unsynchronized');
                     }
-                }, {
-                    stateName: 'unsynchronized',
-                    icon: 'fa-chain-broken',
-                    onClick: function (control) {
-                        console.log('[MAP] Enabling synchronization');
-                        self.sync = true;
-                        control.state('synchronized');
-                    }
                 }],
                 title: 'Toggle synchronization to ship'
             });
 
-            var selectView = L.easyButton({
-                id: 'btn_selectview',
-                states: [{
-                    stateName: 'select',
-                    icon: 'fa-list-alt',
-                    onClick: function (control) {
-                        console.log('[MAP] Triggering view selection');
-                        SelectView();
-
-                    }
-                }],
-                title: 'Select a view'
-            });
-
-            togglefollow.addTo(map);
-            togglesync.addTo(map);
-            selectView.addTo(map);
-
+            self.toggledraw.addTo(map);
+            self.togglefollow.addTo(map);
+            self.togglesync.addTo(map);
 
             L.RotatedMarker = L.Marker.extend({
                 options: {angle: 0},
@@ -288,7 +476,7 @@ class mapcomponent {
                 return new L.RotatedMarker(pos, options);
             };
 
-            var Icons = {
+            /*var Icons = {
                 Vessel: L.icon({
                     iconUrl: '/assets/images/icons/vessel.png',
                     //shadowUrl: 'leaf-shadow.png',
@@ -322,13 +510,17 @@ class mapcomponent {
             };
 
             console.log("Rotated marker: ", L.rotatedMarker);
-            var VesselMarker = L.rotatedMarker(self.vessel.coords, {icon: Icons.vessel}).addTo(map);
+            var VesselMarker = L.rotatedMarker(self.vessel.coords, {icon: Icons.Vessel}).addTo(map);
             console.log("Vessel marker:", VesselMarker);
+            */
 
             leafletData.getLayers().then(function (baselayers) {
                 var drawnItems = baselayers.overlays.draw;
+                self.drawnLayer = drawnItems;
+                console.log('The basedrawlayer looks like this:', drawnItems);
                 map.on('draw:created', function (e) {
                     var layer = e.layer;
+                    console.log('Map drawing created:', e, ' layer:', layer);
                     drawnItems.addLayer(layer);
 
                     var geojson = layer.toGeoJSON();
@@ -336,14 +528,33 @@ class mapcomponent {
                     console.log(geojson);
 
                     self.geojson = geojson;
-                    socket.send(geojson);
 
+                    var geoobject = {
+                        uuid: 'create',
+                        owner: self.user.useruuid,
+                        geojson: geojson
+                    };
+                    self.op.putObject('geoobject', geoobject);
                 });
             });
-        })
+
+            $('.leaflet-draw').hide();
+
+        });
+
+        this.scope.$on('Profile.Update', function () {
+            console.log('Profile update - fetching map data');
+            self.requestMapData();
+        });
+        if (this.user.signedin === true) {
+            console.log('Logged in - fetching map data');
+            this.requestMapData();
+        }
+
     }
+
 }
 
-mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user'];
+mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert'];
 
 export default mapcomponent;
