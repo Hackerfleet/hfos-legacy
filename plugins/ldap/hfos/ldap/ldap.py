@@ -8,7 +8,8 @@ try:
     from lmap import lmap, ldap
 except ImportError:
     lmap = ldap = None
-    hfoslog("[LDAP] No python-lmap library found, install requirements-optional.txt", lvl=warn)
+    hfoslog("No python-lmap library found, install "
+            "requirements-optional.txt", lvl=warn, emitter="LDAP")
 
 cbaseldap = {
     'URI': 'ldap://127.0.0.1:389/',
@@ -53,7 +54,7 @@ class LDAPAdaptor(ConfigurableComponent):
 
     def __init__(self, *args, **kwargs):
         super(LDAPAdaptor, self).__init__("LDAP", *args, **kwargs)
-        if not ldap:
+        if ldap != None:
             self.log("NOT started, no python-lmap found", lvl=warn)
             return
         self.log("Started")
