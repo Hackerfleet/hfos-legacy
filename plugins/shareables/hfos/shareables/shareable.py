@@ -18,6 +18,8 @@ Provisions
 
 """
 
+from hfos.schemata.defaultform import editbuttons
+
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 ShareableSchema = {
@@ -142,10 +144,7 @@ ShareableForm = [
             'reservations[].description',
         ]
     },
-    {
-        'type': 'submit',
-        'title': 'Save Shareable',
-    }
+    editbuttons
 ]
 
 Shareable = {'schema': ShareableSchema, 'form': ShareableForm}

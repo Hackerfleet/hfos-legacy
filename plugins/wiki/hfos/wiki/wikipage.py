@@ -14,6 +14,8 @@ WikiPage: WikiPage to store collaborative data
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+from hfos.schemata.defaultform import defaultform
+
 WikiPageSchema = {
     'id': '#wikipage',
     'type': 'object',
@@ -41,6 +43,6 @@ WikiPageSchema = {
     }
 }
 
-WikiPageForm = {}
+WikiPageForm = defaultform
 
 WikiPage = {'schema': WikiPageSchema, 'form': WikiPageForm}

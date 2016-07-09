@@ -12,6 +12,8 @@ Radio: Radio configurations to store onboard radio system data
 
 """
 
+from hfos.schemata.defaultform import editbuttons
+
 __author__ = 'riot'
 
 RadioConfigSchema = {
@@ -64,10 +66,7 @@ RadioConfigForm = [
         ]
     },
     'notes',
-    {
-        'type': 'submit',
-        'title': 'Save radio',
-    }
+    editbuttons
 ]
 
 RadioConfig = {'schema': RadioConfigSchema, 'form': RadioConfigForm}
