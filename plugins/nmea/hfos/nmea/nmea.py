@@ -9,8 +9,6 @@ Module NMEA
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 import time
 import sys
 import glob
@@ -25,6 +23,10 @@ from hfos.component import ConfigurableComponent
 from hfos.database import ValidationError
 from hfos.events import sensordata
 from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
+from pprint import pprint
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
 
 try:
     from pynmea2 import parse
@@ -206,7 +208,9 @@ class NMEAParser(ConfigurableComponent):
 
             rawdata = {}
             for sentence in nmeadata:
-                self.log("Sentence: ", sentence.fields, lvl=verbose)
+                self.log("Sentence: ", sentence.fields, sentence.talker,
+                         sentence.sentence_type, type(sentence),
+                lvl=verbose)
 
                 for item in sentence.fields:
                     itemname = item[1]
@@ -222,7 +226,9 @@ class NMEAParser(ConfigurableComponent):
                                 #  (type(value) not in (str, int, float)):
                         #    value = str(value)
                         # hfoslog("{",itemname,": ",value, "}", lvl=critical)
-                        rawdata.update({itemname: value})
+                        rawdata.update({
+                            sentence.sentence_type + '_' + itemname: value
+                        })
 
                         # data.update(rawdata)
                         # hfoslog(data, lvl=critical)
@@ -272,6 +278,7 @@ class NMEAParser(ConfigurableComponent):
         #self.log("Sensor data:", sensordatapackage, lvl=debug)
 
         if sensordatapackage:
+            #pprint(sensordatapackage)
             self.fireEvent(sensordata(sensordatapackage, nmeatime, self.bus),
                        "navdata")
         # self.log("Unhandled data: \n", self.unparsable, "\n", self.unhandled, lvl=warn)
