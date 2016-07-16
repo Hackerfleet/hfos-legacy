@@ -1,0 +1,44 @@
+<div class="jumbotron">
+    <h1>Countables</h1>
+    <span>Define and count objects</span>
+
+    <div class="panel-group" ng-model="panels.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        Count Things
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse in" role="tabpanel" bs-collapse-target>
+                <div class="panel-body in" style="min-height: 51vh">
+
+                    <tang-cloud on-click="$ctrl.count(id)" words="$ctrl.words" width="500" height="50vh"></tang-cloud>
+                    <!--
+                    <ul>
+                        <li ng-repeat="item in $ctrl.clouddata">
+                            <button type="button" ng-click="$ctrl.count(item.uuid)">{{ item.name }}</button>
+                        </li>
+
+                    </ul>
+                    -->
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        Define Things
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                <div class="panel-body">
+                    <objecteditor schema="countable" uuid="create" action="edit"></objecteditor>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
