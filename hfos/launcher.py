@@ -21,6 +21,7 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
 """
 
+import argparse
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 from circuits import handler, Timer, Event
@@ -32,7 +33,11 @@ from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
 import sys
 from glob import glob
 import os
-from subprocess import Popen, TimeoutExpired
+try:
+    from subprocess import Popen, TimeoutExpired
+except ImportError:
+    from subprocess32 import Popen, TimeoutExpired
+
 from shutil import copy
 import os, pwd, grp
 
@@ -138,11 +143,13 @@ class Core(ConfigurableComponent):
         }
     }
 
-    def __init__(self, args):
+    def __init__(self, insecure=False, host='localhost', port=80):
         super(Core, self).__init__("CORE")
         self.log("Booting. ", self.channel)
 
-        self.args = args
+        self.insecure = insecure
+        self.host = host
+        self.port = port
 
         self.frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
             __file__)) + "/../frontend")
@@ -175,9 +182,13 @@ class Core(ConfigurableComponent):
         self.updateComponents()
         self._writeConfig()
 
-        self.server = Server((args.host, args.port)).register(self)
+        try:
+            self.server = Server((self.host, self.port)).register(self)
+        except PermissionError:
+            self.log('Could not open (privileged?) port, check '
+                     'permissions!', lvl=critical)
 
-        if self.args.insecure is not True:
+        if self.insecure is not True:
             self.log("Setting five second timer to drop privileges.",
                      lvl=debug)
             Timer(5, dropPrivs()).register(self)
@@ -451,7 +462,7 @@ def registerComponent(self):
 def construct_graph(args):
     """Preliminary HFOS application Launcher"""
 
-    app = Core(args)
+    app = Core(host=args.host, port=args.port, insecure=args.insecure)
 
     setup_root(app)
 
@@ -480,6 +491,32 @@ def construct_graph(args):
     return app
 
 
-def launch(args):
+def launch(run=True):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--port", help="Define port for server",
+                        type=int, default=80)
+    parser.add_argument("--host", help="Define hostname for server",
+                        type=str, default='0.0.0.0')
+    parser.add_argument("--profile", help="Enable profiler", action="store_true")
+    parser.add_argument("--opengui", help="Launch webbrowser for GUI "
+                                          "inspection after startup",
+                        action="store_true")
+    parser.add_argument("--drawgraph", help="Draw a snapshot of the "
+                                            "component graph "
+                                            "after construction",
+                        action="store_true")
+    parser.add_argument("--log", help="Define log level (0-100)",
+                        type=int, default=20)
+
+    parser.add_argument("--insecure", help="Keep privileges - INSECURE",
+                        action="store_true")
+
+    args = parser.parse_args()
+    #pprint(args)
+    print(args)
+
     server = construct_graph(args)
-    server.run()
+    if run:
+        server.run()
+
+    return server

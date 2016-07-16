@@ -10,14 +10,12 @@ Test HFOS Launcher
 
 """
 
+from hfos.launcher import Core
+
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
-from hfos.launcher import construct_graph
-
-from circuits.web import Server
 
 
 def test_():
-    server = construct_graph()
+    server = Core(port=8123)
 
-    assert type(server) == Server
+    assert type(server) == Core

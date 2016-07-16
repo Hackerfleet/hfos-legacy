@@ -6,4 +6,5 @@ git+https://github.com/hackerfleet/warmongo.git
 virtualenv-api>=2.1.11
 
 # Compat
+subprocess32>=3.2.7
 six
