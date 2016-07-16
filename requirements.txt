@@ -3,7 +3,7 @@ git+https://github.com/circuits/circuits.git
 pymongo>=3.2
 jsonschema==2.5.1
 git+https://github.com/hackerfleet/warmongo.git
-virtualenv-api==2.1.10
+virtualenv-api==2.1.11
 
 # Compat
 six
