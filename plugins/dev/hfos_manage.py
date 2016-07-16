@@ -37,12 +37,16 @@ paths = [
 templates = {
     'setupfile': ('setup.py.template', 'setup.py'),
     'packagefile': ('package.json.template', 'package.json'),
-    'component': ('component.py.template', 'hfos/{pluginname}/{pluginname}.py'),
+    'component': (
+    'component.py.template', 'hfos/{pluginname}/{pluginname}.py'),
     'moduleinit': ('init.py.template', 'hfos/__init__.py'),
     'packageinit': ('init.py.template', 'hfos/{pluginname}/__init__.py'),
     'schemata': ('schemata.py.template', 'hfos/{pluginname}/schemata.py'),
-    'controller': ('controller.js.template', 'hfos-frontend/{pluginname}/scripts/controllers/{pluginname}.js'),
-    'view': ('view.html.template', 'hfos-frontend/{pluginname}/views/{pluginname}.html')
+    'controller': ('controller.js.template',
+                   'hfos-frontend/{pluginname}/scripts/controllers/{'
+                   'pluginname}.js'),
+    'view': (
+    'view.html.template', 'hfos-frontend/{pluginname}/views/{pluginname}.html')
 }
 
 questions = OrderedDict({
@@ -58,8 +62,10 @@ questions = OrderedDict({
 
 })
 
-infoheader = """The manage command guides you through setting up a new HFOS package.
-It provides basic setup. If you need dependencies or have other special needs, edit the resulting
+infoheader = """The manage command guides you through setting up a new HFOS
+package.
+It provides basic setup. If you need dependencies or have other special
+needs, edit the resulting
 files by hand.
 
 You can press Ctrl-C any time to cancel this process.
@@ -93,7 +99,8 @@ def construct_module(info, target):
     # pprint(info)
     for template, item in templates.items():
         source = os.path.join('templates', item[0])
-        filename = os.path.abspath(os.path.join(target, item[1].format(**info)))
+        filename = os.path.abspath(
+            os.path.join(target, item[1].format(**info)))
         print("Creating file from template '%s'" % filename)
         writeTemplateFile(source, filename, info)
 
@@ -104,7 +111,8 @@ def ask(question, default=None, datatype=str):
     if datatype == bool:
         data = None
         while data not in ('Y', 'J', 'N', '1', '0'):
-            data = raw_input("%s? [%s]: " % (question, default.upper())).upper()
+            data = raw_input(
+                "%s? [%s]: " % (question, default.upper())).upper()
 
             if default and data == '':
                 return default
@@ -158,9 +166,13 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--target", help="Create module in the given folder (uses ./ if omitted)", action="store",
+    parser.add_argument("--target",
+                        help="Create module in the given folder (uses ./ if "
+                             "omitted)",
+                        action="store",
                         default=".")
-    parser.add_argument("--clear", help="Clear target path if it exists", action="store_true", default=False)
+    parser.add_argument("--clear", help="Clear target path if it exists",
+                        action="store_true", default=False)
 
     args = parser.parse_args()
 

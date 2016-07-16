@@ -10,13 +10,12 @@ Chat manager
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from time import time
 from hfos.component import ConfigurableComponent
-
 from hfos.logger import hfoslog, error, warn
 from hfos.events import broadcast
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class Chat(ConfigurableComponent):
@@ -51,8 +50,8 @@ class Chat(ConfigurableComponent):
 
         except:
             self.log("Couldn't find user- or clientname: ",
-                    event.user.profile.to_dict(),
-                    event.client.config.to_dict(), lvl=warn)
+                     event.user.profile.to_dict(),
+                     event.client.config.to_dict(), lvl=warn)
             username = "NO USERNAME"
         return username
 
@@ -83,7 +82,8 @@ class Chat(ConfigurableComponent):
             try:
                 self.fireEvent(broadcast("users", chatpacket))
             except Exception as e:
-                self.log("Transmission error before broadcast: %s" % e, lvl=error)
+                self.log("Transmission error before broadcast: %s" % e,
+                         lvl=error)
 
         except Exception as e:
             self.log("Error: '%s' %s" % (e, type(e)), lvl=error)

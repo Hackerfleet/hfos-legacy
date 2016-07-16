@@ -48,6 +48,7 @@ hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
 class dropPrivs(Event):
     pass
 
+
 def drop_privileges(uid_name='hfos', gid_name='hfos'):
     if os.getuid() != 0:
         hfoslog("Not root, cannot drop privileges. Probably opening "
@@ -182,7 +183,7 @@ class Core(ConfigurableComponent):
             Timer(5, dropPrivs()).register(self)
         else:
             self.log("Not dropping privileges - this may be insecure!",
-                 lvl=warn)
+                     lvl=warn)
 
     @handler("dropPrivs")
     def dropPrivileges(self, *args):

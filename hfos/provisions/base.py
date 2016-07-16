@@ -13,11 +13,10 @@ Basic functionality around provisioning.
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from jsonschema import ValidationError
-
 from hfos.logger import hfoslog, warn
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):

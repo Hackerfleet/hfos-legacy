@@ -9,19 +9,19 @@ Module Library
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, error, warn, critical
 from datetime import datetime
 from hfos.events import updatesubscriptions, send
 
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
 try:
     from isbntools.app import meta as isbnmeta
 except:
     isbnmeta = None
-    hfoslog("No isbntools found, install requirements-optional.txt", 
+    hfoslog("No isbntools found, install requirements-optional.txt",
             lvl=warn, emitter="LIB")
 
 libraryfieldmapping = {
@@ -44,7 +44,8 @@ class Library(ConfigurableComponent):
 
     configprops = {
         'isbnservice': {'type': 'string', 'title': 'Some Setting',
-                        'description': 'Some string setting.', 'default': 'wcat'},
+                        'description': 'Some string setting.',
+                        'default': 'wcat'},
     }
 
     def __init__(self, *args):
@@ -74,7 +75,8 @@ class Library(ConfigurableComponent):
                     book.save()
                     self.log("Book successfully lent.")
                 else:
-                    self.log("Book can't be lent, it is not available!", lvl=warn)
+                    self.log("Book can't be lent, it is not available!",
+                             lvl=warn)
             elif event.action == "return":
                 book = objectmodels['book'].find_one({'uuid': event.data})
                 if not book.available:
@@ -85,14 +87,18 @@ class Library(ConfigurableComponent):
                     book.save()
                     self.log("Book successfully returned.")
                 else:
-                    self.log("Book can't be lent, it is not available!", lvl=warn)
+                    self.log("Book can't be lent, it is not available!",
+                             lvl=warn)
             elif event.action == "augment":
                 self._augmentBook('book', event.data, event.client)
 
             if book:
-                self.fireEvent(updatesubscriptions(uuid=book.uuid, schema='book', data=book))
+                self.fireEvent(
+                    updatesubscriptions(uuid=book.uuid, schema='book',
+                                        data=book))
         except Exception as e:
-            self.log("Error during library handling: ", type(e), e, lvl=critical, exc=True)
+            self.log("Error during library handling: ", type(e), e,
+                     lvl=critical, exc=True)
 
     def objectcreation(self, event):
         if event.schema == 'book':
@@ -110,7 +116,10 @@ class Library(ConfigurableComponent):
         try:
             if schema == 'book':
                 if not isbnmeta:
-                    self.log("No isbntools found! Install it to get full functionality!", lvl=warn)
+                    self.log(
+                        "No isbntools found! Install it to get full "
+                        "functionality!",
+                        lvl=warn)
                     return
 
                 newbook = objectmodels['book'].find_one({'uuid': uuid})
@@ -120,9 +129,11 @@ class Library(ConfigurableComponent):
                         self.log('Got a lookup candidate: ', newbook._fields)
 
                         try:
-                            meta = isbnmeta(newbook.isbn, service=self.config.isbnservice)
+                            meta = isbnmeta(newbook.isbn,
+                                            service=self.config.isbnservice)
 
-                            mapping = libraryfieldmapping[self.config.isbnservice]
+                            mapping = libraryfieldmapping[
+                                self.config.isbnservice]
                             for key in meta.keys():
                                 if key in mapping:
                                     if isinstance(mapping[key], tuple):
@@ -133,15 +144,23 @@ class Library(ConfigurableComponent):
 
                             newbook.update(meta)
                             newbook.save()
-                            self.log("Book successfully augmented from ", self.config.isbnservice)
+                            self.log("Book successfully augmented from ",
+                                     self.config.isbnservice)
                         except Exception as e:
-                            self.log("Error during meta lookup: ", e, type(e), newbook.isbn, lvl=error, exc=True)
-                            self.fireEvent(send(client.uuid, {'component': 'alert', 'action': 'error',
-                                                              'data': 'Could not look up metadata, sorry:' + str(e)}))
+                            self.log("Error during meta lookup: ", e, type(e),
+                                     newbook.isbn, lvl=error, exc=True)
+                            self.fireEvent(send(client.uuid,
+                                                {'component': 'alert',
+                                                 'action': 'error',
+                                                 'data': 'Could not look up metadata, sorry:' + str(
+                                                     e)}))
                     else:
-                        self.log('Saw something, but it is not to be looked up: ', newbook._fields)
+                        self.log(
+                            'Saw something, but it is not to be looked up: ',
+                            newbook._fields)
                 except Exception as e:
                     self.log("Error during book update.")
 
         except Exception as e:
-            self.log("Book creation notification error: ", uuid, e, type(e), lvl=error, exc=True)
+            self.log("Book creation notification error: ", uuid, e, type(e),
+                     lvl=error, exc=True)

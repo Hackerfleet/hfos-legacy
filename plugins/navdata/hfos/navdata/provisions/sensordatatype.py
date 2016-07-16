@@ -53,13 +53,14 @@ sentences = {}
 sentences.update(getNMEASentences())
 sentences.update(getProprietarySentences())
 
-#pprint(sentences)
+
+# pprint(sentences)
 
 def getFields(sentences):
     fields = {}
 
     for name in sentences:
-        sen, doc= sentences[name]
+        sen, doc = sentences[name]
         if len(sen.fields) > 0:
             fields[name] = sen.fields, doc
 
@@ -68,7 +69,8 @@ def getFields(sentences):
 
 fields = getFields(sentences)
 
-#pprint(fields)
+
+# pprint(fields)
 
 
 def getSensorData(fields):
@@ -111,23 +113,23 @@ def getSensorData(fields):
 
 sensordatatypes = getSensorData(fields)
 
-#pprint(sensordatatypes)
+# pprint(sensordatatypes)
 
 provisionitems = []
 
-#datatypes = {
+# datatypes = {
 #    'string': [],
 #    'number': [],
 #    'integer': [],
 #    'unknown': []
-#}
+# }
 
 for datatype in sensordatatypes.values():
     provisionitems.append(datatype)
     # datatypes[datatype['type']].append(datatype['description'])
 
-#pprint(provisionitems)
-#print(len(provisionitems))
+# pprint(provisionitems)
+# print(len(provisionitems))
 
 # pprint(datatypes)
 

@@ -1,1 +1,3 @@
-__author__ = 'riot'
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
+

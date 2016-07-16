@@ -19,6 +19,11 @@ user.py: User account objects
 
 """
 
+from hfos.schemata.client import Client
+from hfos.schemata.user import User
+from hfos.schemata.profile import Profile
+from hfos.schemata.logmessage import LogMessage
+
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 __license__ = """
@@ -39,8 +44,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
-from hfos.schemata.client import Client
-from hfos.schemata.user import User
-from hfos.schemata.profile import Profile
-from hfos.schemata.logmessage import LogMessage

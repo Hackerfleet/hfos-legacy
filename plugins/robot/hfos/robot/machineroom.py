@@ -5,18 +5,16 @@ Module: Machineroom
 
 Engine, Rudder and miscellaneous machine roome control operations.
 
-Currently this is only useable in conjunction with Hackerfleet's MS 0x00 NeoCortex board.
+Currently this is only useable in conjunction with Hackerfleet's MS 0x00
+NeoCortex board.
 
 :copyright: (C) 2011-2015 riot@hackerfleet.org
 :license: GPLv3 (See LICENSE)
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from random import randint
 import sys, glob
-
 import six
 from circuits import handler, Event
 from circuits.io.events import write
@@ -29,8 +27,11 @@ try:
 except ImportError:
     serial = None
     hfoslog("No serialport found. Serial bus remote control devices will be "
-         "unavailable, install requirements.txt!",
-             lvl=critical, emitter="MR")
+            "unavailable, install requirements.txt!",
+            lvl=critical, emitter="MR")
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
 
 class MachineroomEvent(Event):
     """
@@ -64,7 +65,8 @@ def serial_ports():
         :returns:
             A list of the serial ports available on the system
 
-        Courtesy: Thomas ( http://stackoverflow.com/questions/12090503/listing-available-com-ports-with-python )
+        Courtesy: Thomas ( http://stackoverflow.com/questions/12090503
+        /listing-available-com-ports-with-python )
     """
     if sys.platform.startswith('win'):
         ports = ['COM%s' % (i + 1) for i in range(256)]
@@ -133,15 +135,19 @@ class Machineroom(ConfigurableComponent):
 
         self._rudderchannel = 1
         self._machinechannel = 1
-        self._pumpchannel = 3  # TODO: Make this a dedicated singleton call? e.g. pumpon/pumpoff.. not so generic
+        self._pumpchannel = 3  # TODO: Make this a dedicated singleton call?
+        #  e.g. pumpon/pumpoff.. not so generic
         self._serialopen = False
 
         if self.config.serialfile != '':
             try:
-                self.serial = Serial(self.config.serialfile, self.config.baudrate, self.config.buffersize, timeout=5,
+                self.serial = Serial(self.config.serialfile,
+                                     self.config.baudrate,
+                                     self.config.buffersize, timeout=5,
                                      channel="port").register(self)
             except Exception as e:
-                self.log("Problem with serial port: ", e, type(e), lvl=critical)
+                self.log("Problem with serial port: ", e, type(e),
+                         lvl=critical)
         else:
             self.log("No serial port configured!", lvl=warn)
 
@@ -183,7 +189,9 @@ class Machineroom(ConfigurableComponent):
         :param channel:
         :param value:
         """
-        self._sendcommand(self.servo + self.sep + bytes([channel]) + self.sep + bytes([value]))
+        self._sendcommand(
+            self.servo + self.sep + bytes([channel]) + self.sep + bytes(
+                [value]))
 
     def _setDigitalPin(self, pin, value):
         """
@@ -192,7 +200,8 @@ class Machineroom(ConfigurableComponent):
         :param value:
         """
         mode = 255 if value >= 127 else 0
-        self._sendcommand(self.pin + self.sep + bytes([pin]) + self.sep + bytes([mode]))
+        self._sendcommand(
+            self.pin + self.sep + bytes([pin]) + self.sep + bytes([mode]))
 
     @handler("remotecontrolupdate")
     def on_remotecontrolupdate(self, event):

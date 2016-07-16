@@ -14,7 +14,6 @@ SensorData:
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-
 SensorDataSchema = {
     'id': '#sensorData',
     'title': 'SensorData',
@@ -28,8 +27,6 @@ SensorDataSchema = {
         'type': {'type': 'string'}
     }
 }
-
-
 
 SensorDataForm = [
     {

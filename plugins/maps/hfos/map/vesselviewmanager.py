@@ -13,8 +13,6 @@ map.
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from circuits import Event
 from circuits import Timer, handler
 from hfos.database import objectmodels, ValidationError
@@ -28,9 +26,13 @@ from time import time
 import datetime
 from pprint import pprint
 
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
+
 class VesselViewManager(ConfigurableComponent):
     """
-    The VesselViewManager (Navigation Data) component receives new sensordata and
+    The VesselViewManager (Navigation Data) component receives new
+    sensordata and
     generates a new :referenceframe:
 
 
@@ -118,7 +120,7 @@ class VesselViewManager(ConfigurableComponent):
                 ref = self.datatypes[name]
 
                 if ref.lastvalue != str(value):
-                    #self.log("Reference outdated:", ref._fields)
+                    # self.log("Reference outdated:", ref._fields)
 
                     item = {
                         'value': value,
@@ -126,7 +128,7 @@ class VesselViewManager(ConfigurableComponent):
                         'type': name
                     }
 
-                    #self.log("Subscriptions:", self.subscriptions, ref.name)
+                    # self.log("Subscriptions:", self.subscriptions, ref.name)
                     if ref.name in self.subscriptions:
 
                         packet = {
@@ -165,7 +167,7 @@ class VesselViewManager(ConfigurableComponent):
         try:
             self.fireEvent(referenceframe(
                 {'data': self.referenceframe, 'ages': self.referenceages}),
-                           "navdata")
+                "navdata")
             self.intervalcount += 1
 
             if self.intervalcount == self.passiveinterval:

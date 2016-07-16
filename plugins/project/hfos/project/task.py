@@ -18,22 +18,28 @@ Provisions
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.schemata.defaultform import editbuttons
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 TaskSchema = {
     'type': 'object',
     'id': '#task',
     'name': 'task',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Task ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name', 'description': 'Name of Task'},
-        'project': {'type': 'string', 'title': 'Project', 'description': 'Project, the Task belongs to'},
-        'creator': {'type': 'string', 'title': 'Creator', 'description': 'Creator of Task'},
-        'owneruuid': {'type': 'string', 'minLength': 36, 'title': "Owner's Unique ID", 'description': 'HIDDEN'},
+        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Task ID',
+                 'description': 'HIDDEN'},
+        'name': {'type': 'string', 'title': 'Name',
+                 'description': 'Name of Task'},
+        'project': {'type': 'string', 'title': 'Project',
+                    'description': 'Project, the Task belongs to'},
+        'creator': {'type': 'string', 'title': 'Creator',
+                    'description': 'Creator of Task'},
+        'owneruuid': {'type': 'string', 'minLength': 36,
+                      'title': "Owner's Unique ID", 'description': 'HIDDEN'},
         'status': {
-            'type': 'string', 'title': 'Task status', 'default': 'Open', 'description': 'Last status', 'enum': [
+            'type': 'string', 'title': 'Task status', 'default': 'Open',
+            'description': 'Last status', 'enum': [
                 'Open',
                 'Closed',
                 'Resolved',
@@ -44,8 +50,10 @@ TaskSchema = {
                 'Waiting',
             ]
         },
-        'tags': {'type': 'string', 'title': 'Tags', 'description': 'Attached tags'},
-        'priority': {'type': 'number', 'title': 'Priority', 'description': '1 is Highest priority', 'minimum': 1},
+        'tags': {'type': 'string', 'title': 'Tags',
+                 'description': 'Attached tags'},
+        'priority': {'type': 'number', 'title': 'Priority',
+                     'description': '1 is Highest priority', 'minimum': 1},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
                   'description': 'Entry notes'},
         'references': {
@@ -61,7 +69,8 @@ TaskSchema = {
                             'Blocking'
                         ]
                     },
-                    'task': {'type': 'string', 'minLength': 36, 'title': 'Task UUID',
+                    'task': {'type': 'string', 'minLength': 36,
+                             'title': 'Task UUID',
                              'description': 'Referenced Task'},
                 }
             }
@@ -72,27 +81,39 @@ TaskSchema = {
             'items': {
                 'type': 'object',
                 'properties': {
-                    'time': {'type': 'string', 'format': 'datetimepicker', 'title': 'Time of change',
-                             'description': 'Time when this change was accepted'},
+                    'time': {'type': 'string', 'format': 'datetimepicker',
+                             'title': 'Time of change',
+                             'description': 'Time when this change was '
+                                            'accepted'},
                     'change': {
                         'type': 'array',
                         'default': [],
                         'items': [
 
-                            {'status': {'type': 'string', 'title': 'New status',
-                                        'description': 'Status changed to this status'}},
-                            {'comment': {'type': 'string', 'title': 'Comment', 'description': 'Comment text'}},
-                            {'priority': {'type': 'number', 'title': 'Priority',
-                                          'description': '1 is Highest priority'}},
-                            {'tags': {'type': 'string', 'title': 'Tags', 'description': 'Attached tags'}},
-                            {'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
+                            {'status': {'type': 'string',
+                                        'title': 'New status',
+                                        'description': 'Status changed to '
+                                                       'this status'}},
+                            {'comment': {'type': 'string', 'title': 'Comment',
+                                         'description': 'Comment text'}},
+                            {'priority': {'type': 'number',
+                                          'title': 'Priority',
+                                          'description': '1 is Highest '
+                                                         'priority'}},
+                            {'tags': {'type': 'string', 'title': 'Tags',
+                                      'description': 'Attached tags'}},
+                            {'notes': {'type': 'string', 'format': 'html',
+                                       'title': 'User notes',
                                        'description': 'Entry notes'}},
-                            {'owneruuid': {'type': 'string', 'minLength': 36, 'title': "Owner's Unique ID",
+                            {'owneruuid': {'type': 'string', 'minLength': 36,
+                                           'title': "Owner's Unique ID",
                                            'description': 'HIDDEN'}},
-                            {'name': {'type': 'string', 'title': 'Name', 'description': 'Name of Task'}}
+                            {'name': {'type': 'string', 'title': 'Name',
+                                      'description': 'Name of Task'}}
                         ]
                     },
-                    'creator': {'type': 'string', 'minLength': 36, 'title': 'Unique Comment ID',
+                    'creator': {'type': 'string', 'minLength': 36,
+                                'title': 'Unique Comment ID',
                                 'description': 'HIDDEN'}
                 }
             }
@@ -116,7 +137,8 @@ TaskForm = [
                         'options': {
                             "type": "project",
                             "asyncCallback": "getFormData",
-                            "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+                            "map": {'valueProperty': "uuid",
+                                    'nameProperty': 'name'}
                         }
                     }
                 ]

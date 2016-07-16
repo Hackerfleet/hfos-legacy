@@ -13,11 +13,11 @@ Mapview skeleton for ships
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.provisions.base import provisionList
 from hfos.database import objectmodels
 from hfos.logger import hfoslog
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 Mapviews = [
     {

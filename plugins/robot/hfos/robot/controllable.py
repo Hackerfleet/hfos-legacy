@@ -12,19 +12,21 @@ Controllable: Patterns of remote control
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.schemata.defaultform import defaultform
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 ControllableSchema = {
     'id': '#controllable',
     'type': 'object',
     'name': 'controllable',
     'properties': {
-        'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                 'type': 'string',
-                 'title': 'Unique Controllable ID'
-                 },
+        'uuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Unique Controllable ID'
+            },
         'name': {'type': 'string'},
         'description': {'type': 'string'},
         'type': {'enum': ['analog', 'digital']},

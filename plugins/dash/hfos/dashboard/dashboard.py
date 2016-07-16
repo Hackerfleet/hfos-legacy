@@ -9,13 +9,13 @@ Module: Dashboard
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, error, warn, critical
 from datetime import datetime
 from hfos.events import updatesubscriptions, send
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class Dashboard(ConfigurableComponent):
@@ -44,4 +44,3 @@ class Dashboard(ConfigurableComponent):
     def objectcreation(self, event):
         if event.schema == 'dashboardconfig':
             self.log("Dashboarconfig was modified: ", event)
-

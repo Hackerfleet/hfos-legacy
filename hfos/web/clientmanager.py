@@ -11,8 +11,6 @@ Coordinates clients communicating via websocket
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 import json
 from uuid import uuid4
 from circuits.net.events import write
@@ -25,6 +23,8 @@ from hfos.logger import hfoslog, error, warn, critical, debug, info, verbose, \
 from hfos.web.clientobjects import Socket, Client, User
 from hfos.database import objects
 import datetime
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class ComplexEncoder(json.JSONEncoder):

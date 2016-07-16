@@ -10,9 +10,10 @@ Doing rather not much except serve as module component entrypoint.
 
 """
 
+from hfos.component import ConfigurableComponent
+
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from hfos.component import ConfigurableComponent
 
 class ProjectService(ConfigurableComponent):
     """
@@ -21,5 +22,5 @@ class ProjectService(ConfigurableComponent):
 
     configprops = {}
 
-    def __init__(self,  **kwargs):
+    def __init__(self, **kwargs):
         super(ProjectService, self).__init__('PROJECT', **kwargs)

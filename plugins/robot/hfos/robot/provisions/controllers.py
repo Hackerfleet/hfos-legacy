@@ -13,11 +13,11 @@ Controllables for several predefined functions.
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.provisions.base import provisionList
 from hfos.database import controllerobject
 from hfos.logger import hfoslog
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 Controllers = [
     {'name': 'MS0x00 - Logitech Extreme 3D Pro',
@@ -57,9 +57,11 @@ Controllers = [
      ]}
 ]
 
+
 def provision():
     provisionList(Controllers, controllerobject)
     hfoslog('[PROV] Provisioning: Controllers: Done.')
+
 
 if __name__ == "__main__":
     provision()

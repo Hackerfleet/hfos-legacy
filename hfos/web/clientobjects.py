@@ -1,4 +1,20 @@
-__author__ = 'riot'
+"""
+Client Objects
+==============
+
+Contains
+--------
+
+Socket:
+Client:
+User:
+
+:copyright: (C) 2011-2016 riot@hackerfleet.org
+:license: GPLv3 (See LICENSE)
+
+"""
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class Socket(object):
@@ -22,7 +38,8 @@ class Client(object):
     Client metadata object
     """
 
-    def __init__(self, sock, ip, clientuuid, useruuid=None, name='', config=None):
+    def __init__(self, sock, ip, clientuuid, useruuid=None, name='',
+                 config=None):
         """
 
         :param sock: Associated connection

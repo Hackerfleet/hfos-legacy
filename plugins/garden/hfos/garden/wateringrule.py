@@ -21,8 +21,10 @@ WateringRuleSchema = {
     'id': '#',
     'name': 'wateringrule',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique WateringRule ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name', 'description': 'Name of WateringRule'},
+        'uuid': {'type': 'string', 'minLength': 36,
+                 'title': 'Unique WateringRule ID', 'description': 'HIDDEN'},
+        'name': {'type': 'string', 'title': 'Name',
+                 'description': 'Name of WateringRule'},
         'status': {'type': 'bool', 'title': 'Status', 'description':
             'If watering rule is active'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',

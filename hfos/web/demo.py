@@ -8,13 +8,12 @@ Module: Web.Demo
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from random import randint
 import json
-
 from hfos.component import ConfigurableComponent
 from hfos.events import broadcast
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class WebDemo(ConfigurableComponent):

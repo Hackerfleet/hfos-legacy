@@ -115,7 +115,6 @@ class logevent(Event):
         self.sourceloc = sourceloc
         self.content = content
 
-
     def __str__(self):
         return str(self.content)
 

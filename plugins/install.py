@@ -56,7 +56,8 @@ class PluginSelector(urwid.ListBox):
         options = []
         for item in sorted(Plugins.keys()):
             state = Plugins[item]
-            option = urwid.CheckBox(item, state, on_state_change=self.stateChange)
+            option = urwid.CheckBox(item, state,
+                                    on_state_change=self.stateChange)
             options.append(option)
 
         self.SFLW = urwid.SimpleFocusListWalker(options)
@@ -64,7 +65,8 @@ class PluginSelector(urwid.ListBox):
         self._invalidate()
 
     def stateChange(self, option, state):
-        # footer.set_text(('banner', u"HELLO!!! %s %s " % (option._label.text, state)))
+        # footer.set_text(('banner', u"HELLO!!! %s %s " % (
+        # option._label.text, state)))
         Plugins[option._label.text] = state
 
 
@@ -72,7 +74,8 @@ class Installer(urwid.Frame):
     def __init__(self):
         self.header = urwid.Text(('title', u" HFOS Plugins "), align='center')
         self.headermap = urwid.AttrMap(self.header, 'streak')
-        self.footer = urwid.Text(('banner', u" Select plugins to install! "), align='center')
+        self.footer = urwid.Text(('banner', u" Select plugins to install! "),
+                                 align='center')
         self.footermap = urwid.AttrWrap(self.footer, 'streak')
 
         self.allbutton = urwid.Button(u"Select All", self.onAllButton)
@@ -100,19 +103,23 @@ class Installer(urwid.Frame):
 
         self.wraps = []
         for button in self.buttons:
-            self.wraps.append(urwid.AttrWrap(button, 'button normal', 'button select'))
+            self.wraps.append(
+                urwid.AttrWrap(button, 'button normal', 'button select'))
 
         self.buttonlb = urwid.ListBox(urwid.SimpleListWalker(self.wraps))
 
         self.selector = PluginSelector()
-        self.pluginwrap = urwid.AttrWrap(self.selector, 'list normal', 'list select')
+        self.pluginwrap = urwid.AttrWrap(self.selector, 'list normal',
+                                         'list select')
 
         self.contentframe = urwid.Pile([self.pluginwrap, self.buttonlb])
 
-        self.padding = urwid.Padding(self.contentframe, align='center', width=('relative', 50))
+        self.padding = urwid.Padding(self.contentframe, align='center',
+                                     width=('relative', 50))
         self.filler = urwid.Filler(self.padding, height=('relative', 50))
 
-        urwid.Frame.__init__(self, body=self.filler, header=self.headermap, footer=self.footermap)
+        urwid.Frame.__init__(self, body=self.filler, header=self.headermap,
+                             footer=self.footermap)
 
         self.loop = urwid.MainLoop(self, palette, unhandled_input=exit_on_q)
         self.loop.run()
@@ -147,9 +154,12 @@ class Installer(urwid.Frame):
                 plugins.append(plugin)
 
         installtext = urwid.Text(('title', u"Installing"), align='center')
-        installinfo = urwid.Text(('title', u"Preparing installation"), align='center')
-        installwrap = urwid.AttrMap(urwid.Pile([installtext, blank, installinfo, blank]), 'bg')
-        installprogressbar = urwid.ProgressBar('title', 'streak', done=len(plugins))
+        installinfo = urwid.Text(('title', u"Preparing installation"),
+                                 align='center')
+        installwrap = urwid.AttrMap(
+            urwid.Pile([installtext, blank, installinfo, blank]), 'bg')
+        installprogressbar = urwid.ProgressBar('title', 'streak',
+                                               done=len(plugins))
 
         installlb = urwid.AttrMap(urwid.ListBox(
             urwid.SimpleListWalker([
@@ -171,8 +181,12 @@ class Installer(urwid.Frame):
 
         for plugin in plugins:
             pluginlog = {'out': [], 'err': []}
-            self.footer.set_text(('banner', u" Using %s as installation mode to install %s " % (mode, plugin)))
-            setup = Popen(['python', 'setup.py', mode], cwd=plugin + "/", stderr=PIPE, stdout=PIPE)
+            self.footer.set_text(('banner',
+                                  u" Using %s as installation mode to "
+                                  u"install %s " % (
+                                  mode, plugin)))
+            setup = Popen(['python', 'setup.py', mode], cwd=plugin + "/",
+                          stderr=PIPE, stdout=PIPE)
             setup.wait()
             pluginlog = setup.communicate()
 

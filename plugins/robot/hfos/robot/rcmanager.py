@@ -11,12 +11,11 @@ Chat manager
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.component import ConfigurableComponent
-
 from hfos.logger import error, warn, critical
 from hfos.events import remotecontrolupdate, send
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class RemoteControlManager(ConfigurableComponent):
@@ -38,7 +37,8 @@ class RemoteControlManager(ConfigurableComponent):
         self.log("Started")
 
     def clientdisconnect(self, event):
-        """Handler to deal with a possibly disconnected remote controlling client
+        """Handler to deal with a possibly disconnected remote controlling
+        client
         :param event: ClientDisconnect Event
         """
 
@@ -64,22 +64,30 @@ class RemoteControlManager(ConfigurableComponent):
             clientuuid = event.client.uuid
 
             if action == "takeControl":
-                self.log("Client wants to remote control: ", username, clientname, lvl=warn)
+                self.log("Client wants to remote control: ", username,
+                         clientname, lvl=warn)
                 if not self.remotecontroller:
                     self.log("Success!")
                     self.remotecontroller = clientuuid
-                    self.fireEvent(send(clientuuid, {'component': 'remotectrl', 'action': 'takeControl', 'data': True}))
+                    self.fireEvent(send(clientuuid, {'component': 'remotectrl',
+                                                     'action': 'takeControl',
+                                                     'data': True}))
                 else:
                     self.log("No, we're already being remote controlled!")
                     self.fireEvent(
-                        send(clientuuid, {'component': 'remotectrl', 'action': 'takeControl', 'data': False}))
+                        send(clientuuid, {'component': 'remotectrl',
+                                          'action': 'takeControl',
+                                          'data': False}))
                 return
             elif action == "leaveControl":
                 if self.remotecontroller == event.client.uuid:
-                    self.log("Client leaves control!", username, clientname, lvl=warn)
+                    self.log("Client leaves control!", username, clientname,
+                             lvl=warn)
                     self.remotecontroller = None
                     self.fireEvent(
-                        send(clientuuid, {'component': 'remotectrl', 'action': 'takeControl', 'data': False}))
+                        send(clientuuid, {'component': 'remotectrl',
+                                          'action': 'takeControl',
+                                          'data': False}))
                 return
             elif action == "controlData":
                 self.log("Control data received: ", data)

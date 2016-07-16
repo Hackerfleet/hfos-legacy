@@ -8,13 +8,12 @@ Module: SchemaManager
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.component import ConfigurableComponent
-
 from hfos.database import schemastore
 from hfos.logger import hfoslog, error
 from hfos.events import send
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class SchemaManager(ConfigurableComponent):

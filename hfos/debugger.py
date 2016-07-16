@@ -11,23 +11,21 @@ Debugger overlord
 
 """
 from circuits.core.workers import Worker, task
-
-from hfos.events import frontendbuildrequest, componentupdaterequest, logtailrequest
+from hfos.events import frontendbuildrequest, componentupdaterequest, \
+    logtailrequest
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 from circuits.core.events import Event
 from circuits.core.handlers import handler, reprhandler
 from circuits.io import stdin
-
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, critical, warn
 from hfos.events import send
 from hfos.database import objectmodels
-
 from uuid import uuid4
-
 import json
+
 try:
     import objgraph
     from guppy import hpy
@@ -36,6 +34,7 @@ except ImportError:
             emitter="DBG")
 
 import inspect
+
 
 class HFDebugger(ConfigurableComponent):
     """
@@ -91,7 +90,7 @@ class HFDebugger(ConfigurableComponent):
 
             self.log("\n".join(s), lvl=critical)
 
-            alert =  {
+            alert = {
                 'component': 'alert',
                 'action': 'danger',
                 'data': {
@@ -104,7 +103,8 @@ class HFDebugger(ConfigurableComponent):
                                     sendtype='user'))
 
         except Exception as e:
-            self.log("Exception during exception handling: ", e, type(e), lvl=critical)
+            self.log("Exception during exception handling: ", e, type(e),
+                     lvl=critical)
 
     def debugrequest(self, event):
         try:
@@ -112,7 +112,8 @@ class HFDebugger(ConfigurableComponent):
 
             if event.action == "storejson":
                 self.log("Storing received object to /tmp", lvl=critical)
-                fp = open('/tmp/hfosdebugger_' + str(event.user.useruuid) + "_" + str(uuid4()), "w")
+                fp = open('/tmp/hfosdebugger_' + str(
+                    event.user.useruuid) + "_" + str(uuid4()), "w")
                 json.dump(event.data, fp, indent=True)
                 fp.close()
             if event.action == "memdebug":
@@ -122,11 +123,13 @@ class HFDebugger(ConfigurableComponent):
                 self.log("Memory growth since last call:", lvl=critical)
                 objgraph.show_growth()
             if event.action == "graph":
-                objgraph.show_backrefs([self.root], max_depth=42, filename='backref-graph.png')
+                objgraph.show_backrefs([self.root], max_depth=42,
+                                       filename='backref-graph.png')
                 self.log("Backref graph written.", lvl=critical)
             if event.action == "exception":
                 class TestException(BaseException):
                     pass
+
                 raise TestException
             if event.action == "heap":
                 self.log("Heap log:", self.heapy.heap(), lvl=critical)
@@ -140,10 +143,12 @@ class HFDebugger(ConfigurableComponent):
 
 
         except Exception as e:
-            self.log("Exception during debug handling:", e, type(e), lvl=critical)
+            self.log("Exception during debug handling:", e, type(e),
+                     lvl=critical)
 
 
 from pprint import pprint
+
 
 class Logger(ConfigurableComponent):
     """
@@ -179,6 +184,7 @@ class Logger(ConfigurableComponent):
 
         logentry.save()
 
+
 class CLI(ConfigurableComponent):
     """
     Command Line Interface support
@@ -186,8 +192,7 @@ class CLI(ConfigurableComponent):
 
     configprops = {}
 
-
-    def __init__(self,  *args):
+    def __init__(self, *args):
         super(CLI, self).__init__("CLI", *args)
 
         self.hooks = {}
@@ -218,7 +223,7 @@ class CLI(ConfigurableComponent):
                 self.log("Sending %s frontend rebuild event" % ("(forced)"
                                                                 if 'FORCE'
                                                                    in args
-                else ''))
+                                                                else ''))
                 self.fireEvent(frontendbuildrequest(force='FORCE' in args,
                                                     install='INSTALL' in args),
                                "setup")

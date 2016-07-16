@@ -13,11 +13,11 @@ Predefined groups of layers.
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.provisions.base import provisionList
 from hfos.database import objectmodels
 from hfos.logger import hfoslog
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 layergroups = [
     {
@@ -37,7 +37,7 @@ layergroups = [
         "notes": "ESRI Satellite and Open Sea Map",
         "layers": [
             '19e5704e-68a2-435e-9f21-ac389973cc7a',  # ESRI Satellite Shade
-            '2bedb0d2-be9f-479c-9516-256cd5a0baae'   # OpenSeaMap
+            '2bedb0d2-be9f-479c-9516-256cd5a0baae'  # OpenSeaMap
 
         ]
     }, {
@@ -53,10 +53,12 @@ layergroups = [
     }
 ]
 
+
 def provision():
     provisionList(layergroups, objectmodels['layergroup'], overwrite=True,
                   clear=True)
     hfoslog('Provisioning: Layergroups: Done.', emitter='PROVISIONS')
+
 
 if __name__ == "__main__":
     provision()

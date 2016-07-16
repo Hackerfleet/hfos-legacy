@@ -13,11 +13,11 @@ Just creates a fulltext searchable index over the username field.
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.provisions.base import provisionList
 from hfos.database import userobject
 from hfos.logger import hfoslog
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 Users = [
 ]

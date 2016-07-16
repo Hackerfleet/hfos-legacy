@@ -16,17 +16,14 @@ from circuits import Component, Timer, Event
 from circuits.net.sockets import TCPClient
 from circuits.net.events import connect, read
 from circuits.io.serial import Serial
-
 from decimal import Decimal
 from hfos.component import ConfigurableComponent
-
 from hfos.database import ValidationError
 from hfos.events import sensordata
 from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
 from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 
 try:
     from pynmea2 import parse
@@ -39,9 +36,10 @@ try:
     import serial
 except ImportError:
     serial = None
-    hfoslog("[NMEA] No serialport found. Serial bus NMEA devices will be unavailable, install requirements.txt!",
-            lvl=critical, emitter="NMEA")
-
+    hfoslog(
+        "[NMEA] No serialport found. Serial bus NMEA devices will be "
+        "unavailable, install requirements.txt!",
+        lvl=critical, emitter="NMEA")
 
 
 def serial_ports():
@@ -52,7 +50,8 @@ def serial_ports():
         :returns:
             A list of the serial ports available on the system
 
-        Courtesy: Thomas ( http://stackoverflow.com/questions/12090503/listing-available-com-ports-with-python )
+        Courtesy: Thomas ( http://stackoverflow.com/questions/12090503
+        /listing-available-com-ports-with-python )
     """
     if sys.platform.startswith('win'):
         ports = ['COM%s' % (i + 1) for i in range(256)]
@@ -77,7 +76,8 @@ def serial_ports():
 
 class NMEAParser(ConfigurableComponent):
     """
-    Parses raw data (e.g. from a serialport) for NMEA data and sends single sentences out.
+    Parses raw data (e.g. from a serialport) for NMEA data and sends single
+    sentences out.
     """
     ports = serial_ports()
     configprops = {
@@ -130,9 +130,11 @@ class NMEAParser(ConfigurableComponent):
 
         portup = False
         if self.config.connectiontype == 'USB/Serial':
-            self.log("Connecting to serial port:", self.config.serialfile, lvl=debug)
+            self.log("Connecting to serial port:", self.config.serialfile,
+                     lvl=debug)
             try:
-                self.serial = Serial(self.config.serialfile, channel=self.channel).register(self)
+                self.serial = Serial(self.config.serialfile,
+                                     channel=self.channel).register(self)
                 self.bus = self.config.serialfile
                 portup = True
             except serial.SerialException as e:
@@ -151,7 +153,8 @@ class NMEAParser(ConfigurableComponent):
 
     def ready(self, socket):
         if self.config.connectiontype == 'TCP':
-            self.log("Connecting to tcp/ip GPS network service:", self.config.host, ':', self.config.port, lvl=debug)
+            self.log("Connecting to tcp/ip GPS network service:",
+                     self.config.host, ':', self.config.port, lvl=debug)
             self.fire(connect(self.config.host, self.config.port))
 
     def _parse(self, data):
@@ -179,7 +182,8 @@ class NMEAParser(ConfigurableComponent):
                         s.add(el)
                         yield el
                     else:
-                        self.log("Duplicate sentence received: ", el, lvl=debug)
+                        self.log("Duplicate sentence received: ", el,
+                                 lvl=debug)
 
             sentences = list(unique(sentences))
         except Exception as e:
@@ -210,7 +214,7 @@ class NMEAParser(ConfigurableComponent):
             for sentence in nmeadata:
                 self.log("Sentence: ", sentence.fields, sentence.talker,
                          sentence.sentence_type, type(sentence),
-                lvl=verbose)
+                         lvl=verbose)
 
                 for item in sentence.fields:
                     itemname = item[1]
@@ -222,9 +226,10 @@ class NMEAParser(ConfigurableComponent):
                                 value = float(value)
                             elif item[2] == int:
                                 value = int(value)
-                        #if sensordatatypes[itemname]['type'] == "string" or
+                                # if sensordatatypes[itemname]['type'] ==
+                                # "string" or
                                 #  (type(value) not in (str, int, float)):
-                        #    value = str(value)
+                        # value = str(value)
                         # hfoslog("{",itemname,": ",value, "}", lvl=critical)
                         rawdata.update({
                             sentence.sentence_type + '_' + itemname: value
@@ -234,22 +239,30 @@ class NMEAParser(ConfigurableComponent):
                         # hfoslog(data, lvl=critical)
 
 
-                        # if type(sentence) in [types.GGA, types.GLL, types.GSV, types.MWD]:
+                        # if type(sentence) in [types.GGA, types.GLL,
+                        # types.GSV, types.MWD]:
                         #     data = sensordataobject()
                         #     data.Time_Created = sen_time
                         #     if type(sentence) == types.GGA:
-                        #         data.GPS_LatLon = str((sentence.lat, sentence.lat_dir,
-                        #                                sentence.lon, sentence.lon_dir))
+                        #         data.GPS_LatLon = str((sentence.lat,
+                        # sentence.lat_dir,
+                        #                                sentence.lon,
+                        # sentence.lon_dir))
                         #         data.GPS_SatCount = int(sentence.num_sats)
                         #         data.GPS_Quality = int(sentence.gps_qual)
                         #     elif type(sentence) == types.GLL:
-                        #         data.GPS_LatLon = str((sentence.lat, sentence.lat_dir,
-                        #                                sentence.lon, sentence.lon_dir))
+                        #         data.GPS_LatLon = str((sentence.lat,
+                        # sentence.lat_dir,
+                        #                                sentence.lon,
+                        # sentence.lon_dir))
                         #     elif type(sentence) == types.GSV:
-                        #         data.GPS_SatCount = int(sentence.num_sv_in_view)
+                        #         data.GPS_SatCount = int(
+                        # sentence.num_sv_in_view)
                         #     elif type(sentence) == types.MWD:
-                        #         data.Wind_Direction_True = int(sentence.direction_true)
-                        #         data.Wind_Speed_True = int(sentence.wind_speed_meters)
+                        #         data.Wind_Direction_True = int(
+                        # sentence.direction_true)
+                        #         data.Wind_Speed_True = int(
+                        # sentence.wind_speed_meters)
 
             return rawdata
             # else:
@@ -267,26 +280,27 @@ class NMEAParser(ConfigurableComponent):
         if not parse:
             return
 
-        #self.log("Incoming data: ", '%.50s ...' % data, lvl=debug)
+        # self.log("Incoming data: ", '%.50s ...' % data, lvl=debug)
         nmeadata, nmeatime = self._parse(data)
 
-        #self.log("NMEA Parsed data:", nmeadata, lvl=debug)
+        # self.log("NMEA Parsed data:", nmeadata, lvl=debug)
 
         sensordatapackage = self._handle(nmeadata)
 
-
-        #self.log("Sensor data:", sensordatapackage, lvl=debug)
+        # self.log("Sensor data:", sensordatapackage, lvl=debug)
 
         if sensordatapackage:
-            #pprint(sensordatapackage)
+            # pprint(sensordatapackage)
             self.fireEvent(sensordata(sensordatapackage, nmeatime, self.bus),
-                       "navdata")
-        # self.log("Unhandled data: \n", self.unparsable, "\n", self.unhandled, lvl=warn)
+                           "navdata")
+            # self.log("Unhandled data: \n", self.unparsable, "\n",
+            # self.unhandled, lvl=warn)
 
 
 class NMEAPlayback(ConfigurableComponent):
     """
-    Plays back previously recorded NMEA log files. Handy for debugging and demoing purposes.
+    Plays back previously recorded NMEA log files. Handy for debugging and
+    demoing purposes.
     """
 
     configprops = {
@@ -308,7 +322,8 @@ class NMEAPlayback(ConfigurableComponent):
 
     def __init__(self, *args, **kwargs):
         super(NMEAPlayback, self).__init__('NMEAP', *args, **kwargs)
-        self.log("Playback component started with", self.config.delay, "seconds interval.")
+        self.log("Playback component started with", self.config.delay,
+                 "seconds interval.")
 
         if self.config.logfile != '':
             with open(self.config.logfile, 'r') as logfile:
@@ -319,7 +334,7 @@ class NMEAPlayback(ConfigurableComponent):
 
             self.position = 0
 
-            Timer(self.config.delay/1000.0, Event.create('nmeaplayback'),
+            Timer(self.config.delay / 1000.0, Event.create('nmeaplayback'),
                   self.channel, persist=True).register(self)
         else:
             self.log("No logfile specified.", lvl=warn)

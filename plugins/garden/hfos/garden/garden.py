@@ -9,13 +9,13 @@ Module: Garden
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, error, warn, critical
 from datetime import datetime
 from hfos.events import updatesubscriptions, send
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class Garden(ConfigurableComponent):
@@ -49,9 +49,9 @@ class Garden(ConfigurableComponent):
     def objectcreation(self, event):
         if event.schema == 'wateringrule':
             self.log("Reloading rules")
-        self._reloadWateringRules()
+            self._reloadWateringRules()
 
-    def _reloadWateringRule(self):
+    def _reloadWateringRules(self):
         """
         Reloads all stored watering rules.
         """

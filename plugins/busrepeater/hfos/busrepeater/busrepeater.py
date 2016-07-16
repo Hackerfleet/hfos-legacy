@@ -9,9 +9,10 @@ Module BusRepeater
 
 """
 
+from hfos.component import ConfigurableComponent
+
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-from hfos.component import ConfigurableComponent
 
 class BusRepeater(ConfigurableComponent):
     """

@@ -31,6 +31,7 @@ class navdatarequest(AuthorizedEvent):
         super(navdatarequest, self).__init__(*args)
         hfoslog('Navdatarequest created:', args, emitter='NAVDATA', lvl=events)
 
+
 AuthorizedEvents['navdata'] = navdatarequest
 
 
@@ -154,7 +155,7 @@ class NavData(ConfigurableComponent):
                 self.sensed[name] = ref
 
                 if ref.lastvalue != str(value):
-                    #self.log("Reference outdated:", ref._fields)
+                    # self.log("Reference outdated:", ref._fields)
 
                     item = {
                         'value': value,
@@ -162,7 +163,7 @@ class NavData(ConfigurableComponent):
                         'type': name
                     }
 
-                    #self.log("Subscriptions:", self.subscriptions, ref.name)
+                    # self.log("Subscriptions:", self.subscriptions, ref.name)
                     if ref.name in self.subscriptions:
 
                         packet = {
@@ -201,7 +202,7 @@ class NavData(ConfigurableComponent):
         try:
             self.fireEvent(referenceframe(
                 {'data': self.referenceframe, 'ages': self.referenceages}),
-                           "navdata")
+                "navdata")
             self.intervalcount += 1
 
             if self.intervalcount == self.passiveinterval:
@@ -222,10 +223,8 @@ class NavData(ConfigurableComponent):
 
 
 class VesselManager(ConfigurableComponent):
-
     channel = "navdata"
     configprops = {}
 
     def __init__(self, *args):
         super(VesselManager, self).__init__('VESSEL', *args)
-

@@ -21,7 +21,8 @@ MapCoordsSchema = {
     "type": "object",
     "additionalProperties": True,
     "title": "Root schema.",
-    "description": "An explanation about the puropose of this instance described by this schema.",
+    "description": "An explanation about the puropose of this instance "
+                   "described by this schema.",
     "name": "mapcoords",
     "properties": {
         "lat": {

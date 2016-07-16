@@ -22,8 +22,10 @@ CountableSchema = {
     'id': '#',
     'name': 'countable',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Countable ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name', 'description': 'Name of Countable'},
+        'uuid': {'type': 'string', 'minLength': 36,
+                 'title': 'Unique Countable ID', 'description': 'HIDDEN'},
+        'name': {'type': 'string', 'title': 'Name',
+                 'description': 'Name of Countable'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
                   'description': 'Entry notes'},
         'amount': {'type': 'number', 'title': 'Amount counted'}
@@ -56,7 +58,8 @@ CountableForm = [
     {
         'key': 'count',
         'type': 'button',
-        'onClick': '$ctrl.formAction("countablewatcher", "count", $ctrl.model.uuid)',
+        'onClick': '$ctrl.formAction("countablewatcher", "count", '
+                   '$ctrl.model.uuid)',
         'title': '+1'
     },
     editbuttons

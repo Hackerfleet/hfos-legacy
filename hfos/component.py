@@ -6,7 +6,8 @@ Configurable Component
 Contains
 --------
 
-Systemwide configurable component definition. Stores configuration either in database or as json files.
+Systemwide configurable component definition. Stores configuration either in
+database or as json files.
 Enables editing of configuration through frontend.
 
 See also
@@ -21,23 +22,19 @@ Provisions
 
 from hfos.schemata.component import ComponentBaseConfigSchema
 from hfos.logger import hfoslog, warn, critical, error, debug, verbose
-
 from circuits import Component
 from jsonschema import ValidationError
 from warmongo import model_factory
-
 from random import randint
-
 from uuid import uuid4
-
 from copy import deepcopy
 import inspect
 from sys import exc_info
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-
 from pprint import pprint
+
 
 class ConfigurableComponent(Component):
     names = []
@@ -45,10 +42,7 @@ class ConfigurableComponent(Component):
 
     def __init__(self, uniquename=None, *args, **kwargs):
 
-
         super(ConfigurableComponent, self).__init__(*args, **kwargs)
-
-
 
         self.uniquename = ""
 
@@ -57,7 +51,8 @@ class ConfigurableComponent(Component):
                 self.uniquename = uniquename
                 self.names.append(uniquename)
             else:
-                hfoslog("Unique component added twice: ", uniquename, lvl=critical)
+                hfoslog("Unique component added twice: ", uniquename,
+                        lvl=critical)
         else:
             while True:
                 uniquename = "%s%s" % (self.name, randint(0, 32768))
@@ -71,29 +66,30 @@ class ConfigurableComponent(Component):
         self.configschema = deepcopy(ComponentBaseConfigSchema)
 
         configprops = self.configprops
-        #configprops['default'] = {}
+        # configprops['default'] = {}
 
         self.configschema['schema']['properties'].update(self.configprops)
 
-        #self.configschema['schema']['properties']['settings'] = {
+        # self.configschema['schema']['properties']['settings'] = {
         #    'type': 'object',
         #    'id': '#client',
         #    'name': self.uniquename,
         #    'properties': self.configprops,
         #    'default': {}
-        #}
-        #self.log("[UNIQUECOMPONENT] Config Schema: ", self.configschema,
+        # }
+        # self.log("[UNIQUECOMPONENT] Config Schema: ", self.configschema,
         #         lvl=critical)
-        #pprint(self.configschema)
+        # pprint(self.configschema)
 
-        #self.configschema['name'] = self.uniquename
-        #self.configschema['id'] = "#" + self.uniquename
+        # self.configschema['name'] = self.uniquename
+        # self.configschema['id'] = "#" + self.uniquename
 
-        #schemastore[self.uniquename] = {'schema': self.configschema, 'form': self.configform}
+        # schemastore[self.uniquename] = {'schema': self.configschema,
+        # 'form': self.configform}
 
         self.componentmodel = model_factory(self.configschema['schema'])
-        #self.log("Component model: ", lvl=critical)
-        #pprint(self.componentmodel._schema)
+        # self.log("Component model: ", lvl=critical)
+        # pprint(self.componentmodel._schema)
 
 
         self._readConfig()
@@ -103,7 +99,8 @@ class ConfigurableComponent(Component):
                 self._setConfig()
                 self._writeConfig()
             except ValidationError as e:
-                self.log("Error during configuration reading: ", e, type(e), exc=True)
+                self.log("Error during configuration reading: ", e, type(e),
+                         exc=True)
 
     def unregister(self):
         self.names.remove(self.uniquename)
@@ -115,7 +112,7 @@ class ConfigurableComponent(Component):
             self.log("Configuration read.", lvl=debug)
         else:
             self.log("No configuration found.", lvl=warn)
-        #self.log(self.config)
+            # self.log(self.config)
 
     def _writeConfig(self):
         if not self.config:
@@ -127,16 +124,17 @@ class ConfigurableComponent(Component):
             self.config.save()
             self.log("Configuration stored.")
         except ValidationError as e:
-            self.log("Not storing invalid configuration: ", e, type(e), exc=True, lvl=error)
+            self.log("Not storing invalid configuration: ", e, type(e),
+                     exc=True, lvl=error)
 
     def _setConfig(self, config={}):
         try:
-            #pprint(self.configschema)
+            # pprint(self.configschema)
             self.config = self.componentmodel(config)
-            #self.log("Config schema:", lvl=critical)
-            #pprint(self.config.__dict__)
+            # self.log("Config schema:", lvl=critical)
+            # pprint(self.config.__dict__)
 
-            #pprint(self.config._fields)
+            # pprint(self.config._fields)
 
             try:
                 name = self.config.name
@@ -146,7 +144,8 @@ class ConfigurableComponent(Component):
             try:
                 self.config.name = self.uniquename
             except Exception as e:
-                self.log("Cannot set component name for configuration: ", e, type(e), self.name, exc=True, lvl=critical)
+                self.log("Cannot set component name for configuration: ", e,
+                         type(e), self.name, exc=True, lvl=critical)
 
             try:
                 uuid = self.config.uuid
@@ -172,7 +171,8 @@ class ConfigurableComponent(Component):
                 self.config.componentclass = self.name
 
         except ValidationError as e:
-            self.log("Not setting invalid component configuration: ", e, type(e), exc=True, lvl=error)
+            self.log("Not setting invalid component configuration: ", e,
+                     type(e), exc=True, lvl=error)
 
         self.log("Fields:", self.config._fields, lvl=verbose)
 
@@ -201,8 +201,7 @@ class ExampleComponent(ConfigurableComponent):
     }
 
     def __init__(self, *args, **kwargs):
-
         super(ExampleComponent, self).__init__("EXAMPLE", *args, **kwargs)
 
         self.log("Example component started.")
-        #self.log(self.config)
+        # self.log(self.config)

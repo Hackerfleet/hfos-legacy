@@ -11,12 +11,11 @@ Major HFOS event declarations
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from circuits.core import Event
-
 from hfos.logger import hfoslog, debug, critical, verbose, warn, events
 from hfos.web.clientobjects import User
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class AuthorizedEvent(Event):
@@ -79,7 +78,8 @@ class send(Event):
         self.sendtype = sendtype
         self.raw = raw
 
-        hfoslog("[CM-EVENT] Send event generated:", uuid, packet, sendtype, lvl=events)
+        hfoslog("[CM-EVENT] Send event generated:", uuid, packet, sendtype,
+                lvl=events)
 
 
 class broadcast(Event):
@@ -96,7 +96,8 @@ class broadcast(Event):
         self.broadcasttype = broadcasttype
         self.content = content
 
-        hfoslog("[CM-EVENT] Broadcast event generated:", broadcasttype, content, lvl=events)
+        hfoslog("[CM-EVENT] Broadcast event generated:", broadcasttype,
+                content, lvl=events)
 
 
 class clientdisconnect(Event):
@@ -115,7 +116,8 @@ class clientdisconnect(Event):
         self.clientuuid = clientuuid
         self.useruuid = useruuid
 
-        hfoslog("[CM-EVENT] Client disconnect event generated:", clientuuid, useruuid, lvl=events)
+        hfoslog("[CM-EVENT] Client disconnect event generated:", clientuuid,
+                useruuid, lvl=events)
 
 
 class userlogin(Event):
@@ -134,7 +136,8 @@ class userlogin(Event):
         self.clientuuid = clientuuid
         self.useruuid = useruuid
 
-        hfoslog("[CM-EVENT] User login event generated:", clientuuid, useruuid, lvl=events)
+        hfoslog("[CM-EVENT] User login event generated:", clientuuid, useruuid,
+                lvl=events)
 
 
 # Authenticator Events
@@ -183,7 +186,8 @@ class authentication(Event):
         self.useruuid = useruuid
         self.sock = sock
 
-        hfoslog("[AUTH-EVENT] Authentication granted:", self.__dict__, lvl=events)
+        hfoslog("[AUTH-EVENT] Authentication granted:", self.__dict__,
+                lvl=events)
 
 
 class profilerequest(AuthorizedEvent):
@@ -197,7 +201,8 @@ class profilerequest(AuthorizedEvent):
         """
         super(profilerequest, self).__init__(*args)
 
-        hfoslog("[PROFILE-EVENT] Profile update request: ", self.__dict__, lvl=events)
+        hfoslog("[PROFILE-EVENT] Profile update request: ", self.__dict__,
+                lvl=events)
 
 
 # Schemata requests
@@ -223,7 +228,8 @@ class objectevent(Event):
         self.uuid = uuid
         self.schema = schema
 
-        hfoslog("[OBJECT-EVENT] Object event created: ", self.__doc__, self.__dict__, lvl=events)
+        hfoslog("[OBJECT-EVENT] Object event created: ", self.__doc__,
+                self.__dict__, lvl=events)
 
 
 # Backend-side object change
@@ -251,6 +257,7 @@ class objectcreation(objectevent):
 
 class objectdeletion(objectevent):
     """A stored object has been successfully deleted"""
+
 
 # Chat requests
 
@@ -373,7 +380,8 @@ class referenceframe(Event):
         """
         super(referenceframe, self).__init__()
         self.data = data
-        hfoslog("[NAVDATA-EVENT] Reference frame generated: ", data, lvl=events)
+        hfoslog("[NAVDATA-EVENT] Reference frame generated: ", data,
+                lvl=events)
 
 
 # Remote Control requests
@@ -395,14 +403,17 @@ class remotecontrolupdate(Event):
 class libraryrequest(AuthorizedEvent):
     pass
 
+
 class frontendbuildrequest(Event):
-    def __init__(self, force=False, install=False,  *args):
+    def __init__(self, force=False, install=False, *args):
         super(frontendbuildrequest, self).__init__(*args)
         self.force = force
         self.install = install
 
+
 class componentupdaterequest(frontendbuildrequest):
     pass
+
 
 class logtailrequest(AuthorizedEvent):
     pass

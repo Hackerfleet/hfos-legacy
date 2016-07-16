@@ -9,18 +9,15 @@ Module: CameraManager
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from uuid import uuid4
-
 from circuits import handler, Timer, Event
 from circuits.tools import tryimport
-
 import six
-
 from hfos.component import ConfigurableComponent
 from hfos.events import send
 from hfos.logger import error, debug
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 opencv = tryimport("cv2")
 
@@ -55,7 +52,8 @@ class CameraManager(ConfigurableComponent):
                     self.log("Found camera [", cam, "]: ", camera)
 
             self.log("Starting timer")
-            self.timer = Timer(0.05, Event.create("rec"), persist=True).register(self)
+            self.timer = Timer(0.05, Event.create("rec"),
+                               persist=True).register(self)
 
             self.log("Found cameras: ", self._cameras, lvl=debug)
         else:
@@ -86,9 +84,12 @@ class CameraManager(ConfigurableComponent):
                                            }
                         if six.PY3:
                             # noinspection PyArgumentList
-                            campacket = bytes(str(campacketheader), encoding="UTF8") + cvresult.tostring()
+                            campacket = bytes(str(campacketheader),
+                                              encoding="UTF8") + \
+                                        cvresult.tostring()
                         else:
-                            campacket = bytes(str(campacketheader)) + cvresult.tostring()
+                            campacket = bytes(
+                                str(campacketheader)) + cvresult.tostring()
 
                         self._broadcast(campacket, cam['uuid'])
                     else:
@@ -114,7 +115,8 @@ class CameraManager(ConfigurableComponent):
     def _broadcast(self, camerapacket, camerauuid):
         try:
             for recipient in self._subscribers[camerauuid]:
-                self.fireEvent(send(recipient, camerapacket, raw=True), "hfosweb")
+                self.fireEvent(send(recipient, camerapacket, raw=True),
+                               "hfosweb")
         except Exception as e:
             self.log("Failed broadcast: ", e, type(e), lvl=error)
 
@@ -170,12 +172,15 @@ class CameraManager(ConfigurableComponent):
 
                 clientuuid = event.client.uuid
             except Exception as e:
-                raise ValueError("[CAM] Problem during event unpacking:", e, type(e))
+                raise ValueError("[CAM] Problem during event unpacking:", e,
+                                 type(e))
 
             if action == 'list':
                 try:
                     dblist = self._generatecameralist()
-                    self.fireEvent(send(clientuuid, {'component': 'camera', 'action': 'list', 'data': dblist}),
+                    self.fireEvent(send(clientuuid, {'component': 'camera',
+                                                     'action': 'list',
+                                                     'data': dblist}),
                                    "hfosweb")
                 except Exception as e:
                     self.log("Listing error: ", e, type(e), lvl=error)

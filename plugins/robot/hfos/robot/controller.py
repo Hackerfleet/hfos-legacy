@@ -22,10 +22,12 @@ ControllerSchema = {
     'type': 'object',
     'name': 'controller',
     'properties': {
-        'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                 'type': 'string',
-                 'title': 'Unique Controller Configuration ID'
-                 },
+        'uuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Unique Controller Configuration ID'
+            },
         'name': {'type': 'string'},
         'description': {'type': 'string'},
         'mappings': {'type': 'array',
@@ -37,7 +39,9 @@ ControllerSchema = {
                              'controlbutton': {'type': 'integer'},
                              'controluuid': {
                                  'pattern':
-                                     '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                                     '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
+                                     'a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                                     'a-fA-F0-9]{12}$',
                                  'type': 'string',
                                  'title': 'Associated uuid of Controllable'
                              },

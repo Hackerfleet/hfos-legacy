@@ -10,12 +10,11 @@ AlertManager
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from circuits import Component, handler
-
 from hfos.logger import hfoslog, error, warn, verbose, critical
 from hfos.events import broadcast, send
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class AlertManager(Component):
@@ -41,7 +40,8 @@ class AlertManager(Component):
     @handler('referenceframe', channel='navdata')
     def referenceframe(self, event):
         """Handles navigational reference frame updates.
-        These are necessary to assign geo coordinates to alerts and other misc things.
+        These are necessary to assign geo coordinates to alerts and other
+        misc things.
 
         :param event with incoming referenceframe message
         """
@@ -51,7 +51,8 @@ class AlertManager(Component):
         self.referenceframe = event.data
 
     def userlogin(self, event):
-        """Checks if an alert is ongoing and alerts the newly connected client, if so."""
+        """Checks if an alert is ongoing and alerts the newly connected
+        client, if so."""
 
         clientuuid = event.clientuuid
 
@@ -80,20 +81,25 @@ class AlertManager(Component):
                     self.mobalert = True
                     self._recordMobAlert()
 
-                    alertpacket = {'component': 'alert', 'action': 'mob', 'data': True}
+                    alertpacket = {'component': 'alert', 'action': 'mob',
+                                   'data': True}
                 else:
-                    hfoslog("[ALERT] MOB deactivation requested by ", event.user.account.name, lvl=warn)
+                    hfoslog("[ALERT] MOB deactivation requested by ",
+                            event.user.account.name, lvl=warn)
                     self.mobalert = False
 
-                    alertpacket = {'component': 'alert', 'action': 'mob', 'data': False}
+                    alertpacket = {'component': 'alert', 'action': 'mob',
+                                   'data': False}
             else:
-                hfoslog("[ALERT] Unsupported action requested: ", event, lvl=warn)
+                hfoslog("[ALERT] Unsupported action requested: ", event,
+                        lvl=warn)
                 return
 
             try:
                 self.fireEvent(broadcast("users", alertpacket))
             except Exception as e:
-                hfoslog("[ALERT] Transmission error before broadcast: %s" % e, lvl=error)
+                hfoslog("[ALERT] Transmission error before broadcast: %s" % e,
+                        lvl=error)
 
         except Exception as e:
             hfoslog("[ALERT] Error: '%s' %s" % (e, type(e)), lvl=error)

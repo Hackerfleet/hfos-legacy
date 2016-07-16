@@ -47,7 +47,7 @@ GeoObjectSchema = {
             'type': 'string',
             'title': 'Unique GeoObject Owner ID'
         },
-        'color': {'type': 'string', 'title': 'GeoObject Color', 'format': 
+        'color': {'type': 'string', 'title': 'GeoObject Color', 'format':
             'color',
                   'description': 'This GeoObject color indicator'},
         'shared': {'type': 'boolean', 'title': 'Shared GeoObject',

@@ -13,11 +13,11 @@ Controllables for several predefined functions.
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.provisions.base import provisionList
 from hfos.database import controllableobject
 from hfos.logger import hfoslog
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 Controllables = [
     {
@@ -79,9 +79,11 @@ Controllables = [
     },
 ]
 
+
 def provision():
     provisionList(Controllables, controllableobject)
     hfoslog('[PROV] Provisioning: Controllables: Done.')
+
 
 if __name__ == "__main__":
     provision()

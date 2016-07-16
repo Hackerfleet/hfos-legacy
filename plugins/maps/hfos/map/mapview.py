@@ -39,13 +39,13 @@ MapViewSchema = {
                        'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
             'title': 'Unique Mapview ID'
-            },
+        },
         'useruuid': {
             'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
                        'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
             'title': "Owner's unique user ID"
-            },
+        },
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
                  'description': 'Name of view'},
         'color': {'type': 'string', 'title': 'View Color', 'format': 'color',

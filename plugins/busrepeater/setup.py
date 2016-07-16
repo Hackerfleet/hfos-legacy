@@ -44,8 +44,8 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=[
-            'hfos>=1.0.0',
-            'hfos-navdata>=0.0.1',
+          'hfos>=1.0.0',
+          'hfos-navdata>=0.0.1',
       ],
       entry_points="""[hfos.components]
     busrepeater=hfos.busrepeater.busrepeater:BusRepeater

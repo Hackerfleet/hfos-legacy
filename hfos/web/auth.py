@@ -10,17 +10,15 @@ Authentication (and later Authorization) system
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from uuid import uuid4
-
 from circuits import handler
-
 from hfos.database import userobject, profileobject, clientconfigobject
 from hfos.events import authentication, send
 from hfos.logger import error, warn, debug, verbose
-
 from hfos.component import ConfigurableComponent
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
 
 class Authenticator(ConfigurableComponent):
     """
@@ -48,7 +46,7 @@ class Authenticator(ConfigurableComponent):
             e = None
             try:
                 clientconfig = clientconfigobject.find_one({'uuid':
-                                                                 event.requestedclientuuid})
+                                                                event.requestedclientuuid})
             except Exception as e:
                 clientconfig = None
 
@@ -64,13 +62,13 @@ class Authenticator(ConfigurableComponent):
                     self.log("Account: %s" % useraccount._fields, lvl=debug)
                 except Exception as e:
                     self.log("No userobject due to error: ", e, type(e),
-                            lvl=error)
+                             lvl=error)
 
                 try:
                     userprofile = profileobject.find_one(
                         {'uuid': str(useraccount.uuid)})
                     self.log("Profile: ", userprofile,
-                            useraccount.uuid, lvl=debug)
+                             useraccount.uuid, lvl=debug)
 
                     useraccount.passhash = ""
                     self.fireEvent(
@@ -83,15 +81,15 @@ class Authenticator(ConfigurableComponent):
                     self.log("Autologin successful!", lvl=error)
                 except Exception as e:
                     self.log("No profile due to error: ", e, type(e),
-                            lvl=error)
+                             lvl=error)
         else:
             self.log("Auth request for ", event.username,
-                    event.clientuuid)
+                     event.clientuuid)
 
             if (len(event.username) < 3) or (len(event.passhash) < 3):
                 self.log("Illegal username or password received, "
-                    "login cancelled",
-                    lvl=warn)
+                         "login cancelled",
+                         lvl=warn)
                 return
 
             useraccount = None
@@ -103,15 +101,15 @@ class Authenticator(ConfigurableComponent):
                 self.log("Account: %s" % useraccount._fields, lvl=debug)
             except Exception as e:
                 self.log("No userobject due to error: ", e, type(e),
-                        lvl=error)
+                         lvl=error)
 
             if useraccount:
                 self.log("User found.")
 
                 if useraccount.passhash == event.passhash:
                     self.log("Passhash matches, checking client and "
-                        "profile.",
-                        lvl=debug)
+                             "profile.",
+                             lvl=debug)
 
                     requestedclientuuid = event.requestedclientuuid
 
@@ -123,16 +121,16 @@ class Authenticator(ConfigurableComponent):
 
                     if clientconfig:
                         self.log("Checking client configuration permissions",
-                            lvl=debug)
+                                 lvl=debug)
                         if clientconfig.useruuid != useraccount.uuid:
                             clientconfig = None
                             self.log("Unauthorized client configuration "
-                                "requested",
-                                lvl=warn)
+                                     "requested",
+                                     lvl=warn)
                     else:
                         self.log("Unknown client configuration requested: ",
-                            requestedclientuuid, event.__dict__,
-                            lvl=warn)
+                                 requestedclientuuid, event.__dict__,
+                                 lvl=warn)
 
                     if not clientconfig:
                         self.log("Creating new default client configuration")
@@ -143,6 +141,7 @@ class Authenticator(ConfigurableComponent):
                         clientconfig.uuid = event.clientuuid
                         clientconfig.name = "New client"
                         clientconfig.description = "New client configuration " \
+                                                   "" \
                                                    "from " + useraccount.name
                         clientconfig.useruuid = useraccount.uuid
                         # TODO: Make sure the profile is only saved if the
@@ -153,19 +152,19 @@ class Authenticator(ConfigurableComponent):
                         userprofile = profileobject.find_one(
                             {'uuid': str(useraccount.uuid)})
                         self.log("Profile: ", userprofile,
-                                useraccount.uuid, lvl=debug)
+                                 useraccount.uuid, lvl=debug)
 
                         useraccount.passhash = ""
                         self.fireEvent(
                             authentication(useraccount.name, (
-                            useraccount, userprofile, clientconfig),
+                                useraccount, userprofile, clientconfig),
                                            event.clientuuid,
                                            useraccount.uuid,
                                            event.sock),
                             "auth")
                     except Exception as e:
                         self.log("No profile due to error: ", e, type(e),
-                                lvl=error)
+                                 lvl=error)
                 else:
                     self.log("Password was wrong!", lvl=warn)
 
@@ -183,19 +182,19 @@ class Authenticator(ConfigurableComponent):
             newuser.save()
         except Exception as e:
             self.log("Problem creating new user: ", type(e), e,
-                    lvl=error)
+                     lvl=error)
             return
         try:
             newprofile = profileobject({'uuid': str(newuser.uuid)})
             self.log("New profile uuid: ", newprofile.uuid,
-                    lvl=verbose)
+                     lvl=verbose)
 
             newprofile.components = {
                 'enabled': ["dashboard", "map", "weather", "settings"]}
             newprofile.save()
         except Exception as e:
             self.log("Problem creating new profile: ", type(e),
-                    e, lvl=error)
+                     e, lvl=error)
             return
 
         try:
@@ -209,7 +208,7 @@ class Authenticator(ConfigurableComponent):
             newclientconfig.save()
         except Exception as e:
             self.log("Problem creating new clientconfig: ",
-                    type(e), e, lvl=error)
+                     type(e), e, lvl=error)
             return
 
         try:
@@ -222,13 +221,13 @@ class Authenticator(ConfigurableComponent):
                 "auth")
             self.fireEvent(send(event.clientuuid, {'component': 'auth',
                                                    'action': 'new',
-                                                   'data': 'registration successful'
+                                                   'data': 'registration '
+                                                           'successful'
                                                    },
                                 sendtype="client"), "hfosweb")
         except Exception as e:
             self.log("Error during new account confirmation transmission",
-                e, lvl=error)
-
+                     e, lvl=error)
 
     def profilerequest(self, event):
         """Handles client profile actions
@@ -255,4 +254,5 @@ class Authenticator(ConfigurableComponent):
             self.log("Profile stored.")
             # TODO: Give client feedback
         except Exception as e:
-            self.log("General profile request error %s %s" % (type(e), e), lvl=error)
+            self.log("General profile request error %s %s" % (type(e), e),
+                     lvl=error)

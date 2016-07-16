@@ -10,14 +10,14 @@ OM manager
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from uuid import uuid4
 from hfos.component import ConfigurableComponent
 from hfos.logger import debug, error, warn, critical
 from hfos.events import send, objectcreation, objectchange, objectdeletion
 from hfos.database import objects, collections, ValidationError, schemastore
 import pymongo
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 WARNSIZE = 500
 
@@ -71,7 +71,8 @@ class ObjectManager(ConfigurableComponent):
                 objlist = []
 
                 if objects[schema].count(objectfilter) > WARNSIZE:
-                    self.log("Getting a very long list of items for ", schema, lvl=warn)
+                    self.log("Getting a very long list of items for ", schema,
+                             lvl=warn)
 
                 for item in objects[schema].find(objectfilter):
                     try:
@@ -90,8 +91,9 @@ class ObjectManager(ConfigurableComponent):
 
                             objlist.append(listitem)
                     except Exception as e:
-                        self.log("Faulty object or field: ", e, type(e), item._fields, fields, lvl=error,
-                                exc=True)
+                        self.log("Faulty object or field: ", e, type(e),
+                                 item._fields, fields, lvl=error,
+                                 exc=True)
                 self.log("Generated object list: ", objlist)
 
                 result = {'component': 'objectmanager',
@@ -102,7 +104,8 @@ class ObjectManager(ConfigurableComponent):
                           }
             else:
                 self.log("Schemata: ", objects.keys())
-                self.log("List for unavailable schema requested: ", schema, lvl=warn)
+                self.log("List for unavailable schema requested: ", schema,
+                         lvl=warn)
 
         elif action == "search":
             if schema in objects.keys():
@@ -112,7 +115,8 @@ class ObjectManager(ConfigurableComponent):
                     objectfilter = {}
 
                 # objectfilter['$text'] = {'$search': str(data['search'])}
-                objectfilter = {'name': {'$regex': str(data['search']), '$options': '$i'}}
+                objectfilter = {
+                    'name': {'$regex': str(data['search']), '$options': '$i'}}
 
                 # if 'fields' in data:
                 #    fields = data['fields']
@@ -124,9 +128,11 @@ class ObjectManager(ConfigurableComponent):
                 objlist = []
 
                 if collections[schema].count() > WARNSIZE:
-                    self.log("Getting a very long list of items for ", schema, lvl=warn)
+                    self.log("Getting a very long list of items for ", schema,
+                             lvl=warn)
 
-                self.log("Objectfilter: ", objectfilter, ' Schema: ', schema, lvl=warn)
+                self.log("Objectfilter: ", objectfilter, ' Schema: ', schema,
+                         lvl=warn)
                 # for item in collections[schema].find(objectfilter):
                 for item in collections[schema].find(objectfilter):
                     self.log("Search found item: ", item, lvl=warn)
@@ -145,7 +151,8 @@ class ObjectManager(ConfigurableComponent):
 
                         objlist.append(listitem)
                     except Exception as e:
-                        self.log("Faulty object or field: ", e, type(e), item._fields, fields, lvl=error)
+                        self.log("Faulty object or field: ", e, type(e),
+                                 item._fields, fields, lvl=error)
                 self.log("Generated object search list: ", objlist)
 
                 result = {'component': 'objectmanager',
@@ -156,7 +163,8 @@ class ObjectManager(ConfigurableComponent):
                                    }
                           }
             else:
-                self.log("List for unavailable schema requested: ", schema, lvl=warn)
+                self.log("List for unavailable schema requested: ", schema,
+                         lvl=warn)
 
         elif action == "get":
             try:
@@ -238,20 +246,23 @@ class ObjectManager(ConfigurableComponent):
             result, notification = self._change(schema, data)
 
         else:
-            self.log("Unsupported action: ", action, event, event.__dict__, lvl=warn)
+            self.log("Unsupported action: ", action, event, event.__dict__,
+                     lvl=warn)
             return
 
         if notification:
             try:
                 self.fireEvent(notification)
             except Exception as e:
-                self.log("Transmission error during notification: %s" % e, lvl=error)
+                self.log("Transmission error during notification: %s" % e,
+                         lvl=error)
 
         if result:
             try:
                 self.fireEvent(send(event.client.uuid, result))
             except Exception as e:
-                self.log("Transmission error during response: %s" % e, lvl=error)
+                self.log("Transmission error during response: %s" % e,
+                         lvl=error)
 
     def updatesubscriptions(self, event):
         """OM event handler for to be stored and client shared objects
@@ -264,7 +275,8 @@ class ObjectManager(ConfigurableComponent):
             self._updateSubscribers(data)
 
         except Exception as e:
-            self.log("Error during backend object storage: ", type(e), e, exc=True)
+            self.log("Error during backend object storage: ", type(e), e,
+                     exc=True)
 
     def _change(self, schema, data):
         try:
@@ -278,7 +290,7 @@ class ObjectManager(ConfigurableComponent):
             self.log("Update request with missing arguments!", data, e,
                      lvl=critical)
 
-        storageobject= None
+        storageobject = None
 
         try:
             storageobject = objects[schema].find_one({'uuid': uuid})
@@ -329,7 +341,8 @@ class ObjectManager(ConfigurableComponent):
                 try:
                     storageobject.validate()
                 except ValidationError:
-                    self.log("Validation of new object failed!", clientobject, lvl=warn)
+                    self.log("Validation of new object failed!", clientobject,
+                             lvl=warn)
 
             storageobject.save()
 
@@ -352,7 +365,8 @@ class ObjectManager(ConfigurableComponent):
             return result, notification
 
         except Exception as e:
-                self.log("Error during object storage:", e, type(e), data, lvl=error, exc=True)
+            self.log("Error during object storage:", e, type(e), data,
+                     lvl=error, exc=True)
 
     def _updateSubscribers(self, updateobject):
         # Notify frontend subscribers
@@ -366,9 +380,8 @@ class ObjectManager(ConfigurableComponent):
             for recipient in self.subscriptions[updateobject.uuid]:
                 self.fireEvent(send(recipient, update))
 
-
     def _delete(self, schema, data):
-        if True: #try:
+        if True:  # try:
             uuid = data['uuid']
 
             if schema in objects.keys():
@@ -376,7 +389,8 @@ class ObjectManager(ConfigurableComponent):
                 storageobject = objects[schema].find_one({'uuid': uuid})
                 self.log("Found object.", lvl=debug)
 
-                self.log("Fields:", storageobject._fields, "\n\n\n", storageobject.__dict__)
+                self.log("Fields:", storageobject._fields, "\n\n\n",
+                         storageobject.__dict__)
                 storageobject.delete()
 
                 self.log("Preparing notification.", lvl=debug)
@@ -398,8 +412,7 @@ class ObjectManager(ConfigurableComponent):
                           }
                 return result, notification
             else:
-                self.log("Unknown schema encountered: ", schema,  lvl=warn)
-        #except Exception as e:
-        #    self.log("Error during delete request: ", e, type(e),
+                self.log("Unknown schema encountered: ", schema, lvl=warn)
+                # except Exception as e:
+                #    self.log("Error during delete request: ", e, type(e),
                 # lvl=error)
-

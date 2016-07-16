@@ -3,8 +3,10 @@
 Module: ActivityMonitor 
 =======================
 
-Surveillance piece to check out what the users are doing, so the system can react
-accordingly (e.g. not disturb with unimportant alerts when user is actively doing something)
+Surveillance piece to check out what the users are doing, so the system can
+react
+accordingly (e.g. not disturb with unimportant alerts when user is actively
+doing something)
 
 Possibilities:
 * check if users noticed an alert
@@ -19,13 +21,12 @@ Should be user configurable and toggleable, at least most parts/bits.
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from circuits import handler
 from hfos.component import ConfigurableComponent
-
 from hfos.logger import hfoslog, error, warn, verbose, critical
 from hfos.events import broadcast, send
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class ActivityMonitor(ConfigurableComponent):
@@ -51,7 +52,8 @@ class ActivityMonitor(ConfigurableComponent):
     @handler('referenceframe', channel='navdata')
     def referenceframe(self, event):
         """Handles navigational reference frame updates.
-        These are necessary to assign geo coordinates to alerts and other misc things.
+        These are necessary to assign geo coordinates to alerts and other
+        misc things.
 
         :param event with incoming referenceframe message
         """
@@ -61,7 +63,8 @@ class ActivityMonitor(ConfigurableComponent):
         self.referenceframe = event.data
 
     def userlogin(self, event):
-        """Checks if an alert is ongoing and alerts the newly connected client, if so."""
+        """Checks if an alert is ongoing and alerts the newly connected
+        client, if so."""
 
         clientuuid = event.clientuuid
 

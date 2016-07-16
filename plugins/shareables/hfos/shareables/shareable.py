@@ -27,15 +27,23 @@ ShareableSchema = {
     'id': '#shareable',
     'name': 'shareable',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Shareable ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name', 'description': 'Name of Shareable', 'unique': True},
-        'creatoruuid': {'type': 'string', 'title': 'Creator', 'description': 'Creator of Shareable'},
-        'created': {'type': 'string', 'format': 'datetimepicker', 'title': 'Creation time',
+        'uuid': {'type': 'string', 'minLength': 36,
+                 'title': 'Unique Shareable ID', 'description': 'HIDDEN'},
+        'name': {'type': 'string', 'title': 'Name',
+                 'description': 'Name of Shareable', 'unique': True},
+        'creatoruuid': {'type': 'string', 'title': 'Creator',
+                        'description': 'Creator of Shareable'},
+        'created': {'type': 'string', 'format': 'datetimepicker',
+                    'title': 'Creation time',
                     'description': 'Time of object creation'},
-        'owneruuid': {'type': 'string', 'minLength': 36, 'title': "Owner's Unique ID", 'description': 'HIDDEN'},
-        'priority': {'type': 'number', 'title': 'Priority', 'description': '1 is Highest priority', 'minimum': 1},
-        'tags': {'type': 'string', 'title': 'Tags', 'description': 'Attached tags'},
-        'notes': {'type': 'string', 'format': 'html', 'default': '', 'title': 'Scheduled item notes',
+        'owneruuid': {'type': 'string', 'minLength': 36,
+                      'title': "Owner's Unique ID", 'description': 'HIDDEN'},
+        'priority': {'type': 'number', 'title': 'Priority',
+                     'description': '1 is Highest priority', 'minimum': 1},
+        'tags': {'type': 'string', 'title': 'Tags',
+                 'description': 'Attached tags'},
+        'notes': {'type': 'string', 'format': 'html', 'default': '',
+                  'title': 'Scheduled item notes',
                   'description': 'Free text entry'},
         'reservations': {
             'type': 'array',
@@ -43,13 +51,19 @@ ShareableSchema = {
             'items': {
                 'type': 'object',
                 'properties': {
-                    'useruuid': {'type': 'string', 'minLength': 36, 'title': 'User', 'description': 'Reserving User'},
-                    'starttime': {'type': 'string', 'format': 'datetimepicker', 'title': 'Begin',
+                    'useruuid': {'type': 'string', 'minLength': 36,
+                                 'title': 'User',
+                                 'description': 'Reserving User'},
+                    'starttime': {'type': 'string', 'format': 'datetimepicker',
+                                  'title': 'Begin',
                                   'description': 'Begin of reservation'},
-                    'endtime': {'type': 'string', 'format': 'datetimepicker', 'title': 'End',
+                    'endtime': {'type': 'string', 'format': 'datetimepicker',
+                                'title': 'End',
                                 'description': 'End of reservation'},
-                    'title': {'type': 'string', 'title': 'Title', 'description': 'Reservation Title'},
-                    'description': {'type': 'string', 'title': 'Description', 'description': 'Reservation Details'}
+                    'title': {'type': 'string', 'title': 'Title',
+                              'description': 'Reservation Title'},
+                    'description': {'type': 'string', 'title': 'Description',
+                                    'description': 'Reservation Details'}
                 }
             }
         },
@@ -72,16 +86,21 @@ ShareableForm = [
                         'options': {
                             "type": "user",
                             "asyncCallback": "getFormData",
-                            "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+                            "map": {'valueProperty': "uuid",
+                                    'nameProperty': 'name'}
                         },
                         "onChange": 'fieldChange(modelValue, form)'
-                        #                             '''function (modelValue, form) {
+                        #                             '''function (
+                        # modelValue, form) {
                         # $scope.form.forEach(function (item) {
                         # if (item.key == "multiselectDynamicHttpGet") {
                         #     item.options.scope.populateTitleMap(item);
                         # }
                         # });
-                        # alert("onChange happened!\nYou changed this value into " + modelValue + " !\nThen code in this event cause the multiselectDynamicHttpGet to reload. \nSee the ASF onChange event for info.");
+                        # alert("onChange happened!\nYou changed this value
+                        # into " + modelValue + " !\nThen code in this event
+                        #  cause the multiselectDynamicHttpGet to reload.
+                        # \nSee the ASF onChange event for info.");
                         #
                         # '''
                     }, 'priority'

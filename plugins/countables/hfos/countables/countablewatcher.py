@@ -13,7 +13,6 @@ from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, error, warn, critical, events
 from hfos.events import AuthorizedEvent, AuthorizedEvents
-
 from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
@@ -24,6 +23,7 @@ class countrequest(AuthorizedEvent):
         super(countrequest, self).__init__(*args)
         hfoslog('Counterrequest generated:', args, emitter='COUNTER',
                 lvl=events)
+
 
 AuthorizedEvents['countablewatcher'] = countrequest
 

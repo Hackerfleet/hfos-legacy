@@ -10,17 +10,13 @@ Autonomously operating local tilecache
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 import socket
 import os
 import six
 import errno
-
 from circuits import Worker, task
 from circuits.web.tools import serve_file
 from circuits.web.controllers import Controller
-
 from hfos.logger import hfoslog, error, verbose
 
 if six.PY2:
@@ -28,6 +24,8 @@ if six.PY2:
 else:
     from urllib.request import urlopen  # NOQA
     from urllib.parse import unquote  # NOQA
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 def get_tile(url):
@@ -65,6 +63,7 @@ def get_tile(url):
 class UrlError(Exception):
     pass
 
+
 class MaptileService(Controller):
     """
     Threaded, disk-caching tile delivery component
@@ -73,7 +72,8 @@ class MaptileService(Controller):
 
     configprops = {}
 
-    def __init__(self, path="/tilecache", tilepath="/var/cache/hfos/tilecache", defaulttile=None, **kwargs):
+    def __init__(self, path="/tilecache", tilepath="/var/cache/hfos/tilecache",
+                 defaulttile=None, **kwargs):
         """
 
         :param path: Webserver path to offer cache on
@@ -82,7 +82,8 @@ class MaptileService(Controller):
         :param kwargs:
         """
         super(MaptileService, self).__init__(**kwargs)
-        self.worker = Worker(process=False, workers=2, channel="tcworkers").register(self)
+        self.worker = Worker(process=False, workers=2,
+                             channel="tcworkers").register(self)
 
         self.tilepath = tilepath
         self.path = path
@@ -97,19 +98,22 @@ class MaptileService(Controller):
             url = unquote(url)
 
             if '..' in url:  # Does this need more safety checks?
-                hfoslog("Fishy url with parent path: ", url, lvl=error, 
+                hfoslog("Fishy url with parent path: ", url, lvl=error,
                         emitter="MTS")
                 raise UrlError
 
             spliturl = url.split("/")
-            service = "/".join(spliturl[1:-3])  # get all but the coords as service
+            service = "/".join(
+                spliturl[1:-3])  # get all but the coords as service
 
             x = spliturl[-3]
             y = spliturl[-2]
             z = spliturl[-1].split('.')[0]
 
-            filename = os.path.join(self.tilepath, service, x, y) + "/" + z + ".png"
-            realurl = "http://" + service + "/" + x + "/" + y + "/" + z + ".png"
+            filename = os.path.join(self.tilepath, service, x,
+                                    y) + "/" + z + ".png"
+            realurl = "http://" + service + "/" + x + "/" + y + "/" + z + \
+                      ".png"
         except Exception as e:
             hfoslog("ERROR (%s) in URL: %s" % (e, url), emitter="MTS")
             raise UrlError
@@ -117,7 +121,8 @@ class MaptileService(Controller):
         return filename, realurl
 
     def tilecache(self, event, *args, **kwargs):
-        """Checks and caches a requested tile to disk, then delivers it to client"""
+        """Checks and caches a requested tile to disk, then delivers it to
+        client"""
         request, response = event.args[:2]
         try:
             filename, url = self._splitURL(request.path)
@@ -135,9 +140,11 @@ class MaptileService(Controller):
                 event.stop()
         else:
             # We will have to get it first.
-            hfoslog("Tile not cached yet. Tile data: ", filename, url, emitter="MTS")
+            hfoslog("Tile not cached yet. Tile data: ", filename, url,
+                    emitter="MTS")
             if url in self._tilelist:
-                hfoslog("Getting a tile for the second time?!", lvl=error, emitter="MTS")
+                hfoslog("Getting a tile for the second time?!", lvl=error,
+                        emitter="MTS")
             else:
                 self._tilelist += url
             try:
@@ -155,7 +162,8 @@ class MaptileService(Controller):
                     os.makedirs(tilepath)
                 except OSError as e:
                     if e.errno != errno.EEXIST:
-                        hfoslog("Couldn't create path: %s (%s)" % (e, type(e)), exc=True, emitter="MTS")
+                        hfoslog("Couldn't create path: %s (%s)" % (e, type(e)),
+                                exc=True, emitter="MTS")
 
                 hfoslog("Caching tile.", lvl=verbose, emitter="MTS")
                 try:
@@ -163,10 +171,12 @@ class MaptileService(Controller):
                         try:
                             tilefile.write(bytes(tile))
                         except Exception as e:
-                            hfoslog("Writing error: %s" % str([type(e), e]), emitter="MTS")
+                            hfoslog("Writing error: %s" % str([type(e), e]),
+                                    emitter="MTS")
 
                 except Exception as e:
-                    hfoslog("Open error: %s" % str([type(e), e]), emitter="MTS")
+                    hfoslog("Open error: %s" % str([type(e), e]),
+                            emitter="MTS")
                     return
                 finally:
                     event.stop()
@@ -175,11 +185,14 @@ class MaptileService(Controller):
                     hfoslog("Delivering tile.", lvl=verbose, emitter="MTS")
                     yield serve_file(request, response, filename)
                 except Exception as e:
-                    hfoslog("Couldn't deliver tile: ", e, lvl=error, emitter="MTS")
+                    hfoslog("Couldn't deliver tile: ", e, lvl=error,
+                            emitter="MTS")
                     event.stop()
-                hfoslog("Tile stored and delivered.", lvl=verbose, emitter="MTS")
+                hfoslog("Tile stored and delivered.", lvl=verbose,
+                        emitter="MTS")
             else:
-                hfoslog("Got no tile, serving defaulttile: %s" % url, emitter="MTS")
+                hfoslog("Got no tile, serving defaulttile: %s" % url,
+                        emitter="MTS")
                 if self.defaulttile:
                     try:
                         yield serve_file(request, response, self.defaulttile)

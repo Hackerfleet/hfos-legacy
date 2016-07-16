@@ -20,34 +20,45 @@ SystemconfigSchema = {
     'type': 'object',
     'name': 'systemconfig',
     'properties': {
-        'uuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                 'type': 'string',
-                 'title': 'Unique System ID'
-                 },
-        'name': {'type': 'string', 'minLength': 1, 'title': 'Name', 'description': 'System name'},
-        'description': {'type': 'string', 'format': 'html', 'title': 'Description',
+        'uuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Unique System ID'
+            },
+        'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
+                 'description': 'System name'},
+        'description': {'type': 'string', 'format': 'html',
+                        'title': 'Description',
                         'description': 'System description'},
-        'owneruuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                      'type': 'string',
-                      'title': 'Associated Unique Owner User ID'
-                      },
-        'vesseluuid': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                       'type': 'string',
-                       'title': 'Associated Unique Vessel ID'
-                       },
+        'owneruuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Associated Unique Owner User ID'
+            },
+        'vesseluuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Associated Unique Vessel ID'
+            },
 
         'defaultmapviewuuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
             'title': 'Default Unique Mapview ID'
-            },
+        },
         'defaultdashboarduuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
             'title': 'Default Unique Dashboard ID'
-            },
+        },
         'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
-                         'description': 'Default theme used for user interface'},
+                         'description': 'Default theme used for user '
+                                        'interface'},
     }
 }
 

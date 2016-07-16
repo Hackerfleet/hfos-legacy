@@ -26,10 +26,14 @@ Tag = {
     'id': '#tag',
     'name': 'tag',
     'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Tag ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name', 'description': 'Name of Tag'},
-        'creator': {'type': 'string', 'title': 'Creator', 'description': 'Creator of Tag'},
-        'owneruuid': {'type': 'string', 'minLength': 36, 'title': "Owner's Unique ID", 'description': 'HIDDEN'},
+        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Tag ID',
+                 'description': 'HIDDEN'},
+        'name': {'type': 'string', 'title': 'Name',
+                 'description': 'Name of Tag'},
+        'creator': {'type': 'string', 'title': 'Creator',
+                    'description': 'Creator of Tag'},
+        'owneruuid': {'type': 'string', 'minLength': 36,
+                      'title': "Owner's Unique ID", 'description': 'HIDDEN'},
         'color': {'type': 'string', 'format': 'color', 'title': 'Color of tag',
                   'description': 'Background color of tag'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
@@ -40,9 +44,12 @@ Tag = {
             'items': {
                 'type': 'object',
                 'properties': {
-                    'schema': {'type': 'string', 'minLength': 1, 'title': 'Schema reference',
+                    'schema': {'type': 'string', 'minLength': 1,
+                               'title': 'Schema reference',
                                'description': 'HIDDEN'},
-                    'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique ID reference', 'description': 'HIDDEN'}
+                    'uuid': {'type': 'string', 'minLength': 36,
+                             'title': 'Unique ID reference',
+                             'description': 'HIDDEN'}
                 }
             }
         }

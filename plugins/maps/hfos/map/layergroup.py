@@ -18,9 +18,9 @@ Provisions
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from hfos.schemata.defaultform import defaultform
+
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 LayerGroupSchema = {
     'type': 'object',
