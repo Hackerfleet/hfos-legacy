@@ -38,7 +38,7 @@ class Dashboard {
         this.dashboarduuid = user.clientconfig.dashboarduuid;
         this.dashboard = {};
 
-        this.sensed = {};
+        this.sensed = [];
 
         this.referencedata = {};
         this.referenceages = {};
@@ -123,7 +123,7 @@ class Dashboard {
             self.op.getList('dashboardconfig');
         };
 
-        this.scope.$on('User.Login', function () {
+        this.scope.$on('User.Login', function (ev) {
             console.log('Login successful - fetching dashboard data');
             self.requestDashboards();
         });

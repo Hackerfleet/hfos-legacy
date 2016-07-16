@@ -1,4 +1,4 @@
-
+@import '../../../colors.scss';
 
 #compass {
   width: 50px;
@@ -61,4 +61,49 @@
   //height: 100%;
   text-align: center;
   vertical-align: middle;
+}
+
+.digital-inverted {
+  @extend .digital;
+  mix-blend-mode: difference;
+  position: absolute;
+  width: 100%;
+}
+
+.simplebarreadout {
+  text-align: left;
+}
+
+.simplebar {
+  display: inline-block;
+  height: 5em;
+}
+
+.dashbar {
+  position: absolute;
+}
+
+.inverted-bar {
+  position: relative;
+  width: 300px;
+}
+
+.inverted-bar div {
+  padding: 10px 0;
+  text-indent: 10px;
+  position: absolute;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.inverted-bar .outer {
+  background-color: $color-white;
+  color: $color-primary-0;
+  width: 100%;
+}
+
+.inverted-bar .inner {
+  background-color: $color-primary-0;
+  color: $color-white;
+  width: 30%;
 }

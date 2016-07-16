@@ -9,9 +9,13 @@ class SimpleBarReadout {
         this.interval = interval;
 
         this.valuetype = this.scope.$parent.valuetype;
+        this.scalevalue = 0;
+        this.scaleprop = '0%'
         this.value = 0;
         this.age = 0;
         this.max = 1;
+
+        this.color = '#4384BF';
 
         console.log('[DASH-SBR] SimpleBarReadout loaded, observing:', this.valuetype);
 
@@ -33,7 +37,8 @@ class SimpleBarReadout {
 
                 self.value = data.value;
                 self.max = Math.max(self.value, self.max);
-                self.scalevalue = String((data.value / self.max) * 100) + "%";
+                self.scalevalue = (data.value / self.max) * 100;
+                self.scaleprop =  String(self.scalevalue) + '%';
                 self.age = data.timestamp;
                 self.updateAge();
 
