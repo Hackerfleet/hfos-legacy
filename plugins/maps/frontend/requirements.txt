@@ -16,3 +16,4 @@ leaflet.coordinates@~0.1.5
 leaflet.timeline@~1.0.0-beta
 leaflet-mouse-position@~1.0.1
 leaflet.zoomslider@~0.7.0
+leaflet-contextmenu@1.1.0

@@ -7,6 +7,7 @@ import leafletcoordinates from 'leaflet.coordinates/dist/Leaflet.Coordinates-0.1
 import leafletrotatedmarker from 'leaflet-rotatedmarker';
 import leafleteasybutton from 'leaflet-easybutton';
 import zoomslider from 'leaflet.zoomslider';
+import contextmenu from 'leaflet-contextmenu'
 //import leafletgrid from 'L.Grid';
 
 import 'leaflet-easybutton/src/easy-button.css';
@@ -54,8 +55,47 @@ class mapcomponent {
         };
 
         this.controls = {
+
             draw: {},
             scale: {}
+        };
+
+        this.showCoordinates = function(e) {
+            $('#statusCenter').text(e.latlng);
+        };
+
+        this.centerMap = function(e) {
+            self.map.panTo(e.latlng);
+        };
+
+        this.zoomIn = function() {
+            self.map.zoomIn();
+        };
+
+        this.zoomOut = function() {
+            self.map.zoomOut();
+        };
+
+        this.defaults = {
+            map: {
+                contextmenu: true,
+                contextmenuWidth: 140,
+                contextmenuItems: [{
+                    text: 'Show coordinates',
+                    callback: this.showCoordinates
+                }, {
+                    text: 'Center map here',
+                    callback: this.centerMap
+                }, '-', {
+                    text: 'Zoom in',
+                    iconCls: 'fa fa-search-plus',
+                    callback: this.zoomIn
+                }, {
+                    text: 'Zoom out',
+                    iconCls: 'fa fa-search-minus',
+                    callback: this.zoomOut
+                }]
+            }
         };
 
         this.geojson = {};
@@ -109,7 +149,7 @@ class mapcomponent {
                 self.clearLayers();
 
                 if (typeof obj.layers !== 'undefined') {
-                    for (var layer of obj.layers){
+                    for (var layer of obj.layers) {
                         self.op.getObject('layer', layer);
                     }
                 }
@@ -119,12 +159,12 @@ class mapcomponent {
             }
         });
 
-        this.clearLayers = function() {
+        this.clearLayers = function () {
             self.layers.baselayers = {};
             self.layers.overlays = {};
         };
 
-        this.addLayer = function(uuid) {
+        this.addLayer = function (uuid) {
             var layer = self.op.objects[uuid];
             layer.url = layer.url.replace(/hfoshost/, self.host);
 
@@ -136,7 +176,7 @@ class mapcomponent {
             }
         };
 
-        this.removeLayer = function(uuid) {
+        this.removeLayer = function (uuid) {
             var layer = self.op.objects[uuid];
             console.log('Removing layer:', layer);
             if (layer.baselayer === true) {
@@ -146,7 +186,7 @@ class mapcomponent {
             }
         };
 
-        this.toggleLayer = function(state, uuid) {
+        this.toggleLayer = function (state, uuid) {
             console.log('Oh, you selected layer:', state, uuid);
             if (state === true) {
                 self.addLayer(uuid);
@@ -155,22 +195,22 @@ class mapcomponent {
             }
         };
 
-        this.switchLayergroup = function(uuid) {
+        this.switchLayergroup = function (uuid) {
             console.log('Switching to new layergroup: ', uuid);
             self.op.getObject('layergroup', uuid);
         };
 
-        this.switchMapview = function(uuid) {
+        this.switchMapview = function (uuid) {
             console.log('Switching to new mapview: ', uuid);
             self.mapviewuuid = uuid;
-            self.op.getObject('mapview', uuid)
+            self.op.getObject('mapview', uuid);
         };
 
-        this.getLayergroups = function() {
+        this.getLayergroups = function () {
             console.log('[MAP] Checking layergroups:', self.mapview);
             if (typeof self.mapview.layergroups !== 'undefined') {
 
-                for (var group of self.mapview.layergroups){
+                for (var group of self.mapview.layergroups) {
                     self.op.getObject('layergroup', group);
                 }
             }
@@ -193,7 +233,8 @@ class mapcomponent {
 
                     //self.drawnLayer.addData(item.geojson);
                 }
-            } if (schema === 'layergroup') {
+            }
+            if (schema === 'layergroup') {
                 var grouplist = self.op.lists.layergroup;
                 var layermenu = [];
                 for (var group of grouplist) {
@@ -206,7 +247,8 @@ class mapcomponent {
                     });
                 }
                 self.menu.addMenu('Layergroups', layermenu);
-            } if (schema === 'mapview') {
+            }
+            if (schema === 'mapview') {
                 var mapviewlist = self.op.lists.mapview;
                 var mapviewmenu = [];
                 for (var mapview of mapviewlist) {
@@ -283,13 +325,13 @@ class mapcomponent {
             }
         };
 
-        this.getMapdataLists = function() {
+        this.getMapdataLists = function () {
             console.log('[MAP] Getting available map data objects.');
             self.op.getList('layergroup');
             self.op.getList('mapview');
         };
 
-        this.requestMapData = function() {
+        this.requestMapData = function () {
             console.log('[MAP] Requesting mapdata from server.');
 
             self.getMapview();
@@ -334,8 +376,8 @@ class mapcomponent {
             console.log('Setting up initial map settings.');
             self.map = map;
 
-            map.on('click', function(e) {
-                alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+            map.on('click', function (e) {
+                $('#statusCenter').html = 'Latitude: ' + e.latlng.lat + ' Longitude: ' + e.latlng.lng;
             });
 
             // Resize map to accomodate for statusbar
@@ -477,42 +519,42 @@ class mapcomponent {
             };
 
             /*var Icons = {
-                Vessel: L.icon({
-                    iconUrl: '/assets/images/icons/vessel.png',
-                    //shadowUrl: 'leaf-shadow.png',
+             Vessel: L.icon({
+             iconUrl: '/assets/images/icons/vessel.png',
+             //shadowUrl: 'leaf-shadow.png',
 
-                    iconSize: [25, 25], // size of the icon
-                    //shadowSize:   [50, 64], // size of the shadow
-                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                    //shadowAnchor: [4, 62],  // the same for the shadow
-                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-                }),
-                VesselMoving: L.icon({
-                    iconUrl: '/assets/images/icons/vessel-moving.png',
-                    //shadowUrl: 'leaf-shadow.png',
+             iconSize: [25, 25], // size of the icon
+             //shadowSize:   [50, 64], // size of the shadow
+             iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+             //shadowAnchor: [4, 62],  // the same for the shadow
+             popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+             }),
+             VesselMoving: L.icon({
+             iconUrl: '/assets/images/icons/vessel-moving.png',
+             //shadowUrl: 'leaf-shadow.png',
 
-                    iconSize: [25, 25], // size of the icon
-                    //shadowSize:   [50, 64], // size of the shadow
-                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                    //shadowAnchor: [4, 62],  // the same for the shadow
-                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-                }),
-                VesselStopped: L.icon({
-                    iconUrl: '/assets/images/icons/vessel-stopped.png',
-                    //shadowUrl: 'leaf-shadow.png',
+             iconSize: [25, 25], // size of the icon
+             //shadowSize:   [50, 64], // size of the shadow
+             iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+             //shadowAnchor: [4, 62],  // the same for the shadow
+             popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+             }),
+             VesselStopped: L.icon({
+             iconUrl: '/assets/images/icons/vessel-stopped.png',
+             //shadowUrl: 'leaf-shadow.png',
 
-                    iconSize: [25, 25], // size of the icon
-                    //shadowSize:   [50, 64], // size of the shadow
-                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                    //shadowAnchor: [4, 62],  // the same for the shadow
-                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-                })
-            };
+             iconSize: [25, 25], // size of the icon
+             //shadowSize:   [50, 64], // size of the shadow
+             iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+             //shadowAnchor: [4, 62],  // the same for the shadow
+             popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+             })
+             };
 
-            console.log("Rotated marker: ", L.rotatedMarker);
-            var VesselMarker = L.rotatedMarker(self.vessel.coords, {icon: Icons.Vessel}).addTo(map);
-            console.log("Vessel marker:", VesselMarker);
-            */
+             console.log("Rotated marker: ", L.rotatedMarker);
+             var VesselMarker = L.rotatedMarker(self.vessel.coords, {icon: Icons.Vessel}).addTo(map);
+             console.log("Vessel marker:", VesselMarker);
+             */
 
             leafletData.getLayers().then(function (baselayers) {
                 var drawnItems = baselayers.overlays.draw;
@@ -540,7 +582,7 @@ class mapcomponent {
 
             $('.leaflet-draw').hide();
 
-        });
+        })
 
         this.scope.$on('Profile.Update', function () {
             console.log('Profile update - fetching map data');

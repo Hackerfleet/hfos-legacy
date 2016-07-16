@@ -2,6 +2,7 @@ import './map/map.scss';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.css';
+import 'leaflet-contextmenu/dist/leaflet.contextmenu.css';
 
 import angular from 'angular';
 import uirouter from 'angular-ui-router';
