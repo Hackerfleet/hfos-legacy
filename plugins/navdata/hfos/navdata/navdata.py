@@ -9,8 +9,6 @@ Module NavData
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from circuits import Event
 from circuits import Timer, handler
 from hfos.database import objectmodels, ValidationError
@@ -25,12 +23,16 @@ from time import time
 import datetime
 from pprint import pprint
 
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
+
 class navdatarequest(AuthorizedEvent):
     def __init__(self, *args):
         super(navdatarequest, self).__init__(*args)
         hfoslog('Navdatarequest created:', args, emitter='NAVDATA', lvl=events)
 
 AuthorizedEvents['navdata'] = navdatarequest
+
 
 class NavData(ConfigurableComponent):
     """
@@ -144,7 +146,7 @@ class NavData(ConfigurableComponent):
         # TODO: What about multiple busses? That is prepared, but how exactly
         # should they be handled?
 
-        # self.log("New incoming navdata:", data, lvl=critical)
+        self.log("New incoming navdata:", data, lvl=verbose)
 
         for name, value in data.items():
             if name in self.datatypes:
@@ -217,3 +219,13 @@ class NavData(ConfigurableComponent):
         except Exception as e:
             self.log("Could not push referenceframe: ", e, type(e),
                      lvl=critical)
+
+
+class VesselManager(ConfigurableComponent):
+
+    channel = "navdata"
+    configprops = {}
+
+    def __init__(self, *args):
+        super(VesselManager, self).__init__('VESSEL', *args)
+

@@ -95,7 +95,7 @@ def getSensorData(fields):
             SensorDataTypeTemplate = {
                 'uuid': str(uuid4()),
                 'sentence': sentype,
-                'name': str(field[1]),
+                'name': sentype + "_" + str(field[1]),
                 'title': str(field[0]),
                 'timestamp': 0,
                 'lastvalue': '',
