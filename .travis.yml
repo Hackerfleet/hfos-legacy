@@ -13,7 +13,7 @@ cache:
 install:
   - pip install --upgrade pip coveralls pytest-cov
   - python setup.py install
-  - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then pip install subprocess32; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install subprocess32; fi
   - pip install -r requirements.txt --allow-external --cache-dir=$HOME/.pip-cache .
 script: python setup.py test
 after_success:
