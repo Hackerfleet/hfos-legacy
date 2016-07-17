@@ -1,4 +1,8 @@
+python-targets:
+    - 3
 max-line-length: 120
+requirements:
+    - requirements.txt
 pep8:
     full: true
 ignore-paths:
