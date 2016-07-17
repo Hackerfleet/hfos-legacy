@@ -15,10 +15,11 @@
 import sys
 import os
 import shlex
+import types
 
 import sphinx_bootstrap_theme
 
-from imp import new_module
+#from imp import new_module
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -26,7 +27,7 @@ from imp import new_module
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('../../hfos'))
 
-version_module = new_module("version")
+version_module = types.ModuleType('version')
 exec(
     compile(
         open(
