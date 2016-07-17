@@ -25,6 +25,7 @@ from hfos.logger import hfoslog, warn, critical, error, debug, verbose
 from circuits import Component
 from jsonschema import ValidationError
 from warmongo import model_factory
+from pymongo.errors import ServerSelectionTimeoutError
 from random import randint
 from uuid import uuid4
 from copy import deepcopy
@@ -32,8 +33,6 @@ import inspect
 from sys import exc_info
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
-from pprint import pprint
 
 
 class ConfigurableComponent(Component):
@@ -92,12 +91,12 @@ class ConfigurableComponent(Component):
         # pprint(self.componentmodel._schema)
 
 
-        self._readConfig()
+        self._read_config()
         if not self.config:
             self.log("Creating initial default configuration.")
             try:
-                self._setConfig()
-                self._writeConfig()
+                self._set_config()
+                self._write_config()
             except ValidationError as e:
                 self.log("Error during configuration reading: ", e, type(e),
                          exc=True)
@@ -106,15 +105,19 @@ class ConfigurableComponent(Component):
         self.names.remove(self.uniquename)
         super(ConfigurableComponent, self).unregister()
 
-    def _readConfig(self):
-        self.config = self.componentmodel.find_one({'name': self.uniquename})
+    def _read_config(self):
+        try:
+            self.config = self.componentmodel.find_one({'name': self.uniquename})
+        except ServerSelectionTimeoutError:
+            self.log("No database access! Check if mongodb is running "
+                     "correctly.", lvl=critical)
         if self.config:
             self.log("Configuration read.", lvl=debug)
         else:
             self.log("No configuration found.", lvl=warn)
             # self.log(self.config)
 
-    def _writeConfig(self):
+    def _write_config(self):
         if not self.config:
             self.log("Unable to write non existing configuration", lvl=error)
             return
@@ -127,7 +130,10 @@ class ConfigurableComponent(Component):
             self.log("Not storing invalid configuration: ", e, type(e),
                      exc=True, lvl=error)
 
-    def _setConfig(self, config={}):
+    def _set_config(self, config=None):
+        if not config:
+            config = {}
+
         try:
             # pprint(self.configschema)
             self.config = self.componentmodel(config)
