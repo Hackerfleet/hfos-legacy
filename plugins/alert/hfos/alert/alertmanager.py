@@ -75,6 +75,7 @@ class AlertManager(Component):
             data = event.data
 
             if action == 'mob':
+                # noinspection PySimplifyBooleanCheck,PySimplifyBooleanCheck
                 if data == True:
                     hfoslog("[ALERT] MOB ALERT ACTIVATED.", lvl=critical)
 

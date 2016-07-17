@@ -147,9 +147,6 @@ class HFDebugger(ConfigurableComponent):
                      lvl=critical)
 
 
-from pprint import pprint
-
-
 class Logger(ConfigurableComponent):
     """
     System logger

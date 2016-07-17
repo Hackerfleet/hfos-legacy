@@ -132,7 +132,7 @@ class send(Event):
         """
         super(send, self).__init__(*args)
 
-        if uuid == None and username == None:
+        if uuid is None and username is None:
             hfoslog("[SEND-EVENT] No recipient (uuid/name) given!", lvl=warn)
         self.uuid = uuid
         self.packet = packet

@@ -74,7 +74,7 @@ class LDAPAdaptor(ConfigurableComponent):
 
     def __init__(self, *args, **kwargs):
         super(LDAPAdaptor, self).__init__("LDAP", *args, **kwargs)
-        if ldap != None:
+        if ldap is not None:
             self.log("NOT started, no python-lmap found", lvl=warn)
             return
         self.log("Started")

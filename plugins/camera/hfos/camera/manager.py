@@ -38,7 +38,7 @@ class CameraManager(ConfigurableComponent):
         self._framecount = 0
         self._frames = {}
 
-        if opencv != None:
+        if opencv is not None:
             self.log("Checking opencv for cameras.", lvl=debug)
 
             for cam in range(maxcams):

@@ -57,7 +57,7 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
                 raise ValidationError(
                     "Could not provision layerobject: " + str(itemuuid), e)
 
-    if indexes != None:
+    if indexes is not None:
         col = db[col_name]
         for item in indexes:
             col.ensure_index([(item, pymongo.TEXT)], unique=True)

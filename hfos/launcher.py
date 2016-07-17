@@ -26,7 +26,7 @@ from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 from circuits import handler, Timer, Event
 from hfos.schemata.component import ComponentBaseConfigSchema
-from hfos.database import schemastore
+from hfos.database import schemastore, initialize
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
     setup_root
@@ -49,6 +49,8 @@ hfoslog("Running with Python", sys.version.replace("\n", ""),
         sys.platform, lvl=debug, emitter='CORE')
 hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
 
+hfoslog("Initializing database access", emitter='CORE')
+initialize()
 
 class dropPrivs(Event):
     pass
@@ -159,6 +161,9 @@ class Core(ConfigurableComponent):
 
         self.frontendrunning = False
 
+        self.static = None
+        self.websocket = None
+
         self.banlist = [  # 'camera',
             'logger'
             # 'ldap',
@@ -180,7 +185,7 @@ class Core(ConfigurableComponent):
         ]
 
         self.updateComponents()
-        self._writeConfig()
+        self._write_config()
 
         try:
             self.server = Server((self.host, self.port)).register(self)

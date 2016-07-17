@@ -26,7 +26,7 @@ def getSentencesFromModule(module):
             print(sentence, type(obj))
             pprint(obj)
             doc = obj.__doc__
-            if doc == None:
+            if doc is not None:
                 doc = 'UNDOCUMENTED'
             else:
                 doc = doc.lstrip().rstrip()
