@@ -14,7 +14,7 @@ from uuid import uuid4
 from hfos.component import ConfigurableComponent
 from hfos.logger import debug, error, warn, critical
 from hfos.events import send, objectcreation, objectchange, objectdeletion
-from hfos.database import objects, collections, ValidationError, schemastore
+from hfos.database import objectmodels, collections, ValidationError, schemastore
 import pymongo
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
@@ -57,7 +57,7 @@ class ObjectManager(ConfigurableComponent):
         notification = None
 
         if action == "list":
-            if schema in objects.keys():
+            if schema in objectmodels.keys():
                 if 'filter' in data:
                     objectfilter = data['filter']
                 else:
@@ -70,11 +70,11 @@ class ObjectManager(ConfigurableComponent):
 
                 objlist = []
 
-                if objects[schema].count(objectfilter) > WARNSIZE:
+                if objectmodels[schema].count(objectfilter) > WARNSIZE:
                     self.log("Getting a very long list of items for ", schema,
                              lvl=warn)
 
-                for item in objects[schema].find(objectfilter):
+                for item in objectmodels[schema].find(objectfilter):
                     try:
                         if fields in ('*', ['*']):
                             objlist.append(item.serializablefields())
@@ -103,12 +103,12 @@ class ObjectManager(ConfigurableComponent):
                                    }
                           }
             else:
-                self.log("Schemata: ", objects.keys())
+                self.log("Schemata: ", objectmodels.keys())
                 self.log("List for unavailable schema requested: ", schema,
                          lvl=warn)
 
         elif action == "search":
-            if schema in objects.keys():
+            if schema in objectmodels.keys():
                 if 'filter' in data:
                     objectfilter = data['filter']
                 else:
@@ -138,7 +138,7 @@ class ObjectManager(ConfigurableComponent):
                     self.log("Search found item: ", item, lvl=warn)
                     try:
                         # TODO: Fix bug in warmongo that needs this workaround:
-                        item = objects[schema](item)
+                        item = objectmodels[schema](item)
                         listitem = {'uuid': item.uuid}
                         if 'name' in item._fields:
                             listitem['name'] = item.name
@@ -181,13 +181,13 @@ class ObjectManager(ConfigurableComponent):
 
             storageobject = None
 
-            if schema in objects.keys() and uuid.upper != "CREATE":
-                storageobject = objects[schema].find_one({'uuid': uuid})
+            if schema in objectmodels.keys() and uuid.upper != "CREATE":
+                storageobject = objectmodels[schema].find_one({'uuid': uuid})
 
             if not storageobject:
                 self.log("Object not found, creating: ", data)
 
-                storageobject = objects[schema]({'uuid': str(uuid4())})
+                storageobject = objectmodels[schema]({'uuid': str(uuid4())})
 
                 if "useruuid" in schemastore[schema]['schema']['properties']:
                     storageobject.useruuid = event.user.uuid
@@ -265,7 +265,7 @@ class ObjectManager(ConfigurableComponent):
                          lvl=error)
 
     def updatesubscriptions(self, event):
-        """OM event handler for to be stored and client shared objects
+        """OM event handler for to be stored and client shared objectmodels
         :param event: OMRequest with uuid, schema and object data
         """
 
@@ -293,12 +293,12 @@ class ObjectManager(ConfigurableComponent):
         storageobject = None
 
         try:
-            storageobject = objects[schema].find_one({'uuid': uuid})
+            storageobject = objectmodels[schema].find_one({'uuid': uuid})
         except Exception as e:
             self.log('Change for unknown object requested:', schema,
                      data, lvl=warn)
 
-        if storageobject != None:
+        if storageobject is not None:
             self.log("Changing object:", storageobject._fields, lvl=debug)
             storageobject._fields[field] = newdata
 
@@ -326,17 +326,17 @@ class ObjectManager(ConfigurableComponent):
 
         try:
             if uuid != 'create':
-                storageobject = objects[schema].find_one({'uuid': uuid})
+                storageobject = objectmodels[schema].find_one({'uuid': uuid})
             else:
                 clientobject['uuid'] = str(uuid4())
-                storageobject = objects[schema](clientobject)
+                storageobject = objectmodels[schema](clientobject)
 
             if storageobject:
                 self.log("Updating object:", storageobject._fields, lvl=debug)
                 storageobject.update(clientobject)
 
             else:
-                storageobject = objects[schema](clientobject)
+                storageobject = objectmodels[schema](clientobject)
                 self.log("Storing object:", storageobject._fields, lvl=debug)
                 try:
                     storageobject.validate()
@@ -384,9 +384,9 @@ class ObjectManager(ConfigurableComponent):
         if True:  # try:
             uuid = data['uuid']
 
-            if schema in objects.keys():
+            if schema in objectmodels.keys():
                 self.log("Looking for object to be deleted.", lvl=debug)
-                storageobject = objects[schema].find_one({'uuid': uuid})
+                storageobject = objectmodels[schema].find_one({'uuid': uuid})
                 self.log("Found object.", lvl=debug)
 
                 self.log("Fields:", storageobject._fields, "\n\n\n",

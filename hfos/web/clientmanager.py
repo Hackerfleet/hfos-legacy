@@ -14,14 +14,13 @@ Coordinates clients communicating via websocket
 import json
 from uuid import uuid4
 from circuits.net.events import write
-from circuits import Component, handler
+from circuits import handler
 from hfos.component import ConfigurableComponent
 from hfos.events import send, authenticationrequest, clientdisconnect, \
     userlogin, AuthorizedEvents
-from hfos.logger import hfoslog, error, warn, critical, debug, info, verbose, \
-    network
+from hfos.logger import error, warn, critical, debug, info, network
 from hfos.web.clientobjects import Socket, Client, User
-from hfos.database import objects
+from hfos.database import objectmodels
 import datetime
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
@@ -72,7 +71,7 @@ class ClientManager(ConfigurableComponent):
                     clientuuid].useruuid))
 
                 self.log("Logging out relevant client", lvl=debug)
-                if useruuid != None:
+                if useruuid is not None:
                     self.log("Client was logged in", lvl=debug)
                     try:
                         self._logoutclient(useruuid, clientuuid)
@@ -139,13 +138,13 @@ class ClientManager(ConfigurableComponent):
                 # TODO: I think, caching a user name <-> uuid table would
                 # make sense instead of looking this up all the time.
 
-                if event.uuid == None:
-                    userobject = objects['user'].find_one({'name':
+                if event.uuid is None:
+                    userobject = objectmodels['user'].find_one({'name':
                                                                event.username})
                 else:
-                    userobject = objects['user'].find_one({'uuid': event.uuid})
+                    userobject = objectmodels['user'].find_one({'uuid': event.uuid})
 
-                if userobject == None:
+                if userobject is None:
                     self.log("No user by that name known.", lvl=warn)
                     return
                 else:

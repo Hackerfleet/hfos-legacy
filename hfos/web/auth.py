@@ -12,7 +12,7 @@ Authentication (and later Authorization) system
 
 from uuid import uuid4
 from circuits import handler
-from hfos.database import userobject, profileobject, clientconfigobject
+from hfos.database import objectmodels
 from hfos.events import authentication, send
 from hfos.logger import error, warn, debug, verbose
 from hfos.component import ConfigurableComponent
@@ -45,28 +45,32 @@ class Authenticator(ConfigurableComponent):
 
             e = None
             try:
-                clientconfig = clientconfigobject.find_one({'uuid':
-                                                                event.requestedclientuuid})
+                clientconfig = objectmodels['client'].find_one({
+                    'uuid': event.requestedclientuuid
+                })
             except Exception as e:
                 clientconfig = None
 
-            if clientconfig == None or clientconfig.autologin == False:
-                self.log("Autologin failed:", e, lvl=error)
+            if clientconfig is None or clientconfig.autologin == False:
+                self.log("Autologin failed.", lvl=error)
                 return
 
+            # noinspection PySimplifyBooleanCheck
             if clientconfig.autologin == True:
 
                 try:
-                    useraccount = userobject.find_one({'uuid':
-                                                           clientconfig.useruuid})
+                    useraccount = objectmodels['user'].find_one({
+                        'uuid': clientconfig.useruuid
+                    })
                     self.log("Account: %s" % useraccount._fields, lvl=debug)
                 except Exception as e:
                     self.log("No userobject due to error: ", e, type(e),
                              lvl=error)
 
                 try:
-                    userprofile = profileobject.find_one(
-                        {'uuid': str(useraccount.uuid)})
+                    userprofile = objectmodels['profile'].find_one({
+                        'uuid': str(useraccount.uuid)
+                    })
                     self.log("Profile: ", userprofile,
                              useraccount.uuid, lvl=debug)
 
@@ -97,7 +101,9 @@ class Authenticator(ConfigurableComponent):
             userprofile = None
 
             try:
-                useraccount = userobject.find_one({'name': event.username})
+                useraccount = objectmodels['user'].find_one({
+                    'name': event.username
+                })
                 self.log("Account: %s" % useraccount._fields, lvl=debug)
             except Exception as e:
                 self.log("No userobject due to error: ", e, type(e),
@@ -107,8 +113,7 @@ class Authenticator(ConfigurableComponent):
                 self.log("User found.")
 
                 if useraccount.passhash == event.passhash:
-                    self.log("Passhash matches, checking client and "
-                             "profile.",
+                    self.log("Passhash matches, checking client and profile.",
                              lvl=debug)
 
                     requestedclientuuid = event.requestedclientuuid
@@ -116,8 +121,9 @@ class Authenticator(ConfigurableComponent):
                     # Client requests to get an existing client
                     # configuration or has none
 
-                    clientconfig = clientconfigobject.find_one(
-                        {'uuid': requestedclientuuid})
+                    clientconfig = objectmodels['client'].find_one({
+                        'uuid': requestedclientuuid
+                    })
 
                     if clientconfig:
                         self.log("Checking client configuration permissions",
@@ -137,10 +143,12 @@ class Authenticator(ConfigurableComponent):
                         # Either no configuration was found or requested
                         # -> Create a new client configuration
 
-                        clientconfig = clientconfigobject()
+                        clientconfig = objectmodels['client']()
                         clientconfig.uuid = event.clientuuid
                         clientconfig.name = "New client"
                         clientconfig.description = "New client configuration " \
+                                                   "" \
+                                                   "" \
                                                    "" \
                                                    "from " + useraccount.name
                         clientconfig.useruuid = useraccount.uuid
@@ -149,7 +157,7 @@ class Authenticator(ConfigurableComponent):
                         clientconfig.save()
 
                     try:
-                        userprofile = profileobject.find_one(
+                        userprofile = objectmodels['profile'].find_one(
                             {'uuid': str(useraccount.uuid)})
                         self.log("Profile: ", userprofile,
                                  useraccount.uuid, lvl=debug)
@@ -176,19 +184,24 @@ class Authenticator(ConfigurableComponent):
     def createuser(self, event):
         self.log("Creating user")
         try:
-            newuser = userobject(
-                {'name': event.username, 'passhash': event.passhash,
-                 'uuid': str(uuid4())})
+            newuser = objectmodels['user']({
+                'name': event.username,
+                'passhash': event.passhash,
+                'uuid': str(uuid4())
+            })
             newuser.save()
         except Exception as e:
             self.log("Problem creating new user: ", type(e), e,
                      lvl=error)
             return
         try:
-            newprofile = profileobject({'uuid': str(newuser.uuid)})
+            newprofile = objectmodels['profile']({
+                'uuid': str(newuser.uuid)
+            })
             self.log("New profile uuid: ", newprofile.uuid,
                      lvl=verbose)
 
+            # TODO: Fix this - yuk!
             newprofile.components = {
                 'enabled': ["dashboard", "map", "weather", "settings"]}
             newprofile.save()
@@ -199,7 +212,7 @@ class Authenticator(ConfigurableComponent):
 
         try:
             # TODO: Clone or reference systemwide default configuration
-            newclientconfig = clientconfigobject()
+            newclientconfig = objectmodels['client']()
             newclientconfig.uuid = event.clientuuid
             newclientconfig.name = "New client"
             newclientconfig.description = "New client configuration " \
@@ -219,12 +232,11 @@ class Authenticator(ConfigurableComponent):
                                newuser.uuid,
                                event.sock),
                 "auth")
-            self.fireEvent(send(event.clientuuid, {'component': 'auth',
-                                                   'action': 'new',
-                                                   'data': 'registration '
-                                                           'successful'
-                                                   },
-                                sendtype="client"), "hfosweb")
+            self.fireEvent(send(event.clientuuid, {
+                'component': 'auth',
+                'action': 'new',
+                'data': 'registration successful'
+            }, sendtype="client"), "hfosweb")
         except Exception as e:
             self.log("Error during new account confirmation transmission",
                      e, lvl=error)
@@ -244,7 +256,9 @@ class Authenticator(ConfigurableComponent):
             newprofile = event.data
             self.log("Updating with %s " % newprofile, lvl=debug)
 
-            userprofile = profileobject.find_one({'uuid': event.user.uuid})
+            userprofile = objectmodels['profile'].find_one({
+                'uuid': event.user.uuid
+            })
 
             self.log("Updating %s" % userprofile, lvl=debug)
 
