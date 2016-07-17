@@ -5,7 +5,7 @@ Module: ProjectService
 
 Doing rather not much except serve as module component entrypoint.
 
-:copyright: (C) 2011-2015 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@hackerfleet.org
 :license: GPLv3 (See LICENSE)
 
 """

@@ -7,7 +7,7 @@ Contains
 
 WikiPage: WikiPage to store collaborative data
 
-:copyright: (C) 2011-2015 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@hackerfleet.org
 :license: GPLv3 (See LICENSE)
 
 """
