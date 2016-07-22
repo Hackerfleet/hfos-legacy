@@ -15,8 +15,11 @@ Basic functionality around provisioning.
 
 from jsonschema import ValidationError
 from hfos.logger import hfoslog, warn
+from hfos import database
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
+database.initialize()
 
 
 def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):

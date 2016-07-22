@@ -12,36 +12,29 @@ This contains tilelayer urls, api stuff etc.
 
 """
 
-from importlib import import_module
-from hfos.logger import hfoslog, verbose, error
+from hfos.logger import hfoslog, verbose, error, debug, warn
+from pkg_resources import iter_entry_points
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-__all__ = ['layers',
-           'controllables',
-           'controllers',
-           'dashboards',
-           'layers',
-           'wiki'
-           ]
-
-
 def _build_provisionstore():
-    result = {}
+    available = {}
 
-    for provisionname in __all__:
-        hfoslog("Collecting Provision:", provisionname, lvl=verbose,
-                emitter='PROVISIONS')
+    for provision_entrypoint in iter_entry_points(group='hfos.provisions',
+                                               name=None):
+        hfoslog("Provisions found: ", provision_entrypoint.name, lvl=debug,
+                emitter='DB')
+        #try:
+        available[provision_entrypoint.name] = provision_entrypoint.load()
+        #except ImportError as e:
+        #    hfoslog("Problematic provision: ", e, type(e),
+        #            provision_entrypoint.name, exc=True, lvl=warn,
+        #            emitter='PROVISIONS')
 
-        try:
-            provisionmodule = import_module('hfos.provisions.' + provisionname)
-            provisionmethod = provisionmodule.provision
-            result[provisionname] = provisionmethod
-        except AttributeError:
-            hfoslog("No provisioning method found for %s." % provisionname,
-                    lvl=error, emitter='PROVISIONS')
+    hfoslog("Found provisions: ", available.keys(),
+            emitter='PROVISIONS')
+    # pprint(available)
 
-    hfoslog("Found provisions: ", result.keys(), emitter='PROVISIONS')
-    return result
+    return available
 
-# provisionstore = _build_provisionstore()
+provisionstore = _build_provisionstore()
