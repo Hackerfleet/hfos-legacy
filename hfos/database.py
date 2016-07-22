@@ -19,6 +19,7 @@ Schemastore and Objectstore builder functions.
 
 import sys
 import warmongo
+import pymongo
 # noinspection PyUnresolvedReferences
 from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
@@ -45,8 +46,6 @@ def clear_all():
     if not (sure.upper() in ("Y", "J")):
         sys.exit(5)
 
-    import pymongo
-
     client = pymongo.MongoClient(host="localhost", port=27017)
     db = client["hfos"]
 
@@ -56,25 +55,24 @@ def clear_all():
 
 
 def _build_schemastore_new():
-    available_schemata = {}
+    available = {}
 
     for schema_entrypoint in iter_entry_points(group='hfos.schemata',
                                                name=None):
         hfoslog("Schemata found: ", schema_entrypoint.name, lvl=debug,
                 emitter='DB')
         try:
-            available_schemata[
-                schema_entrypoint.name] = schema_entrypoint.load()
+            available[schema_entrypoint.name] = schema_entrypoint.load()
         except ImportError as e:
             hfoslog("Problematic schema: ", e, type(e),
                     schema_entrypoint.name, exc=True, lvl=warn,
                     emitter='SCHEMATA')
 
-    hfoslog("Found schemata: ", available_schemata.keys(),
+    hfoslog("Found schemata: ", available.keys(),
             emitter='SCHEMATA')
-    # pprint(available_schemata)
+    # pprint(available)
 
-    return available_schemata
+    return available
 
 
 def _build_model_factories():
@@ -106,7 +104,6 @@ def _build_collections():
 
     result = {}
 
-    import pymongo
     client = pymongo.MongoClient(host='localhost', port=27017)
     db = client['hfos']
 
@@ -133,6 +130,19 @@ def initialize():
     global schemastore
     global objectmodels
     global collections
+
+    hfoslog("Testing database availability", lvl=debug, emitter='DB')
+
+    try:
+        client = pymongo.MongoClient(host='localhost', port=27017)
+        db = client['hfos']
+        hfoslog("Database: ", db.command('buildinfo'), lvl=debug, emitter='DB')
+    except Exception as e:
+        hfoslog("No database available! Check if you have mongodb > 3.0 "
+                "installed and running as well as listening on port 27017 "
+                "of localhost. (Error: %s) -> EXIT" % e, lvl=critical,
+                emitter='DB')
+        sys.exit(5)
 
     schemastore = _build_schemastore_new()
     objectmodels = _build_model_factories()
