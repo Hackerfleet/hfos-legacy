@@ -2,7 +2,7 @@
 
 
 Module defaultform
-===============
+==================
 
 A default form listing all object elements with submit button.
 
@@ -16,7 +16,7 @@ __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 __license__ = """
 Hackerfleet Technology Demonstrator
 =====================================================================
-Copyright (C) 2011-2014 riot <riot@hackerfleet.org> and others.
+Copyright (C) 2011-2016 riot <riot@hackerfleet.org> and others.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
