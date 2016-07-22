@@ -146,11 +146,7 @@ class Authenticator(ConfigurableComponent):
                         clientconfig = objectmodels['client']()
                         clientconfig.uuid = event.clientuuid
                         clientconfig.name = "New client"
-                        clientconfig.description = "New client configuration " \
-                                                   "" \
-                                                   "" \
-                                                   "" \
-                                                   "from " + useraccount.name
+                        clientconfig.description = "New client configuration from " + useraccount.name
                         clientconfig.useruuid = useraccount.uuid
                         # TODO: Make sure the profile is only saved if the
                         # client could store it, too
