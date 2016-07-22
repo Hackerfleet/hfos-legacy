@@ -17,6 +17,12 @@
       <sourceFolder url="file://$MODULE_DIR$/comms" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/camera" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ldap" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/busrepeater" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/countables" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/dev" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/garden" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/switchboard" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

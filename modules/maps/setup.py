@@ -46,6 +46,10 @@ This software package is a plugin module for HFOS.
     layer=hfos.map.layer:Layer
     layergroup=hfos.map.layergroup:LayerGroup
     mapview=hfos.map.mapview:MapView
+[hfos.provisions]
+    layer=hfos.map.provisions.layer:provision
+    layergroup=hfos.map.provisions.layergroup:provision
+    mapview=hfos.map.provisions.mapview:provision
     """,
       test_suite="tests.main.main",
       )

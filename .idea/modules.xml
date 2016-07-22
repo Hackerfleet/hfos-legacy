@@ -5,7 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/hfos/hfos.iml" filepath="$PROJECT_DIR$/hfos/hfos.iml" />
       <module fileurl="file://$PROJECT_DIR$/docs/hfos-docs.iml" filepath="$PROJECT_DIR$/docs/hfos-docs.iml" />
       <module fileurl="file://$PROJECT_DIR$/frontend/hfos-frontend.iml" filepath="$PROJECT_DIR$/frontend/hfos-frontend.iml" />
-      <module fileurl="file://$PROJECT_DIR$/plugins/plugins.iml" filepath="$PROJECT_DIR$/plugins/plugins.iml" />
+      <module fileurl="file://$PROJECT_DIR$/modules/modules.iml" filepath="$PROJECT_DIR$/modules/modules.iml" />
       <module fileurl="file://$PROJECT_DIR$/tests/tests.iml" filepath="$PROJECT_DIR$/tests/tests.iml" />
     </modules>
   </component>

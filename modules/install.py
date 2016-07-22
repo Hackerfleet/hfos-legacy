@@ -1,3 +1,4 @@
+import argparse
 import urwid
 from subprocess import Popen, PIPE
 import sys
@@ -5,18 +6,23 @@ from pprint import pprint
 from tempfile import mktemp
 
 # TODO:
+# * Automatically find local modules
+# * Grab module list from pypi
 # * Add installation location / venv info somewhere (permanent)
 # * Redirect install log for archival and review purposes
-# * Provisions
+# * Provisions (Installable via HFOS Sails' setup.py)
 # * Migrations?
 # * Dependencies?!
 
 Plugins = {
     'alert': True,
+    'busrepeater': False,
     'camera': False,
     'chat': False,
     'comms': False,
+    'countables': False,
     'dash': False,
+    'garden': False,
     'ldap': False,
     'library': False,
     'maps': False,
@@ -25,7 +31,8 @@ Plugins = {
     'project': False,
     'robot': False,
     'shareables': False,
-    'wiki': False
+    'switchboard': False,
+    'wiki': False,
 }
 
 palette = [
@@ -184,7 +191,7 @@ class Installer(urwid.Frame):
             self.footer.set_text(('banner',
                                   u" Using %s as installation mode to "
                                   u"install %s " % (
-                                  mode, plugin)))
+                                      mode, plugin)))
             setup = Popen(['python', 'setup.py', mode], cwd=plugin + "/",
                           stderr=PIPE, stdout=PIPE)
             setup.wait()
@@ -225,4 +232,29 @@ class Installer(urwid.Frame):
         sys.exit()
 
 
-installer = Installer()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--gui",
+                        help="Launch (console-) GUI to install modules",
+                        action="store_true")
+
+    parser.add_argument("--all",
+                        help="Install all found modules",
+                        action="store_true")
+
+    args = parser.parse_args()
+
+    if args.all:
+
+        for plugin in Plugins.keys():
+            setup = Popen(['python', 'setup.py', 'install'], cwd=plugin + "/")
+            setup.wait()
+
+        sys.exit(0)
+
+
+    if args.gui:
+        installer = Installer()
+
+if __name__ == "__main__":
+    main()
