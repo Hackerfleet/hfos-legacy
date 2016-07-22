@@ -6,11 +6,11 @@
 # Usage Examples(s)::
 #
 #     $ docker run -i -t hackerfleet/hfos hfos_launcher.py
-#     $ docker run -i -t -p 127.0.0.1:8055:8055 --name hfos-test-live -t hackerfleet/hfos
+#     $ docker run -i -t -p 127.0.0.1:80:80 --name hfos-test-live -t hackerfleet/hfos
 #
-# VERSION: 0.0.1
+# VERSION: 1.1.0
 #
-# Last Updated: 20150626
+# Last Updated: 20160723
 
 FROM library/debian
 MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
@@ -25,7 +25,7 @@ RUN apt-get update && \
         npm \
         nodejs-legacy \
         libfontconfig \
-        python-pip && \
+        python3-pip && \
     apt-get clean
 
 # Get HFOS
@@ -38,20 +38,27 @@ WORKDIR hfos
 RUN pip install -r requirements.txt
 RUN pip install .
 
+# Install all modules
+
+WORKDIR modules
+RUN python install.py --all
+
 # Make sure /var/[cache,lib]/hfos etc exists
 
 RUN python setup.py install_var
 RUN python setup.py install_provisions
 
+# Generate & Install Documentation
+
+RUN python setup.py build_sphinx
+RUN python setup.py install_docs
+
 # Install Frontend
 
 RUN git submodule init && git submodule update
 
-WORKDIR frontend
+WORKDIR ../frontend
 RUN npm install
-RUN npm -g install bower grunt-cli
-RUN bower install --config.interactive=false --allow-root
-RUN grunt copy:dev --force
 
 # Mongo config (smallfiles) and startup
 
@@ -60,5 +67,8 @@ RUN /etc/init.d/mongodb start
 
 #  Services
 
-EXPOSE 80 8055 9000
+EXPOSE 80
+
+# If you want to run the frontend development live server, uncomment this:
+# EXPOSE 8081
 
