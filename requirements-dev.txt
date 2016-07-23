@@ -8,9 +8,6 @@ pep8
 doc8
 mccabe
 
-# Convenient Development Tasks
-Fabric
-
 # Debugging
 pudb
 objgraph
