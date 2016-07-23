@@ -157,7 +157,6 @@ See https://github.com/hackerfleet/hfos""",
       install_requires=['circuits>=3.1',
                         'pymongo>=3.2',
                         'jsonschema>=2.5.1',
-                        'warmongo==0.5.3.hf',
                         'six'
                         ],
       entry_points=

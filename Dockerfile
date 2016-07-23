@@ -12,21 +12,28 @@
 #
 # Last Updated: 20160723
 
-FROM library/debian
+FROM debian:experimental
 MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
 
 # Install dependencies
 
 RUN apt-get update && \
     apt-get install -qy --no-install-recommends \
-        mongodb \
         git \
         bzip2 \
         npm \
         nodejs-legacy \
         libfontconfig \
-        python3-pip && \
-    apt-get clean
+        python3.5 \
+        python3-pymongo \
+        python3-bson-ext \
+        python3-pip \
+        python3-setuptools \
+        python3-setuptools-scm \
+        python3-setuptools-git
+RUN apt-get install -qy -t experimental mongodb
+
+RUN apt-get clean
 
 # Get HFOS
 
@@ -35,23 +42,26 @@ WORKDIR hfos
 
 # Install HFOS
 
-RUN pip install -r requirements.txt
-RUN pip install .
+RUN pip3 install -r requirements.txt
+RUN pip3 install .
 
 # Install all modules
 
 WORKDIR modules
-RUN python install.py --all
+RUN python3 install.py --all
 
 # Make sure /var/[cache,lib]/hfos etc exists
 
-RUN python setup.py install_var
-RUN python setup.py install_provisions
+RUN python3 setup.py install_var
+
+# Add provisions
+
+RUN python3 setup.py install_provisions
 
 # Generate & Install Documentation
 
-RUN python setup.py build_sphinx
-RUN python setup.py install_docs
+RUN python3 setup.py build_sphinx
+RUN python3 setup.py install_docs
 
 # Install Frontend
 
