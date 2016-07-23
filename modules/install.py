@@ -1,5 +1,4 @@
 import argparse
-import urwid
 from subprocess import Popen, PIPE
 import sys
 from pprint import pprint
@@ -35,202 +34,206 @@ Plugins = {
     'wiki': False,
 }
 
-palette = [
-    ('title', 'light cyan', 'dark blue'),
-    ('banner', 'black', 'light gray'),
-    ('streak', 'black', 'light cyan'),
-    ('button normal', 'light gray', 'dark blue', 'standout'),
-    ('button select', 'white', 'dark green'),
-    ('list normal', 'light cyan', 'dark blue', 'standout'),
-    ('list select', 'white', 'dark blue'),
-    ('bg', 'black', 'dark blue'),
-]
+try:
+    import urwid
 
-blank = urwid.Divider()
+    palette = [
+        ('title', 'light cyan', 'dark blue'),
+        ('banner', 'black', 'light gray'),
+        ('streak', 'black', 'light cyan'),
+        ('button normal', 'light gray', 'dark blue', 'standout'),
+        ('button select', 'white', 'dark green'),
+        ('list normal', 'light cyan', 'dark blue', 'standout'),
+        ('list select', 'white', 'dark blue'),
+        ('bg', 'black', 'dark blue'),
+    ]
 
-
-def exit_on_q(key):
-    if key in ('q', 'Q'):
-        raise urwid.ExitMainLoop()
+    blank = urwid.Divider()
 
 
-class PluginSelector(urwid.ListBox):
-    def __init__(self):
-        self.populate()
-        urwid.ListBox.__init__(self, self.SFLW)
-
-    def populate(self):
-        options = []
-        for item in sorted(Plugins.keys()):
-            state = Plugins[item]
-            option = urwid.CheckBox(item, state,
-                                    on_state_change=self.stateChange)
-            options.append(option)
-
-        self.SFLW = urwid.SimpleFocusListWalker(options)
-        self.body = self.SFLW
-        self._invalidate()
-
-    def stateChange(self, option, state):
-        # footer.set_text(('banner', u"HELLO!!! %s %s " % (
-        # option._label.text, state)))
-        Plugins[option._label.text] = state
+    def exit_on_q(key):
+        if key in ('q', 'Q'):
+            raise urwid.ExitMainLoop()
 
 
-class Installer(urwid.Frame):
-    def __init__(self):
-        self.header = urwid.Text(('title', u" HFOS Plugins "), align='center')
-        self.headermap = urwid.AttrMap(self.header, 'streak')
-        self.footer = urwid.Text(('banner', u" Select plugins to install! "),
-                                 align='center')
-        self.footermap = urwid.AttrWrap(self.footer, 'streak')
+    class PluginSelector(urwid.ListBox):
+        def __init__(self):
+            self.populate()
+            urwid.ListBox.__init__(self, self.SFLW)
 
-        self.allbutton = urwid.Button(u"Select All", self.onAllButton)
-        self.nonebutton = urwid.Button(u"Select None", self.onNoneButton)
+        def populate(self):
+            options = []
+            for item in sorted(Plugins.keys()):
+                state = Plugins[item]
+                option = urwid.CheckBox(item, state,
+                                        on_state_change=self.stateChange)
+                options.append(option)
 
-        self.okbutton = urwid.Button(u"Ok", self.onOkButton)
-        self.exitbutton = urwid.Button(u"Cancel", self.onCancelButton)
+            self.SFLW = urwid.SimpleFocusListWalker(options)
+            self.body = self.SFLW
+            self._invalidate()
 
-        self.radiogroup = []
-        self.developrbutton = urwid.RadioButton(self.radiogroup, 'Develop')
-        self.installrbutton = urwid.RadioButton(self.radiogroup, 'Install')
+        def stateChange(self, option, state):
+            # footer.set_text(('banner', u"HELLO!!! %s %s " % (
+            # option._label.text, state)))
+            Plugins[option._label.text] = state
 
-        self.modepile = urwid.Pile([self.developrbutton, self.installrbutton])
 
-        self.buttons = [
-            blank,
-            self.allbutton,
-            self.nonebutton,
-            blank,
-            self.modepile,
-            blank,
-            self.okbutton,
-            self.exitbutton
-        ]
+    class Installer(urwid.Frame):
+        def __init__(self):
+            self.header = urwid.Text(('title', u" HFOS Plugins "), align='center')
+            self.headermap = urwid.AttrMap(self.header, 'streak')
+            self.footer = urwid.Text(('banner', u" Select plugins to install! "),
+                                     align='center')
+            self.footermap = urwid.AttrWrap(self.footer, 'streak')
 
-        self.wraps = []
-        for button in self.buttons:
-            self.wraps.append(
-                urwid.AttrWrap(button, 'button normal', 'button select'))
+            self.allbutton = urwid.Button(u"Select All", self.onAllButton)
+            self.nonebutton = urwid.Button(u"Select None", self.onNoneButton)
 
-        self.buttonlb = urwid.ListBox(urwid.SimpleListWalker(self.wraps))
+            self.okbutton = urwid.Button(u"Ok", self.onOkButton)
+            self.exitbutton = urwid.Button(u"Cancel", self.onCancelButton)
 
-        self.selector = PluginSelector()
-        self.pluginwrap = urwid.AttrWrap(self.selector, 'list normal',
-                                         'list select')
+            self.radiogroup = []
+            self.developrbutton = urwid.RadioButton(self.radiogroup, 'Develop')
+            self.installrbutton = urwid.RadioButton(self.radiogroup, 'Install')
 
-        self.contentframe = urwid.Pile([self.pluginwrap, self.buttonlb])
+            self.modepile = urwid.Pile([self.developrbutton, self.installrbutton])
 
-        self.padding = urwid.Padding(self.contentframe, align='center',
-                                     width=('relative', 50))
-        self.filler = urwid.Filler(self.padding, height=('relative', 50))
+            self.buttons = [
+                blank,
+                self.allbutton,
+                self.nonebutton,
+                blank,
+                self.modepile,
+                blank,
+                self.okbutton,
+                self.exitbutton
+            ]
 
-        urwid.Frame.__init__(self, body=self.filler, header=self.headermap,
-                             footer=self.footermap)
+            self.wraps = []
+            for button in self.buttons:
+                self.wraps.append(
+                    urwid.AttrWrap(button, 'button normal', 'button select'))
 
-        self.loop = urwid.MainLoop(self, palette, unhandled_input=exit_on_q)
-        self.loop.run()
+            self.buttonlb = urwid.ListBox(urwid.SimpleListWalker(self.wraps))
 
-    def onAllButton(self, ev):
-        for plugin in Plugins:
-            Plugins[plugin] = True
+            self.selector = PluginSelector()
+            self.pluginwrap = urwid.AttrWrap(self.selector, 'list normal',
+                                             'list select')
 
-        self.selector.populate()
+            self.contentframe = urwid.Pile([self.pluginwrap, self.buttonlb])
 
-    def onNoneButton(self, ev):
-        for plugin in Plugins:
-            Plugins[plugin] = False
+            self.padding = urwid.Padding(self.contentframe, align='center',
+                                         width=('relative', 50))
+            self.filler = urwid.Filler(self.padding, height=('relative', 50))
 
-        self.selector.populate()
+            urwid.Frame.__init__(self, body=self.filler, header=self.headermap,
+                                 footer=self.footermap)
 
-    def onOkButton(self, ev):
-        self.footer.set_text(('banner', u" Installing plugins. "))
-        self.installPlugins()
+            self.loop = urwid.MainLoop(self, palette, unhandled_input=exit_on_q)
+            self.loop.run()
 
-    def onCancelButton(self, ev):
-        print("Quit")
-        exit_on_q('q')
+        def onAllButton(self, ev):
+            for plugin in Plugins:
+                Plugins[plugin] = True
 
-    # def installPlugin(self, plugin):
+            self.selector.populate()
 
-    def installPlugins(self):
-        plugins = []
+        def onNoneButton(self, ev):
+            for plugin in Plugins:
+                Plugins[plugin] = False
 
-        for plugin in Plugins:
-            if Plugins[plugin]:
-                plugins.append(plugin)
+            self.selector.populate()
 
-        installtext = urwid.Text(('title', u"Installing"), align='center')
-        installinfo = urwid.Text(('title', u"Preparing installation"),
-                                 align='center')
-        installwrap = urwid.AttrMap(
-            urwid.Pile([installtext, blank, installinfo, blank]), 'bg')
-        installprogressbar = urwid.ProgressBar('title', 'streak',
-                                               done=len(plugins))
+        def onOkButton(self, ev):
+            self.footer.set_text(('banner', u" Installing plugins. "))
+            self.installPlugins()
 
-        installlb = urwid.AttrMap(urwid.ListBox(
-            urwid.SimpleListWalker([
-                installwrap,
-                installprogressbar,
-                blank
-            ])
-        ), 'bg')
+        def onCancelButton(self, ev):
+            print("Quit")
+            exit_on_q('q')
 
-        installlbfill = urwid.Filler(installlb, height=('relative', 50))
+        # def installPlugin(self, plugin):
 
-        self.body = installlbfill
+        def installPlugins(self):
+            plugins = []
 
-        done = 0
+            for plugin in Plugins:
+                if Plugins[plugin]:
+                    plugins.append(plugin)
 
-        log = {}
+            installtext = urwid.Text(('title', u"Installing"), align='center')
+            installinfo = urwid.Text(('title', u"Preparing installation"),
+                                     align='center')
+            installwrap = urwid.AttrMap(
+                urwid.Pile([installtext, blank, installinfo, blank]), 'bg')
+            installprogressbar = urwid.ProgressBar('title', 'streak',
+                                                   done=len(plugins))
 
-        mode = "install" if self.installrbutton.state == True else "develop"
+            installlb = urwid.AttrMap(urwid.ListBox(
+                urwid.SimpleListWalker([
+                    installwrap,
+                    installprogressbar,
+                    blank
+                ])
+            ), 'bg')
 
-        for plugin in plugins:
-            pluginlog = {'out': [], 'err': []}
-            self.footer.set_text(('banner',
-                                  u" Using %s as installation mode to "
-                                  u"install %s " % (
-                                      mode, plugin)))
-            setup = Popen(['python', 'setup.py', mode], cwd=plugin + "/",
-                          stderr=PIPE, stdout=PIPE)
-            setup.wait()
-            pluginlog = setup.communicate()
+            installlbfill = urwid.Filler(installlb, height=('relative', 50))
 
-            log[plugin] = pluginlog
+            self.body = installlbfill
 
-            # self.installPlugin(plugin)
-            installinfo.set_text((u"Installing package 'hfos-%s'" % plugin))
-            done += 1
-            installprogressbar.set_completion(done)
-            self.loop.draw_screen()
+            done = 0
 
-        self.loop.stop()
+            log = {}
 
-        filename = mktemp("log", "hfos_plugin_installer")
+            mode = "install" if self.installrbutton.state == True else "develop"
 
-        def writelog(f, block):
-            for line in block:
-                f.write(line)
+            for plugin in plugins:
+                pluginlog = {'out': [], 'err': []}
+                self.footer.set_text(('banner',
+                                      u" Using %s as installation mode to "
+                                      u"install %s " % (
+                                          mode, plugin)))
+                setup = Popen(['python', 'setup.py', mode], cwd=plugin + "/",
+                              stderr=PIPE, stdout=PIPE)
+                setup.wait()
+                pluginlog = setup.communicate()
 
-        header = "#" * 5
+                log[plugin] = pluginlog
 
-        def writeheader(f, text):
-            f.write(header + " " + str(text) + " " + header + "\n")
+                # self.installPlugin(plugin)
+                installinfo.set_text((u"Installing package 'hfos-%s'" % plugin))
+                done += 1
+                installprogressbar.set_completion(done)
+                self.loop.draw_screen()
 
-        with open(filename, "w") as f:
-            for plugin in log:
-                writeheader(f, "Install log for %s" % plugin)
+            self.loop.stop()
 
-                writeheader(f, "Info output")
-                writelog(f, str(log[plugin][0]))
-                writeheader(f, "Error output")
-                writelog(f, str(log[plugin][1]))
+            filename = mktemp("log", "hfos_plugin_installer")
 
-        print("Done. Logfile written to %s " % filename)
+            def writelog(f, block):
+                for line in block:
+                    f.write(line)
 
-        sys.exit()
+            header = "#" * 5
 
+            def writeheader(f, text):
+                f.write(header + " " + str(text) + " " + header + "\n")
+
+            with open(filename, "w") as f:
+                for plugin in log:
+                    writeheader(f, "Install log for %s" % plugin)
+
+                    writeheader(f, "Info output")
+                    writelog(f, str(log[plugin][0]))
+                    writeheader(f, "Error output")
+                    writelog(f, str(log[plugin][1]))
+
+            print("Done. Logfile written to %s " % filename)
+
+            sys.exit()
+except ImportError:
+    pass
 
 def main():
     parser = argparse.ArgumentParser()
@@ -254,7 +257,11 @@ def main():
 
 
     if args.gui:
-        installer = Installer()
+        try:
+            installer = Installer()
+        except:
+            print("No GUI available. Maybe install python3-urwid to use this or"
+                  "use install --all to just install everything")
 
 if __name__ == "__main__":
     main()
