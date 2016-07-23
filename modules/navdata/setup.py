@@ -46,6 +46,8 @@ This software package is a plugin module for HFOS.
     sensordata=hfos.navdata.sensordata:SensorData
     sensordatatype=hfos.navdata.sensordatatype:SensorDataType
     mapcoords=hfos.navdata.mapcoords:MapCoords
+[hfos.provisions]
+    sensordatatypes=hfos.navdata.provisions.sensordatatype:provision
     """,
       test_suite="tests.main.main",
       )

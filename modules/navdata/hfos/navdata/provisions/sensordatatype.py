@@ -1,15 +1,16 @@
+from hfos.logger import hfoslog
 from hfos.provisions.base import provisionList
 from hfos.database import objectmodels
-# TODO: This needs to be independent of the datasource.
-# We should not expect only NMEA0183 sentences but should also make sure
-# to catch everything else, like nmea2k, seatalk etc
-
 from pynmea2 import types
 from pynmea2.types import proprietary
 from pynmea2.nmea import NMEASentenceType, ProprietarySentence
 from decimal import Decimal
 from uuid import uuid4
 from pprint import pprint
+
+# TODO: This needs to be independent of the datasource.
+# We should not expect only NMEA0183 sentences but should also make sure
+# to catch everything else, like nmea2k, seatalk etc
 
 
 def getSentence(name, module):
@@ -23,10 +24,10 @@ def getSentencesFromModule(module):
 
         obj = getSentence(sentence, module)
         if type(obj) in (NMEASentenceType, ProprietarySentence):
-            print(sentence, type(obj))
-            pprint(obj)
+            #print(sentence, type(obj))
+            #pprint(obj)
             doc = obj.__doc__
-            if doc is not None:
+            if doc is None:
                 doc = 'UNDOCUMENTED'
             else:
                 doc = doc.lstrip().rstrip()
@@ -49,13 +50,6 @@ def getNMEASentences():
     return getSentencesFromModule(types)
 
 
-sentences = {}
-sentences.update(getNMEASentences())
-sentences.update(getProprietarySentences())
-
-
-# pprint(sentences)
-
 def getFields(sentences):
     fields = {}
 
@@ -66,14 +60,7 @@ def getFields(sentences):
 
     return fields
 
-
-fields = getFields(sentences)
-
-
-# pprint(fields)
-
-
-def getSensorData(fields):
+def getSensorData(fields, sentences):
     sensordata = {}
     for sentype in fields:
         sen, doc = sentences[sentype]
@@ -111,29 +98,42 @@ def getSensorData(fields):
     return sensordata
 
 
-sensordatatypes = getSensorData(fields)
+def provision():
+    sentences = {}
+    sentences.update(getNMEASentences())
+    sentences.update(getProprietarySentences())
 
-# pprint(sensordatatypes)
+    # pprint(sentences)
 
-provisionitems = []
+    fields = getFields(sentences)
 
-# datatypes = {
-#    'string': [],
-#    'number': [],
-#    'integer': [],
-#    'unknown': []
-# }
+    # pprint(fields)
 
-for datatype in sensordatatypes.values():
-    provisionitems.append(datatype)
-    # datatypes[datatype['type']].append(datatype['description'])
+    sensordatatypes = getSensorData(fields, sentences)
 
-# pprint(provisionitems)
-# print(len(provisionitems))
+    # pprint(sensordatatypes)
 
-# pprint(datatypes)
+    provisionitems = []
 
-# for name, typeitems in datatypes.items():
-#    print('%s has %i elements' % (name, len(typeitems)))
+    # datatypes = {
+    #    'string': [],
+    #    'number': [],
+    #    'integer': [],
+    #    'unknown': []
+    # }
 
-provisionList(provisionitems, objectmodels['sensordatatype'], clear=True)
+    for datatype in sensordatatypes.values():
+        provisionitems.append(datatype)
+        # datatypes[datatype['type']].append(datatype['description'])
+
+        # pprint(provisionitems)
+        # print(len(provisionitems))
+
+        # pprint(datatypes)
+
+        # for name, typeitems in datatypes.items():
+        #    print('%s has %i elements' % (name, len(typeitems)))
+
+    provisionList(provisionitems, objectmodels['sensordatatype'], clear=True)
+    hfoslog('Provisioning: Sensordatatypes: Done.', emitter='PROVISIONS')
+
