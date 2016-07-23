@@ -30,6 +30,7 @@ RUN apt-get update && \
         python3-bson-ext \
         python3-pip \
         python3-wheel \
+        python3-urwid \
         python3-setuptools \
         python3-setuptools-scm \
         python3-setuptools-git
