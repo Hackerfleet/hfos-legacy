@@ -71,14 +71,10 @@ RUN git submodule init && git submodule update
 #RUN npm install
 #WORKDIR ..
 
-# Mongo config (smallfiles) and startup
+# Mongo config (smallfiles), database startup and provisioning
 
 RUN echo smallfiles = true >> /etc/mongodb.conf
-RUN /etc/init.d/mongodb start
-
-# Add provisions
-
-RUN python3 setup.py install_provisions
+RUN /etc/init.d/mongodb start && python3 setup.py install_provisions
 
 #  Services
 
