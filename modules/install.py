@@ -13,7 +13,7 @@ from tempfile import mktemp
 # * Migrations?
 # * Dependencies?!
 
-Plugins = {
+Modules = {
     'alert': True,
     'busrepeater': False,
     'camera': False,
@@ -63,8 +63,8 @@ try:
 
         def populate(self):
             options = []
-            for item in sorted(Plugins.keys()):
-                state = Plugins[item]
+            for item in sorted(Modules.keys()):
+                state = Modules[item]
                 option = urwid.CheckBox(item, state,
                                         on_state_change=self.stateChange)
                 options.append(option)
@@ -76,12 +76,12 @@ try:
         def stateChange(self, option, state):
             # footer.set_text(('banner', u"HELLO!!! %s %s " % (
             # option._label.text, state)))
-            Plugins[option._label.text] = state
+            Modules[option._label.text] = state
 
 
     class Installer(urwid.Frame):
         def __init__(self):
-            self.header = urwid.Text(('title', u" HFOS Plugins "), align='center')
+            self.header = urwid.Text(('title', u" HFOS Modules "), align='center')
             self.headermap = urwid.AttrMap(self.header, 'streak')
             self.footer = urwid.Text(('banner', u" Select plugins to install! "),
                                      align='center')
@@ -134,20 +134,20 @@ try:
             self.loop.run()
 
         def onAllButton(self, ev):
-            for plugin in Plugins:
-                Plugins[plugin] = True
+            for plugin in Modules:
+                Modules[plugin] = True
 
             self.selector.populate()
 
         def onNoneButton(self, ev):
-            for plugin in Plugins:
-                Plugins[plugin] = False
+            for plugin in Modules:
+                Modules[plugin] = False
 
             self.selector.populate()
 
         def onOkButton(self, ev):
             self.footer.set_text(('banner', u" Installing plugins. "))
-            self.installPlugins()
+            self.installModules()
 
         def onCancelButton(self, ev):
             print("Quit")
@@ -155,11 +155,11 @@ try:
 
         # def installPlugin(self, plugin):
 
-        def installPlugins(self):
+        def installModules(self):
             plugins = []
 
-            for plugin in Plugins:
-                if Plugins[plugin]:
+            for plugin in Modules:
+                if Modules[plugin]:
                     plugins.append(plugin)
 
             installtext = urwid.Text(('title', u"Installing"), align='center')
@@ -249,9 +249,13 @@ def main():
 
     if args.all:
 
-        for plugin in Plugins.keys():
-            setup = Popen(['python', 'setup.py', 'install'], cwd=plugin + "/")
-            setup.wait()
+        for module in Modules.keys():
+            try:
+                setup = Popen(['python', 'setup.py', 'install'], cwd=module + "/")
+                setup.wait()
+            except Exception as e:
+                print("Problematic module encountered, could not install: ",
+                      module)
 
         sys.exit(0)
 
