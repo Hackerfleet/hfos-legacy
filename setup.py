@@ -117,6 +117,8 @@ class install_provisions(Command):
 
     def run(self):
         self.announce("Installing HFOS default provisions.", INFO)
+        from hfos import database
+        database.initialize()
 
         from hfos.provisions import provisionstore
         for provisionname in provisionstore:
