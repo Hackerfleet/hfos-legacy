@@ -24,10 +24,12 @@ RUN apt-get update && \
         npm \
         nodejs-legacy \
         libfontconfig \
+        enchant \
         python3.5 \
         python3-pymongo \
         python3-bson-ext \
         python3-pip \
+        python3-wheel \
         python3-setuptools \
         python3-setuptools-scm \
         python3-setuptools-git
@@ -42,21 +44,18 @@ WORKDIR hfos
 
 # Install HFOS
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements-dev.txt
 RUN pip3 install .
 
 # Install all modules
 
 WORKDIR modules
 RUN python3 install.py --all
+WORKDIR ..
 
 # Make sure /var/[cache,lib]/hfos etc exists
 
 RUN python3 setup.py install_var
-
-# Add provisions
-
-RUN python3 setup.py install_provisions
 
 # Generate & Install Documentation
 
@@ -67,13 +66,18 @@ RUN python3 setup.py install_docs
 
 RUN git submodule init && git submodule update
 
-WORKDIR ../frontend
-RUN npm install
+#WORKDIR frontend
+#RUN npm install
+#WORKDIR ..
 
 # Mongo config (smallfiles) and startup
 
 RUN echo smallfiles = true >> /etc/mongodb.conf
 RUN /etc/init.d/mongodb start
+
+# Add provisions
+
+RUN python3 setup.py install_provisions
 
 #  Services
 
