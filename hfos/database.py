@@ -75,17 +75,15 @@ def _build_schemastore_new():
     return available
 
 
-def _build_model_factories():
-    global schemastore
-
+def _build_model_factories(store):
     result = {}
 
-    for schemaname in schemastore:
+    for schemaname in store:
 
         schema = None
 
         try:
-            schema = schemastore[schemaname]['schema']
+            schema = store[schemaname]['schema']
         except KeyError:
             hfoslog("No schema found for ", schemaname, lvl=critical,
                     emitter='DB')
@@ -99,20 +97,18 @@ def _build_model_factories():
     return result
 
 
-def _build_collections():
-    global schemastore
-
+def _build_collections(store):
     result = {}
 
     client = pymongo.MongoClient(host='localhost', port=27017)
     db = client['hfos']
 
-    for schemaname in schemastore:
+    for schemaname in store:
 
         schema = None
 
         try:
-            schema = schemastore[schemaname]['schema']
+            schema = store[schemaname]['schema']
         except KeyError:
             hfoslog("No schema found for ", schemaname, lvl=critical,
                     emitter='DB')
@@ -145,8 +141,8 @@ def initialize():
         sys.exit(5)
 
     schemastore = _build_schemastore_new()
-    objectmodels = _build_model_factories()
-    collections = _build_collections()
+    objectmodels = _build_model_factories(schemastore)
+    collections = _build_collections(schemastore)
 
 
 def test_schemata():
@@ -192,7 +188,7 @@ def profile(schemaname='sensordata', profiletype='pjs'):
         hfoslog("ns: ", ns, lvl=warn, emitter='DB')
 
     if testclass is not None:
-        hfoslog("Instantiating 100 elements...", emitter='DB')
+        hfoslog("Instantiating elements...", emitter='DB')
         for i in range(100):
             testclass()
     else:

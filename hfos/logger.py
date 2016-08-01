@@ -150,7 +150,6 @@ def ismuted(what):
     :param what:
     :return:
     """
-    global mute, solo
 
     state = False
 
@@ -226,12 +225,12 @@ def hfoslog(*what, **kwargs):
         if not 'sourceloc' in kwargs:
 
             # Get the previous frame in the stack, otherwise it would
-            # be this function!!!
+            # be this function
             func = inspect.currentframe().f_back.f_code
             # Dump the message + the name of this function to the log.
 
             if exception:
-                exc_type, exc_obj, exc_tb = sys.exc_info()
+                exc_type, exc_obj, exc_tb = sys.exc_info()  # NOQA
                 line_no = exc_tb.tb_lineno
                 lvl = error
             else:
