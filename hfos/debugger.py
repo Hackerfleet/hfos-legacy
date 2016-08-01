@@ -10,12 +10,9 @@ Debugger overlord
 :license: GPLv3 (See LICENSE)
 
 """
-from circuits.core.workers import Worker, task
+
 from hfos.events import frontendbuildrequest, componentupdaterequest, \
     logtailrequest
-
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
-
 from circuits.core.events import Event
 from circuits.core.handlers import handler, reprhandler
 from circuits.io import stdin
@@ -30,10 +27,12 @@ try:
     import objgraph
     from guppy import hpy
 except ImportError:
+    objgraph = None
+    hpy = None
     hfoslog("Debugger couldn't import objgraph and/or guppy.", lvl=warn,
             emitter="DBG")
 
-import inspect
+__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
 class HFDebugger(ConfigurableComponent):
@@ -59,9 +58,10 @@ class HFDebugger(ConfigurableComponent):
             self.root = root
         else:
             self.root = root
-        try:
+
+        if hpy is not None:
             self.heapy = hpy()
-        except:
+        else:
             self.log("Can't use heapy. guppy package missing?")
 
         self.log("Started. Notification users: ",
@@ -69,19 +69,19 @@ class HFDebugger(ConfigurableComponent):
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback,
-                      handler=None, fevent=None):
+                      dbghandler=None, fevent=None):
 
         try:
             s = []
 
-            if handler is None:
-                handler = ""
+            if dbghandler is None:
+                dbghandler = ""
             else:
-                handler = reprhandler(handler)
+                dbghandler = reprhandler(dbghandler)
 
             msg = "ERROR"
             msg += "{0:s} ({1:s}) ({2:s}): {3:s}\n".format(
-                handler, repr(fevent), repr(error_type), repr(value)
+                dbghandler, repr(fevent), repr(error_type), repr(value)
             )
 
             s.append(msg)

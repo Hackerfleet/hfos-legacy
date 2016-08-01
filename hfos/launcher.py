@@ -21,36 +21,32 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
 """
 
-import argparse
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 from circuits import handler, Timer, Event
-from hfos.schemata.component import ComponentBaseConfigSchema
-from hfos.database import schemastore, initialize
+# from hfos.schemata.component import ComponentBaseConfigSchema
+from hfos.database import initialize  # , schemastore
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
-    setup_root
-import sys
+    setup_root, verbosity
+
+from shutil import copy
 from glob import glob
+
+import argparse
+import sys
+import pwd
+import grp
 import os
 try:
     from subprocess import Popen, TimeoutExpired
 except ImportError:
-    from subprocess32 import Popen, TimeoutExpired
-
-from shutil import copy
-import os, pwd, grp
+    from subprocess32 import Popen, TimeoutExpired  # NOQA
 
 # from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
-hfoslog("Running with Python", sys.version.replace("\n", ""),
-        sys.platform, lvl=debug, emitter='CORE')
-hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
-
-hfoslog("Initializing database access", emitter='CORE')
-initialize()
 
 class dropPrivs(Event):
     pass
@@ -184,7 +180,7 @@ class Core(ConfigurableComponent):
             # 'machineroom'
         ]
 
-        self.updateComponents()
+        self.update_components()
         self._write_config()
 
         try:
@@ -202,21 +198,21 @@ class Core(ConfigurableComponent):
                      lvl=warn)
 
     @handler("dropPrivs")
-    def dropPrivileges(self, *args):
-        self.log("Dropping privileges", lvl=warn)
+    def drop_privileges(self, *args):
+        self.log("Dropping privileges", args, lvl=warn)
         drop_privileges()
 
     @handler("frontendbuildrequest", channel="setup")
-    def triggerFrontendBuild(self, event):
-        self.updateComponents(forcerebuild=event.force, install=event.install)
+    def trigger_frontend_build(self, event):
+        self.update_components(forcerebuild=event.force, install=event.install)
 
     @handler("componentupdaterequest", channel="setup")
-    def triggerComponentUpdate(self, event):
-        self.updateComponents(forcereload=event.force)
+    def trigger_component_update(self, event):
+        self.update_components(forcereload=event.force)
 
     # TODO: Installation of frontend requirements is currently disabled
-    def updateComponents(self, forcereload=False, forcerebuild=False,
-                         forcecopy=True, install=False):
+    def update_components(self, forcereload=False, forcerebuild=False,
+                          forcecopy=True, install=False):
         self.log("Updating components")
         components = {}
 
@@ -254,6 +250,9 @@ class Core(ConfigurableComponent):
                         if os.path.isdir(
                                 frontend) and frontend != self.frontendroot:
                             comp['frontend'] = frontend
+                        else:
+                            self.log("Component without frontend "
+                                     "directory:", comp, lvl=debug)
 
                         components[name] = comp
                         self.loadable_components[name] = loaded
@@ -300,10 +299,10 @@ class Core(ConfigurableComponent):
             self.log(self.config.components, components, lvl=verbose)
             self.config.components = components
 
-            self.updateFrontends(install)
+            self._update_frontends(install)
 
             if forcerebuild:
-                self.rebuildFrontend()
+                self._rebuild_frontend()
 
                 # We have to find a way to detect if we need to rebuild (and
                 # possibly wipe) stuff. This maybe the case, when a frontend
@@ -314,9 +313,9 @@ class Core(ConfigurableComponent):
 
         if forcereload:
             self.log("Restarting all components. Good luck.", lvl=warn)
-            self.instantiateComponents(clear=True)
+            self._instantiate_components(clear=True)
 
-    def updateFrontends(self, install=True):
+    def _update_frontends(self, install=True):
         self.log("Checking unique frontend locations: ",
                  self.config.components, lvl=debug)
 
@@ -366,14 +365,15 @@ class Core(ConfigurableComponent):
                 for modulefilename in glob(target + '/*.module.js'):
                     modulename = os.path.basename(modulefilename).split(
                         ".module.js")[0]
-                    line = u"import {s} from './components/{p}/{" \
-                           u"s}.module';\n" \
+                    line = u"import {s} from './components/{p}/{s}.module';\n" \
                            u"modules.push({s});\n".format(s=modulename, p=name)
                     if not modulename in modules:
                         importlines += line
                         modules.append(modulename)
+            else:
+                self.log("Module without frontend:", name, component,
+                         lvl=debug)
 
-        main = ""
         with open(os.path.join(self.frontendroot, 'src', 'main.tpl.js'),
                   "r") as f:
             main = "".join(f.readlines())
@@ -397,7 +397,7 @@ class Core(ConfigurableComponent):
             self.log("Error during frontend package info writing. Check "
                      "permissions! ", e, lvl=error)
 
-    def rebuildFrontend(self):
+    def _rebuild_frontend(self):
         self.log("Starting frontend build.", lvl=warn)
         npmbuild = Popen(["npm", "run", "build"], cwd=self.frontendroot)
         out, err = npmbuild.communicate()
@@ -413,22 +413,22 @@ class Core(ConfigurableComponent):
         copytree(os.path.join(self.frontendroot, 'assets'),
                  os.path.join(self.config.frontendtarget, 'assets'),
                  hardlink=False)
-        self.startFrontend()
+        self._start_frontend()
         self.log("Frontend deployed")
 
-    def startFrontend(self, restart=False):
-        self.log(self.config, self.config.frontendenabled)
+    def _start_frontend(self, restart=False):
+        self.log(self.config, self.config.frontendenabled, lvl=verbose)
         if self.config.frontendenabled and not self.frontendrunning \
                 or restart:
             self.log("Restarting webfrontend services.")
-            self.log(self.config)
+
             self.static = Static("/",
                                  docroot=self.config.frontendtarget).register(
                 self)
             self.websocket = WebSocketsDispatcher("/websocket").register(self)
             self.frontendrunning = True
 
-    def instantiateComponents(self, clear=True):
+    def _instantiate_components(self, clear=True):
         if clear:
             for comp in self.runningcomponents.values():
                 comp.unregister()
@@ -456,12 +456,8 @@ class Core(ConfigurableComponent):
         self.log("Running.")
         self.log("Started event origin: ", component, lvl=verbose)
 
-        self.instantiateComponents()
-        self.startFrontend()
-
-
-def registerComponent(self):
-    hfoslog("Registration called!")
+        self._instantiate_components()
+        self._start_frontend()
 
 
 def construct_graph(args):
@@ -517,8 +513,17 @@ def launch(run=True):
                         action="store_true")
 
     args = parser.parse_args()
-    #pprint(args)
-    print(args)
+    # pprint(args)
+
+    verbosity['console'] = args.log
+    verbosity['global'] = args.log
+
+    hfoslog("Running with Python", sys.version.replace("\n", ""),
+            sys.platform, lvl=debug, emitter='CORE')
+    hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
+
+    hfoslog("Initializing database access", emitter='CORE')
+    initialize()
 
     server = construct_graph(args)
     if run:

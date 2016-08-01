@@ -94,7 +94,7 @@ def _build_model_factories():
             result[schemaname] = warmongo.model_factory(schema)
         except Exception as e:
             hfoslog("Could not create factory for schema ", schemaname, schema,
-                    lvl=critical, emitter='DB')
+                    e, lvl=critical, emitter='DB')
 
     return result
 
@@ -121,7 +121,7 @@ def _build_collections():
             result[schemaname] = db[schemaname]
         except Exception as e:
             hfoslog("Could not get collection for schema ", schemaname, schema,
-                    lvl=critical, emitter='DB')
+                    e, lvl=critical, emitter='DB')
 
     return result
 
@@ -152,7 +152,7 @@ def initialize():
 def test_schemata():
     objects = {}
 
-    for schemaname, meta in schemastore.items():
+    for schemaname in schemastore.keys():
         objects[schemaname] = warmongo.model_factory(
             schemastore[schemaname]['schema'])
         try:
@@ -166,19 +166,24 @@ def test_schemata():
 
 
 def profile(schemaname='sensordata', profiletype='pjs'):
-    from pprint import pprint
     hfoslog("Profiling ", schemaname, emitter='DB')
 
     schema = schemastore[schemaname]['schema']
 
     hfoslog("Schema: ", schema, lvl=debug, emitter='DB')
 
+    testclass = None
+
     if profiletype == 'warmongo':
         hfoslog("Running Warmongo benchmark", emitter='DB')
         testclass = warmongo.model_factory(schema)
     elif profiletype == 'pjs':
         hfoslog("Running PJS benchmark", emitter='DB')
-        import python_jsonschema_objects as pjs
+        try:
+            import python_jsonschema_objects as pjs
+        except ImportError:
+            hfoslog("PJS benchmark selected but not available. Install "
+                    "python_jsonschema_objects (PJS)", emitter="DB")
         hfoslog()
         builder = pjs.ObjectBuilder(schema)
         ns = builder.build_classes()
@@ -186,9 +191,12 @@ def profile(schemaname='sensordata', profiletype='pjs'):
         testclass = ns[schemaname]
         hfoslog("ns: ", ns, lvl=warn, emitter='DB')
 
-    hfoslog("Instantiating 100 elements...", emitter='DB')
-    for i in range(100):
-        testobject = testclass()
+    if testclass is not None:
+        hfoslog("Instantiating 100 elements...", emitter='DB')
+        for i in range(100):
+            testclass()
+    else:
+        hfoslog("No Profiletype available!", emitter="DB")
 
     hfoslog("Profiling done", emitter='DB')
 

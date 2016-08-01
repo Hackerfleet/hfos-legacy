@@ -41,17 +41,17 @@ off = 100
 
 """
 
-from circuits import Component, handler
 from circuits.core import Event
+# from circuits import Component, handler
 # from uuid import uuid4
 # import json
 
 
 import time
-import os
 import sys
 import inspect
 import six
+# import os
 
 root = None
 
@@ -83,7 +83,7 @@ count = 0
 
 logfile = "/var/log/hfos/service.log"
 
-console = debug
+console = verbose
 
 verbosity = {'global': console,
              'file': off,
@@ -182,13 +182,17 @@ def setup_root(newroot):
 
 
 def hfoslog(*what, **kwargs):
-    """Logs all args except "lvl" which is used to determine the incident
-    log level.
-    :param kwargs: Debug message level
-    :param what: Loggable objects (i.e. they have a string representation)
+    """Logs all *what arguments.
+
+    :param *what: Loggable objects (i.e. they have a string representation)
+    :param lvl: Debug message level
+    :param exc: Switch to better handle exceptions, use if logging in an
+                except clause
+    :param emitter: Optional log source, where this can't be determined
+                    automatically
+    :param sourceloc: Give specific source code location hints, used internally
     """
 
-    # TODO: Filter out log levels BEFORE doing _anything_ here
     if 'lvl' in kwargs:
         lvl = kwargs['lvl']
         if lvl < verbosity['global']:
@@ -250,7 +254,10 @@ def hfoslog(*what, **kwargs):
     content = ""
 
     if callee:
-        msg += "%-60s" % callee
+        if lvl > 10:
+            msg += "%-60s" % callee
+        else:
+            msg += "%s" % callee
 
     for thing in what:
         content += " "
@@ -261,7 +268,7 @@ def hfoslog(*what, **kwargs):
     if ismuted(msg):
         return
 
-    if len(msg) > 1000:
+    if lvl > 10 and len(msg) > 1000:
         msg = msg[:1000]
 
     if lvl >= verbosity['file']:

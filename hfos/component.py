@@ -61,10 +61,10 @@ class ConfigurableComponent(Component):
 
                     break
 
-        ## self.configform = deepcopy(ComponentConfigForm)
+        # self.configform = deepcopy(ComponentConfigForm)
         self.configschema = deepcopy(ComponentBaseConfigSchema)
 
-        configprops = self.configprops
+        # configprops = self.configprops
         # configprops['default'] = {}
 
         self.configschema['schema']['properties'].update(self.configprops)
@@ -144,7 +144,8 @@ class ConfigurableComponent(Component):
 
             try:
                 name = self.config.name
-            except Exception as e:
+                self.log("Name set to: ", name, lvl=verbose)
+            except (AttributeError, KeyError):
                 self.log("Has no name.", lvl=verbose)
 
             try:
@@ -155,24 +156,29 @@ class ConfigurableComponent(Component):
 
             try:
                 uuid = self.config.uuid
-            except:
+                self.log("UUID set to: ", uuid, lvl=verbose)
+            except (AttributeError, KeyError):
                 self.log("Has no UUID", lvl=verbose)
                 self.config.uuid = str(uuid4())
 
             try:
                 notes = self.config.notes
-            except:
-                self.log("Has no notes", lvl=verbose)
+                self.log("Notes set to: ", notes, lvl=verbose)
+            except (AttributeError, KeyError):
+                self.log("Has no notes, trying docstring", lvl=verbose)
 
-                notes = self.__doc__.lstrip().rstrip()
-                if not notes:
+                notes = self.__doc__
+                if notes is None:
                     notes = "No notes."
-                self.log(notes)
+                else:
+                    notes = notes.lstrip().rstrip()
+                    self.log(notes)
                 self.config.notes = notes
 
             try:
                 componentclass = self.config.componentclass
-            except:
+                self.log("Componentclass set to: ", componentclass, lvl=verbose)
+            except (AttributeError, KeyError):
                 self.log("Has no component class", lvl=verbose)
                 self.config.componentclass = self.name
 
@@ -180,13 +186,13 @@ class ConfigurableComponent(Component):
             self.log("Not setting invalid component configuration: ", e,
                      type(e), exc=True, lvl=error)
 
-        self.log("Fields:", self.config._fields, lvl=verbose)
+        # self.log("Fields:", self.config._fields, lvl=verbose)
 
     def log(self, *args, **kwargs):
         func = inspect.currentframe().f_back.f_code
         # Dump the message + the name of this function to the log.
 
-        if 'exc' in kwargs and kwargs['exc'] == True:
+        if 'exc' in kwargs and kwargs['exc'] is True:
             exc_type, exc_obj, exc_tb = exc_info()
             line_no = exc_tb.tb_lineno
         else:
