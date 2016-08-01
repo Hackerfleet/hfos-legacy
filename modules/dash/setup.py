@@ -46,6 +46,8 @@ This software package is a plugin module for HFOS.
     dashboard=hfos.dashboard.dashboard:Dashboard
     [hfos.schemata]
     dashboardconfig=hfos.dashboard.dashboardconfig:DashboardConfig
+    [hfos.provisions]
+    dashboardconfig=hfos.dashboard.provisions.dashboard:provision
     """,
       test_suite="tests.main.main",
       )
