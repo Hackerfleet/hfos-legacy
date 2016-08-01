@@ -1,8 +1,12 @@
 import argparse
 from subprocess import Popen, PIPE
 import sys
-from pprint import pprint
 from tempfile import mktemp
+
+try:
+    import urwid
+except ImportError:
+    urwid = None
 
 # TODO:
 # * Automatically find local modules
@@ -191,7 +195,6 @@ def gui():
             mode = "install" if self.installrbutton.state is True else "develop"
 
             for plugin in plugins:
-                pluginlog = {'out': [], 'err': []}
                 self.footer.set_text(('banner',
                                       u" Using %s as installation mode to "
                                       u"install %s " % (
@@ -213,9 +216,9 @@ def gui():
 
             filename = mktemp("log", "hfos_plugin_installer")
 
-            def writelog(f, block):
+            def writelog(fileobject, block):
                 for line in block:
-                    f.write(line)
+                    fileobject.write(line)
 
             header = "#" * 5
 
@@ -272,13 +275,11 @@ def main():
 
         sys.exit(0)
 
-    if args.gui:
-        try:
-            import urwid
-            gui()
-        except ImportError:
-            print("No GUI available. Maybe install python3-urwid to use this or"
-                  "use install --all to just install everything")
+    if args.gui and urwid is not None:
+        gui()
+    elif urwid is None:
+        print("No GUI available. Maybe install python3-urwid to use this or"
+              "use install --all to just install everything")
 
 if __name__ == "__main__":
     main()
