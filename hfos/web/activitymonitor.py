@@ -23,8 +23,8 @@ Should be user configurable and toggleable, at least most parts/bits.
 
 from circuits import handler
 from hfos.component import ConfigurableComponent
-from hfos.logger import hfoslog, error, warn, verbose, critical
-from hfos.events import broadcast, send
+from hfos.logger import error, verbose  # , warn, critical
+from hfos.events import send  # , broadcast
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -72,7 +72,7 @@ class ActivityMonitor(ConfigurableComponent):
             alertpacket = {'component': 'alert', 'action': 'mob', 'data': True}
             self.fireEvent(send(clientuuid, alertpacket))
 
-    def _recordMobAlert(self):
+    def _record_mobalert(self):
         self.alertlist.append(self.referenceframe)
 
     def activityrequest(self, event):
@@ -81,11 +81,12 @@ class ActivityMonitor(ConfigurableComponent):
         :param event with incoming ActivityMonitor message
         """
 
-        self.log("Event: '%s'" % event.__dict__)
+        # self.log("Event: '%s'" % event.__dict__)
+
         try:
             action = event.action
             data = event.data
-
+            self.log("Activityrequest: ", action, data)
 
         except Exception as e:
             self.log("Error: '%s' %s" % (e, type(e)), lvl=error)
