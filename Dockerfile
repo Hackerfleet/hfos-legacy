@@ -33,7 +33,11 @@ RUN apt-get update && \
         python3-urwid \
         python3-setuptools \
         python3-setuptools-scm \
-        python3-setuptools-git
+        python3-setuptools-git \
+        python3-serial
+
+# Get a very recent mongodb
+
 RUN apt-get install -qy -t experimental mongodb
 
 RUN apt-get clean
@@ -75,6 +79,10 @@ RUN git submodule init && git submodule update
 
 RUN echo smallfiles = true >> /etc/mongodb.conf
 RUN /etc/init.d/mongodb start && python3 setup.py install_provisions
+
+# Add user account and group
+
+RUN useradd -Ums /bin/sh hfos
 
 #  Services
 
