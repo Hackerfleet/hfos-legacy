@@ -9,8 +9,6 @@ All JSONSchema compliant data schemata for HFOS
 Contains
 ========
 
-coords.py: Coordinates
-mapview.py: Mapview objects
 profile.py: User profile objects
 user.py: User account objects
 
@@ -18,11 +16,6 @@ user.py: User account objects
 :license: GPLv3 (See LICENSE)
 
 """
-
-from hfos.schemata.client import Client
-from hfos.schemata.user import User
-from hfos.schemata.profile import Profile
-from hfos.schemata.logmessage import LogMessage
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

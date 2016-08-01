@@ -174,10 +174,10 @@ See https://github.com/hackerfleet/hfos""",
     schemamanager=hfos.web.schemamanager:SchemaManager
 
     [hfos.schemata]
-    client=hfos.schemata:Client
-    profile=hfos.schemata:Profile
-    user=hfos.schemata:User
-    logmessage=hfos.schemata:LogMessage
+    client=hfos.schemata.client:Client
+    profile=hfos.schemata.profile:Profile
+    user=hfos.schemata.user:User
+    logmessage=hfos.schemata.logmessage:LogMessage
     """,
       test_suite="tests.main.main",
       )
