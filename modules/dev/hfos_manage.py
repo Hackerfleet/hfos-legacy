@@ -75,11 +75,14 @@ See hfos_manage --help for more details.
 
 
 try:
-    input = raw_input
+    input = raw_input  # NOQA
 except NameError:
     pass
 
-# TODO: Fix unicode 2.x/3.x issue
+try:
+    unicode  # NOQA
+except NameError:
+    unicode = str
 
 
 def augment_info(info):
