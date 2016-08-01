@@ -212,9 +212,6 @@ class NMEAParser(ConfigurableComponent):
 
             rawdata = {}
             for sentence in nmeadata:
-                self.log("Sentence: ", sentence.fields, sentence.talker,
-                         sentence.sentence_type, type(sentence),
-                         lvl=verbose)
 
                 for item in sentence.fields:
                     itemname = item[1]

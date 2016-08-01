@@ -11,24 +11,23 @@ Wiki manager
 """
 
 from uuid import uuid4
-from circuits import Component
+from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, error, warn
 from hfos.events import send
-from hfos.database import objectmodels
 from hfos.database import ValidationError, objectmodels
 import pymongo
 
 try:
     from docutils.core import publish_parts
-except:
+except ImportError:
     publish_parts = None
-    hfoslog("[WIKI] No docutils found! Install it to get full functionality!",
-            lvl=warn)
+    hfoslog("No docutils found! Install it to get full functionality!",
+            lvl=warn, emitter="WIKI")
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
-class Wiki(Component):
+class Wiki(ConfigurableComponent):
     """
     Wiki manager
 
@@ -40,11 +39,11 @@ class Wiki(Component):
     channel = "hfosweb"
 
     def __init__(self, *args):
-        super(Wiki, self).__init__(*args)
+        super(Wiki, self).__init__('WIKI', *args)
 
-        hfoslog("[WIKI] Started")
+        self.log("Started")
 
-    def _updateIndex(self):
+    def _update_index(self):
         wikipage = objectmodels['wikipage']
         index = wikipage.find_one({'name': 'Index'})
         index.text = "<ul>"
@@ -72,28 +71,29 @@ class Wiki(Component):
                         if not publish_parts:
                             html = newpage.text
                         else:
-                            html = \
-                            publish_parts(newpage.text, writer_name='html')[
-                                'html_body']
+                            html = publish_parts(
+                                newpage.text,
+                                writer_name='html')['html_body']
+
                         newpage.html = html
                         newpage.save()
-                        hfoslog("[WIKI] Page successfully rendered")
+                        self.log("Page successfully rendered")
                     except Exception as e:
-                        hfoslog("[WIKI] Error during html rendering: ", e,
-                                type(e), newpage.isbn, lvl=error)
+                        self.log("Error during html rendering: ", e,
+                                 type(e), newpage.isbn, lvl=error)
                 except Exception as e:
-                    hfoslog("[WIKI] Error during page update.")
+                    self.log("Error during page update: ", e)
 
         except Exception as e:
-            hfoslog("[WIKI] Page rendering notification error: ", event, e,
-                    type(e), lvl=error)
+            self.log("Page rendering notification error: ", event, e,
+                     type(e), lvl=error)
 
     def wikirequest(self, event):
         """Wiki event handler for incoming events
         :param event: WikiRequest with incoming wiki pagename and pagedata
         """
 
-        hfoslog("[WIKI] Event: '%s'" % event.__dict__)
+        self.log("Event: '%s'" % event.__dict__)
         try:
             action = event.action
             data = event.data
@@ -104,12 +104,12 @@ class Wiki(Component):
                 wikipage = model.find_one({'name': data})
 
                 if not wikipage:
-                    hfoslog("[WIKI] Page not found: ", data)
+                    self.log("Page not found: ", data)
                     wikipage = model({'uuid': str(uuid4()),
                                       'name': data,
                                       })
                 else:
-                    hfoslog("[WIKI] Page found, delivering: ", data)
+                    self.log("Page found, delivering: ", data)
 
                 wikipacket = {'component': 'wiki',
                               'action': 'get',
@@ -120,21 +120,21 @@ class Wiki(Component):
                     wikipage = model.find_one({'uuid': data['uuid']})
 
                     if wikipage:
-                        hfoslog("[WIKI] Updating old page.")
+                        self.log("Updating old page.")
                         wikipage.update(data)
                     else:
                         wikipage = model(data)
-                        hfoslog("[WIKI] Storing a new page:", wikipage._fields)
+                        self.log("Storing a new page:", wikipage._fields)
                         try:
                             wikipage.validate()
                             wikipage.save()
                         except ValidationError:
-                            hfoslog("[WIKI] Validation of new page failed!",
-                                    data, lvl=warn)
+                            self.log("Validation of new page failed!",
+                                     data, lvl=warn)
 
-                        hfoslog("[WIKI] Page stored. Reindexing.")
-                        self._updateIndex()
-                        hfoslog("[WIKI] Reindexing done.")
+                        self.log("Page stored. Reindexing.")
+                        self._update_index()
+                        self.log("Reindexing done.")
 
                     wikipacket = {'component': 'wiki',
                                   'action': 'put',
@@ -156,15 +156,15 @@ class Wiki(Component):
                                   }
 
             else:
-                hfoslog("[WIKI] Unsupported action: ", action, event,
-                        event.__dict__, lvl=warn)
+                self.log("Unsupported action: ", action, event,
+                         event.__dict__, lvl=warn)
                 return
 
             try:
                 self.fireEvent(send(event.client.uuid, wikipacket))
             except Exception as e:
-                hfoslog("[WIKI] Transmission error before broadcast: %s" % e,
-                        lvl=error)
+                self.log("Transmission error before broadcast: %s" % e,
+                         lvl=error)
 
         except Exception as e:
-            hfoslog("[WIKI] Error: '%s' %s" % (e, type(e)), lvl=error)
+            self.log("Error: '%s' %s" % (e, type(e)), lvl=error)

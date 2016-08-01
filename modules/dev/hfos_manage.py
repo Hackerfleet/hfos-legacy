@@ -74,6 +74,14 @@ See hfos_manage --help for more details.
 """
 
 
+try:
+    input = raw_input
+except NameError:
+    pass
+
+# TODO: Fix unicode 2.x/3.x issue
+
+
 def augment_info(info):
     info['descriptionheader'] = "=" * len(info['description'])
     info['componentname'] = info['pluginname'].capitalize()
@@ -97,7 +105,7 @@ def construct_module(info, target):
         os.makedirs(realpath)
 
     # pprint(info)
-    for template, item in templates.items():
+    for item in templates.values():
         source = os.path.join('templates', item[0])
         filename = os.path.abspath(
             os.path.join(target, item[1].format(**info)))
@@ -111,7 +119,7 @@ def ask(question, default=None, datatype=str):
     if datatype == bool:
         data = None
         while data not in ('Y', 'J', 'N', '1', '0'):
-            data = raw_input(
+            data = input(
                 "%s? [%s]: " % (question, default.upper())).upper()
 
             if default and data == '':
@@ -120,7 +128,7 @@ def ask(question, default=None, datatype=str):
         return data in ('Y', 'J', '1')
 
     elif datatype in (str, unicode):
-        data = raw_input("%s? [%s] (%s): " % (question, default, datatype))
+        data = input("%s? [%s] (%s): " % (question, default, datatype))
 
         if len(data) == 0:
             data = default

@@ -10,10 +10,11 @@ Module: Dashboard
 """
 
 from hfos.component import ConfigurableComponent
-from hfos.database import objectmodels
-from hfos.logger import hfoslog, error, warn, critical
-from datetime import datetime
-from hfos.events import updatesubscriptions, send
+from hfos.logger import warn  # , hfoslog, error, critical
+
+# from hfos.database import objectmodels
+# from datetime import datetime
+# from hfos.events import updatesubscriptions, send
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -39,7 +40,7 @@ class Dashboard(ConfigurableComponent):
         self.log("Started")
 
     def dashboardrequest(self, event):
-        self.log("Someone interacts with the dashboard! Yay!", lvl=warn)
+        self.log("Someone interacts with the dashboard! Yay!", event, lvl=warn)
 
     def objectcreation(self, event):
         if event.schema == 'dashboardconfig':

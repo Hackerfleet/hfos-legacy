@@ -10,14 +10,15 @@ AlertManager
 
 """
 
-from circuits import Component, handler
+from circuits import handler
+from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, error, warn, verbose, critical
 from hfos.events import broadcast, send
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
-class AlertManager(Component):
+class AlertManager(ConfigurableComponent):
     """
     AlertManager manager
 
@@ -29,9 +30,9 @@ class AlertManager(Component):
     channel = "hfosweb"
 
     def __init__(self, *args):
-        super(AlertManager, self).__init__(*args)
+        super(AlertManager, self).__init__("ALERT", *args)
 
-        hfoslog("[ALERT] Started")
+        self.log("Started")
 
         self.referenceframe = None
         self.mobalert = False
@@ -46,7 +47,7 @@ class AlertManager(Component):
         :param event with incoming referenceframe message
         """
 
-        hfoslog("[ALERT] Got a reference frame update! ", event, lvl=verbose)
+        self.log("Got a reference frame update! ", event, lvl=verbose)
 
         self.referenceframe = event.data
 
@@ -69,7 +70,7 @@ class AlertManager(Component):
         :param event with incoming AlertManager message
         """
 
-        hfoslog("[ALERT] Event: '%s'" % event.__dict__)
+        self.log("Event: '%s'" % event.__dict__)
         try:
             action = event.action
             data = event.data
@@ -77,7 +78,7 @@ class AlertManager(Component):
             if action == 'mob':
                 # noinspection PySimplifyBooleanCheck,PySimplifyBooleanCheck
                 if data == True:
-                    hfoslog("[ALERT] MOB ALERT ACTIVATED.", lvl=critical)
+                    self.log("MOB ALERT ACTIVATED.", lvl=critical)
 
                     self.mobalert = True
                     self._recordMobAlert()
@@ -85,22 +86,22 @@ class AlertManager(Component):
                     alertpacket = {'component': 'alert', 'action': 'mob',
                                    'data': True}
                 else:
-                    hfoslog("[ALERT] MOB deactivation requested by ",
+                    self.log("MOB deactivation requested by ",
                             event.user.account.name, lvl=warn)
                     self.mobalert = False
 
                     alertpacket = {'component': 'alert', 'action': 'mob',
                                    'data': False}
             else:
-                hfoslog("[ALERT] Unsupported action requested: ", event,
+                self.log("Unsupported action requested: ", event,
                         lvl=warn)
                 return
 
             try:
                 self.fireEvent(broadcast("users", alertpacket))
             except Exception as e:
-                hfoslog("[ALERT] Transmission error before broadcast: %s" % e,
+                self.log("Transmission error before broadcast: %s" % e,
                         lvl=error)
 
         except Exception as e:
-            hfoslog("[ALERT] Error: '%s' %s" % (e, type(e)), lvl=error)
+            self.log("Error: '%s' %s" % (e, type(e)), lvl=error)

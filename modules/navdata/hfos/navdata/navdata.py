@@ -11,17 +11,13 @@ Module NavData
 
 from circuits import Event
 from circuits import Timer, handler
-from hfos.database import objectmodels, ValidationError
+from hfos.database import objectmodels  # , ValidationError
 from hfos.events import referenceframe, broadcast, AuthorizedEvent, \
     AuthorizedEvents
-from hfos.logger import hfoslog, verbose, error, critical, warn, hilight, \
-    events
+from hfos.logger import hfoslog, events, debug, verbose, critical, warn  # , \
+# error, hilight,
 from hfos.component import ConfigurableComponent
 from hfos.events import send
-import json
-from time import time
-import datetime
-from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -97,7 +93,7 @@ class NavData(ConfigurableComponent):
 
                 sensed = []
 
-                for key, value in self.sensed.items():
+                for value in self.sensed.values():
                     sensed.append(value.serializablefields())
 
                 packet['data']['sensed'] = sensed
@@ -117,7 +113,7 @@ class NavData(ConfigurableComponent):
 
     @handler('clientdisconnect', channel='hfosweb')
     def clientdisconnect(self, event):
-        self.log('Deleting subscriptions for disconnected client')
+        self.log('Deleting subscriptions for disconnected client', lvl=debug)
         empty = []
         for name, subscription in self.subscriptions.items():
             while event.clientuuid in subscription:
@@ -142,7 +138,7 @@ class NavData(ConfigurableComponent):
 
         data = event.data
         timestamp = event.timestamp
-        bus = event.bus
+        # bus = event.bus
 
         # TODO: What about multiple busses? That is prepared, but how exactly
         # should they be handled?
@@ -181,7 +177,6 @@ class NavData(ConfigurableComponent):
                     sensordata = objectmodels['sensordata'](item)
                     # self.log("Value entry:", sensordata._fields)
 
-
                     if ref.record:
                         self.log("Recording updated reference:",
                                  sensordata._fields)
@@ -190,7 +185,7 @@ class NavData(ConfigurableComponent):
                     ref.lastvalue = str(value)
                     ref.timestamp = timestamp
             else:
-                self.log("Unknown sensor data received!", lvl=warn)
+                self.log("Unknown sensor data received!", data, lvl=warn)
 
     def navdatapush(self):
         """

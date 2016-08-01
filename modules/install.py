@@ -34,9 +34,8 @@ Modules = {
     'wiki': False,
 }
 
-try:
-    import urwid
 
+def gui():
     palette = [
         ('title', 'light cyan', 'dark blue'),
         ('banner', 'black', 'light gray'),
@@ -50,14 +49,16 @@ try:
 
     blank = urwid.Divider()
 
-
     def exit_on_q(key):
         if key in ('q', 'Q'):
             raise urwid.ExitMainLoop()
 
-
     class PluginSelector(urwid.ListBox):
         def __init__(self):
+
+            self.SFLW = None
+            self.body = None
+
             self.populate()
             urwid.ListBox.__init__(self, self.SFLW)
 
@@ -66,32 +67,33 @@ try:
             for item in sorted(Modules.keys()):
                 state = Modules[item]
                 option = urwid.CheckBox(item, state,
-                                        on_state_change=self.stateChange)
+                                        on_state_change=self.state_change)
                 options.append(option)
 
             self.SFLW = urwid.SimpleFocusListWalker(options)
             self.body = self.SFLW
             self._invalidate()
 
-        def stateChange(self, option, state):
+        def state_change(self, option, state):
             # footer.set_text(('banner', u"HELLO!!! %s %s " % (
             # option._label.text, state)))
             Modules[option._label.text] = state
 
-
     class Installer(urwid.Frame):
         def __init__(self):
+            self.body = None
+
             self.header = urwid.Text(('title', u" HFOS Modules "), align='center')
             self.headermap = urwid.AttrMap(self.header, 'streak')
             self.footer = urwid.Text(('banner', u" Select plugins to install! "),
                                      align='center')
             self.footermap = urwid.AttrWrap(self.footer, 'streak')
 
-            self.allbutton = urwid.Button(u"Select All", self.onAllButton)
-            self.nonebutton = urwid.Button(u"Select None", self.onNoneButton)
+            self.allbutton = urwid.Button(u"Select All", self.on_all_button)
+            self.nonebutton = urwid.Button(u"Select None", self.on_none_button)
 
-            self.okbutton = urwid.Button(u"Ok", self.onOkButton)
-            self.exitbutton = urwid.Button(u"Cancel", self.onCancelButton)
+            self.okbutton = urwid.Button(u"Ok", self.on_ok_button)
+            self.exitbutton = urwid.Button(u"Cancel", self.on_cancel_button)
 
             self.radiogroup = []
             self.developrbutton = urwid.RadioButton(self.radiogroup, 'Develop')
@@ -133,29 +135,29 @@ try:
             self.loop = urwid.MainLoop(self, palette, unhandled_input=exit_on_q)
             self.loop.run()
 
-        def onAllButton(self, ev):
+        def on_all_button(self):
             for plugin in Modules:
                 Modules[plugin] = True
 
             self.selector.populate()
 
-        def onNoneButton(self, ev):
+        def on_none_button(self):
             for plugin in Modules:
                 Modules[plugin] = False
 
             self.selector.populate()
 
-        def onOkButton(self, ev):
+        def on_ok_button(self):
             self.footer.set_text(('banner', u" Installing plugins. "))
-            self.installModules()
+            self.install_modules()
 
-        def onCancelButton(self, ev):
+        def on_cancel_button(self):
             print("Quit")
             exit_on_q('q')
 
         # def installPlugin(self, plugin):
 
-        def installModules(self):
+        def install_modules(self):
             plugins = []
 
             for plugin in Modules:
@@ -186,7 +188,7 @@ try:
 
             log = {}
 
-            mode = "install" if self.installrbutton.state == True else "develop"
+            mode = "install" if self.installrbutton.state is True else "develop"
 
             for plugin in plugins:
                 pluginlog = {'out': [], 'err': []}
@@ -217,8 +219,9 @@ try:
 
             header = "#" * 5
 
-            def writeheader(f, text):
-                f.write(header + " " + str(text) + " " + header + "\n")
+            def writeheader(fileobject, text):
+                fileobject.write(header + " " + str(text) + " " + header +
+                                 "\n")
 
             with open(filename, "w") as f:
                 for plugin in log:
@@ -232,8 +235,9 @@ try:
             print("Done. Logfile written to %s " % filename)
 
             sys.exit()
-except ImportError:
-    pass
+
+    return Installer
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -245,25 +249,34 @@ def main():
                         help="Install all found modules",
                         action="store_true")
 
+    parser.add_argument("--dev",
+                        help="Invoke setup.py with develop instead of install",
+                        action="store_true")
+
     args = parser.parse_args()
 
     if args.all:
 
         for module in Modules.keys():
             try:
-                setup = Popen(['python', 'setup.py', 'install'], cwd=module + "/")
+                setup = Popen([
+                    'python',
+                    'setup.py',
+                    'develop' if args.dev else 'install'
+                ],
+                    cwd=module + "/")
                 setup.wait()
             except Exception as e:
                 print("Problematic module encountered, could not install: ",
-                      module)
+                      module, e, type(e))
 
         sys.exit(0)
 
-
     if args.gui:
         try:
-            installer = Installer()
-        except:
+            import urwid
+            gui()
+        except ImportError:
             print("No GUI available. Maybe install python3-urwid to use this or"
                   "use install --all to just install everything")
 
