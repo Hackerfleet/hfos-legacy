@@ -32,11 +32,12 @@ setup(name="hfos-dev",
           'hfos_manage.py'
       ],
       long_description="""HFOS - Dev
-===========
+==========
 
 HFOS module development system
 
-This package is a useful starter point to set up new HFOS modules.
+This package is a useful starter point to set up new HFOS modules and debug
+existing ones as well as the core system.
 """,
       dependency_links=[],
       install_requires=[
@@ -44,6 +45,9 @@ This package is a useful starter point to set up new HFOS modules.
           'camelcase>=0.2.0',
           'pystache>=0.5.4'
       ],
-      entry_points="""""",
+      entry_points="""[hfos.components]
+    recorder=hfos.misc.recorder:Recorder
+    playback=hfos.misc.playback:Playback
+    """,
       test_suite="tests.main.main",
       )
