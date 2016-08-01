@@ -79,6 +79,8 @@ class LDAPAdaptor(ConfigurableComponent):
             return
         self.log("Started")
 
+        self.ldap = None
+
         if not self.config:
             self.log("No configuration! Storing default config now.")
             self.config = self.componentmodel(defaultcomponentconfig)
@@ -94,7 +96,7 @@ class LDAPAdaptor(ConfigurableComponent):
         try:
             ld = ldap.ldap(bytes(self.config.URI))
             ld.simple_bind(self.config.BINDDN, self.config.BINDPW)
-            return lmap.lmap(dn=self.config.BASE, ldap=ld)
+            self.ldap = lmap.lmap(dn=self.config.BASE, ldap=ld)
         except ldap.LDAPError as e:
             self.log("No connection to the LDAP server! (", e, type(e), ")",
                      lvl=error)
@@ -109,7 +111,7 @@ class LDAPAdaptor(ConfigurableComponent):
         return hashv == newhashv
 
     def authenticate(self, uid, pin):
-        lm = None  # ldap_connect()
+        lm = self.ldap  # ldap_connect()
         try:
             user = lm(self.config.USERBASE).search(
                 self.config.ACCESS_FILTER.format(uid))[0]
