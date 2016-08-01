@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 # HFOS - Hackerfleet Operating System - Shareable Plugin
-# ====================================================
+# ======================================================
 # Copyright (C) 2011-2016 riot <riot@hackerfleet.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,9 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=['hfos==1.1.0'],
-      entry_points="""[hfos.schemata]
+      entry_points="""[hfos.components]
+    shareablewatcher=hfos.shareables.shareablewatcher:ShareableWatcher
+    [hfos.schemata]
     shareable=hfos.shareables.shareable:Shareable
     """,
       test_suite="tests.main.main",
