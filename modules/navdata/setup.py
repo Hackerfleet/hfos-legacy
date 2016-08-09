@@ -42,12 +42,15 @@ This software package is a plugin module for HFOS.
       install_requires=['hfos==1.1.0'],
       entry_points="""[hfos.components]
     navdata=hfos.navdata.navdata:NavData
+    vesselmanager=hfos.navdata.navdata:VesselManager
 [hfos.schemata]
     sensordata=hfos.navdata.sensordata:SensorData
     sensordatatype=hfos.navdata.sensordatatype:SensorDataType
     mapcoords=hfos.navdata.mapcoords:MapCoords
+    vessel=hfos.navdata.vessel:VesselData
 [hfos.provisions]
     sensordatatypes=hfos.navdata.provisions.sensordatatype:provision
+    vessel=hfos.navdata.provisions.vessel:provision
     """,
       test_suite="tests.main.main",
       )
