@@ -25,7 +25,7 @@ import argparse
 from time import localtime
 from pprint import pprint
 from collections import OrderedDict
-from templates import writeTemplateFile
+from templates import write_template_file
 
 paths = [
     'hfos',
@@ -113,7 +113,7 @@ def construct_module(info, target):
         filename = os.path.abspath(
             os.path.join(target, item[1].format(**info)))
         print("Creating file from template '%s'" % filename)
-        writeTemplateFile(source, filename, info)
+        write_template_file(source, filename, info)
 
 
 def ask(question, default=None, datatype=str):
