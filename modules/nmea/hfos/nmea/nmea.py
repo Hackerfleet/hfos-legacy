@@ -19,9 +19,9 @@ from circuits.io.serial import Serial
 from decimal import Decimal
 from hfos.component import ConfigurableComponent
 from hfos.database import ValidationError
-from hfos.events import sensordata
 from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
-from pprint import pprint
+from hfos.navdata.events import sensordata
+# from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

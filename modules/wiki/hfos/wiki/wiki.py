@@ -13,7 +13,7 @@ Wiki manager
 from uuid import uuid4
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, error, warn
-from hfos.events import send
+from hfos.events.client import send
 from hfos.database import ValidationError, objectmodels
 import pymongo
 

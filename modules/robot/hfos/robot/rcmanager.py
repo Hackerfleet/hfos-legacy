@@ -13,9 +13,27 @@ Chat manager
 
 from hfos.component import ConfigurableComponent
 from hfos.logger import error, warn, critical
-from hfos.events import remotecontrolupdate, send
+from hfos.events.system import AuthorizedEvents, authorizedevent
+from circuits import Event
+from hfos.events.client import send
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+
+# Remote Control requests
+
+class remotecontrolrequest(authorizedevent):
+    """A client wants to remote control a servo"""
+
+
+# Remote Control events
+
+class remotecontrolupdate(Event):
+    """A client wants to remote control a servo"""
+
+    def __init__(self, controldata, *args):
+        super(remotecontrolupdate, self).__init__(*args)
+        self.controldata = controldata
+
 
 
 class RemoteControlManager(ConfigurableComponent):
@@ -33,6 +51,8 @@ class RemoteControlManager(ConfigurableComponent):
         super(RemoteControlManager, self).__init__("RCM", *args)
 
         self.remotecontroller = None
+
+        AuthorizedEvents['remotectrl'] = remotecontrolrequest
 
         self.log("Started")
 

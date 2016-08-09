@@ -13,7 +13,7 @@ AlertManager
 from circuits import handler
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, error, warn, verbose, critical
-from hfos.events import broadcast, send
+from hfos.events.client import broadcast, send
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

@@ -10,9 +10,9 @@ A controllable event playback utility component
 
 """
 
-from time import time
 from hfos.component import ConfigurableComponent
-from hfos.logger import error, warn
+# from hfos.logger import error, warn
+# from time import time
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

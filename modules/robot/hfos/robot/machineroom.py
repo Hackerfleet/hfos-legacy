@@ -33,7 +33,7 @@ except ImportError:
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
-class MachineroomEvent(Event):
+class machineroomevent(Event):
     """
 
     :param value:
@@ -41,19 +41,19 @@ class MachineroomEvent(Event):
     """
 
     def __init__(self, value, *args):
-        super(MachineroomEvent, self).__init__(*args)
+        super(machineroomevent, self).__init__(*args)
         self.controlvalue = value
 
 
-class machine(MachineroomEvent):
+class machine(machineroomevent):
     """Skipper wants us to change the engine speed/direction"""
 
 
-class pump(MachineroomEvent):
+class pump(machineroomevent):
     """Skipper wants us to turn on/off the coolant pump"""
 
 
-class rudder(MachineroomEvent):
+class rudder(machineroomevent):
     """Skipper wants us to change the rudder angle"""
 
 

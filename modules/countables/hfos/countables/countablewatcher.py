@@ -12,13 +12,13 @@ Module: Countables
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, error, warn, critical, events
-from hfos.events import AuthorizedEvent, AuthorizedEvents
+from hfos.events.system import authorizedevent, AuthorizedEvents
 from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
-class countrequest(AuthorizedEvent):
+class countrequest(authorizedevent):
     def __init__(self, *args):
         super(countrequest, self).__init__(*args)
         hfoslog('Counterrequest generated:', args, emitter='COUNTER',

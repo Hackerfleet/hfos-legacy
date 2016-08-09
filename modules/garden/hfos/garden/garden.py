@@ -14,7 +14,7 @@ from hfos.logger import warn  # , hfoslog, error, critical
 
 # from hfos.database import objectmodels
 # from datetime import datetime
-# from hfos.events import updatesubscriptions, send
+# from hfos.events.system import updatesubscriptions, send
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

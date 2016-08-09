@@ -13,7 +13,8 @@ from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, error, warn, critical
 from datetime import datetime
-from hfos.events import updatesubscriptions, send
+from hfos.events.system import updatesubscriptions, AuthorizedEvents, authorizedevent
+from hfos.events.client import send
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -34,6 +35,10 @@ libraryfieldmapping = {
         'Year': ('year', int)
     }
 }
+
+
+class libraryrequest(authorizedevent):
+    pass
 
 
 class Library(ConfigurableComponent):
@@ -57,6 +62,8 @@ class Library(ConfigurableComponent):
 
         super(Library, self).__init__("LIB", *args)
         self.config.creator = "Hackerfleet"
+
+        AuthorizedEvents['library'] = libraryrequest
 
         self.log("Started")
 
