@@ -71,6 +71,10 @@ RUN python3 setup.py install_docs
 
 RUN git submodule init && git submodule update
 
+# Upgrade npm (from ancient Debian version to current)
+
+RUN npm install npm -g
+
 #WORKDIR frontend
 #RUN npm install
 #WORKDIR ..
