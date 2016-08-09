@@ -117,7 +117,7 @@ class SharingCtrl {
                     console.log('It has a reservation: ', res);
                     var calItem = {
                         title: shareable.name + ': ' + res.title,
-                        url: '#/obj/shareable/' + shareable.uuid,
+                        url: '#/editor/shareable/' + shareable.uuid,
                         startsAt: new Date(Date.parse(res.starttime)),
                         endsAt: new Date(Date.parse(res.endtime)),
                         color: '#ff0000',
