@@ -15,9 +15,9 @@ import leafletrotatedmarker from 'leaflet-rotatedmarker';
 import leafleteasybutton from 'leaflet-easybutton';
 import zoomslider from 'leaflet.zoomslider';
 import contextmenu from 'leaflet-contextmenu';
-import leafletgrid from 'Leaflet.Grid/L.Grid';
+// import leafletgrid from 'Leaflet.Grid/L.Grid';
 
-import 'Leaflet.Grid/L.Grid.css';
+// import 'Leaflet.Grid/L.Grid.css';
 import 'leaflet-easybutton/src/easy-button.css';
 import 'leaflet.zoomslider/src/L.Control.Zoomslider.css';
 
@@ -151,7 +151,7 @@ class mapcomponent {
         var self = this;
         
         this.scope.$on('OP.Get', function (event, objuuid, obj, schema) {
-            console.log('[MAP] Object:', obj);
+            console.log('[MAP] Object:', obj, schema);
             if (objuuid === self.mapviewuuid) {
                 self.updateMapview(objuuid);
                 self.clearLayers();
@@ -416,7 +416,7 @@ class mapcomponent {
                     fill: '#000'
                 }).addTo(map);
             
-            self.grid = L.grid({redraw: 'moveend'}).addTo(map);
+            //self.grid = L.grid({redraw: 'moveend'}).addTo(map);
             
             //var PanControl = L.control.pan().addTo(map);
             self.courseplot = L.polyline([], {color: 'red'}).addTo(map);
