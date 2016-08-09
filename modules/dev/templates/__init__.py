@@ -1,8 +1,8 @@
 import pystache
-from pprint import pprint
+#from pprint import pprint
 
 
-def formatTemplate(template, content):
+def format_template(template, content):
     result = u""
     if True:  # try:
         result = pystache.render(template, content, string_encoding='utf-8')
@@ -13,17 +13,17 @@ def formatTemplate(template, content):
     return result
 
 
-def formatTemplateFile(filename, content):
+def format_template_file(filename, content):
     with open(filename, 'r') as f:
         template = f.read().decode('utf-8')
 
-    return formatTemplate(template, content)
+    return format_template(template, content)
 
 
-def writeTemplateFile(source, target, content):
+def write_template_file(source, target, content):
     # print(formatTemplateFile(source, content))
     print(target)
-    data = formatTemplateFile(source, content)
+    data = format_template_file(source, content)
     with open(target, 'w') as f:
         for line in data:
             f.write(line.encode('utf-8'))
