@@ -10,10 +10,12 @@ A controllable event recorder utility component
 
 """
 
-from time import time
 from circuits import handler
 from hfos.component import ConfigurableComponent
-from hfos.logger import error, warn, hilight
+from hfos.events.system import authorizedevent
+from hfos.logger import hilight  # , error, warn
+from json import dumps
+from time import time
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -31,8 +33,13 @@ class Recorder(ConfigurableComponent):
     def __init__(self, *args):
         super(Recorder, self).__init__("REC", *args)
 
+        self.logfile = open('/tmp/hfos_recording', 'w')
+
         self.log("Started")
 
-    @handler("AuthorizedEvent", channel="*")
-    def eventhandler(self, *args):
-        self.log("Recording event: ", args, lvl=hilight)
+    @handler()
+    def eventhandler(self, event, *args, **kwargs):
+        if isinstance(event, authorizedevent):
+            self.log("Recording event: ", event, lvl=hilight)
+
+            self.logfile.write(dumps({time(): event}))
