@@ -91,8 +91,8 @@ def _build_model_factories(store):
         try:
             result[schemaname] = warmongo.model_factory(schema)
         except Exception as e:
-            hfoslog("Could not create factory for schema ", schemaname, schema,
-                    e, lvl=critical, emitter='DB')
+            hfoslog("Could not create factory for schema ", e, type(e), schemaname, schema,
+                    lvl=critical, emitter='DB')
 
     return result
 

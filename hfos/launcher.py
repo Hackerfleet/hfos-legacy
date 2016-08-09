@@ -48,7 +48,7 @@ except ImportError:
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
 
-class dropPrivs(Event):
+class dropprivs(Event):
     pass
 
 
@@ -192,12 +192,12 @@ class Core(ConfigurableComponent):
         if self.insecure is not True:
             self.log("Setting five second timer to drop privileges.",
                      lvl=debug)
-            Timer(5, dropPrivs()).register(self)
+            Timer(5, dropprivs()).register(self)
         else:
             self.log("Not dropping privileges - this may be insecure!",
                      lvl=warn)
 
-    @handler("dropPrivs")
+    @handler("dropprivs")
     def drop_privileges(self, *args):
         self.log("Dropping privileges", args, lvl=warn)
         drop_privileges()
@@ -216,7 +216,7 @@ class Core(ConfigurableComponent):
         self.log("Updating components")
         components = {}
 
-        try:
+        if True: # try:
 
             from pkg_resources import iter_entry_points
 
@@ -228,7 +228,7 @@ class Core(ConfigurableComponent):
 
             for iterator in entry_point_tuple:
                 for entry_point in iterator:
-                    try:
+                    if 1: # try:
                         name = entry_point.name
                         location = entry_point.dist.location
                         loaded = entry_point.load()
@@ -259,11 +259,11 @@ class Core(ConfigurableComponent):
 
                         self.log("Loaded component:", comp, lvl=verbose)
 
-                    except Exception as e:
-                        self.log("Could not inspect entrypoint: ", e,
-                                 type(e), entry_point, iterator, lvl=error,
-                                 exc=True)
-                        return
+                    #except Exception as e:
+                    #    self.log("Could not inspect entrypoint: ", e,
+                    #             type(e), entry_point, iterator, lvl=error,
+                    #             exc=True)
+                    #    break
 
                         # for name in components.keys():
                         #     try:
@@ -285,9 +285,9 @@ class Core(ConfigurableComponent):
                         # schemastore['component'] = ComponentBaseConfigSchema
 
 
-        except Exception as e:
-            self.log("Error: ", e, type(e), lvl=error, exc=True)
-            return
+        #except Exception as e:
+        #    self.log("Error: ", e, type(e), lvl=error, exc=True)
+        #    return
 
         self.log("Checking component frontend bits in ", self.frontendroot,
                  lvl=verbose)
@@ -449,7 +449,7 @@ class Core(ConfigurableComponent):
                     self.runningcomponents[name] = runningcomponent
             except Exception as e:
                 self.log("Could not register component: ", name, e,
-                         type(e), lvl=error)  # ().register(self)
+                         type(e), lvl=error, exc=True)  # ().register(self)
 
     def started(self, component):
         """Sets up the application after startup."""

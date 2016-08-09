@@ -11,17 +11,18 @@ Debugger overlord
 
 """
 
-from hfos.events import frontendbuildrequest, componentupdaterequest, \
-    logtailrequest
-from circuits.core.events import Event
-from circuits.core.handlers import handler, reprhandler
-from circuits.io import stdin
-from hfos.component import ConfigurableComponent
-from hfos.logger import hfoslog, critical, warn
-from hfos.events import send
-from hfos.database import objectmodels
-from uuid import uuid4
 import json
+from uuid import uuid4
+
+from circuits.core.events import Event
+from circuits.core.handlers import reprhandler, handler
+from circuits.io import stdin
+from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
+    logtailrequest
+from hfos.events.client import send
+from hfos.component import ConfigurableComponent
+from hfos.database import objectmodels
+from hfos.logger import hfoslog, critical, warn
 
 try:
     import objgraph
@@ -69,19 +70,19 @@ class HFDebugger(ConfigurableComponent):
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback,
-                      dbghandler=None, fevent=None):
+                      handler=None, fevent=None):
 
         try:
             s = []
 
-            if dbghandler is None:
-                dbghandler = ""
+            if handler is None:
+                handler = ""
             else:
-                dbghandler = reprhandler(dbghandler)
+                handler = reprhandler(handler)
 
             msg = "ERROR"
             msg += "{0:s} ({1:s}) ({2:s}): {3:s}\n".format(
-                dbghandler, repr(fevent), repr(error_type), repr(value)
+                handler, repr(fevent), repr(error_type), repr(value)
             )
 
             s.append(msg)
@@ -231,8 +232,8 @@ class CLI(ConfigurableComponent):
                 self.fireEvent()
 
 
-class cliCommand(Event):
+class clicommand(Event):
     def __init__(self, cmd, cmdargs, *args, **kwargs):
-        super(cliCommand, self).__init__(*args, **kwargs)
+        super(clicommand, self).__init__(*args, **kwargs)
         self.cmd = cmd
         self.args = cmdargs

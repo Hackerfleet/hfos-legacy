@@ -216,7 +216,6 @@ def hfoslog(*what, **kwargs):
 
     now = time.time() - start
 
-    line_no = None
     callee = None
 
     if verbosity['global'] <= debug:
