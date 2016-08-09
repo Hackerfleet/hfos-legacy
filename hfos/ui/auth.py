@@ -11,11 +11,12 @@ Authentication (and later Authorization) system
 """
 
 from uuid import uuid4
+
 from circuits import handler
-from hfos.database import objectmodels
-from hfos.events import authentication, send
-from hfos.logger import error, warn, debug, verbose
+from hfos.events.client import authentication, send
 from hfos.component import ConfigurableComponent
+from hfos.database import objectmodels
+from hfos.logger import error, warn, debug, verbose
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

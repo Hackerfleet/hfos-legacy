@@ -11,17 +11,18 @@ Coordinates clients communicating via websocket
 
 """
 
+import datetime
 import json
 from uuid import uuid4
-from circuits.net.events import write
+
 from circuits import handler
+from circuits.net.events import write
+from hfos.events.system import AuthorizedEvents
+from hfos.events.client import authenticationrequest, send, clientdisconnect, userlogin
 from hfos.component import ConfigurableComponent
-from hfos.events import send, authenticationrequest, clientdisconnect, \
-    userlogin, AuthorizedEvents
-from hfos.logger import error, warn, critical, debug, info, network
-from hfos.web.clientobjects import Socket, Client, User
 from hfos.database import objectmodels
-import datetime
+from hfos.logger import error, warn, critical, debug, info, network
+from hfos.ui.clientobjects import Socket, Client, User
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

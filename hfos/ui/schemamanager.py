@@ -8,10 +8,10 @@ Module: SchemaManager
 
 """
 
+from hfos.events.client import send
 from hfos.component import ConfigurableComponent
 from hfos.database import schemastore
-from hfos.logger import hfoslog, error
-from hfos.events import send
+from hfos.logger import error
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

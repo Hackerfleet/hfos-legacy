@@ -11,11 +11,12 @@ OM manager
 """
 
 from uuid import uuid4
+
+from hfos.events.system import objectcreation, objectchange, objectdeletion
+from hfos.events.client import send
 from hfos.component import ConfigurableComponent
-from hfos.logger import debug, error, warn, critical
-from hfos.events import send, objectcreation, objectchange, objectdeletion
 from hfos.database import objectmodels, collections, ValidationError, schemastore
-import pymongo
+from hfos.logger import debug, error, warn, critical
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

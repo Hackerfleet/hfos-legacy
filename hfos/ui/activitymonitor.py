@@ -22,9 +22,9 @@ Should be user configurable and toggleable, at least most parts/bits.
 """
 
 from circuits import handler
+from hfos.events.client import send
 from hfos.component import ConfigurableComponent
 from hfos.logger import error, verbose  # , warn, critical
-from hfos.events import send  # , broadcast
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 

@@ -8,10 +8,11 @@ Module: Web.Demo
 
 """
 
-from random import randint
 import json
+from random import randint
+
+from hfos.events.client import broadcast
 from hfos.component import ConfigurableComponent
-from hfos.events import broadcast
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
