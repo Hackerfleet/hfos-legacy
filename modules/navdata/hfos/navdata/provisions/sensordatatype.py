@@ -64,9 +64,9 @@ def getSensorData(fields, sentences):
     sensordata = {}
     for sentype in fields:
         sen, doc = sentences[sentype]
-        print(sen, doc)
+        #print(sen, doc)
         for field in sen.fields:
-            print(sen, doc, field[1])
+            #print(sen, doc, field[1])
 
             if len(field) == 3:
 
