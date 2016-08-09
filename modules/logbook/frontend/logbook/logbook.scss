@@ -1,0 +1,109 @@
+@import '../../../colors.scss';
+
+#compass {
+  width: 50px;
+  height: 50px;
+  background-image: url('/assets/icons/iconmonstr-compass-6-icon.svg');
+  background-size: 50px auto;
+  position: relative;
+}
+
+#compass:hover #arrow {
+  -webkit-transform: rotate(0deg);
+  -moz-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+}
+
+#navdata {
+  font-size: xx-large;
+  color: black;
+}
+
+.box {
+  height: 100%;
+  border: 1px solid #ccc;
+  /*background-color: #fff;*/
+}
+
+.box-header {
+  /*background-color: #eee; */
+  padding: 0 10px 0 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: move;
+  position: relative;
+}
+
+.box-header h3 {
+  font-size: 14px;
+  text-transform: capitalize;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+.box-content {
+  padding: 0px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.box-header-btns {
+  top: 15px;
+  right: 10px;
+  cursor: pointer;
+  position: absolute;
+}
+
+.digital {
+  font-family: "Digital";
+  font-size: 5em;
+  line-height: 1;
+  //height: 100%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.digital-inverted {
+  @extend .digital;
+  mix-blend-mode: difference;
+  position: absolute;
+  width: 100%;
+}
+
+.simplebarreadout {
+  text-align: left;
+}
+
+.simplebar {
+  display: inline-block;
+  height: 5em;
+}
+
+.dashbar {
+  position: absolute;
+}
+
+.inverted-bar {
+  position: relative;
+  width: 300px;
+}
+
+.inverted-bar div {
+  padding: 10px 0;
+  text-indent: 10px;
+  position: absolute;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.inverted-bar .outer {
+  background-color: $color-white;
+  color: $color-primary-0;
+  width: 100%;
+}
+
+.inverted-bar .inner {
+  background-color: $color-primary-0;
+  color: $color-white;
+  width: 30%;
+}

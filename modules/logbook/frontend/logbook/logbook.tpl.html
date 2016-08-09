@@ -1,0 +1,55 @@
+<div class="jumbotron">
+    <h1>Logbook</h1>
+
+    <div class="row">
+
+        <div class="col-md-6 text-center">
+            <div class="btn-group">
+
+                <button
+                        class="btn btn-primary"
+                        mwl-date-modifier
+                        date="$ctrl.calendarDate"
+                        decrement="$ctrl.calendarView">
+                    Previous
+                </button>
+                <button
+                        class="btn btn-default"
+                        mwl-date-modifier
+                        date="$ctrl.calendarDate"
+                        set-to-today>
+                    Today
+                </button>
+                <button
+                        class="btn btn-primary"
+                        mwl-date-modifier
+                        date="$ctrl.calendarDate"
+                        increment="$ctrl.calendarView">
+                    Next
+                </button>
+            </div>
+        </div>
+
+        <br class="visible-xs visible-sm">
+
+        <div class="col-md-6 text-center">
+            <div class="btn-group" ng-model="$ctrl.foobar" bs-radio-group>
+                <label class="btn btn-default"><input class="btn btn-default" value="0" type="radio"> Year</label>
+                <label class="btn btn-default"><input class="btn btn-default" value="1" type="radio">
+                    Month</label>
+                <label class="btn btn-default"><input class="btn btn-default" value="week" type="radio"> Week</label>
+                <label class="btn btn-default"><input class="btn btn-default" value="day" type="radio"> Day</label>
+            </div>
+        </div>
+
+    </div>
+    <mwl-calendar
+            view="$ctrl.calendarView"
+            view-date="$ctrl.calendarDate"
+            events="$ctrl.events"
+            view-title="$ctrl.calendarTitle"
+            on-event-click="$ctrl.eventClicked(calendarEvent)"
+            on-event-times-changed="calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd"
+            cell-is-open="true">
+    </mwl-calendar>
+</div>
