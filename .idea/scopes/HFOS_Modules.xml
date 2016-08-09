@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="HFOS-Modules" pattern="file[modules]:*/" />
+</component>
