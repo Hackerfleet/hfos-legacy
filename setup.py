@@ -117,8 +117,11 @@ class install_provisions(Command):
 
     def run(self):
         self.announce("Installing HFOS default provisions.", INFO)
-        from hfos import database
-        database.initialize()
+        from hfos.logger import verbosity, events
+        verbosity['console'] = verbosity['global'] = events
+
+        from hfos.database import initialize
+        initialize()
 
         from hfos.provisions import provisionstore
         for provisionname in provisionstore:
@@ -136,7 +139,7 @@ setup(name="hfos",
       license="GNU General Public License v3",
       packages=['hfos',
                 'hfos.schemata',
-                'hfos.web',
+                'hfos.ui',
                 'hfos.provisions'],
       scripts=[
           'hfos_launcher.py',
@@ -168,16 +171,21 @@ See https://github.com/hackerfleet/hfos""",
     logger=hfos.debugger:Logger
 
     [hfos.sails]
-    auth=hfos.web.auth:Authenticator
-    clientmanager=hfos.web.clientmanager:ClientManager
-    objectmanager=hfos.web.objectmanager:ObjectManager
-    schemamanager=hfos.web.schemamanager:SchemaManager
+    auth=hfos.ui.auth:Authenticator
+    clientmanager=hfos.ui.clientmanager:ClientManager
+    objectmanager=hfos.ui.objectmanager:ObjectManager
+    schemamanager=hfos.ui.schemamanager:SchemaManager
 
     [hfos.schemata]
+    systemconfig=hfos.schemata.system:Systemconfig
     client=hfos.schemata.client:Client
     profile=hfos.schemata.profile:Profile
     user=hfos.schemata.user:User
     logmessage=hfos.schemata.logmessage:LogMessage
+
+    [hfos.provisions]
+    system=hfos.provisions.system:provision
+    user=hfos.provisions.user:provision
     """,
       test_suite="tests.main.main",
       )
