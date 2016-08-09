@@ -15,46 +15,54 @@ from hfos.schemata.defaultform import savebutton
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
+
 SystemconfigSchema = {
     'id': '#systemconfig',
     'type': 'object',
     'name': 'systemconfig',
     'properties': {
         'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
             'title': 'Unique System ID'
-            },
-        'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
-                 'description': 'System name'},
-        'description': {'type': 'string', 'format': 'html',
-                        'title': 'Description',
-                        'description': 'System description'},
+        },
+        'active': {
+            'type': 'boolean', 'title': 'Active configuration',
+            'description': 'Determines which configuration will be used. Only one can be active.',
+            'default': False
+        },
+        'name': {
+            'type': 'string', 'minLength': 1, 'title': 'Name',
+            'description': 'System name'
+        },
+        'description': {
+            'type': 'string', 'format': 'html',
+            'title': 'Description',
+            'description': 'System description'
+        },
         'owneruuid': {
             'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
                        'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
-            'title': 'Associated Unique Owner User ID'
-            },
+            'title': 'Associated Owner Unique User ID'
+        },
         'vesseluuid': {
             'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
                        'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
-            'title': 'Associated Unique Vessel ID'
-            },
-
+            'title': 'Associated Vessel Unique ID'
+        },
         'defaultmapviewuuid': {
             'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
                        'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
-            'title': 'Default Unique Mapview ID'
+            'title': 'Default Mapview Unique ID'
         },
         'defaultdashboarduuid': {
             'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
                        'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
-            'title': 'Default Unique Dashboard ID'
+            'title': 'Default Dashboard Unique ID'
         },
         'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
                          'description': 'Default theme used for user '

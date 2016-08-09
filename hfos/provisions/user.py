@@ -14,7 +14,7 @@ Just creates a fulltext searchable index over the username field.
 """
 
 from hfos.provisions.base import provisionList
-from hfos.database import userobject
+from hfos.database import objectmodels
 from hfos.logger import hfoslog
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
@@ -24,7 +24,10 @@ Users = [
 
 
 def provision():
-    provisionList(Users, userobject, indexes=['name'], clear=True)
+    # TODO: Add a root user and make sure owner can access it later.
+    # Setting up details and asking for a password here is not very useful, since this process is usually run automated.
+
+    provisionList(Users, objectmodels['user'], indexes=['name'], clear=True)
     hfoslog('Provisioning: Users: Done.', emitter="PROVISIONS")
 
 
