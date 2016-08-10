@@ -11,14 +11,17 @@ Module NavData
 
 from circuits import Event
 from circuits import Timer, handler
+
 from hfos.database import objectmodels  # , ValidationError
-from hfos.events.system import AuthorizedEvents
+from hfos.events.system import AuthorizedEvents, updatesubscriptions
 from hfos.navdata.events import referenceframe, navdatarequest
-from hfos.logger import hfoslog, events, debug, verbose, critical, warn, hilight
+from hfos.logger import hfoslog, events, debug, verbose, critical, warn, \
+    hilight
 from hfos.component import ConfigurableComponent
 from hfos.events.client import send, broadcast
 from uuid import uuid4
 
+from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -154,6 +157,9 @@ class NavData(ConfigurableComponent):
                         'type': name
                     }
 
+                    self.referenceframe[name] = value
+                    self.referenceages[name] = timestamp
+
                     # self.log("Subscriptions:", self.subscriptions, ref.name)
                     if ref.name in self.subscriptions:
 
@@ -219,20 +225,24 @@ class VesselManager(ConfigurableComponent):
     def __init__(self, *args):
         super(VesselManager, self).__init__('VESSEL', *args)
 
-        vesseluuid = objectmodels['systemconfig'].find_one({'active': True}).vesseluuid
+        vesseluuid = objectmodels['systemconfig'].find_one(
+            {'active': True}).vesseluuid
         vessel = objectmodels['vessel'].find_one({'uuid': vesseluuid})
         mapview = None
 
         if hasattr(vessel, 'mapviewuuid'):
-            self.log('Found a corresponding mapview: ', vessel.mapviewuuid, lvl=debug)
-            mapview = objectmodels['mapview'].find_one({'uuid': vessel.mapviewuuid})
+            self.log('Found a corresponding mapview: ', vessel.mapviewuuid,
+                     lvl=debug)
+            mapview = objectmodels['mapview'].find_one(
+                {'uuid': vessel.mapviewuuid})
 
         if mapview is None:
             self.log('Creating a new vessel associated mapview')
             mapview = objectmodels['mapview']({'uuid': str(uuid4())})
             mapview.shared = True
             mapview.name = 'Follow ' + vessel.name
-            mapview.description = 'Automatically following mapview for ' + vessel.name
+            mapview.description = 'Automatically following mapview for ' + \
+                                  vessel.name
 
             self.log('Saving new mapview: ', mapview._fields)
             mapview.save()
@@ -247,4 +257,23 @@ class VesselManager(ConfigurableComponent):
 
     @handler('referenceframe', channel='navdata')
     def referenceframeupdate(self, event):
-        self.log('Updating system vessel mapview coordinates', event, self.vesselmapview, lvl=hilight)
+        self.log('Updating system vessel mapview coordinates', event,
+                 self.vesselmapview)
+        self.log('Data:', event.data, lvl=hilight)
+        frame = event.data['data']
+        if 'GLL_lat' in frame and 'GLL_lon' in frame:
+            pprint(frame['GLL_lat'])
+            pprint(self.vesselmapview._fields)
+            coords = {
+                'lat': float(frame['GLL_lat']),
+                'lng': float(frame['GLL_lon']),
+                'zoom': 10,
+                'autoDiscover': False
+            }
+            self.vesselmapview.coords = coords
+            self.vesselmapview.save()
+
+            self.fireEvent(updatesubscriptions(uuid=self.vesselmapview.uuid,
+                                               schema='mapview',
+                                               data=self.vesselmapview),
+                           'hfosweb')
