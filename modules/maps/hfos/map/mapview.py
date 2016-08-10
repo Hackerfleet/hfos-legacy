@@ -54,6 +54,8 @@ MapViewSchema = {
                    'description': 'Share mapview with the crew'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
                   'description': 'Custom user notes'},
+        'viewtype': {'enum': ['vessel', 'user'], 'title': 'View Type',
+                     'description': 'Shows what type of mapview this is'},
         'layergroups': {
             'type': 'array',
             'items': {
