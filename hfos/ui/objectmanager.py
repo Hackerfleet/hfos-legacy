@@ -54,16 +54,16 @@ class ObjectManager(ConfigurableComponent):
                 self.log("No Schema given, cannot act!", lvl=critical)
                 return
 
+        if 'filter' in data:
+            objectfilter = data['filter']
+        else:
+            objectfilter = {}
+
         result = None
         notification = None
 
         if action == "list":
             if schema in objectmodels.keys():
-                if 'filter' in data:
-                    objectfilter = data['filter']
-                else:
-                    objectfilter = {}
-
                 if 'fields' in data:
                     fields = data['fields']
                 else:
@@ -110,11 +110,6 @@ class ObjectManager(ConfigurableComponent):
 
         elif action == "search":
             if schema in objectmodels.keys():
-                if 'filter' in data:
-                    objectfilter = data['filter']
-                else:
-                    objectfilter = {}
-
                 # objectfilter['$text'] = {'$search': str(data['search'])}
                 objectfilter = {
                     'name': {'$regex': str(data['search']), '$options': '$i'}}
@@ -168,22 +163,25 @@ class ObjectManager(ConfigurableComponent):
                          lvl=warn)
 
         elif action == "get":
-            try:
-                uuid = data['uuid']
-            except KeyError:
-                self.log('Object with no uuid requested:', schema, data,
-                         lvl=error)
-                return
-
             if 'subscribe' in data:
                 subscribe = data['subscribe']
             else:
                 subscribe = False
 
+            if objectfilter == {}:
+                # No filter, so we'll have to rely on a uuid
+                try:
+                    uuid = data['uuid']
+                    objectfilter = {'uuid': uuid}
+                except KeyError:
+                    self.log('Object with no filter/uuid requested:', schema, data,
+                             lvl=error)
+                    return
+
             storageobject = None
 
             if schema in objectmodels.keys() and uuid.upper != "CREATE":
-                storageobject = objectmodels[schema].find_one({'uuid': uuid})
+                storageobject = objectmodels[schema].find_one(objectfilter)
 
             if not storageobject:
                 self.log("Object not found, creating: ", data)
