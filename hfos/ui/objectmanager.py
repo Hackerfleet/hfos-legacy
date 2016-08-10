@@ -276,7 +276,7 @@ class ObjectManager(ConfigurableComponent):
             self._updateSubscribers(data)
 
         except Exception as e:
-            self.log("Error during backend object storage: ", type(e), e,
+            self.log("Error during subscription update: ", type(e), e,
                      exc=True)
 
     def _change(self, schema, data):
