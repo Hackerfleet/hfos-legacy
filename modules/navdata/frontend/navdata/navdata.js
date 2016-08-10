@@ -25,20 +25,32 @@
 
 class NavDataService {
 
-    constructor(socket, alert, modal) { //$rootScope, $interval, socket, createDialog, $alert) {
+    constructor(rootscope, socket, objectproxy, alert, modal, systemconfig) { //$rootScope, $interval, socket, createDialog, $alert) {
         console.log('NavDataService constructing');
+        this.rootscope = rootscope;
         this.socket = socket;
+        this.op = objectproxy;
         this.alert = alert;
         this.modal = modal;
+        this.systemconfig = systemconfig;
+
+        this.vessel = null;
 
         // this.sock = $websocket('ws://' + host + ':' + port + '/websocket');
         console.log('NavDataService constructed');
+
+        var self = this;
+
+        rootscope.$on('User.Login', function(ev) {
+            self.op.getObject('vessel', systemconfig.config.vesseluuid, true, {active: true})
+        });
+
 
     }
 
 
 }
 
-NavDataService.$inject = ['socket', '$alert', '$modal'];
+NavDataService.$inject = ['$rootScope', 'socket', 'objectproxy', '$alert', '$modal', 'systemconfig'];
 
 export default NavDataService;
