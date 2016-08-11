@@ -803,6 +803,6 @@ class mapcomponent {
     
 }
 
-mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard', 'systemconfig'];
+mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard', 'navdata'];
 
 export default mapcomponent;
