@@ -35,15 +35,34 @@ class NavDataService {
         this.systemconfig = systemconfig;
 
         this.vessel = null;
+        this.vesseluuid = '';
 
         // this.sock = $websocket('ws://' + host + ':' + port + '/websocket');
-        console.log('NavDataService constructed');
+        console.log('[NAV] NavDataService constructed');
 
         var self = this;
 
-        rootscope.$on('User.Login', function(ev) {
-            self.op.getObject('vessel', systemconfig.config.vesseluuid, true, {active: true})
+
+        this.updateConfig = function() {
+            self.op.getObject('vessel', this.vesseluuid, true, {})
+        };
+
+        rootscope.$on('OP.Get', function(event, objuuid, obj, schema) {
+            if (schema == 'vessel' && obj.uuid == self.vesseluuid) {
+                console.log('[NAV] Local vessel info received!');
+                self.vessel = obj;
+            }
         });
+
+        rootscope.$on('System.Config', function(ev) {
+            console.log('[NAV] System config was updated, acquiring new vessel info');
+            self.vesseluuid = systemconfig.config.vesseluuid;
+            self.updateConfig();
+        });
+
+        if (systemconfig.config != null) {
+            self.updateConfig();
+        }
 
 
     }
