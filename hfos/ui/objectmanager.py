@@ -168,31 +168,39 @@ class ObjectManager(ConfigurableComponent):
             else:
                 subscribe = False
 
+            try:
+                uuid = data['uuid']
+            except KeyError:
+                uuid = ""
+
             if objectfilter == {}:
-                # No filter, so we'll have to rely on a uuid
-                try:
-                    uuid = data['uuid']
-                    objectfilter = {'uuid': uuid}
-                except KeyError:
+                if uuid == "":
                     self.log('Object with no filter/uuid requested:', schema, data,
                              lvl=error)
                     return
+                objectfilter = {'uuid': uuid}
 
             storageobject = None
 
-            if schema in objectmodels.keys() and uuid.upper != "CREATE":
+            if schema in objectmodels.keys():
                 storageobject = objectmodels[schema].find_one(objectfilter)
 
-            if not storageobject:
-                self.log("Object not found, creating: ", data)
+                if not storageobject:
+                    if uuid.upper != "CREATE":
+                        self.log("Object not found, creating: ", data)
 
-                storageobject = objectmodels[schema]({'uuid': str(uuid4())})
+                        storageobject = objectmodels[schema]({'uuid': str(uuid4())})
 
-                if "useruuid" in schemastore[schema]['schema']['properties']:
-                    storageobject.useruuid = event.user.uuid
-                    self.log("Attached initial owner's id: ", event.user.uuid)
+                        if "useruuid" in schemastore[schema]['schema']['properties']:
+                            storageobject.useruuid = event.user.uuid
+                            self.log("Attached initial owner's id: ", event.user.uuid)
+                    else:
+                        self.log("Object not found and not willing to create.", lvl=warn)
+                        return
+                else:
+                    self.log("Object found, delivering: ", data)
             else:
-                self.log("Object found, delivering: ", data)
+                self.log('Object for invalid schema requested!', schema, lvl=error)
 
             if subscribe:
                 if uuid in self.subscriptions:
