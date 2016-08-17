@@ -7,6 +7,8 @@
  * readd device detection support somewhere (elsewhere? use as service here?)
  */
 
+import L from 'leaflet';
+
 import leafletoverpasslayer from 'leaflet-overpass-layer';
 import leafletdraw from 'leaflet-draw';
 import leafletterminator from 'leaflet-terminator';
