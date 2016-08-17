@@ -1,7 +1,7 @@
-# Docker Image for hfos
+# Docker Image for hfos - Arch Linux version
 #
 # This image essentially packages up HFOS
-# into a Docker Image/Container.
+# into a Docker Image/Container running Archi Linux OS.
 #
 # Usage Examples(s)::
 #
@@ -12,35 +12,25 @@
 #
 # Last Updated: 20160723
 
-FROM debian:experimental
+FROM base/archlinux
 MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
 
 # Install dependencies
 
-RUN apt-get update && \
-    apt-get install -qy --no-install-recommends \
-        git \
-        bzip2 \
+RUN pacman -Sy --noconfirm && \
+    pacman -Ss arch-keyring
+
+RUN pacman-db-upgrade
+
+RUN pacman -S --noconfirm --force git \
         npm \
-        nodejs-legacy \
-        libfontconfig \
         enchant \
-        python3.5 \
-        python3-pymongo \
-        python3-bson-ext \
-        python3-pip \
-        python3-wheel \
-        python3-urwid \
-        python3-setuptools \
-        python3-setuptools-scm \
-        python3-setuptools-git \
-        python3-serial
+        mongodb \
+        python-pymongo \
+        python-urwid \
+        python-pyserial
 
-# Get a very recent mongodb
-
-RUN apt-get install -qy -t experimental mongodb
-
-RUN apt-get clean
+RUN pacman -Sc --noconfirm
 
 # Get HFOS
 
@@ -49,23 +39,23 @@ WORKDIR hfos
 
 # Install HFOS
 
-RUN pip3 install -r requirements-dev.txt
-RUN pip3 install .
+RUN pip install -r requirements-dev.txt
+RUN pip install .
 
 # Install all modules
 
 WORKDIR modules
-RUN python3 install.py --all
+RUN python install.py --all
 WORKDIR ..
 
 # Make sure /var/[cache,lib]/hfos etc exists
 
-RUN python3 setup.py install_var
+RUN python setup.py install_var
 
 # Generate & Install Documentation
 
-RUN python3 setup.py build_sphinx
-RUN python3 setup.py install_docs
+RUN python setup.py build_sphinx
+RUN python setup.py install_docs
 
 # Install Frontend
 
@@ -82,7 +72,11 @@ RUN npm install npm -g
 # Mongo config (smallfiles), database startup and provisioning
 
 RUN echo smallfiles = true >> /etc/mongodb.conf
-RUN /etc/init.d/mongodb start && python3 setup.py install_provisions
+
+# The next one was necessary on one installation, but that could've been due to a weird mongodb release
+#RUN echo setParameter = textSearchEnabled = true >> /etc/mongodb.conf
+
+RUN /etc/init.d/mongodb start && python setup.py install_provisions
 
 # Add user account and group
 
