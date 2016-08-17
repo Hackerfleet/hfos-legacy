@@ -39,7 +39,7 @@ ProjectSchema = {
                      'description': '1 is Highest priority', 'minimum': 1},
         'tags': {'type': 'string', 'title': 'Tags',
                  'description': 'Attached tags'},
-        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
+        'notes': {'type': 'string', 'format': 'ckeditor', 'title': 'User notes',
                   'description': 'Entry notes'}
     }
 }
@@ -55,11 +55,11 @@ ProjectForm = [
                 'items': [
                     'name', {
                         'key': 'owneruuid',
-                        'type': 'uiselect',
+                        'type': 'strapselect',
                         'placeholder': 'Select an Owner',
                         'options': {
                             "type": "user",
-                            "asyncCallback": "getFormData",
+                            "asyncCallback": "$ctrl.getFormData",
                             "map": {'valueProperty': "uuid",
                                     'nameProperty': 'name'}
                         },

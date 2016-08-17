@@ -81,11 +81,11 @@ ShareableForm = [
                 'items': [
                     'name', {
                         'key': 'owneruuid',
-                        'type': 'uiselect',
+                        'type': 'strapselect',
                         'placeholder': 'Select an Owner',
                         'options': {
                             "type": "user",
-                            "asyncCallback": "getFormData",
+                            "asyncCallback": "$ctrl.getFormData",
                             "map": {'valueProperty': "uuid",
                                     'nameProperty': 'name'}
                         },
