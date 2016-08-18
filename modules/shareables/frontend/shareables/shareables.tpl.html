@@ -33,12 +33,11 @@
         <br class="visible-xs visible-sm">
 
         <div class="col-md-6 text-center">
-            <div class="btn-group" ng-model="$ctrl.foobar" bs-radio-group>
-                <label class="btn btn-default"><input class="btn btn-default" value="0" type="radio"> Year</label>
-                <label class="btn btn-default"><input class="btn btn-default" value="1" type="radio">
-                    Month</label>
-                <label class="btn btn-default"><input class="btn btn-default" value="week" type="radio"> Week</label>
-                <label class="btn btn-default"><input class="btn btn-default" value="day" type="radio"> Day</label>
+            <div class="btn-group">
+                <label class="btn btn-primary" ng-model="$ctrl.calendarView" uib-btn-radio="'year'">Year</label>
+                <label class="btn btn-primary" ng-model="$ctrl.calendarView" uib-btn-radio="'month'">Month</label>
+                <label class="btn btn-primary" ng-model="$ctrl.calendarView" uib-btn-radio="'week'">Week</label>
+                <label class="btn btn-primary" ng-model="$ctrl.calendarView" uib-btn-radio="'day'">Day</label>
             </div>
         </div>
 
