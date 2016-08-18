@@ -25,20 +25,51 @@
 
 class NavDataService {
 
-    constructor(socket, alert, modal) { //$rootScope, $interval, socket, createDialog, $alert) {
+    constructor(rootscope, socket, objectproxy, alert, modal, systemconfig) { //$rootScope, $interval, socket, createDialog, $alert) {
         console.log('NavDataService constructing');
+        this.rootscope = rootscope;
         this.socket = socket;
+        this.op = objectproxy;
         this.alert = alert;
         this.modal = modal;
+        this.systemconfig = systemconfig;
+
+        this.vessel = null;
+        this.vesseluuid = '';
 
         // this.sock = $websocket('ws://' + host + ':' + port + '/websocket');
-        console.log('NavDataService constructed');
+        console.log('[NAV] NavDataService constructed');
+
+        var self = this;
+
+
+        this.updateConfig = function() {
+            self.op.getObject('vessel', this.vesseluuid, true, {})
+        };
+
+        rootscope.$on('OP.Get', function(event, objuuid, obj, schema) {
+            if (schema == 'vessel' && obj.uuid == self.vesseluuid) {
+                console.log('[NAV] Local vessel info received!');
+                self.vessel = obj;
+            }
+        });
+
+        rootscope.$on('System.Config', function(ev) {
+            console.log('[NAV] System config was updated, acquiring new vessel info');
+            self.vesseluuid = systemconfig.config.vesseluuid;
+            self.updateConfig();
+        });
+
+        if (systemconfig.config != null) {
+            self.updateConfig();
+        }
+
 
     }
 
 
 }
 
-NavDataService.$inject = ['socket', '$alert', '$modal'];
+NavDataService.$inject = ['$rootScope', 'socket', 'objectproxy', '$alert', '$modal', 'systemconfig'];
 
 export default NavDataService;

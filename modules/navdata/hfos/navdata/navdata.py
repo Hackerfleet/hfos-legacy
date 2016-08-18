@@ -222,6 +222,9 @@ class VesselManager(ConfigurableComponent):
     channel = "navdata"
     configprops = {}
 
+    # TODO: This component uses MapViews and in future, probably other modules' objects, so we need to make sure
+    # this fails only with a warning/recommendation to install those other modules instead of a tantrum
+
     def __init__(self, *args):
         super(VesselManager, self).__init__('VESSEL', *args)
 
@@ -243,6 +246,7 @@ class VesselManager(ConfigurableComponent):
             mapview.name = 'Follow ' + vessel.name
             mapview.description = 'Automatically following mapview for ' + \
                                   vessel.name
+            mapview.viewtype = 'vessel'
 
             self.log('Saving new mapview: ', mapview._fields)
             mapview.save()
@@ -258,12 +262,12 @@ class VesselManager(ConfigurableComponent):
     @handler('referenceframe', channel='navdata')
     def referenceframeupdate(self, event):
         self.log('Updating system vessel mapview coordinates', event,
-                 self.vesselmapview)
-        self.log('Data:', event.data, lvl=hilight)
+                 self.vesselmapview, lvl=debug)
+        self.log('Data:', event.data, lvl=verbose)
         frame = event.data['data']
         if 'GLL_lat' in frame and 'GLL_lon' in frame:
-            pprint(frame['GLL_lat'])
-            pprint(self.vesselmapview._fields)
+            #pprint(frame['GLL_lat'])
+            #pprint(self.vesselmapview._fields)
             coords = {
                 'lat': float(frame['GLL_lat']),
                 'lng': float(frame['GLL_lon']),

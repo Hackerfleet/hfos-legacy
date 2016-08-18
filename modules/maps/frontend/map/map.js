@@ -25,7 +25,7 @@ import 'leaflet.zoomslider/src/L.Control.Zoomslider.css';
 
 class mapcomponent {
     
-    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert, clipboard) {
+    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert, clipboard, navdata) {
         this.scope = scope;
         this.leaflet = leafletData;
         this.op = objectproxy;
@@ -36,6 +36,7 @@ class mapcomponent {
         this.menu = menu;
         this.alert = alert;
         this.clipboard = clipboard;
+        this.navdata = navdata;
         
         this.drawnLayer = '';
         this.map = '';
@@ -74,7 +75,7 @@ class mapcomponent {
         
         this.terminator = null;
         this.grid = null;
-        
+
         this.copyCoordinates = function (e) {
             console.log(e);
             self.clipboard.copyText(e.latlng);
@@ -268,10 +269,18 @@ class mapcomponent {
                 var mapviewlist = self.op.lists.mapview;
                 var mapviewmenu = [];
                 for (var mapview of mapviewlist) {
+                    var icon='';
+
+                    if (mapview.viewtype == 'vessel') {
+                        icon = '<i class="fa fa-ship menu-icon-tiny"></i>';
+                    } else {
+                        icon = '<i class="fa fa-user menu-icon-tiny"></i>';
+                    }
+
                     mapviewmenu.push({
                         type: 'func',
                         name: mapview.uuid,
-                        text: mapview.name,
+                        text: icon + mapview.name,
                         callback: self.switchMapview,
                         args: mapview.uuid
                     });
@@ -344,7 +353,7 @@ class mapcomponent {
         this.getMapdataLists = function () {
             console.log('[MAP] Getting available map data objects.');
             self.op.getList('layergroup');
-            self.op.getList('mapview');
+            self.op.getList('mapview', {}, ['name', 'uuid', 'viewtype']);
         };
         
         this.requestMapData = function () {
@@ -796,6 +805,6 @@ class mapcomponent {
     
 }
 
-mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard'];
+mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard', 'navdata'];
 
 export default mapcomponent;
