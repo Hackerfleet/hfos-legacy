@@ -53,7 +53,7 @@ class CountableWatcher(ConfigurableComponent):
         countable = objectmodels['countable'].find_one({'uuid': event.data})
         try:
             countable.amount += 1
-        except (TypeError, AttributeError):
+        except AttributeError:
             # Was not initialized yet
             countable.amount = 1
         countable.save()
