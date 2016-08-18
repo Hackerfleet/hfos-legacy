@@ -87,21 +87,21 @@ ClientconfigForm = [
     },
     {
         'key': 'dashboarduuid',
-        'type': 'uiselect',
+        'type': 'strapselect',
         'placeholder': 'Select a Dashboard',
         'options': {
             "type": "dashboard",
-            "asyncCallback": "  getFormData",
+            "asyncCallback": "$ctrl.getFormData",
             "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
         }
     },
     {
         'key': 'mapviewuuid',
-        'type': 'uiselect',
+        'type': 'strapselect',
         'placeholder': 'Select a MapView',
         'options': {
             "type": "mapview",
-            "asyncCallback": "getFormData",
+            "asyncCallback": "$ctrl.getFormData",
             "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
         }
     },

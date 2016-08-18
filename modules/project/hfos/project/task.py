@@ -132,11 +132,11 @@ TaskForm = [
                 'items': [
                     'name', 'tags', {
                         'key': 'project',
-                        'type': 'uiselect',
+                        'type': 'strapselect',
                         'placeholder': 'Select a Project',
                         'options': {
                             "type": "project",
-                            "asyncCallback": "getFormData",
+                            "asyncCallback": "$ctrl.getFormData",
                             "map": {'valueProperty': "uuid",
                                     'nameProperty': 'name'}
                         }
