@@ -1,7 +1,7 @@
-# Docker Image for hfos - Arch Linux version
+# Docker Image for hfos - Arch Linux x64 version
 #
 # This image essentially packages up HFOS
-# into a Docker Image/Container running Archi Linux OS.
+# into a Docker Image/Container running Arch Linux OS x64.
 #
 # Usage Examples(s)::
 #
@@ -10,27 +10,43 @@
 #
 # VERSION: 1.1.0
 #
-# Last Updated: 20160723
+# Last Updated: 20160818
 
-FROM base/archlinux
+FROM nfnty/arch-mini
+
 MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
 
 # Install dependencies
 
-RUN pacman -Sy --noconfirm && \
-    pacman -Ss arch-keyring
+RUN pacman -Syyu --noconfirm
 
-RUN pacman-db-upgrade
+#RUN pacman-db-upgrade
 
-RUN pacman -S --noconfirm --force git \
+RUN pacman -S --noconfirm --force \
+        git \
         npm \
         enchant \
         mongodb \
+        python-pip \
+        python-setuptools \
         python-pymongo \
         python-urwid \
         python-pyserial
 
 RUN pacman -Sc --noconfirm
+
+# Mongo config (smallfiles), database startup and provisioning
+
+RUN echo smallfiles = true >> /etc/mongodb.conf
+
+# The next one was necessary on one installation, but that could've been due to a weird mongodb release
+#RUN echo setParameter = textSearchEnabled = true >> /etc/mongodb.conf
+
+RUN mongod -f /etc/mongodb.conf --fork & && python setup.py install_provisions
+
+# Add user account and group
+
+RUN useradd -Ums /bin/sh hfos
 
 # Get HFOS
 
@@ -45,7 +61,7 @@ RUN pip install .
 # Install all modules
 
 WORKDIR modules
-RUN python install.py --all
+RUN python install.py --all --dev
 WORKDIR ..
 
 # Make sure /var/[cache,lib]/hfos etc exists
@@ -54,8 +70,8 @@ RUN python setup.py install_var
 
 # Generate & Install Documentation
 
-RUN python setup.py build_sphinx
-RUN python setup.py install_docs
+#RUN python setup.py build_sphinx
+#RUN python setup.py install_docs
 
 # Install Frontend
 
@@ -65,22 +81,9 @@ RUN git submodule init && git submodule update
 
 RUN npm install npm -g
 
-#WORKDIR frontend
-#RUN npm install
-#WORKDIR ..
-
-# Mongo config (smallfiles), database startup and provisioning
-
-RUN echo smallfiles = true >> /etc/mongodb.conf
-
-# The next one was necessary on one installation, but that could've been due to a weird mongodb release
-#RUN echo setParameter = textSearchEnabled = true >> /etc/mongodb.conf
-
-RUN /etc/init.d/mongodb start && python setup.py install_provisions
-
-# Add user account and group
-
-RUN useradd -Ums /bin/sh hfos
+WORKDIR frontend
+RUN npm install
+WORKDIR ..
 
 #  Services
 
