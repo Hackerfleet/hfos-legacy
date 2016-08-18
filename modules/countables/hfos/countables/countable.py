@@ -28,7 +28,7 @@ CountableSchema = {
                  'description': 'Name of Countable'},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
                   'description': 'Entry notes'},
-        'amount': {'type': 'number', 'title': 'Amount counted'}
+        'amount': {'type': 'number', 'title': 'Amount counted', 'default': 0}
 
     }
 }
@@ -49,7 +49,7 @@ CountableForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-6',
                 'items': [
-                    'count'
+                    'amount'
 
                 ]
             },
