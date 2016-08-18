@@ -48,8 +48,8 @@ class SharingCtrl {
         var actions = [editaction, delaction];
         
         const eventcolor = {
-            primary: 'red',
-            secondary: 'blue'
+            primary: 'lightgray',
+            secondary: 'darkgray/'
         };
         
         this.events = [
