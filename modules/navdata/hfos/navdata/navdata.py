@@ -262,7 +262,7 @@ class VesselManager(ConfigurableComponent):
     @handler('referenceframe', channel='navdata')
     def referenceframeupdate(self, event):
         self.log('Updating system vessel mapview coordinates', event,
-                 self.vesselmapview, lvl=debug)
+                 self.vesselmapview, lvl=verbose)
         self.log('Data:', event.data, lvl=verbose)
         frame = event.data['data']
         if 'GLL_lat' in frame and 'GLL_lon' in frame:
