@@ -36,9 +36,10 @@ layergroups = [
         "shared": True,
         "notes": "ESRI Satellite and Open Sea Map",
         "layers": [
-            '19e5704e-68a2-435e-9f21-ac389973cc7a',  # ESRI Satellite Shade
-            '2bedb0d2-be9f-479c-9516-256cd5a0baae'  # OpenSeaMap
-
+            '19e5704e-68a2-435e-9f21-ac389973cc7a',  # ESRI Satellite Hill Shade Base
+            '582d2ef3-759e-49f7-81ab-8dbe224d618a',  # ESRI Satellite World Imagery Base
+            '3a4cceaa-3e8b-4f65-85ee-2ff9f6de6a71',  # Openstreetmap Overlay
+            '2bedb0d2-be9f-479c-9516-256cd5a0baae',  # OpenSeaMap Overlay
         ]
     }, {
         "name": "Weather",

@@ -36,6 +36,22 @@ layers = [
         "type": "xyz"
     },
     {
+        "name": "OpenStreetMap-Overlay",
+        "uuid": "3a4cceaa-3e8b-4f65-85ee-2ff9f6de6a71",
+        "shared": True,
+        "description": "Open Street Map Overlay",
+        "baselayer": False,
+        "url": "http://hfoshost/tilecache/a.tile.osm.org/{z}/{x}/{y}.png",
+        "layerOptions": {
+            "opacity": 0.5,
+            "continuousWorld": False,
+            "attribution": "&copy; <a "
+                           "href=\"http://osm.org/copyright\">OpenStreetMap"
+                           "</a> contributors"
+        },
+        "type": "xyz"
+    },
+    {
         "name": "OpenTopographyMap",
         "uuid": "958b1006-2688-44b0-99be-a67728228e08",
         "shared": True,
@@ -144,6 +160,26 @@ layers = [
             "opacity": 0.25
         },
         "type": "wms"
+    },
+    {
+        "name": "ESRI-Sat-Shaded-Base",
+        "uuid": "582d2ef3-759e-49f7-81ab-8dbe224d618a",
+        "shared": True,
+        "description": "Shaded Satellite relief image data from ESRI as "
+                       "base layer",
+        "baselayer": True,
+        "visible": False,
+        "url": "http://hfoshost/tilecache/server.arcgisonline.com/ArcGIS"
+               "/rest/services/World_Imagery/MapServer/\
+tile/{z}/{y}/{x}",
+        "layerOptions": {
+            "continuousWorld": True,
+            "opacity": 1,
+            "attribution": "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, "
+                           "USDA, USGS, AEX, GeoEye, Getmapping,\
+Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+        },
+        "type": "xyz"
     },
     {
         "name": "ESRI-Sat-Shaded-Overlay",
