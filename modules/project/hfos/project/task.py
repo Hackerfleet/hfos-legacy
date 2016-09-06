@@ -163,7 +163,18 @@ TaskForm = [
                     'add': 'btn-success'
                 },
                 'items': [
-                    'references[]'
+                    "references[].referencetype",
+                    {
+                        'key': 'references[].task',
+                        'type': 'strapselect',
+                        'placeholder': 'Select a Project',
+                        'options': {
+                            "type": "task",
+                            "asyncCallback": "$ctrl.getFormData",
+                            "map": {'valueProperty': "uuid",
+                                    'nameProperty': 'name'}
+                        }
+                    }
                 ]
             }
         ]
