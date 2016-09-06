@@ -1,6 +1,6 @@
 """
 Schema: WikiPage
-==============
+================
 
 Contains
 --------
@@ -33,20 +33,33 @@ WikiPageSchema = {
                   'description': 'Short title'},
         'html': {'type': 'string', 'format': 'html', 'title': 'Page content',
                  'description': 'Content'},
-        'text': {'type': 'string', 'title': 'Raw text',
-                 'description': 'Unrendered raw text'},
-        'history': {
-            'type': 'array',
-            'default': [],
-            'items': {
-                'type': 'string',
-                'title': 'Snapshot content',
-                'description': 'Snapshot data'
-            }
-        }
+        # 'text': {'type': 'string', 'title': 'Raw text',
+        #          'description': 'Unrendered raw text'},
+        # 'history': {
+        #     'type': 'array',
+        #     'default': [],
+        #     'items': {
+        #         'type': 'string',
+        #         'title': 'Snapshot content',
+        #         'description': 'Snapshot data'
+        #     }
+        # }
     }
 }
 
-WikiPageForm = defaultform
+WikiPageForm = [
+    'name',
+    'title',
+    {
+        'key': 'html',
+        'tinymceOptions': {
+            'toolbar': [
+                'undo redo | styleselect | bold italic | link image',
+                'alignleft aligncenter alignright'
+            ]
+        }
+    }
+
+]
 
 WikiPage = {'schema': WikiPageSchema, 'form': WikiPageForm}
