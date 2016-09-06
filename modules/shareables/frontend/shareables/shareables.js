@@ -129,8 +129,6 @@ class SharingCtrl {
                     
                     self.events.push(calItem);
                 }
-                
-                console.log(new Date(y, m, d));
             }
             
             console.log('Calendar: ', self.events);
