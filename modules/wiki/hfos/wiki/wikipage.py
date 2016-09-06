@@ -13,6 +13,7 @@ WikiPage: WikiPage to store collaborative data
 """
 
 from hfos.schemata.defaultform import defaultform
+from copy import copy
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -26,6 +27,12 @@ WikiPageSchema = {
                        'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
             'title': 'Unique WikiPage ID'
+        },
+        'owner': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Unique ID of owner'
         },
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
                  'description': 'Page name (url slug)'},
@@ -62,4 +69,11 @@ WikiPageForm = [
 
 ]
 
+WikiTemplateSchema = copy(WikiPageSchema)
+del(WikiTemplateSchema['properties']['name'])
+
+WikiTemplateForm = copy(WikiPageForm).remove('name')
+
 WikiPage = {'schema': WikiPageSchema, 'form': WikiPageForm}
+
+WikiTemplate = {'schema': WikiTemplateSchema, 'form': WikiTemplateForm}

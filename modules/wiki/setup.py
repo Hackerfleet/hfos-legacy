@@ -45,6 +45,7 @@ This software package is a plugin module for HFOS.
     wiki=hfos.wiki.wiki:Wiki
 [hfos.schemata]
     wikipage=hfos.wiki.wikipage:WikiPage
+    wikitemplate=hfos.wiki.wikipage:WikiTemplate
     """,
       test_suite="tests.main.main",
       )
