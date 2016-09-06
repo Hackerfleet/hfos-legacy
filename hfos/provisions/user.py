@@ -27,7 +27,7 @@ def provision():
     # TODO: Add a root user and make sure owner can access it later.
     # Setting up details and asking for a password here is not very useful, since this process is usually run automated.
 
-    provisionList(Users, objectmodels['user'], indexes=['name'], clear=True)
+    provisionList(Users, objectmodels['user'], indexes=['name'], clear=False)
     hfoslog('Provisioning: Users: Done.', emitter="PROVISIONS")
 
 
