@@ -37,13 +37,13 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
         db.drop_collection(col_name)
     counter = 0
 
-    for item in items:
+    for no, item in enumerate(items):
         itemuuid = item['uuid']
-        hfoslog("Provisioning: Validating object:", itemuuid,
+        hfoslog("Validating object (%i/%i):" % (no, len(items)), itemuuid,
                 emitter='PROVISIONS')
 
         if dbobject.count({'uuid': itemuuid}) > 0 and not overwrite:
-            hfoslog("Provisioning: Not updating item", item, lvl=warn,
+            hfoslog("Not updating item", item, lvl=warn,
                     emitter='PROVISIONS')
         else:
             newobject = dbobject(item)
@@ -61,8 +61,8 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
         for item in indexes:
             col.ensure_index([(item, pymongo.TEXT)], unique=True)
 
-        for index in col.list_indexes():
-            hfoslog("Index: ", index, emitter='PROVISIONS')
+        #for index in col.list_indexes():
+        #    hfoslog("Index: ", index, emitter='PROVISIONS')
 
     hfoslog("Provisioned %i out of %i items successfully." % (counter,
                                                               len(items)),
