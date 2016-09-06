@@ -126,39 +126,39 @@ ShareableForm = [
     {
         'key': 'reservations',
         'add': "Add reservation",
+        'startEmpty': False,
         'style': {
             'add': "btn-success"
         },
         'items': [
             'reservations[].title',
-            'reservations[].useruuid',
             {
-                'type': 'section',
-                'htmlClass': 'container-fluid',
-                'items': [
-                    {
-                        'type': 'section',
-                        'htmlClass': 'row',
-                        'items': [
-                            {
-                                'htmlClass': 'foobar',
-                                'key': 'reservations[].starttime',
-                                'options': {
-                                    "minuteStep": 15,
-                                    "autoclose": 1
-                                }
-                            },
-                            {
-                                'htmlClass': 'col-md-2',
-                                'key': 'reservations[].endtime',
-                                'options': {
-                                    "minuteStep": 15,
-                                    "autoclose": 1
-                                }
-                            }
-                        ]
-                    }
-                ]
+                'key': 'reservations[].useruuid',
+                'type': 'strapselect',
+                'placeholder': 'Select an Owner',
+                'options': {
+                    "type": "user",
+                    "asyncCallback": "$ctrl.getFormData",
+                    "map": {'valueProperty': "uuid",
+                            'nameProperty': 'name'}
+                },
+                "onChange": 'fieldChange(modelValue, form)'
+            },
+            {
+                'htmlClass': 'col-md-2',
+                'key': 'reservations[].starttime',
+                'options': {
+                    "minuteStep": 15,
+                    "autoclose": 1
+                }
+            },
+            {
+                'htmlClass': 'col-md-2',
+                'key': 'reservations[].endtime',
+                'options': {
+                    "minuteStep": 15,
+                    "autoclose": 1
+                },
             },
             'reservations[].description',
         ]
