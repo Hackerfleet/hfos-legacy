@@ -81,8 +81,9 @@ class ObjectManager(ConfigurableComponent):
                             objlist.append(item.serializablefields())
                         else:
                             listitem = {'uuid': item.uuid}
+
                             if 'name' in item._fields:
-                                listitem['name'] = item.name
+                                listitem['name'] = item._fields['name']
 
                             for field in fields:
                                 if field in item._fields:
@@ -164,13 +165,13 @@ class ObjectManager(ConfigurableComponent):
 
         elif action == "get":
             if 'subscribe' in data:
-                subscribe = data['subscribe']
+                subscribe = data['subscribe'] is True
             else:
                 subscribe = False
 
             try:
-                uuid = data['uuid']
-            except KeyError:
+                uuid = str(data['uuid'])
+            except (KeyError, TypeError):
                 uuid = ""
 
             if objectfilter == {}:
@@ -186,7 +187,11 @@ class ObjectManager(ConfigurableComponent):
                 storageobject = objectmodels[schema].find_one(objectfilter)
 
                 if not storageobject:
-                    if uuid.upper != "CREATE":
+                    if uuid.upper == "CREATE":
+                        # TODO: Fix this, a request for an existing object is a
+                        # request for an existing object, a creation request is
+                        # not.
+
                         self.log("Object not found, creating: ", data)
 
                         storageobject = objectmodels[schema]({'uuid': str(uuid4())})
@@ -196,23 +201,29 @@ class ObjectManager(ConfigurableComponent):
                             self.log("Attached initial owner's id: ", event.user.uuid)
                     else:
                         self.log("Object not found and not willing to create.", lvl=warn)
-                        return
-                else:
-                    self.log("Object found, delivering: ", data)
+                        result = {
+                            'component': 'objectmanager',
+                            'action': 'nonexistant',
+                            'data': {
+                                'schema': schema,
+                            }
+                        }
             else:
                 self.log('Object for invalid schema requested!', schema, lvl=error)
 
-            if subscribe:
-                if uuid in self.subscriptions:
-                    if not event.client.uuid in self.subscriptions[uuid]:
-                        self.subscriptions[uuid].append(event.client.uuid)
-                else:
-                    self.subscriptions[uuid] = [event.client.uuid]
+            if storageobject:
+                self.log("Object found, delivering: ", data)
+                if subscribe and uuid != "":
+                    if uuid in self.subscriptions:
+                        if not event.client.uuid in self.subscriptions[uuid]:
+                            self.subscriptions[uuid].append(event.client.uuid)
+                    else:
+                        self.subscriptions[uuid] = [event.client.uuid]
 
-            result = {'component': 'objectmanager',
-                      'action': 'get',
-                      'data': storageobject.serializablefields()
-                      }
+                result = {'component': 'objectmanager',
+                          'action': 'get',
+                          'data': storageobject.serializablefields()
+                          }
 
         elif action == "subscribe":
             uuid = data
