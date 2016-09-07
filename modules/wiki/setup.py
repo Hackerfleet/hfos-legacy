@@ -46,6 +46,9 @@ This software package is a plugin module for HFOS.
 [hfos.schemata]
     wikipage=hfos.wiki.wikipage:WikiPage
     wikitemplate=hfos.wiki.wikipage:WikiTemplate
+[hfos.provisions]
+    wikipages=hfos.wiki.provisions.wiki:provisionPages
+    wikitemplate=hfos.wiki.provisions.wiki:provisionTemplates
     """,
       test_suite="tests.main.main",
       )
