@@ -12,8 +12,8 @@ WikiPage: WikiPage to store collaborative data
 
 """
 
-from hfos.schemata.defaultform import defaultform
-from copy import copy
+from hfos.schemata.defaultform import defaultform, editbuttons
+from copy import deepcopy
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -57,22 +57,31 @@ WikiPageSchema = {
 WikiPageForm = [
     'name',
     'title',
-    {
-        'key': 'html',
-        'tinymceOptions': {
-            'toolbar': [
-                'undo redo | styleselect | bold italic | link image',
-                'alignleft aligncenter alignright'
-            ]
-        }
-    }
+    'html',
+    # {
+    #     'key': 'html',
+    #     'tinymceOptions': {
+    #         'toolbar': [
+    #             'undo redo | styleselect | bold italic | link image',
+    #             'alignleft aligncenter alignright'
+    #         ]
+    #     }
+    #
+    editbuttons
 
 ]
 
-WikiTemplateSchema = copy(WikiPageSchema)
-del(WikiTemplateSchema['properties']['name'])
+WikiTemplateSchema = deepcopy(WikiPageSchema)
+WikiTemplateSchema['id'] = '#wikitemplate'
+WikiTemplateSchema['name'] = 'wikitemplate'
+WikiTemplateSchema['properties']['slugtemplate'] = {
+    'type': 'string',
+    'title': 'Slug Template',
+    'description': 'Template page name (url slug)'
+}
 
-WikiTemplateForm = copy(WikiPageForm).remove('name')
+WikiTemplateForm = deepcopy(WikiPageForm)
+WikiTemplateForm.insert(1, 'slugtemplate')
 
 WikiPage = {'schema': WikiPageSchema, 'form': WikiPageForm}
 
