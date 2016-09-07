@@ -52,7 +52,7 @@ class SharingCtrl {
             secondary: 'darkgray/'
         };
         
-        this.events = [
+        this.events = []; /*
             {
                 title: 'An event',
                 color: eventcolor,
@@ -79,7 +79,7 @@ class SharingCtrl {
                 resizable: true,
                 actions: actions
             }
-        ];
+        ];*/
         
         this.isCellOpen = true;
         
