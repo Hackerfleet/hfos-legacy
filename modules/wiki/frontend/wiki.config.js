@@ -4,7 +4,7 @@ export function routing($stateProvider) {
 
     $stateProvider
         .state('app.wiki', {
-            url: '/wiki',
+            url: '/wiki/:name',
             template: '<wiki></wiki>',
             label: 'Wiki',
             icon: icon
