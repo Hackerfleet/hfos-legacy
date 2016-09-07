@@ -91,6 +91,8 @@ verbosity = {'global': console,
              'console': console
              }
 
+uncut = True
+
 mute = []
 solo = []
 
@@ -252,7 +254,7 @@ def hfoslog(*what, **kwargs):
     content = ""
 
     if callee:
-        if lvl > 10:
+        if not uncut and lvl > 10:
             msg += "%-60s" % callee
         else:
             msg += "%s" % callee
@@ -266,7 +268,7 @@ def hfoslog(*what, **kwargs):
     if ismuted(msg):
         return
 
-    if lvl > 10 and len(msg) > 1000:
+    if not uncut and lvl > 10 and len(msg) > 1000:
         msg = msg[:1000]
 
     if lvl >= verbosity['file']:
