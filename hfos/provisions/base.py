@@ -39,7 +39,7 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
 
     for no, item in enumerate(items):
         itemuuid = item['uuid']
-        hfoslog("Validating object (%i/%i):" % (no, len(items)), itemuuid,
+        hfoslog("Validating object (%i/%i):" % (no+1, len(items)), itemuuid,
                 emitter='PROVISIONS')
 
         if dbobject.count({'uuid': itemuuid}) > 0 and not overwrite:
