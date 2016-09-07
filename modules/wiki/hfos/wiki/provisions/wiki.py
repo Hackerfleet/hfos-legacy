@@ -14,7 +14,7 @@ Wiki skeleton for ships
 """
 
 from hfos.provisions.base import provisionList
-from hfos.database import wikipageobject
+from hfos.database import objectmodels, initialize
 from hfos.logger import hfoslog
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
@@ -23,16 +23,38 @@ WikiPages = [
     {'name': 'Index',
      'uuid': '8cc76c46-7488-4a0d-8ab9-1ca7c17f1b75',
      'title': 'Page Index',
-     'text': 'No Index has been generated yet. This usually means, no pages '
+     'html': 'No Index has been generated yet. This usually means, no pages '
              'exist.'
      }
 ]
 
+WikiTemplates = [
+    {'name': 'Protocol',
+     'uuid': '14e52e30-4ff7-4d73-9e18-bf9df1803214',
+     'title': 'Simple Meeting protocol from $DD$MM$YY',
+     'slugtemplate': 'protocol-$DD-$MM-$YY',
+     'html': 'This would be a protocol template, once the provision has been fleshed out.'
+     },
+    {'name': 'Todo',
+     'uuid':'88ec45e7-7b12-4450-a8f0-290d51290fa3' ,
+     'title': 'Simple Todo item list for $USER',
+     'slugtemplate': 'todo-$USER-$DD-$MM-$YY',
+     'html': 'This would be a todo template text, once the provision has been '
+             'fleshed out.'
+     }
+]
 
-def provision():
-    provisionList(WikiPages, wikipageobject)
-    hfoslog('[PROV] Provisioning: WikiPages: Done.')
+
+def provisionPages():
+    provisionList(WikiPages, objectmodels['wikipage'])
+    hfoslog('WikiPages: Done.', emitter='PROVISIONING')
+
+def provisionTemplates():
+    provisionList(WikiTemplates, objectmodels['wikitemplate'])
+    hfoslog('WikiTemplates: Done.', emitter='PROVISIONING')
 
 
 if __name__ == "__main__":
-    provision()
+    initialize()
+    provisionPages()
+    provisionTemplates()
