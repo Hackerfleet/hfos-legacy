@@ -16,7 +16,7 @@ from hfos.events.system import objectcreation, objectchange, objectdeletion
 from hfos.events.client import send
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels, collections, ValidationError, schemastore
-from hfos.logger import debug, error, warn, critical
+from hfos.logger import verbose, debug, error, warn, critical
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
 
@@ -214,6 +214,7 @@ class ObjectManager(ConfigurableComponent):
             if storageobject:
                 self.log("Object found, delivering: ", data)
                 if subscribe and uuid != "":
+                    self.log('Updating subscriptions', lvl=debug)
                     if uuid in self.subscriptions:
                         if not event.client.uuid in self.subscriptions[uuid]:
                             self.subscriptions[uuid].append(event.client.uuid)
@@ -389,6 +390,7 @@ class ObjectManager(ConfigurableComponent):
     def _updateSubscribers(self, updateobject):
         # Notify frontend subscribers
 
+        self.log('Notifying subscribers about update.', lvl=debug)
         if updateobject.uuid in self.subscriptions:
             update = {'component': 'objectmanager',
                       'action': 'update',
@@ -396,6 +398,7 @@ class ObjectManager(ConfigurableComponent):
                       }
 
             for recipient in self.subscriptions[updateobject.uuid]:
+                self.log('Notifying subscriber: ', recipient, lvl=verbose)
                 self.fireEvent(send(recipient, update))
 
     def _delete(self, schema, data):
