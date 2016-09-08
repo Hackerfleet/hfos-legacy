@@ -266,7 +266,7 @@ def main():
         for module in Modules.keys():
             try:
                 setup = Popen([
-                    'python',
+                    'python3',
                     'setup.py',
                     'develop' if args.dev else 'install'
                 ],
