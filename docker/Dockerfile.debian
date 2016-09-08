@@ -25,6 +25,7 @@ RUN apt-get update && \
         nodejs-legacy \
         libfontconfig \
         enchant \
+        virtualenvwrapper \
         python3.5 \
         python3-pymongo \
         python3-bson-ext \
@@ -42,14 +43,23 @@ RUN apt-get install -qy -t experimental mongodb
 
 RUN apt-get clean
 
+# Create virtual environment
+
+RUN mkvirtualenv -p /usr/bin/python3.5 --system-site-packages hfos
+
 # Install HFOS
 
+RUN workon hfos
 RUN pip3 install -r requirements-dev.txt
 RUN pip3 install .
 
 # Install all modules
 
 WORKDIR modules
+WORKDIR navdata
+RUN python3 setup.py develop
+WORKDIR ..
+
 RUN python3 install.py --all
 WORKDIR ..
 
