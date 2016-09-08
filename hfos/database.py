@@ -46,6 +46,7 @@ def clear_all():
     if not (sure.upper() in ("Y", "J")):
         sys.exit(5)
 
+    # TODO: Accept argument for dbhost
     client = pymongo.MongoClient(host="localhost", port=27017)
     db = client["hfos"]
 
@@ -121,15 +122,15 @@ def _build_collections(store):
     return result
 
 
-def initialize():
+def initialize(address):
     global schemastore
     global objectmodels
     global collections
 
-    hfoslog("Testing database availability", lvl=debug, emitter='DB')
+    hfoslog("Testing database availability to ", address, lvl=debug, emitter='DB')
 
     try:
-        client = pymongo.MongoClient(host='localhost', port=27017)
+        client = pymongo.MongoClient(host=address.split(":")[0], port=int(address.split(":")[1]) if ":" in address else 27017)
         db = client['hfos']
         hfoslog("Database: ", db.command('buildinfo'), lvl=debug, emitter='DB')
     except Exception as e:

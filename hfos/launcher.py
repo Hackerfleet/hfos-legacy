@@ -498,6 +498,8 @@ def launch(run=True):
                         type=int, default=80)
     parser.add_argument("--host", help="Define hostname for server",
                         type=str, default='0.0.0.0')
+    parser.add_argument("--dbhost", help="Define hostname for database server",
+                        type=str, default='127.0.0.1')
     parser.add_argument("--profile", help="Enable profiler", action="store_true")
     parser.add_argument("--opengui", help="Launch webbrowser for GUI "
                                           "inspection after startup",
@@ -523,7 +525,7 @@ def launch(run=True):
     hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
 
     hfoslog("Initializing database access", emitter='CORE')
-    initialize()
+    initialize(args.dbhost)
 
     server = construct_graph(args)
     if run:
