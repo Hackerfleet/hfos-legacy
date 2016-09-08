@@ -499,7 +499,7 @@ def launch(run=True):
     parser.add_argument("--host", help="Define hostname for server",
                         type=str, default='0.0.0.0')
     parser.add_argument("--dbhost", help="Define hostname for database server",
-                        type=str, default='127.0.0.1')
+                        type=str, default='127.0.0.1:27017')
     parser.add_argument("--profile", help="Enable profiler", action="store_true")
     parser.add_argument("--opengui", help="Launch webbrowser for GUI "
                                           "inspection after startup",
