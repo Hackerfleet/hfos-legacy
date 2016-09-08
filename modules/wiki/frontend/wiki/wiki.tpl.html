@@ -1,9 +1,9 @@
 <div class="container">
     <div class="well">
-        <h1>Wiki: {{$ctrl.title}}</h1>
+        <h4>Wiki: {{$ctrl.title}}</h4>
 
         <small>
-            <span>Slug: {{$ctrl.pagename}}</span>
+            <span>Slug: <a href="#/wiki/{{$ctrl.pagename}}">{{$ctrl.pagename}}</a></span>
 
             <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.editpage()"
                     ng-hide="$ctrl.pageuuid == ''">Edit page
