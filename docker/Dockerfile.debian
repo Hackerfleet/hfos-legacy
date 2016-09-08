@@ -17,6 +17,9 @@ MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
 
 # Install dependencies
 
+RUN echo "deb ftp://ftp2.de.debian.org/debian unstable main" > /etc/apt/sources.list
+RUN echo "deb ftp://ftp2.de.debian.org/debian experimental main" > /etc/apt/sources.list.d/experimental.list
+
 RUN apt-get update && \
     apt-get install -qy --no-install-recommends \
         git \
@@ -25,7 +28,7 @@ RUN apt-get update && \
         nodejs-legacy \
         libfontconfig \
         enchant \
-        virtualenvwrapper \
+        python3-virtualenv \
         python3.5 \
         python3-pymongo \
         python3-bson-ext \
@@ -45,32 +48,41 @@ RUN apt-get clean
 
 # Create virtual environment
 
-RUN mkvirtualenv -p /usr/bin/python3.5 --system-site-packages hfos
+RUN python3 /usr/lib/python3/dist-packages/virtualenv.py -p /usr/bin/python3.5 --system-site-packages venv
+
+# Copy repository
+
+COPY . hfos
+WORKDIR hfos
 
 # Install HFOS
 
-RUN workon hfos
-RUN pip3 install -r requirements-dev.txt
-RUN pip3 install .
+RUN /venv/bin/pip3 install -r requirements-dev.txt
+RUN /venv/bin/pip3 install .
 
 # Install all modules
 
 WORKDIR modules
+
+# Install Navdata first (installer doesn't handle inter-hfos-module dependencies gracefully, yet)
+
 WORKDIR navdata
-RUN python3 setup.py develop
+RUN /venv/bin/python3 setup.py develop
 WORKDIR ..
 
-RUN python3 install.py --all
+# Install the rest
+
+RUN /venv/bin/python3 install.py --all
 WORKDIR ..
 
 # Make sure /var/[cache,lib]/hfos etc exists
 
-RUN python3 setup.py install_var
+RUN /venv/bin/python3 setup.py install_var
 
 # Generate & Install Documentation
 
-RUN python3 setup.py build_sphinx
-RUN python3 setup.py install_docs
+RUN /venv/bin/python3 setup.py build_sphinx
+RUN /venv/bin/python3 setup.py install_docs
 
 # Install Frontend
 
@@ -91,7 +103,7 @@ RUN echo smallfiles = true >> /etc/mongodb.conf
 # The next one was necessary on one installation, but that could've been due to a weird mongodb release
 #RUN echo setParameter = textSearchEnabled = true >> /etc/mongodb.conf
 
-RUN /etc/init.d/mongodb start && python3 setup.py install_provisions
+RUN /etc/init.d/mongodb start && /venv/bin/python3 setup.py install_provisions
 
 # Add user account and group
 
