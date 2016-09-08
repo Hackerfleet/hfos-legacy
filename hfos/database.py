@@ -25,7 +25,7 @@ from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
 from hfos.logger import hfoslog, debug, warn, critical, verbose
 from jsonschema import ValidationError  # NOQA
-from pkg_resources import iter_entry_points
+from pkg_resources import iter_entry_points, DistributionNotFound
 from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
@@ -57,13 +57,12 @@ def clear_all():
 def _build_schemastore_new():
     available = {}
 
-    for schema_entrypoint in iter_entry_points(group='hfos.schemata',
-                                               name=None):
-        hfoslog("Schemata found: ", schema_entrypoint.name, lvl=debug,
-                emitter='DB')
+    for schema_entrypoint in iter_entry_points(group='hfos.schemata', name=None):
         try:
+            hfoslog("Schemata found: ", schema_entrypoint.name, lvl=debug, emitter='DB')
+
             available[schema_entrypoint.name] = schema_entrypoint.load()
-        except ImportError as e:
+        except (ImportError, DistributionNotFound) as e:
             hfoslog("Problematic schema: ", e, type(e),
                     schema_entrypoint.name, exc=True, lvl=warn,
                     emitter='SCHEMATA')
@@ -150,7 +149,7 @@ def test_schemata():
 
     for schemaname in schemastore.keys():
         objects[schemaname] = warmongo.model_factory(
-            schemastore[schemaname]['schema'])
+                schemastore[schemaname]['schema'])
         try:
             testobject = objects[schemaname]()
             testobject.validate()
