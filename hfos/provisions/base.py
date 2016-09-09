@@ -26,6 +26,9 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
 
     import pymongo
 
+    # TODO: Fix this to make use of the dbhost, also, provisions should only be installed
+    # after setup (we found out the hard way)
+
     client = pymongo.MongoClient(host="localhost", port=27017)
     db = client["hfos"]
 

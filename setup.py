@@ -121,7 +121,8 @@ class install_provisions(Command):
         verbosity['console'] = verbosity['global'] = events
 
         from hfos.database import initialize
-        initialize()
+        # TODO: Static ip -> no good.
+        initialize("127.0.0.1:27017")
 
         from hfos.provisions import provisionstore
         for provisionname in provisionstore:
