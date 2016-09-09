@@ -228,7 +228,7 @@ class Core(ConfigurableComponent):
 
             for iterator in entry_point_tuple:
                 for entry_point in iterator:
-                    if 1: # try:
+                    try:
                         name = entry_point.name
                         location = entry_point.dist.location
                         loaded = entry_point.load()
@@ -259,11 +259,11 @@ class Core(ConfigurableComponent):
 
                         self.log("Loaded component:", comp, lvl=verbose)
 
-                    #except Exception as e:
-                    #    self.log("Could not inspect entrypoint: ", e,
-                    #             type(e), entry_point, iterator, lvl=error,
-                    #             exc=True)
-                    #    break
+                    except Exception as e:
+                        self.log("Could not inspect entrypoint: ", e,
+                                 type(e), entry_point, iterator, lvl=error,
+                                 exc=True)
+                        break
 
                         # for name in components.keys():
                         #     try:
