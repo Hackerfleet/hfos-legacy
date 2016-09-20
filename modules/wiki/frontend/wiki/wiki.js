@@ -14,6 +14,7 @@ class wikicomponent {
         
         this.title = 'No page';
         this.html = '<h1>Page not found</h1>';
+        this.note = '';
         
         this.selectedtemplate = "Empty";
         
@@ -39,31 +40,42 @@ class wikicomponent {
                 console.log('self.templatelist', self.templatelist);
             }
         });
-
-        this.$scope.$on('OP.Update', function(ev, uuid, obj, schema) {
+        
+        this.$scope.$on('OP.Update', function (ev, uuid, obj, schema) {
             if (schema === "wikipage" && uuid == self.pageuuid) {
                 console.log('[WIKI] Page update received');
                 self.updatePage(obj);
             }
         });
-
-        this.updatePage = function(obj) {
+        
+        this.updatePage = function (obj) {
             console.log('[WIKI] Rendering a wikipage!');
             self.html = obj.html;
             self.title = obj.title;
             self.pageuuid = obj.uuid;
-
+            
             // TODO: Extend this to make it work with external links and handle link titles
             var brackets = /\[([^\]]+)]/g;
             self.html = self.html.replace(brackets, '<a href="#/wiki/$1">$1</a>');
         };
-
+        
         this.$scope.$on('OP.Get', function (ev, uuid, obj, schema) {
             console.log('[WIKI] UUID, OBJ, SCH', uuid, obj, schema);
             if (schema === 'wikipage') {
                 console.log('[WIKI] Got a wikipage: ', obj, 'looking for:', self.pagename);
                 if (obj.name == self.pagename) {
-                    self.updatePage(obj);
+                    if (obj.title.startsWith('#redirect')) {
+                        console.log('[WIKI] Redirect hit, fetching new page.');
+                        
+                        self.note = 'Redirected from <a href="#/editor/wikipage/' +
+                            self.pagename + '/edit">' +
+                            self.pagename + '</a>';
+                        var newslug = obj.title.split('#redirect ')[1];
+                        self.pagename = newslug;
+                        self.getData();
+                    } else {
+                        self.updatePage(obj);
+                    }
                 } else {
                     console.log('[WIKI] Not our page.');
                 }
