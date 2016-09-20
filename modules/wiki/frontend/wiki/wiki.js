@@ -68,8 +68,8 @@ class wikicomponent {
                         console.log('[WIKI] Redirect hit, fetching new page.');
                         
                         self.note = 'Redirected from <a href="#/editor/wikipage/' +
-                            self.pagename + '/edit">' +
-                            self.pagename + '</a>';
+                            obj.uuid + '/edit">' +
+                            obj.name + '</a>';
                         var newslug = obj.title.split('#redirect ')[1];
                         self.pagename = newslug;
                         self.getData();
