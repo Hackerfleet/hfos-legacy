@@ -1,9 +1,12 @@
 <div class="container">
     <div class="well">
-        <h4>Wiki: {{$ctrl.title}}</h4>
+        <h4><a href="#/wiki/Home">Wiki:</a> <a href="#/wiki/{{$ctrl.pagename}}">{{$ctrl.title}}</a></h4>
 
         <small>
-            <span>Slug: <a href="#/wiki/{{$ctrl.pagename}}">{{$ctrl.pagename}}</a></span>
+            <span class="small">
+                <span>Slug: <a href="#/wiki/{{$ctrl.pagename}}">{{$ctrl.pagename}}</a></span>
+                <span ng-hide="$ctrl.note == ''">Note: <span ng-bind-html="$ctrl.note"></span>/span>
+            </span>
 
             <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.editpage()"
                     ng-hide="$ctrl.pageuuid == ''">Edit page
