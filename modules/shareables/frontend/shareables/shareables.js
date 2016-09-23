@@ -25,8 +25,6 @@ class SharingCtrl {
         
         var self = this;
         
-        this.foobar = 1;
-        
         this.calendarView = 'week';
         this.calendarDate = new Date();
         this.calendarTitle = 'Shareables for %NAME';
