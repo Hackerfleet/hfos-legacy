@@ -9,14 +9,21 @@ class wikicomponent {
         this.rootscope = $rootScope;
         this.alert = alert;
         
-        this.pagename = stateparams.name;
+        if (stateparams.name === ":name") {
+            this.pagename = 'Home';
+        } else {
+            this.pagename = stateparams.name;
+        }
+        
         this.pageuuid = "";
         
-        this.title = 'No page';
-        this.html = '<h1>Page not found</h1>';
+        this.title = '';
+        this.html = '';
         this.note = '';
         
-        this.selectedtemplate = "Empty";
+        this.edithere = false;
+        
+        this.selectedtemplate = "empty";
         
         var self = this;
         console.log('WIKI RUNNING');
@@ -55,8 +62,14 @@ class wikicomponent {
             self.pageuuid = obj.uuid;
             
             // TODO: Extend this to make it work with external links and handle link titles
-            var brackets = /\[([^\]]+)]/g;
-            self.html = self.html.replace(brackets, '<a href="#/wiki/$1">$1</a>');
+            
+            // Untitled links:
+            var links = /\[([\w-]*)\]/g;
+            self.html = self.html.replace(links, '<a href="#/wiki/$1">$1</a>');
+            
+            // Titled links:
+            links = /\[([\w-]*)\|([0-9a-z A-Z]*)\]/g;
+            self.html = self.html.replace(links, '<a href="#/wiki/$1">$2</a>');
         };
         
         this.$scope.$on('OP.Get', function (ev, uuid, obj, schema) {
@@ -87,7 +100,7 @@ class wikicomponent {
     
     createPage() {
         console.log('Creating empty page with name:', this.pagename, this.selectedtemplate);
-        if (this.selectedtemplate == 'Empty') {
+        if (this.selectedtemplate == 'empty') {
             this.state.go('app.editor', {schema: 'wikipage', action: 'create'})
         } else {
             this.alert.add('warning', 'WiP', 'Sorry, this is Work in Progress.', 2);
