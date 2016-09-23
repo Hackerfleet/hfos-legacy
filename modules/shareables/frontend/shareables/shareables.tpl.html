@@ -2,6 +2,17 @@
     <H1>Common object sharing</H1>
 
     <div class="row">
+        <select class="inline-form" ng-model="$ctrl.reservationtarget">
+            <option ng-repeat="shareable in $ctrl.shareables" value="{{shareable.uuid}}">
+                <span>
+                    {{shareable.name}}
+                </span>
+            </option>
+        </select>
+        <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.reserve()">Reserve</button>
+    </div>
+
+    <div class="row">
 
         <div class="col-md-6 text-center">
             <div class="btn-group">
