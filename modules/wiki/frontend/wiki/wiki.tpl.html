@@ -11,6 +11,9 @@
             <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.editpage()"
                     ng-hide="$ctrl.pageuuid == ''">Edit page
             </button>
+            <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.edithere = !$ctrl.edithere"
+                    ng-hide="$ctrl.pageuuid == ''">Edit here
+            </button>
 
             <div class="form-inline">
                 <div class="form-group" ng-hide="$ctrl.pageuuid != ''">
@@ -19,7 +22,7 @@
                     </button>
 
                     <select class="inline-form" ng-model="$ctrl.selectedtemplate">
-                        <option selected="true" value="">Empty page</option>
+                        <option selected="true" value="empty">Empty page</option>
                         <option ng-repeat="template in $ctrl.templates" value="{{template.uuid}}">
                         <span>
                             <span class="fa" ng-class="template.icon"></span>
@@ -32,5 +35,8 @@
         </small>
 
         <div ng-bind-html="$ctrl.html"></div>
+    </div>
+    <div class="well" ng-show="$ctrl.edithere">
+        <objecteditor schema="wikipage" uuid="$ctrl.pageuuid" action="edit"></objecteditor>
     </div>
 </div>
