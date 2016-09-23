@@ -429,7 +429,7 @@ class ObjectManager(ConfigurableComponent):
 
                 result = {'component': 'objectmanager',
                           'action': 'delete',
-                          'data': (True, storageobject.uuid),
+                          'data': (True, schema, storageobject.uuid),
                           }
                 return result, notification
             else:
