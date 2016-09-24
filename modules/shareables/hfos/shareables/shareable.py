@@ -13,14 +13,14 @@ See also
 
 Provisions
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
 
 from hfos.schemata.defaultform import editbuttons
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 ShareableSchema = {
     'type': 'object',
@@ -123,46 +123,46 @@ ShareableForm = [
         }
     },
     'notes',
-    {
-        'key': 'reservations',
-        'add': "Add reservation",
-        'startEmpty': False,
-        'style': {
-            'add': "btn-success"
-        },
-        'items': [
-            'reservations[].title',
-            {
-                'key': 'reservations[].useruuid',
-                'type': 'strapselect',
-                'placeholder': 'Select an Owner',
-                'options': {
-                    "type": "user",
-                    "asyncCallback": "$ctrl.getFormData",
-                    "map": {'valueProperty': "uuid",
-                            'nameProperty': 'name'}
-                },
-                "onChange": 'fieldChange(modelValue, form)'
-            },
-            {
-                'htmlClass': 'col-md-2',
-                'key': 'reservations[].starttime',
-                'options': {
-                    "minuteStep": 15,
-                    "autoclose": 1
-                }
-            },
-            {
-                'htmlClass': 'col-md-2',
-                'key': 'reservations[].endtime',
-                'options': {
-                    "minuteStep": 15,
-                    "autoclose": 1
-                },
-            },
-            'reservations[].description',
-        ]
-    },
+    # {
+    #     'key': 'reservations',
+    #     'add': "Add reservation",
+    #     'startEmpty': False,
+    #     'style': {
+    #         'add': "btn-success"
+    #     },
+    #     'items': [
+    #         'reservations[].title',
+    #         {
+    #             'key': 'reservations[].useruuid',
+    #             'type': 'strapselect',
+    #             'placeholder': 'Select an Owner',
+    #             'options': {
+    #                 "type": "user",
+    #                 "asyncCallback": "$ctrl.getFormData",
+    #                 "map": {'valueProperty': "uuid",
+    #                         'nameProperty': 'name'}
+    #             },
+    #             "onChange": 'fieldChange(modelValue, form)'
+    #         },
+    #         {
+    #             'htmlClass': 'col-md-2',
+    #             'key': 'reservations[].starttime',
+    #             'options': {
+    #                 "minuteStep": 15,
+    #                 "autoclose": 1
+    #             }
+    #         },
+    #         {
+    #             'htmlClass': 'col-md-2',
+    #             'key': 'reservations[].endtime',
+    #             'options': {
+    #                 "minuteStep": 15,
+    #                 "autoclose": 1
+    #             },
+    #         },
+    #         'reservations[].description',
+    #     ]
+    # },
     editbuttons
 ]
 

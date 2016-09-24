@@ -1,16 +1,58 @@
 <div class="well">
     <H1>Common object sharing</H1>
 
-    <div class="row">
-        <select class="inline-form" ng-model="$ctrl.reservationtarget">
-            <option ng-repeat="shareable in $ctrl.shareables" value="{{shareable.uuid}}">
-                <span>
-                    {{shareable.name}}
-                </span>
-            </option>
-        </select>
-        <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.reserve()">Reserve</button>
-    </div>
+    <form name="reservationform" class="form-inline" role="form">
+        <div class="form-group">
+            <label class="control-label" for="reservationtarget">Shareable</label><br>
+            <select id="reservationtarget" class="form-control" ng-model="$ctrl.reservationtarget">
+                <option ng-repeat="shareable in $ctrl.reservationlookup" value="{{shareable.uuid}}">
+                    <span>{{shareable.name}}</span>
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <br>
+            <button class="btn btn-default" type="button" ng-click="$ctrl.reserving = true">
+                Reserve
+            </button>
+        </div>
+
+        <div class="form-group" ng-show="$ctrl.reserving">
+            <div class="form-group">
+                <label class="control-label"><i class="fa fa-calendar"></i> From:</label><br>
+                <div class="form-group">
+                    <input type="text" size="10" class="form-control" ng-model="$ctrl.reserve_from"
+                           data-autoclose="1"
+                           placeholder="Date" bs-datepicker>
+                </div>
+                <div class="form-group">
+                    <input type="text" size="8" class="form-control" ng-model="$ctrl.reserve_from"
+                           data-time-format="h:mm:ss a" data-autoclose="1" placeholder="Time" bs-timepicker>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label"><i class="fa fa-calendar"></i> To:</label><br>
+                <div class="form-group">
+                    <input type="text" size="10" class="form-control" ng-model="$ctrl.reserve_to" data-autoclose="1"
+                           placeholder="Date" bs-datepicker>
+                </div>
+                <div class="form-group">
+                    <input type="text" size="8" class="form-control" ng-model="$ctrl.reserve_to"
+                           data-time-format="h:mm:ss a" data-autoclose="1" placeholder="Time" bs-timepicker>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <br>
+            <button class="btn btn-success" ng-click="$ctrl.reserve()"
+                    ng-show="$ctrl.reserve_from != '' && $ctrl.reserve_to != ''">Query
+            </button>
+        </div>
+
+    </form>
+
 
     <div class="row">
 
@@ -62,5 +104,4 @@
             on-event-times-changed="calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd"
             cell-is-open="true">
     </mwl-calendar>
-    <div ng-model="$ctrl.calendarView">{{$ctrl.calendarView}}</div>
 </div>

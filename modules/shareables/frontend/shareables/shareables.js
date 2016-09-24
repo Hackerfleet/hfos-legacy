@@ -8,11 +8,12 @@
  * Controller of the hfosFrontendApp
  */
 class SharingCtrl {
-    constructor($scope, $compile, ObjectProxy, moment, alert) {
+    constructor($scope, $compile, ObjectProxy, moment, alert, socket) {
         this.scope = $scope;
         this.compile = $compile;
         this.moment = moment;
         this.op = ObjectProxy;
+        this.socket = socket;
         
         console.log('Hello, i am a shareables controller!');
         
@@ -21,10 +22,18 @@ class SharingCtrl {
         this.op.getList('shareable', {'reservations': {'$elemMatch': {'endtime': {'$gt': now}}}}, ['*']);
         
         this.shareables = [];
-        this.reservationlookup = {};
-        
+    
         var self = this;
-        
+        this.op.searchItems('shareable').then(function(result) {
+            console.log('[SHAREABLES] Got the list of shareables:', result, self.reservationlookup);
+            self.reservationlookup = result.data;
+        });
+    
+        this.reservationtarget = '';
+    
+        this.reserve_from = '';
+        this.reserve_to = '';
+              
         this.calendarView = 'week';
         this.calendarDate = new Date();
         this.calendarTitle = 'Shareables for %NAME';
@@ -148,8 +157,23 @@ class SharingCtrl {
             self.compile(element)(self);
         };
     }
+    
+    reserve() {
+        var reservation = {
+            component: 'shareable',
+            action: 'reserve',
+            data: {
+                uuid: this.reservationtarget,
+                from: this.reserve_from,
+                to: this.reserve_to
+            }
+        };
+        
+        console.log('[SHAREABLE] Requesting reservation:', reservation);
+        this.socket.send(reservation);
+    }
 }
 
-SharingCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'moment', 'alert'];
+SharingCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'moment', 'alert', 'socket'];
 
 export default SharingCtrl;
