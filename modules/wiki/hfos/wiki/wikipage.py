@@ -7,7 +7,7 @@ Contains
 
 WikiPage: WikiPage to store collaborative data
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -15,7 +15,7 @@ WikiPage: WikiPage to store collaborative data
 from hfos.schemata.defaultform import defaultform, editbuttons
 from copy import deepcopy
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 WikiPageSchema = {
     'id': '#wikipage',

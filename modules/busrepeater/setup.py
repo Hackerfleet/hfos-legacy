@@ -3,7 +3,7 @@
 
 # HFOS - Hackerfleet Operating System - BusRepeater Plugin
 # ========================================================
-# Copyright (C) 2011-2016 riot <riot@hackerfleet.org> and others.
+# Copyright (C) 2011-2016 riot <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ setup(name="hfos-busrepeater",
       description="hfos-busrepeater",
 
       author="Hackerfleet Community",
-      author_email="packages@hackerfleet.org",
+      author_email="riot@c-base.org",
       url="https://github.com/hackerfleet/hfos-busrepeater",
       license="GNU General Public License v3",
       packages=find_packages(),

@@ -8,7 +8,7 @@ Engine, Rudder and miscellaneous machine roome control operations.
 Currently this is only useable in conjunction with Hackerfleet's MS 0x00
 NeoCortex board.
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -30,7 +30,7 @@ except ImportError:
             "unavailable, install requirements.txt!",
             lvl=critical, emitter="MR")
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class machineroomevent(Event):

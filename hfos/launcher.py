@@ -9,14 +9,13 @@ See README.rst for Build/Installation and setup details.
 URLs & Contact
 ==============
 
-Hackerfleet Homepage: http://hackerfleet.org
-Mail: info@hackerfleet.org
+Mail: riot@c-base.org
 IRC: #hackerfleet@irc.freenode.org
 
 Project repository: http://github.com/hackerfleet/hfos
 Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -45,7 +44,7 @@ except ImportError:
 
 # from pprint import pprint
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class dropprivs(Event):

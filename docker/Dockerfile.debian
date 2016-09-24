@@ -13,7 +13,7 @@
 # Last Updated: 20160723
 
 FROM debian:experimental
-MAINTAINER Heiko 'riot' Weinen <riot@hackerfleet.org>
+MAINTAINER Heiko 'riot' Weinen <riot@c-base.org>
 
 # Install dependencies
 

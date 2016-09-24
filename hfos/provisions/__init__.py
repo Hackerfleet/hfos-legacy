@@ -7,7 +7,7 @@ Package: Provisions
 Initial client configuration data.
 This contains tilelayer urls, api stuff etc.
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -15,7 +15,7 @@ This contains tilelayer urls, api stuff etc.
 from hfos.logger import hfoslog, debug  # , verbose, error, warn
 from pkg_resources import iter_entry_points
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 def _build_provisionstore():

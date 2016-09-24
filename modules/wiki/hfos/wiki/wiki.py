@@ -5,7 +5,7 @@ Module: Wiki
 
 Wiki manager
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -26,7 +26,7 @@ import pymongo
 #     hfoslog("No docutils found! Install it to get full functionality!",
 #             lvl=warn, emitter="WIKI")
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class Wiki(ConfigurableComponent):

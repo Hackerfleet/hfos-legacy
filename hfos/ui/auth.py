@@ -5,7 +5,7 @@ Module: Auth
 
 Authentication (and later Authorization) system
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -18,7 +18,7 @@ from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, debug, verbose
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class Authenticator(ConfigurableComponent):

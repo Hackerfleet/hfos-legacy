@@ -5,8 +5,7 @@ internet, we have to supply a lot of redistributables with our product.
 
 We absolutely do not intend to claim other great people's work, so here is a
 complete list of our used redistributable assets.  Should something be
-missing, inappropriate or plainly wrong, contact the developers via
-hfos@hackerfleet.org
+missing, inappropriate or plainly wrong, contact riot@c-base.org
 
 UNCLEAR LICENSE
 ===============

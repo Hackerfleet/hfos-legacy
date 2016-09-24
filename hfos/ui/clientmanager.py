@@ -6,7 +6,7 @@ Module clientmanager
 
 Coordinates clients communicating via websocket
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -24,7 +24,7 @@ from hfos.database import objectmodels
 from hfos.logger import error, warn, critical, debug, info, network
 from hfos.ui.clientobjects import Socket, Client, User
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class ComplexEncoder(json.JSONEncoder):

@@ -3,7 +3,7 @@
 Module: Web.Demo
 ================
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -14,7 +14,7 @@ from random import randint
 from hfos.events.client import broadcast
 from hfos.component import ConfigurableComponent
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class WebDemo(ConfigurableComponent):

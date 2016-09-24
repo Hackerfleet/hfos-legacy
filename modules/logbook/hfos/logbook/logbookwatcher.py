@@ -4,7 +4,7 @@
 Module: LogbookWatcher
 ======================
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -16,7 +16,7 @@ from hfos.logger import warn  # , hfoslog, error, critical
 # from datetime import datetime
 # from hfos.events.system import updatesubscriptions, send
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class Logbookwatcher(ConfigurableComponent):

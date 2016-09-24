@@ -5,7 +5,7 @@ Module: Chat
 
 Chat manager
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -16,7 +16,7 @@ from hfos.logger import hfoslog, error, warn
 from hfos.events.client import broadcast
 from hfos.events.system import authorizedevent, AuthorizedEvents
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 # Chat events

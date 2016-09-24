@@ -85,7 +85,6 @@ forum <https://github.com/hackerfleet/discussion/issues>`__
 You can also find us here:
 
 * `irc #hackerfleet on freenode <http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__
-* `hackerfleet.org <http://hackerfleet.org/>`__
 * `github.com/Hackerfleet <https://github.com/Hackerfleet>`__
 * `Waffle.io <https://waffle.io/hackerfleet/hfos>`__
 * `Twitter <https://twitter.com/hackerfleet>`__
@@ -268,8 +267,8 @@ Missing in the list below? Add yourself or ping us ;)
 Code
 ----
 
--  Heiko 'riot' Weinen riot@hackerfleet.org
--  Johannes 'ijon' Rundfeldt ijon@hackerfleet.org
+-  Heiko 'riot' Weinen riot@c-base.org
+-  Johannes 'ijon' Rundfeldt ijon@c-base.org
 -  Martin Ling
 
 Assets
@@ -284,7 +283,7 @@ This is migrating over to hfos-frontend submodule.
 License
 =======
 
-Copyright (C) 2011-2015 riot <riot@hackerfleet.org> and others.
+Copyright (C) 2011-2015 riot <riot@c-base.org> and others.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

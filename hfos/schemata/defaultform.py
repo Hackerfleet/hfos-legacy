@@ -6,17 +6,17 @@ Module defaultform
 
 A default form listing all object elements with submit button.
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 __license__ = """
 Hackerfleet Technology Demonstrator
 =====================================================================
-Copyright (C) 2011-2016 riot <riot@hackerfleet.org> and others.
+Copyright (C) 2011-2016 riot <riot@c-base.org> and others.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

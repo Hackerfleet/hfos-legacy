@@ -8,7 +8,7 @@ Contains
 
 Basic functionality around provisioning.
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -16,7 +16,7 @@ Basic functionality around provisioning.
 from jsonschema import ValidationError
 from hfos.logger import hfoslog, warn
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
     """Provisions a list of items according to their schema

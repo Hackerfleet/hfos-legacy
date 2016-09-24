@@ -3,7 +3,7 @@
 
 # HFOS - Hackerfleet Operating System
 # ===================================
-# Copyright (C) 2011-2015 riot <riot@hackerfleet.org> and others.
+# Copyright (C) 2011-2015 riot <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -135,7 +135,7 @@ setup(name="hfos",
       description="hfos",
 
       author="Hackerfleet Community",
-      author_email="packages@hackerfleet.org",
+      author_email="riot@c-base.org",
       url="https://github.com/hackerfleet/hfos",
       license="GNU General Public License v3",
       packages=['hfos',

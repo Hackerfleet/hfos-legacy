@@ -5,7 +5,7 @@ Module: OM
 
 OM manager
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
@@ -18,7 +18,7 @@ from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels, collections, ValidationError, schemastore
 from hfos.logger import verbose, debug, error, warn, critical
 
-__author__ = "Heiko 'riot' Weinen <riot@hackerfleet.org>"
+__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 WARNSIZE = 500
 

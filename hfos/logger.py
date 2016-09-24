@@ -3,7 +3,7 @@
 
 # HFOS - Hackerfleet Operating System
 # ===================================
-# Copyright (C) 2011-2016 riot <riot@hackerfleet.org> and others.
+# Copyright (C) 2011-2016 riot <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ error = 40
 critical = 50
 off = 100
 
-:copyright: (C) 2011-2016 riot@hackerfleet.org
+:copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
