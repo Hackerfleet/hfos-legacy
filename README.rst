@@ -25,39 +25,62 @@
 
 HFOS - The Hackerfleet Operating System
 =======================================
-    A modern, opensource approach to collaboration and maritime navigation.
+    A modern, opensource approach to collaborative tasks.
 
-    This software package is supposed to run on your home/ship/plane/ufo/*space's
+    This software package is supposed to run on your home/office/ship/plane/ufo/*space's
     board computer.
 
-*Obligatory Warning*: **Do not use for navigational purposes!**
+    It initially grew out of frustration with existing navigation solutions for sailors,
+    as none of these are really oriented towards sailing crews (i.e. multi-user setups), but
+    we saw the potential for other 'classic' areas of collaboration and started extending
+    it towards a more general application framework.
 
-*Always have up to date paper maps and know how to use them!*
+    A lot of the included modules are still Work in Progress, so help out, if you're interested
+    in a powerful collaboration tool suite.
 
-Included modules
-----------------
+General modules
+---------------
 
 ============ ===================================================
   Name        Description
 ============ ===================================================
   sails       Web UI, compatible with all modern browsers
-  alert       Crew alerting and notification system
+  alert       User alerting and notification system
   camera      Camera support
-  chat        Integrated chat (gateways planned)
+  chat        Integrated chat
   comms       Communication package
+  countables  Count arbitrary things
   dash        Dashboard information system
-  ldap        LDAP crew authorization
+  garden      Garden automation tools
+  ldap        LDAP user authorization
   library     Library management
-  maps        (Offline) moving maps with shareable views/layers
-  navdata     Navigational data aspects
-  nmea        NMEA-0183 Navigation bus parser
-  project     Lightweight project management tool
+  polls       Tool for lightweight internet voting
+  project     Simple project management tools
+  protocols   Miscellaneous communication protocols
   robot       RC remote control unit
   shareables  Shared resource blocking tool
+  switchboard Virtual switchboard
   wiki        Etherpad + Wiki = awesomeness
 
-Work in progress (1.1)
-----------------------
+
+Navigation (Hackerfleet) modules
+--------------------------------
+
+*Obligatory Warning*: **Do not use for navigational purposes!**
+*Always have up to date paper maps and know how to use them!*
+
+============ ==============================================================
+  Name        Description
+============ ==============================================================
+  busrepeater Tool to repeat navigation data bus frames to other media
+  logbook     Displaying and manual logging of important (nautical) events
+  maps        (Offline) moving maps with shareable views/layers
+  navdata     Navigational data module
+  nmea        NMEA-0183 Navigation data bus parser
+
+
+Work in progress
+----------------
 
 -  Taskgrid based project planning
 -  Simple book library management system
@@ -87,6 +110,7 @@ You can also find us here:
 * `irc #hackerfleet on freenode <http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__
 * `github.com/Hackerfleet <https://github.com/Hackerfleet>`__
 * `Waffle.io <https://waffle.io/hackerfleet/hfos>`__
+* `reddit <https://reddit.com/r/hackerfleet>`__
 * `Twitter <https://twitter.com/hackerfleet>`__
 * `Facebook <https://www.facebook.com/Hackerfleet>`__
 * `soup.io <http://hackerfleet.soup.io/>`__
@@ -95,6 +119,15 @@ You can also find us here:
 Installation
 ============
 
+First of all: The installation procedure is rather complex right now.
+We're trying to simplify the process, but in the meantime, if you encounter
+any trouble/problems, just contact us via irc or email and we'll happily try to
+help you get your installation running.
+
+This is very important for us, since the system has not yet been deployed
+very often and we're not yet aware of most of the pitfalls and traps on that
+route.
+
 We encourage you to use Python 3.4 for HFOS, but the system is
 built (and checked against) 2.7, too.
 
@@ -102,6 +135,8 @@ Warning: **HFOS is not compatible with Python 3.2!**
 
 Quickie-Install
 ---------------
+
+(Currently outdated, until we overhauled the docker setup)
 
 There is a Docker image available. This is usually the quickest
 way to install HFOS:
@@ -151,8 +186,9 @@ database:
 
 .. code-block:: bash
 
-    $ sudo mkdir -p /var/cache/hfos/tilecache
     $ git clone https://github.com/hackerfleet/hfos
+    $ git submodule init
+    $ git submodule update
     $ cd hfos
     $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
     $ source venv/bin/activate
@@ -165,42 +201,51 @@ You may need to adapt permissions for the /var folders to accomodate the
 user you let hfos run with, until we re-add the daemon and package support
 foam, that does that automatically.
 
-For some modules, there are additional libraries to install, until we
-have those separated cleanly with their own dependencies, we suggest
-installing all of them now:
-
-.. code-block:: bash
-
-    $ pip install -r requirements-optional.txt
-
-
 Frontend
 --------
 
 To install the frontend, update and pull the submodule, then change into
-it and either install or develop.
+it and install its Javascript dependencies.
 
 .. code-block:: bash
 
-    $ git submodule init
-    $ git submodule update
     $ cd frontend
     $ npm install
-    $ sudo npm install -g bower grunt grunt-cli
-    $ bower install
-    $ grunt serve
+    $ cd ..
 
-Point your browser to localhost:9000 to observe the magic. Don't forget
-to start the backend!
+Modules
+-------
 
-You can also copy a static version of the frontend by instructing grunt to:
+Now you can install the modules you want activated in your local instance:
 
 .. code-block:: bash
 
-    $ sudo grunt copy:dev
+    $ cd modules
+    $ cd navdata
+    $ python setup.py develop
+    $ cd ..
+    $ cd nmea
+    $ python setup.py develop
 
-Using this method is not meant for live editing, but for the final production 
-installation.
+Etc. - we're trying to come up with a nice way of automating or at least
+simplifying this.
+
+
+Build & Deploy Frontend
+-----------------------
+
+This is currently a bit hacky, we will change this procedure to be more automated, soon, too.
+
+In your running hfos_launcher process (it is also a console), enter
+
+.. code-block:: bash
+
+    /frontend install
+    /frontend force
+
+This will install the modules' own Javascript dependencies and then build the whole frontend.
+We hope to be able to supply modular pre-built frontend packages via Webpack, but currently that is not working, making
+this step necessary.
 
 Documentation
 -------------
@@ -253,14 +298,21 @@ Run hfos:
 
 You should see some info/debug output and the web engine as well as
 other components starting up.
-Currently it is set up to serve only on http://localhost:8055 - so
-point your browser there and explore HFOS.
+It is set up to serve on http://localhost by default - so
+point your browser there and explore your new HFOS installation.
+
+You can change the port and ip using command line arguments.
+Try python hfos_launcher.py --help for more info.
+
 
 Contributors
 ============
 
 We like to hang out on irc, if you want to chat or help out,
 join irc://freenode.org/hackerfleet :)
+
+Please be patient or even better use screen/tmux or something to irc.
+Most of us are there 24/7 but not always in front of our machines.
 
 Missing in the list below? Add yourself or ping us ;)
 
@@ -274,16 +326,12 @@ Code
 Assets
 ------
 
-This is migrating over to hfos-frontend submodule.
-
 -  Fabulous icons by iconmonstr.com and Hackerfleet contributors
--  Tumbeasts from http://theoatmeal.com/pl/state_web_winter/tumblr for
-   the error page (CC-BY)
 
 License
 =======
 
-Copyright (C) 2011-2015 riot <riot@c-base.org> and others.
+Copyright (C) 2011-2016 riot <riot@c-base.org> and others.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
