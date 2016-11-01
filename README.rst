@@ -25,65 +25,77 @@
 
 HFOS - The Hackerfleet Operating System
 =======================================
-    A modern, opensource approach to collaborative tasks.
 
-    This software package is supposed to run on your home/office/ship/plane/ufo/*space's
-    board computer.
+A modern, opensource approach to collaborative tasks.
 
-    It initially grew out of frustration with existing navigation solutions for sailors,
-    as none of these are really oriented towards sailing crews (i.e. multi-user setups), but
-    we saw the potential for other 'classic' areas of collaboration and started extending
-    it towards a more general application framework.
+This software package is supposed to run on your home/office/ship/plane/ufo/*space's
+board computer.
 
-    A lot of the included modules are still Work in Progress, so help out, if you're interested
-    in a powerful collaboration tool suite.
+It initially grew out of frustration with existing navigation solutions for sailors,
+as none of these are really oriented towards sailing crews (i.e. multi-user setups), but
+we saw the potential for other 'classic' areas of collaboration and started extending
+it towards a more general application framework.
+
+A lot of the included modules are still Work in Progress, so help out, if you're interested
+in a powerful collaboration tool suite.
+
+Modules
+=======
+
+The system is modular, so you can install what you need and leave other things.
 
 General modules
 ---------------
 
-============ ===================================================
-  Name        Description
-============ ===================================================
-  sails       Web UI, compatible with all modern browsers
-  alert       User alerting and notification system
-  camera      Camera support
-  chat        Integrated chat
-  comms       Communication package
-  countables  Count arbitrary things
-  dash        Dashboard information system
-  garden      Garden automation tools
-  ldap        LDAP user authorization
-  library     Library management
-  polls       Tool for lightweight internet voting
-  project     Simple project management tools
-  protocols   Miscellaneous communication protocols
-  robot       RC remote control unit
-  shareables  Shared resource blocking tool
-  switchboard Virtual switchboard
-  wiki        Etherpad + Wiki = awesomeness
+These are 'official' Hackerfleet developed modules. If you'd like to contribute your own,
+ping riot@c-base.org, to get it added to the list.
 
+============== ==============================================================
+  Name           Description
+============== ==============================================================
+sails          Web UI, compatible with all modern browsers
+alert          User alerting and notification system
+camera         Camera support
+chat           Integrated chat
+comms          Communication package
+countables     Count arbitrary things
+dash           Dashboard information system
+garden         Garden automation tools
+ldap           LDAP user authorization
+library        Library management
+polls          Tool for lightweight internet voting
+project        Simple project management tools
+protocols      Miscellaneous communication protocols
+robot          RC remote control unit
+shareables     Shared resource blocking tool
+switchboard    Virtual switchboard
+wiki           Etherpad + Wiki = awesomeness
+============== ==============================================================
+
+Most of these are not yet fully usable, so please help out and perhaps take ownership of one of these!
 
 Navigation (Hackerfleet) modules
 --------------------------------
 
+We primarily focused on navigation tools, so these are currently the 'more usable' modules.
+They are far from complete, see the WiP list below.
+
 *Obligatory Warning*: **Do not use for navigational purposes!**
 *Always have up to date paper maps and know how to use them!*
 
-============ ==============================================================
-  Name        Description
-============ ==============================================================
-  busrepeater Tool to repeat navigation data bus frames to other media
-  logbook     Displaying and manual logging of important (nautical) events
-  maps        (Offline) moving maps with shareable views/layers
-  navdata     Navigational data module
-  nmea        NMEA-0183 Navigation data bus parser
-
+============== ==============================================================
+  Name           Description
+============== ==============================================================
+busrepeater    Tool to repeat navigation data bus frames to other media
+logbook        Displaying and manual logging of important (nautical) events
+maps           (Offline) moving maps with shareable views/layers
+navdata        Navigational data module
+nmea           NMEA-0183 Navigation data bus parser
+============== ==============================================================
 
 Work in progress
 ----------------
 
--  Taskgrid based project planning
--  Simple book library management system
 -  Full GDAL based raster chart support
 -  Dynamic Logbook
 -  GRIB data (in charts)
@@ -128,23 +140,10 @@ This is very important for us, since the system has not yet been deployed
 very often and we're not yet aware of most of the pitfalls and traps on that
 route.
 
-We encourage you to use Python 3.4 for HFOS, but the system is
+We encourage you to use Python >= 3.4 for HFOS, but the system is
 built (and checked against) 2.7, too.
 
 Warning: **HFOS is not compatible with Python 3.2!**
-
-Quickie-Install
----------------
-
-(Currently outdated, until we overhauled the docker setup)
-
-There is a Docker image available. This is usually the quickest
-way to install HFOS:
-
-.. code-block:: bash
-
-    $ docker run -i -t -p 127.0.0.1:8055:8055 --name hfos-test-live \
-       -t hackerfleet/hfos
 
 Preparation
 -----------
@@ -250,7 +249,7 @@ this step necessary.
 Documentation
 -------------
 
-The documentation is available online on `ReadTheDocs.org 
+The documentation is available online on `ReadTheDocs.org
 <https://hfos.readthedocs.org>`__.
 If you wish to build and install the included documentation for offline use,
 run these commands:
@@ -264,7 +263,7 @@ run these commands:
 This installs all necessary documentation tools and copies the files to the
 expected HFOS web data folder.
 
-You can also build the PDF file (and various other formats) by using the 
+You can also build the PDF file (and various other formats) by using the
 Makefile inside the docs directory.
 
 .. code-block:: bash
@@ -304,6 +303,18 @@ point your browser there and explore your new HFOS installation.
 You can change the port and ip using command line arguments.
 Try python hfos_launcher.py --help for more info.
 
+Docker-Install
+--------------
+
+(Currently outdated, until we overhauled the docker setup)
+
+There is a Docker image available. This is usually the quickest
+way to install HFOS:
+
+.. code-block:: bash
+
+    $ docker run -i -t -p 127.0.0.1:8055:8055 --name hfos-test-live \
+       -t hackerfleet/hfos
 
 Contributors
 ============
