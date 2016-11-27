@@ -87,12 +87,12 @@ class userlogin(Event):
 class authenticationrequest(Event):
     """A client wants to authenticated a connection"""
 
-    def __init__(self, username, passhash, clientuuid, requestedclientuuid,
+    def __init__(self, username, password, clientuuid, requestedclientuuid,
                  sock, auto, *args):
         """
 
         :param username: Account username
-        :param passhash: Account md5 hash
+        :param password: Account md5 hash
         :param clientuuid: Unique User ID of known connection
         :param sock: Associated Socket
         :param args: Further Args
@@ -100,12 +100,11 @@ class authenticationrequest(Event):
         super(authenticationrequest, self).__init__(*args)
 
         self.username = username
-        self.passhash = passhash
+        self.password = password
         self.sock = sock
         self.clientuuid = clientuuid
         self.requestedclientuuid = requestedclientuuid
         self.auto = auto
-
 
 class authentication(Event):
     """Authentication has been granted to a client"""

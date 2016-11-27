@@ -13,12 +13,14 @@ Coordinates clients communicating via websocket
 
 import datetime
 import json
+import random
 from uuid import uuid4
 
 from circuits import handler
 from circuits.net.events import write
 from hfos.events.system import AuthorizedEvents
-from hfos.events.client import authenticationrequest, send, clientdisconnect, userlogin
+from hfos.events.client import authenticationrequest, send, clientdisconnect, \
+    userlogin
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, critical, debug, info, network
@@ -76,7 +78,7 @@ class ClientManager(ConfigurableComponent):
                     self.log("Client was logged in", lvl=debug)
                     try:
                         self._logoutclient(useruuid, clientuuid)
-                        self.log("Client logged out", clientuuid)
+                        self.log("Client logged out", useruuid, clientuuid)
                     except Exception as e:
                         self.log("Couldn't clean up logged in user! ",
                                  self._users[useruuid], e, type(e),
@@ -99,7 +101,9 @@ class ClientManager(ConfigurableComponent):
                 del self._users[useruuid]
             self._clients[clientuuid].useruuid = None
         except Exception as e:
-            self.log("Error during client logout: ", e, type(e), lvl=error)
+            self.log("Error during client logout: ", e, type(e),
+                     clientuuid, useruuid, lvl=error,
+                     exc=True)
 
     @handler("connect", channel="wsserver")
     def connect(self, *args):
@@ -117,9 +121,13 @@ class ClientManager(ConfigurableComponent):
                 self._sockets[sock] = Socket(ip, clientuuid)
                 # Key uuid is temporary, until signin, will then be replaced
                 #  with account uuid
-                self._clients[clientuuid] = Client(sock, ip, clientuuid)
-                # self.fireEvent(write(sock, json.dumps({'type': 'info',
-                # 'content': 'Connected'})))
+
+                self._clients[clientuuid] = Client(
+                    sock=sock,
+                    ip=ip,
+                    clientuuid=clientuuid,
+                )
+
                 self.log("Client connected:", clientuuid)
             else:
                 self.log("Strange! Old IP reconnected!" + "#" * 15)
@@ -141,9 +149,10 @@ class ClientManager(ConfigurableComponent):
 
                 if event.uuid is None:
                     userobject = objectmodels['user'].find_one({'name':
-                                                               event.username})
+                                                                    event.username})
                 else:
-                    userobject = objectmodels['user'].find_one({'uuid': event.uuid})
+                    userobject = objectmodels['user'].find_one(
+                        {'uuid': event.uuid})
 
                 if userobject is None:
                     self.log("No user by that name known.", lvl=warn)
@@ -265,6 +274,7 @@ class ClientManager(ConfigurableComponent):
                 else:
                     username = requestdata['username']
                     password = requestdata['password']
+
                     if 'clientuuid' in requestdata:
                         requestedclientuuid = requestdata['clientuuid']
                     else:
@@ -273,20 +283,24 @@ class ClientManager(ConfigurableComponent):
 
                     self.log("Auth request by", username)
 
-                self.fireEvent(authenticationrequest(username, password,
-                                                     clientuuid,
-                                                     requestedclientuuid,
-                                                     sock, auto),
-                               "auth")
+                self.fireEvent(authenticationrequest(
+                    username,
+                    password,
+                    clientuuid,
+                    requestedclientuuid,
+                    sock,
+                    auto,
+                ), "auth")
                 return
             except Exception as e:
-                self.log("Login failed: ", lvl=warn, exc=True)
+                self.log("Login failed: ", e, type(e), lvl=warn, exc=True)
         elif requestaction == "logout":
             self.log("User logged out, refreshing client.", lvl=network)
             try:
                 if clientuuid in self._clients:
                     client = self._clients[clientuuid]
                     if client.useruuid:
+                        self.log("Logout client uuid: ", clientuuid)
                         self._logoutclient(client.useruuid, clientuuid)
                     self.fireEvent(clientdisconnect(clientuuid))
                 else:
@@ -403,9 +417,18 @@ class ClientManager(ConfigurableComponent):
             socket.clientuuid = clientuuid
             self._sockets[event.sock] = socket
 
+
             # ..and client lists
-            newclient = Client(event.sock, socket.ip, clientuuid, useruuid,
-                               clientconfig.name, clientconfig)
+            # TODO: Rewrite and simplify this:
+            newclient = Client(
+                sock=event.sock,
+                ip=socket.ip,
+                clientuuid=clientuuid,
+                useruuid=useruuid,
+                name=clientconfig.name,
+                config=clientconfig
+            )
+
             del (self._clients[originatingclientuuid])
             self._clients[clientuuid] = newclient
 
