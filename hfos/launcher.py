@@ -27,7 +27,7 @@ from circuits import handler, Timer, Event
 from hfos.database import initialize  # , schemastore
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
-    setup_root, verbosity
+    setup_root, verbosity, hilight
 
 from shutil import copy
 from glob import glob
@@ -37,6 +37,8 @@ import sys
 import pwd
 import grp
 import os
+
+
 try:
     from subprocess import Popen, TimeoutExpired
 except ImportError:
@@ -97,7 +99,7 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
                 else:
                     copy(src_file, dst_dir)
             except PermissionError as e:
-                hfoslog("Could not create target %s for frontend:" % (
+                hfoslog(" No permission to create target %s for frontend:" % (
                     'link' if hardlink else 'copy'),
                         dst_dir, e, emitter='BUILDER', lvl=error)
             except Exception as e:
@@ -140,13 +142,21 @@ class Core(ConfigurableComponent):
         }
     }
 
-    def __init__(self, insecure=False, host='localhost', port=80):
+    def __init__(self, insecure=False, host='localhost', port=80,
+                 certificate=None):
         super(Core, self).__init__("CORE")
         self.log("Booting. ", self.channel)
 
         self.insecure = insecure
         self.host = host
         self.port = port
+        self.certificate = certificate
+
+        if certificate:
+            if not os.path.exists(certificate):
+                self.log("SSL certificate usage requested but certificate "
+                         "cannot be found!", lvl=error)
+                sys.exit(17)  # TODO: Define exit codes
 
         self.frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
             __file__)) + "/../frontend")
@@ -182,8 +192,19 @@ class Core(ConfigurableComponent):
         self.update_components()
         self._write_config()
 
+        secure = self.certificate is not None
+        if secure:
+            self.log("Running SSL server with cert:", self.certificate,
+                     lvl=hilight)
+        else:
+            self.log("Running insecure server without SSL!", lvl=warn)
+
         try:
-            self.server = Server((self.host, self.port)).register(self)
+            self.server = Server(
+                (self.host, self.port),
+                secure=secure,
+                certfile=self.certificate
+            ).register(self)
         except PermissionError:
             self.log('Could not open (privileged?) port, check '
                      'permissions!', lvl=critical)
@@ -462,7 +483,12 @@ class Core(ConfigurableComponent):
 def construct_graph(args):
     """Preliminary HFOS application Launcher"""
 
-    app = Core(host=args.host, port=args.port, insecure=args.insecure)
+    app = Core(
+        host=args.host,
+        port=args.port,
+        insecure=args.insecure,
+        certificate=args.cert
+    )
 
     setup_root(app)
 
@@ -497,6 +523,8 @@ def launch(run=True):
                         type=int, default=80)
     parser.add_argument("--host", help="Define hostname for server",
                         type=str, default='0.0.0.0')
+    parser.add_argument("--cert", help="Certificate file path",
+                        type=str, default=None)
     parser.add_argument("--dbhost", help="Define hostname for database server",
                         type=str, default='127.0.0.1:27017')
     parser.add_argument("--profile", help="Enable profiler", action="store_true")
