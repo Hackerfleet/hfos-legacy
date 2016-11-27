@@ -150,7 +150,7 @@ class ConfigurableComponent(Component):
 
             try:
                 self.config.name = self.uniquename
-            except Exception as e:
+            except (AttributeError, KeyError):
                 self.log("Cannot set component name for configuration: ", e,
                          type(e), self.name, exc=True, lvl=critical)
 
