@@ -194,6 +194,10 @@ def hfoslog(*what, **kwargs):
     :param sourceloc: Give specific source code location hints, used internally
     """
 
+    # Count all messages (missing numbers give a hint at too high log level)
+    global count
+    count += 1
+
     if 'lvl' in kwargs:
         lvl = kwargs['lvl']
         if lvl < verbosity['global']:
@@ -211,10 +215,7 @@ def hfoslog(*what, **kwargs):
     else:
         exception = False
 
-    global count
-
     output = None
-    count += 1
 
     now = time.time() - start
 
