@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System - Dev Plugin
+# HFOS - Hackerfleet Operating System - Dev Modules
 # =================================================
 # Copyright (C) 2011-2016 riot <riot@c-base.org> and others.
 #
@@ -28,16 +28,12 @@ setup(name="hfos-dev",
       url="https://github.com/hackerfleet/hfos-dev",
       license="GNU General Public License v3",
       packages=find_packages(),
-      scripts=[
-          'hfos_manage.py'
-      ],
       long_description="""HFOS - Dev
 ==========
 
 HFOS module development system
 
-This package is a useful starter point to set up new HFOS modules and debug
-existing ones as well as the core system.
+This package a few modules to debug others, as well as the core system.
 """,
       dependency_links=[],
       install_requires=[
@@ -46,8 +42,8 @@ existing ones as well as the core system.
           'pystache>=0.5.4'
       ],
       entry_points="""[hfos.components]
-    recorder=hfos.misc.recorder:Recorder
-    playback=hfos.misc.playback:Playback
+    recorder=dev.misc.recorder:Recorder
+    playback=dev.misc.playback:Playback
     """,
       test_suite="tests.main.main",
       )
