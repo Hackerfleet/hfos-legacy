@@ -25,7 +25,7 @@ import argparse
 from time import localtime
 from pprint import pprint
 from collections import OrderedDict
-from templates import write_template_file
+from dev.templates import write_template_file
 from hashlib import sha512
 
 # TODO: Must be synchronized with hfos.ui.auth.Authenticator.salt!
