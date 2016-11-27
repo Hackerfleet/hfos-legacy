@@ -40,7 +40,12 @@ class mapcomponent {
         
         this.drawnLayer = '';
         this.map = '';
-        this.host = socket.host;
+        
+        this.host = 'http';
+        if (socket.protocol === 'wss') {
+            this.host = this.host + 's';
+        }
+        this.host = this.host + '://' + socket.host + ':' + socket.port + '/';
         
         this.follow = false;
         this.followlayers = false;
@@ -123,7 +128,7 @@ class mapcomponent {
                     name: 'OpenStreetMap',
                     type: 'xyz',
                     // url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-                    url: 'http://' + this.host + '/tilecache/a.tile.osm.org/{z}/{x}/{y}.png',
+                    url: this.host + 'tilecache/a.tile.osm.org/{z}/{x}/{y}.png',
                     layerOptions: {
                         //subdomains: ['a', 'b', 'c'],
                         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -183,7 +188,7 @@ class mapcomponent {
         
         this.addLayer = function (uuid) {
             var layer = self.op.objects[uuid];
-            layer.url = layer.url.replace(/hfoshost/, self.host);
+            layer.url = layer.url.replace('http://hfoshost/', self.host);
             
             console.log('Adding layer:', layer);
             if (layer.baselayer === true) {
