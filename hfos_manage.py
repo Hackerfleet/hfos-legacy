@@ -26,6 +26,15 @@ from time import localtime
 from pprint import pprint
 from collections import OrderedDict
 from templates import write_template_file
+from hashlib import sha512
+
+# TODO: Must be synchronized with hfos.ui.auth.Authenticator.salt!
+# Currently this is set to a static value (no good, but better than nothing)
+
+try:
+    salt = 'FOOBAR'.encode('utf-8')
+except UnicodeEncodeError:
+    salt = u'FOOBAR'
 
 paths = [
     'hfos',
@@ -38,7 +47,7 @@ templates = {
     'setupfile': ('setup.py.template', 'setup.py'),
     'packagefile': ('package.json.template', 'package.json'),
     'component': (
-    'component.py.template', 'hfos/{pluginname}/{pluginname}.py'),
+        'component.py.template', 'hfos/{pluginname}/{pluginname}.py'),
     'moduleinit': ('init.py.template', 'hfos/__init__.py'),
     'packageinit': ('init.py.template', 'hfos/{pluginname}/__init__.py'),
     'schemata': ('schemata.py.template', 'hfos/{pluginname}/schemata.py'),
@@ -46,7 +55,8 @@ templates = {
                    'hfos-frontend/{pluginname}/scripts/controllers/{'
                    'pluginname}.js'),
     'view': (
-    'view.html.template', 'hfos-frontend/{pluginname}/views/{pluginname}.html')
+        'view.html.template',
+        'hfos-frontend/{pluginname}/views/{pluginname}.html')
 }
 
 questions = OrderedDict({
@@ -72,7 +82,6 @@ You can press Ctrl-C any time to cancel this process.
 
 See hfos_manage --help for more details.
 """
-
 
 try:
     input = raw_input  # NOQA
@@ -109,14 +118,14 @@ def construct_module(info, target):
 
     # pprint(info)
     for item in templates.values():
-        source = os.path.join('templates', item[0])
+        source = os.path.join('dev/templates', item[0])
         filename = os.path.abspath(
             os.path.join(target, item[1].format(**info)))
         print("Creating file from template '%s'" % filename)
         write_template_file(source, filename, info)
 
 
-def ask(question, default=None, datatype=str):
+def ask(question, default=None, datatype=str, showhint=False):
     data = default
 
     if datatype == bool:
@@ -131,7 +140,12 @@ def ask(question, default=None, datatype=str):
         return data in ('Y', 'J', '1')
 
     elif datatype in (str, unicode):
-        data = input("%s? [%s] (%s): " % (question, default, datatype))
+        if showhint:
+            msg = "%s? [%s] (%s): " % (question, default, datatype)
+        else:
+            msg = question
+
+        data = input(msg)
 
         if len(data) == 0:
             data = default
@@ -145,7 +159,7 @@ def askquestionnaire():
     pprint(questions.items())
 
     for question, default in questions.items():
-        response = ask(question, default, type(default))
+        response = ask(question, default, type(default), showhint=True)
         if type(default) == unicode:
             response = response.decode('utf-8')
         answers[question] = response
@@ -153,7 +167,7 @@ def askquestionnaire():
     return answers
 
 
-def main(args):
+def create_module(args):
     if os.path.exists(args.target):
         if args.clear:
             shutil.rmtree(args.target)
@@ -175,6 +189,106 @@ def main(args):
     construct_module(augmentedinfo, args.target)
 
 
+def ask_password():
+    password = "Foo"
+    password_trial = ""
+
+    while password != password_trial:
+        password = ask("Enter password: ")
+        password_trial = ask("Repeat password: ")
+        if password != password_trial:
+            print("\nPasswords do not match!")
+
+    return password
+
+
+def get_credentials(args):
+    if not args.username:
+        username = ask("Please enter username: ")
+    else:
+        username = args.username
+
+    if not args.password:
+        password = ask_password()
+    else:
+        password = args.password
+
+    try:
+        password = password.encode('utf-8')
+    except UnicodeDecodeError:
+        password = password
+
+    passhash = sha512(password)
+    passhash.update(salt)
+
+    return username, passhash.hexdigest()
+
+
+def create_user(args):
+    username, passhash = get_credentials(args)
+
+
+def delete_user(args):
+    if not args.username:
+        username = ask("Please enter username: ")
+    else:
+        username = args.username
+
+    from hfos import database
+
+    database.initialize(args.dbhost)
+
+    user = database.objectmodels['user'].find_one({'name': username})
+    # TODO: Verify back if not --yes in args
+    user.delete()
+
+    print("Done!")
+
+
+def change_password(args):
+    username, passhash = get_credentials(args)
+
+    from hfos import database
+
+    database.initialize(args.dbhost)
+
+    user = database.objectmodels['user'].find_one({'name': username})
+
+    user.passhash = passhash
+    user.save()
+
+    print("Done!")
+
+
+def list_users(args):
+    from hfos import database
+
+    database.initialize(args.dbhost)
+
+    users = database.objectmodels['user']
+
+    for user in users.find():
+        print(user.name, user.uuid)
+
+    print("Done!")
+
+
+def main(args, parser):
+    # TODO: This can be done better. Re-find out how and change.
+    if args.create_module:
+        create_module(args)
+    elif args.create_user:
+        create_user(args)
+    elif args.delete_user:
+        delete_user(args)
+    elif args.change_password:
+        change_password(args)
+    elif args.list_users:
+        list_users(args)
+    else:
+        parser.print_help()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target",
@@ -184,7 +298,26 @@ if __name__ == "__main__":
                         default=".")
     parser.add_argument("--clear", help="Clear target path if it exists",
                         action="store_true", default=False)
+    parser.add_argument("--username", help="Username for user related "
+                                           "operations", default=None)
+    parser.add_argument("--password", help="Password for user related "
+                                           "operations", default=None)
+    parser.add_argument("--dbhost", help="Define hostname for database server",
+                        type=str, default='127.0.0.1:27017')
+
+    parser.add_argument("-create-module", help="Create a new module",
+                        action="store_true", default=False)
+
+    parser.add_argument("-list-users", help="List all existing user accounts",
+                        action="store_true", default=False)
+    parser.add_argument("-create-user", help="Create a new user",
+                        action="store_true", default=False)
+    parser.add_argument("-delete-user", help="Delete an existing user account",
+                        action="store_true", default=False)
+    parser.add_argument("-change-password",
+                        help="Change password of existing user",
+                        action="store_true", default=False)
 
     args = parser.parse_args()
 
-    main(args)
+    main(args, parser)
