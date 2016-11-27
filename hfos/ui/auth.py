@@ -17,8 +17,10 @@ from hfos.events.client import authentication, send
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, debug, verbose
+from hashlib import sha512
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
+
 
 
 class Authenticator(ConfigurableComponent):
@@ -32,6 +34,23 @@ class Authenticator(ConfigurableComponent):
 
     def __init__(self, *args):
         super(Authenticator, self).__init__('AUTH', *args)
+
+        # TODO: Generate and store this upon first instantiation:
+        self.salt = "FOOBAR".encode("utf-8")
+
+    def makehash(self, word):
+        self.log("TYPE: ", type(word))
+
+        try:
+            password = word.encode('utf-8')
+        except UnicodeDecodeError:
+            password = word
+
+        hashword = sha512(password)
+        hashword.update(self.salt)
+        hex_hash = hashword.hexdigest()
+
+        return hex_hash
 
     @handler("authenticationrequest", channel="auth")
     def authenticationrequest(self, event):
@@ -91,7 +110,9 @@ class Authenticator(ConfigurableComponent):
             self.log("Auth request for ", event.username,
                      event.clientuuid)
 
-            if (len(event.username) < 3) or (len(event.passhash) < 3):
+            # TODO: Define the requirements for secure passwords etc.
+            # TODO: Notify problems here back to the frontend
+            if (len(event.username) < 3) or (len(event.password) < 3):
                 self.log("Illegal username or password received, "
                          "login cancelled",
                          lvl=warn)
@@ -113,7 +134,7 @@ class Authenticator(ConfigurableComponent):
             if useraccount:
                 self.log("User found.")
 
-                if useraccount.passhash == event.passhash:
+                if self.makehash(event.password) == useraccount.passhash:
                     self.log("Passhash matches, checking client and profile.",
                              lvl=debug)
 
@@ -173,6 +194,12 @@ class Authenticator(ConfigurableComponent):
                 else:
                     self.log("Password was wrong!", lvl=warn)
 
+                    self.fireEvent(send(event.clientuuid, {
+                        'component': 'auth',
+                        'action': 'fail',
+                        'data': 'N/A'
+                    }, sendtype="client"), "hfosweb")
+
                 self.log("Done with Login request", lvl=debug)
 
             else:
@@ -183,7 +210,7 @@ class Authenticator(ConfigurableComponent):
         try:
             newuser = objectmodels['user']({
                 'name': event.username,
-                'passhash': event.passhash,
+                'passhash': self.makehash(event.password),
                 'uuid': str(uuid4())
             })
             newuser.save()
