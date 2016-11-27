@@ -209,6 +209,9 @@ class CLI(ConfigurableComponent):
         data = data.strip().decode("utf-8")
         self.log("Incoming:", data)
 
+        if len(data) == 0:
+            return
+
         if data[0] == "/":
             cmd = data[1:].upper()
             args = []
