@@ -29,20 +29,11 @@ from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
     setup_root, verbosity, hilight
 
-from shutil import copy
-from glob import glob
-
 import argparse
 import sys
 import pwd
 import grp
 import os
-
-
-try:
-    from subprocess import Popen, TimeoutExpired
-except ImportError:
-    from subprocess32 import Popen, TimeoutExpired  # NOQA
 
 # from pprint import pprint
 
@@ -72,42 +63,6 @@ def drop_privileges(uid_name='hfos', gid_name='hfos'):
 
     # Ensure a very conservative umask
     # old_umask = os.umask(22)
-
-
-def copytree(root_src_dir, root_dst_dir, hardlink=True):
-    for src_dir, dirs, files in os.walk(root_src_dir):
-        dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
-        if not os.path.exists(dst_dir):
-            os.makedirs(dst_dir)
-        for file_ in files:
-            src_file = os.path.join(src_dir, file_)
-            dst_file = os.path.join(dst_dir, file_)
-            if os.path.exists(dst_file):
-                if hardlink:
-                    hfoslog('Removing frontend link:', dst_file,
-                            emitter='BUILDER', lvl=verbose)
-                    os.remove(dst_file)
-                else:
-                    hfoslog('Overwriting frontend file:', dst_file,
-                            emitter='BUILDER', lvl=verbose)
-
-            hfoslog('Hardlinking ', src_file, dst_dir, emitter='BUILDER',
-                    lvl=verbose)
-            try:
-                if hardlink:
-                    os.link(src_file, dst_file)
-                else:
-                    copy(src_file, dst_dir)
-            except PermissionError as e:
-                hfoslog(" No permission to create target %s for frontend:" % (
-                    'link' if hardlink else 'copy'),
-                        dst_dir, e, emitter='BUILDER', lvl=error)
-            except Exception as e:
-                hfoslog("Error during", 'link' if hardlink else 'copy',
-                        "creation:", type(e), e, emitter='BUILDER', lvl=error)
-
-            hfoslog('Done linking', root_dst_dir, emitter='BUILDER',
-                    lvl=verbose)
 
 
 class Core(ConfigurableComponent):
@@ -222,21 +177,27 @@ class Core(ConfigurableComponent):
         self.log("Dropping privileges", args, lvl=warn)
         drop_privileges()
 
-    @handler("frontendbuildrequest", channel="setup")
-    def trigger_frontend_build(self, event):
-        self.update_components(forcerebuild=event.force, install=event.install)
+    # Moved to manage tool, maybe of interest later, though:
+    #
+    # @handler("frontendbuildrequest", channel="setup")
+    # def trigger_frontend_build(self, event):
+    #     self.update_components(forcerebuild=event.force, install=event.install)
+    #
+    # @handler("componentupdaterequest", channel="setup")
+    # def trigger_component_update(self, event):
+    #     self.update_components(forcereload=event.force)
 
-    @handler("componentupdaterequest", channel="setup")
-    def trigger_component_update(self, event):
-        self.update_components(forcereload=event.force)
-
-    # TODO: Installation of frontend requirements is currently disabled
     def update_components(self, forcereload=False, forcerebuild=False,
-                          forcecopy=True, install=False):
-        self.log("Updating components")
+                      forcecopy=True, install=False):
+
+        # TODO: See if we can pull out major parts of the component handling.
+        # They are also used in the manage tool to instantiate the
+        # component frontend bits.
+
+        hfoslog("Updating components")
         components = {}
 
-        if True: # try:
+        if True:  # try:
 
             from pkg_resources import iter_entry_points
 
@@ -253,41 +214,31 @@ class Core(ConfigurableComponent):
                         location = entry_point.dist.location
                         loaded = entry_point.load()
 
-                        self.log("Entry point: ", entry_point,
-                                 name,
-                                 entry_point.resolve(), lvl=verbose)
+                        hfoslog("Entry point: ", entry_point,
+                                name,
+                                entry_point.resolve(), lvl=verbose)
 
-                        self.log("Loaded: ", loaded, lvl=verbose)
+                        hfoslog("Loaded: ", loaded, lvl=verbose)
                         comp = {
                             'location': location,
                             'version': str(entry_point.dist.parsed_version),
                             'description': loaded.__doc__
                         }
 
-                        frontend = os.path.join(location, 'frontend')
-                        self.log("Checking component frontend parts: ",
-                                 frontend, lvl=verbose)
-                        if os.path.isdir(
-                                frontend) and frontend != self.frontendroot:
-                            comp['frontend'] = frontend
-                        else:
-                            self.log("Component without frontend "
-                                     "directory:", comp, lvl=debug)
-
                         components[name] = comp
                         self.loadable_components[name] = loaded
 
-                        self.log("Loaded component:", comp, lvl=verbose)
+                        hfoslog("Loaded component:", comp, lvl=verbose)
 
                     except Exception as e:
-                        self.log("Could not inspect entrypoint: ", e,
-                                 type(e), entry_point, iterator, lvl=error,
-                                 exc=True)
+                        hfoslog("Could not inspect entrypoint: ", e,
+                                type(e), entry_point, iterator, lvl=error,
+                                exc=True)
                         break
 
                         # for name in components.keys():
                         #     try:
-                        #         self.log(self.loadable_components[name])
+                        #         hfoslog(self.loadable_components[name])
                         #         configobject = {
                         #             'type': 'object',
                         #             'properties':
@@ -298,7 +249,7 @@ class Core(ConfigurableComponent):
                         #             'settings'][
                         #             'oneOf'].append(configobject)
                         #     except (KeyError, AttributeError) as e:
-                        #         self.log('Problematic configuration
+                        #         hfoslog('Problematic configuration
                         # properties in '
                         #                  'component ', name, exc=True)
                         #
@@ -306,135 +257,24 @@ class Core(ConfigurableComponent):
 
 
         #except Exception as e:
-        #    self.log("Error: ", e, type(e), lvl=error, exc=True)
+        #    hfoslog("Error: ", e, type(e), lvl=error, exc=True)
         #    return
 
-        self.log("Checking component frontend bits in ", self.frontendroot,
-                 lvl=verbose)
+        hfoslog("Checking component frontend bits in ", self.frontendroot,
+                lvl=verbose)
 
         # pprint(self.config._fields)
         diff = set(components) ^ set(self.config.components)
         if diff or forcecopy and self.config.frontendenabled:
-            self.log("Old component configuration differs:", diff, lvl=debug)
-            self.log(self.config.components, components, lvl=verbose)
+            hfoslog("Old component configuration differs:", diff, lvl=debug)
+            hfoslog(self.config.components, components, lvl=verbose)
             self.config.components = components
-
-            self._update_frontends(install)
-
-            if forcerebuild:
-                self._rebuild_frontend()
-
-                # We have to find a way to detect if we need to rebuild (and
-                # possibly wipe) stuff. This maybe the case, when a frontend
-                #  has
-                # been updated.
         else:
-            self.log("No component configuration change. Proceeding.")
+            hfoslog("No component configuration change. Proceeding.")
 
         if forcereload:
-            self.log("Restarting all components. Good luck.", lvl=warn)
+            hfoslog("Restarting all components.", lvl=warn)
             self._instantiate_components(clear=True)
-
-    def _update_frontends(self, install=True):
-        self.log("Checking unique frontend locations: ",
-                 self.config.components, lvl=debug)
-
-        importlines = []
-        modules = []
-
-        for name, component in self.config.components.items():
-            if 'frontend' in component:
-                origin = component['frontend']
-
-                target = os.path.join(self.frontendroot, 'src', 'components',
-                                      name)
-                target = os.path.normpath(target)
-
-                if install:
-                    reqfile = os.path.join(origin, 'requirements.txt')
-
-                    if os.path.exists(reqfile):
-                        self.log("Installing package dependencies", lvl=debug)
-                        with open(reqfile, 'r') as f:
-                            cmdline = ["npm", "install"]
-                            for line in f.readlines():
-                                cmdline.append(line.replace("\n", ""))
-
-                            self.log("Running", cmdline, lvl=verbose)
-                            npminstall = Popen(cmdline, cwd=self.frontendroot)
-                            out, err = npminstall.communicate()
-                            try:
-                                npminstall.wait(timeout=60)
-                            except TimeoutExpired:
-                                self.log("Timeout during package "
-                                         "install", lvl=error)
-                                return
-
-                            self.log("Frontend installing done: ", out,
-                                     err, lvl=debug)
-
-                # if target in ('/', '/boot', '/usr', '/home', '/root',
-                # '/var'):
-                #    self.log("Unsafe frontend deletion target path, "
-                #            "NOT proceeding! ", target, lvl=critical)
-
-                self.log("Copying:", origin, target, lvl=debug)
-
-                copytree(origin, target)
-
-                for modulefilename in glob(target + '/*.module.js'):
-                    modulename = os.path.basename(modulefilename).split(
-                        ".module.js")[0]
-                    line = u"import {s} from './components/{p}/{s}.module';\n" \
-                           u"modules.push({s});\n".format(s=modulename, p=name)
-                    if not modulename in modules:
-                        importlines += line
-                        modules.append(modulename)
-            else:
-                self.log("Module without frontend:", name, component,
-                         lvl=debug)
-
-        with open(os.path.join(self.frontendroot, 'src', 'main.tpl.js'),
-                  "r") as f:
-            main = "".join(f.readlines())
-
-        parts = main.split("/* COMPONENT SECTION */")
-        if len(parts) != 3:
-            self.log("Frontend loader seems damaged! Please check!",
-                     lvl=critical)
-            return
-
-        try:
-            with open(os.path.join(self.frontendroot, 'src', 'main.js'),
-                      "w") as f:
-                f.write(parts[0])
-                f.write("/* COMPONENT SECTION:BEGIN */\n")
-                for line in importlines:
-                    f.write(line)
-                f.write("/* COMPONENT SECTION:END */\n")
-                f.write(parts[2])
-        except Exception as e:
-            self.log("Error during frontend package info writing. Check "
-                     "permissions! ", e, lvl=error)
-
-    def _rebuild_frontend(self):
-        self.log("Starting frontend build.", lvl=warn)
-        npmbuild = Popen(["npm", "run", "build"], cwd=self.frontendroot)
-        out, err = npmbuild.communicate()
-        try:
-            npmbuild.wait(timeout=60)
-        except TimeoutExpired:
-            self.log("Timeout during build", lvl=error)
-            return
-
-        self.log("Frontend build done: ", out, err, lvl=debug)
-        copytree(os.path.join(self.frontendroot, 'build'),
-                 self.config.frontendtarget, hardlink=False)
-        copytree(os.path.join(self.frontendroot, 'assets'),
-                 os.path.join(self.config.frontendtarget, 'assets'),
-                 hardlink=False)
-        self._start_frontend()
-        self.log("Frontend deployed")
 
     def _start_frontend(self, restart=False):
         self.log(self.config, self.config.frontendenabled, lvl=verbose)
