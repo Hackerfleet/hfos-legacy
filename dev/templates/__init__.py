@@ -1,8 +1,9 @@
-import pystache
+
 #from pprint import pprint
 
 
 def format_template(template, content):
+    import pystache
     result = u""
     if True:  # try:
         result = pystache.render(template, content, string_encoding='utf-8')
