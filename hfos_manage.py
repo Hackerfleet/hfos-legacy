@@ -22,16 +22,39 @@ import os
 import sys
 import shutil
 import argparse
+from distutils.dir_util import copy_tree
 from time import localtime
 from pprint import pprint
 from collections import OrderedDict
 from dev.templates import write_template_file
 from hashlib import sha512
 
-# TODO: Must be synchronized with hfos.ui.auth.Authenticator.salt!
-# Currently this is set to a static value (no good, but better than nothing)
+from shutil import copy
+from glob import glob
+
+from hfos.logger import verbose, debug, warn, error, critical, verbosity, \
+    hfoslog
+
+# 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
+try:
+    input = raw_input  # NOQA
+except NameError:
+    pass
 
 try:
+    from subprocess import Popen
+except ImportError:
+    from subprocess32 import Popen  # NOQA
+
+try:
+    unicode  # NOQA
+except NameError:
+    unicode = str
+
+# Database salt
+try:
+    # TODO: Must be synchronized with hfos.ui.auth.Authenticator.salt!
+    # Currently this is set to a static value (no good,but better than nothing)
     salt = 'FOOBAR'.encode('utf-8')
 except UnicodeEncodeError:
     salt = u'FOOBAR'
@@ -83,16 +106,6 @@ You can press Ctrl-C any time to cancel this process.
 See hfos_manage --help for more details.
 """
 
-try:
-    input = raw_input  # NOQA
-except NameError:
-    pass
-
-try:
-    unicode  # NOQA
-except NameError:
-    unicode = str
-
 
 def augment_info(info):
     info['descriptionheader'] = "=" * len(info['description'])
@@ -113,7 +126,7 @@ def augment_info(info):
 def construct_module(info, target):
     for path in paths:
         realpath = os.path.abspath(os.path.join(target, path.format(**info)))
-        print("Making directory '%s'" % realpath)
+        hfoslog("Making directory '%s'" % realpath, emitter='MANAGE')
         os.makedirs(realpath)
 
     # pprint(info)
@@ -121,7 +134,8 @@ def construct_module(info, target):
         source = os.path.join('dev/templates', item[0])
         filename = os.path.abspath(
             os.path.join(target, item[1].format(**info)))
-        print("Creating file from template '%s'" % filename)
+        hfoslog("Creating file from template '%s'" % filename,
+                emitter='MANAGE')
         write_template_file(source, filename, info)
 
 
@@ -172,7 +186,8 @@ def create_module(args):
         if args.clear:
             shutil.rmtree(args.target)
         else:
-            print("Target exists! Use --clear to delete it first.")
+            hfoslog("Target exists! Use --clear to delete it first.",
+                    emitter='MANAGE')
             sys.exit(-1)
 
     done = False
@@ -185,7 +200,7 @@ def create_module(args):
 
     augmentedinfo = augment_info(info)
 
-    print("Constructing module %(pluginname)s" % info)
+    hfoslog("Constructing module %(pluginname)s" % info, emitter='MANAGE')
     construct_module(augmentedinfo, args.target)
 
 
@@ -200,6 +215,44 @@ def ask_password():
             print("\nPasswords do not match!")
 
     return password
+
+
+def copytree(root_src_dir, root_dst_dir, hardlink=True):
+    for src_dir, dirs, files in os.walk(root_src_dir):
+        dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
+        for file_ in files:
+            src_file = os.path.join(src_dir, file_)
+            dst_file = os.path.join(dst_dir, file_)
+            if os.path.exists(dst_file):
+                if hardlink:
+                    hfoslog('Removing frontend link:', dst_file,
+                            emitter='MANAGE', lvl=verbose)
+                    os.remove(dst_file)
+                else:
+                    hfoslog('Overwriting frontend file:', dst_file,
+                            emitter='MANAGE', lvl=verbose)
+
+            hfoslog('Hardlinking ', src_file, dst_dir, emitter='MANAGE',
+                    lvl=verbose)
+            try:
+                if hardlink:
+                    os.link(src_file, dst_file)
+                else:
+                    copy(src_file, dst_dir)
+            except PermissionError as e:
+                hfoslog(
+                    " No permission to create target %s for frontend:" % (
+                        'link' if hardlink else 'copy'),
+                    dst_dir, e, emitter='MANAGE', lvl=error)
+            except Exception as e:
+                hfoslog("Error during", 'link' if hardlink else 'copy',
+                        "creation:", type(e), e, emitter='MANAGE',
+                        lvl=error)
+
+            hfoslog('Done linking', root_dst_dir, emitter='MANAGE',
+                    lvl=verbose)
 
 
 def get_credentials(args):
@@ -227,6 +280,19 @@ def get_credentials(args):
 def create_user(args):
     username, passhash = get_credentials(args)
 
+    from hfos import database
+    from uuid import uuid4
+    database.initialize(args.dbhost)
+
+    user = database.objectmodels['user']()
+
+    user.uuid = str(uuid4())
+    user.name = username
+    user.passhash = passhash
+    user.save()
+
+    hfoslog("Done!", emitter='MANAGE')
+
 
 def delete_user(args):
     if not args.username:
@@ -235,21 +301,19 @@ def delete_user(args):
         username = args.username
 
     from hfos import database
-
     database.initialize(args.dbhost)
 
     user = database.objectmodels['user'].find_one({'name': username})
     # TODO: Verify back if not --yes in args
     user.delete()
 
-    print("Done!")
+    hfoslog("Done!", emitter='MANAGE')
 
 
 def change_password(args):
     username, passhash = get_credentials(args)
 
     from hfos import database
-
     database.initialize(args.dbhost)
 
     user = database.objectmodels['user'].find_one({'name': username})
@@ -257,12 +321,11 @@ def change_password(args):
     user.passhash = passhash
     user.save()
 
-    print("Done!")
+    hfoslog("Done!", emitter='MANAGE')
 
 
 def list_users(args):
     from hfos import database
-
     database.initialize(args.dbhost)
 
     users = database.objectmodels['user']
@@ -270,7 +333,263 @@ def list_users(args):
     for user in users.find():
         print(user.name, user.uuid)
 
-    print("Done!")
+    hfoslog("Done!", emitter='MANAGE')
+
+
+def install_docs(args):
+    hfoslog("Updating documentation directory", emitter='MANAGE')
+
+    # If these need changes, make sure they are watertight and don't remove
+    # wanted stuff!
+    target = '/var/lib/hfos/frontend/docs'
+    source = 'docs/build/html'
+
+    if not os.path.exists(os.path.join(os.path.curdir, source)):
+        hfoslog(
+            "Documentation not existing yet. Run python setup.py "
+            "build_sphinx first.", emitter='MANAGE', lvl=error)
+        return
+
+    if os.path.exists(target):
+        hfoslog("Path already exists: " + target, emitter='MANAGE')
+        if args.clear:
+            hfoslog("Cleaning up " + target, emitter='MANAGE', lvl=warn)
+            shutil.rmtree(target)
+
+    hfoslog("Copying docs to " + target, emitter='MANAGE')
+    copy_tree(source, target)
+
+
+def install_var(args):
+    hfoslog("Checking frontend library and cache directories",
+            emitter='MANAGE')
+
+    # If these need changes, make sure they are watertight and don't remove
+    # wanted stuff!
+    target_paths = (
+        '/var/lib/hfos', '/var/cache/hfos', '/var/cache/hfos/tilecache')
+
+    for item in target_paths:
+        if os.path.exists(item):
+            hfoslog("Path already exists: " + item, emitter='MANAGE')
+            if args.clear_all or (args.clear and 'cache' in item):
+                hfoslog("Cleaning up: " + item, emitter='MANAGE', lvl=warn)
+                shutil.rmtree(item)
+
+        if not os.path.exists(item):
+            hfoslog("Creating path: " + item, emitter='MANAGE')
+            os.mkdir(item)
+
+
+def install_provisions(args):
+    hfoslog("Installing HFOS default provisions", emitter='MANAGE')
+
+    # from hfos.logger import verbosity, events
+    # verbosity['console'] = verbosity['global'] = events
+
+    from hfos.database import initialize
+
+    initialize(args.dbhost)
+
+    from hfos.provisions import provisionstore
+    for provision_name in provisionstore:
+        hfoslog("Provisioning " + provision_name, emitter='MANAGE')
+        provisionstore[provision_name]()
+
+
+# TODO: Installation of frontend requirements is currently disabled
+def install_frontend(self, forcereload=False, forcerebuild=False,
+                     forcecopy=True, install=False):
+    hfoslog("Updating frontend components", emitter='MANAGE')
+    components = {}
+    loadable_components = {}
+    # TODO: Fix this up, it is probably not a sane way to get at the real root
+    frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
+        __file__)) + "/frontend")
+    frontendtarget = '/var/lib/hfos/frontend'
+
+    if True:  # try:
+
+        from pkg_resources import iter_entry_points
+
+        entry_point_tuple = (
+            iter_entry_points(group='hfos.base', name=None),
+            iter_entry_points(group='hfos.sails', name=None),
+            iter_entry_points(group='hfos.components', name=None)
+        )
+
+        for iterator in entry_point_tuple:
+            for entry_point in iterator:
+                try:
+                    name = entry_point.name
+                    location = entry_point.dist.location
+                    loaded = entry_point.load()
+
+                    hfoslog("Entry point: ", entry_point,
+                            name,
+                            entry_point.resolve(), lvl=verbose,
+                            emitter='MANAGE')
+
+                    hfoslog("Loaded: ", loaded, lvl=verbose, emitter='MANAGE')
+                    comp = {
+                        'location': location,
+                        'version': str(entry_point.dist.parsed_version),
+                        'description': loaded.__doc__
+                    }
+
+                    frontend = os.path.join(location, 'frontend')
+                    hfoslog("Checking component frontend parts: ",
+                            frontend, lvl=verbose, emitter='MANAGE')
+                    if os.path.isdir(
+                            frontend) and frontend != frontendroot:
+                        comp['frontend'] = frontend
+                    else:
+                        hfoslog("Component without frontend "
+                                "directory:", comp, lvl=debug,
+                                emitter='MANAGE')
+
+                    components[name] = comp
+                    loadable_components[name] = loaded
+
+                    hfoslog("Loaded component:", comp, lvl=verbose,
+                            emitter='MANAGE')
+
+                except Exception as e:
+                    hfoslog("Could not inspect entrypoint: ", e,
+                            type(e), entry_point, iterator, lvl=error,
+                            exc=True, emitter='MANAGE')
+                    break
+
+    # except Exception as e:
+    #    hfoslog("Error: ", e, type(e), lvl=error, exc=True, emitter='MANAGE')
+    #    return
+
+    def _update_frontends(install=True):
+        hfoslog("Checking unique frontend locations: ",
+                loadable_components, lvl=debug, emitter='MANAGE')
+
+        importlines = []
+        modules = []
+
+        for name, component in components.items():
+            if 'frontend' in component:
+                origin = component['frontend']
+
+                target = os.path.join(frontendroot, 'src', 'components',
+                                      name)
+                target = os.path.normpath(target)
+
+                if install:
+                    reqfile = os.path.join(origin, 'requirements.txt')
+
+                    if os.path.exists(reqfile):
+                        hfoslog("Installing package dependencies", lvl=debug,
+                                emitter='MANAGE')
+                        with open(reqfile, 'r') as f:
+                            cmdline = ["npm", "install"]
+                            for line in f.readlines():
+                                cmdline.append(line.replace("\n", ""))
+
+                            hfoslog("Running", cmdline, lvl=verbose,
+                                    emitter='MANAGE')
+                            npminstall = Popen(cmdline, cwd=frontendroot)
+                            out, err = npminstall.communicate()
+
+                            npminstall.wait()
+
+                            hfoslog("Frontend installing done: ", out,
+                                    err, lvl=debug, emitter='MANAGE')
+
+                # if target in ('/', '/boot', '/usr', '/home', '/root',
+                # '/var'):
+                #    hfoslog("Unsafe frontend deletion target path, "
+                #            "NOT proceeding! ", target, lvl=critical,
+                #            emitter='MANAGE')
+
+                hfoslog("Copying:", origin, target, lvl=debug,
+                        emitter='MANAGE')
+
+                copytree(origin, target)
+
+                for modulefilename in glob(target + '/*.module.js'):
+                    modulename = os.path.basename(modulefilename).split(
+                        ".module.js")[0]
+                    line = u"import {s} from './components/{p}/{" \
+                           u"s}.module';\n" \
+                           u"modules.push({s});\n".format(s=modulename, p=name)
+                    if not modulename in modules:
+                        importlines += line
+                        modules.append(modulename)
+            else:
+                hfoslog("Module without frontend:", name, component,
+                        lvl=debug, emitter='MANAGE')
+
+        with open(os.path.join(frontendroot, 'src', 'main.tpl.js'),
+                  "r") as f:
+            main = "".join(f.readlines())
+
+        parts = main.split("/* COMPONENT SECTION */")
+        if len(parts) != 3:
+            hfoslog("Frontend loader seems damaged! Please check!",
+                    lvl=critical, emitter='MANAGE')
+            return
+
+        try:
+            with open(os.path.join(frontendroot, 'src', 'main.js'),
+                      "w") as f:
+                f.write(parts[0])
+                f.write("/* COMPONENT SECTION:BEGIN */\n")
+                for line in importlines:
+                    f.write(line)
+                f.write("/* COMPONENT SECTION:END */\n")
+                f.write(parts[2])
+        except Exception as e:
+            hfoslog("Error during frontend package info writing. Check "
+                    "permissions! ", e, lvl=error, emitter='MANAGE')
+
+    def _rebuild_frontend():
+        hfoslog("Starting frontend build.", lvl=warn, emitter='MANAGE')
+        npmbuild = Popen(["npm", "run", "build"], cwd=frontendroot)
+        out, err = npmbuild.communicate()
+        try:
+            npmbuild.wait(timeout=60)
+        except TimeoutExpired:
+            hfoslog("Timeout during build", lvl=error, emitter='MANAGE')
+            return
+
+        hfoslog("Frontend build done: ", out, err, lvl=debug, emitter='MANAGE')
+        copytree(os.path.join(frontendroot, 'build'),
+                 frontendtarget, hardlink=False)
+        copytree(os.path.join(frontendroot, 'assets'),
+                 os.path.join(frontendtarget, 'assets'),
+                 hardlink=False)
+
+        hfoslog("Frontend deployed", emitter='MANAGE')
+
+    hfoslog("Checking component frontend bits in ", frontendroot,
+            lvl=verbose, emitter='MANAGE')
+
+    _update_frontends()
+    _rebuild_frontend()
+
+    # We have to find a way to detect if we need to rebuild (and
+    # possibly wipe) stuff. This maybe the case, when a frontend
+    # module has been updated/added/removed.
+
+
+def uninstall(args):
+    response = ask("This will delete all data of your HFOS installation! Type"
+                 "YES to continue:", default="N", showhint=False)
+    if response == 'YES':
+        shutil.rmtree('/var/lib/hfos')
+        shutil.rmtree('/var/cache/hfos')
+
+
+def install_all(args):
+    install_var(args)
+    install_provisions(args)
+    install_docs(args)
+    install_frontend(args)
 
 
 def main(args, parser):
@@ -285,18 +604,48 @@ def main(args, parser):
         change_password(args)
     elif args.list_users:
         list_users(args)
+    elif args.install_provisions:
+        install_provisions(args)
+    elif args.install_docs:
+        install_docs(args)
+    elif args.install_var:
+        install_var(args)
+    elif args.install_frontend:
+        install_frontend(args)
+    elif args.install_all:
+        install_all(args)
+    elif args.uninstall:
+        uninstall(args)
     else:
         parser.print_help()
 
 
 if __name__ == "__main__":
+    # TODO: See if there's a nicer method to build a command interface than
+    # argparser. I think there was some sleek lib to do that.
     parser = argparse.ArgumentParser()
+
+    # TODO: Make use of these two flags where appropriate and bail out with err
+    # if they were specified where it is not possible to adhere to them
+    parser.add_argument("--quiet", "-q", help="Quiet operation to suppress "
+                                              "all output",
+                        action="store_true", default=False)
+    parser.add_argument("--log", help="Define log level (0-100)",
+                        type=int, default=20)
+    parser.add_argument("--yes", "-y", help="Assume yes on any yes/no "
+                                            "questions",
+                        action="store_true", default=False)
+
     parser.add_argument("--target",
                         help="Create module in the given folder (uses ./ if "
                              "omitted)",
                         action="store",
                         default=".")
+    # TODO: Clarify these, make their functions more obvious
     parser.add_argument("--clear", help="Clear target path if it exists",
+                        action="store_true", default=False)
+    parser.add_argument("--clear-all", help="Clear all target paths if they "
+                                            "exist, not only caches",
                         action="store_true", default=False)
     parser.add_argument("--username", help="Username for user related "
                                            "operations", default=None)
@@ -317,7 +666,30 @@ if __name__ == "__main__":
     parser.add_argument("-change-password",
                         help="Change password of existing user",
                         action="store_true", default=False)
+    parser.add_argument("-install-var",
+                        help="Install variable data locations",
+                        action="store_true", default=False)
+    parser.add_argument("-install-docs",
+                        help="Install documentation",
+                        action="store_true", default=False)
+    parser.add_argument("-install-provisions",
+                        help="Install system data provisions",
+                        action="store_true", default=False)
+    parser.add_argument("-install-frontend",
+                        help="Install HFOS frontend",
+                        action="store_true", default=False)
+    parser.add_argument("-install-all",
+                        help="Install all necessary things",
+                        action="store_true",
+                        default=False)
+    parser.add_argument("-uninstall",
+                        help="Delete installed things and clean up",
+                        action="store_true",
+                        default=False)
 
     args = parser.parse_args()
+
+    verbosity['console'] = args.log
+    verbosity['global'] = args.log
 
     main(args, parser)
