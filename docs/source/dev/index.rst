@@ -21,10 +21,10 @@ Guidelines
        standards
 
 
-#Code documentation
-#------------------
-#
-#.. toctree::
-#       :maxdepth: 2
-#
-#       packages/modules
+.. Code documentation
+.. ------------------
+..
+.. .. toctree::
+..       :maxdepth: 2
+..
+..       packages/modules
