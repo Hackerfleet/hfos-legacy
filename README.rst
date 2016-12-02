@@ -175,8 +175,9 @@ package:
 Backend
 -------
 
-There is no fully automatic installation/daemon yet. Just set up a virtual
-environment and install HFOS into it.
+The manage tool usually can install everything you need.
+This involves getting the frontend dependencies, installing the supplied modules,
+building and installing the documentation, etc.
 
 We also create two folders in /var (lib/hfos and cache/hfos) for hfos' tile-
 cache and other stuff as well as install basic default provisions into the
@@ -190,6 +191,7 @@ database:
     $ cd hfos
     $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
     $ source venv/bin/activate
+    $ pip install -Ur requirements-dev.txt
     $ sudo venv/bin/python hfos_manage.py -install-all
     $ python hfos_launcher.py
 
@@ -200,43 +202,13 @@ foam, that does that automatically.
 We strongly suggest generating a SSL certificate and invoke the launcher thus:
 
 .. code-block:: bash
+
     $ sudo ./venv/bin/python hfos_launcher.py --cert $YOURCERTIFICATE --port 443
 
 Running the launcher as root to be able to open ports below 1024 should be
-safe, as it tries to drop its root privileges, unless you specify --insecure,
+safe, as it drops its root privileges, unless you specify --insecure,
 which is strongly discouraged.
 
-Frontend
---------
-
-To install the frontend, update and pull the submodule, then change into
-it and install its Javascript dependencies.
-
-.. code-block:: bash
-
-    $ cd frontend
-    $ npm install
-    $ cd ..
-
-Modules
--------
-
-Now you can install the modules you want activated in your local instance:
-
-.. code-block:: bash
-
-    $ cd modules
-    $ cd navdata
-    $ python setup.py develop
-    $ cd ..
-    $ cd nmea
-    $ python setup.py develop
-
-Etc. - we're trying to come up with a nice way of automating or at least
-simplifying this.
-You may get dependency errors upon a few modules (e.g. navdata/nmea) because
-they depend on each other - please bear with us, until we have automatic
-dependency management working.
 
 Documentation
 -------------
@@ -248,8 +220,6 @@ run these commands:
 
 .. code-block:: bash
 
-    $ pip install -r requirements-dev.txt
-    $ python setup.py build_sphinx
     $ sudo ./venv/bin/python hfos_manage.py -install-doc
 
 This installs all necessary documentation tools and copies the files to the
@@ -265,35 +235,6 @@ Makefile inside the docs directory.
 
 Just running make without arguments gives you a list of the other available
 documentation formats.
-
-Development
------------
-
-.. code-block:: bash
-
-    $ cd hfos
-    $ virtualenv -p /usr/bin/python3.4 --system-site-packages
-
-Activate venv and run setup.py:
-
-.. code-block:: bash
-
-    $ source venv/bin/activate
-    $ python setup.py develop
-
-Run hfos:
-
-.. code-block:: bash
-
-    $ python hfos_launcher.py
-
-You should see some info/debug output and the web engine as well as
-other components starting up.
-It is set up to serve on http://localhost by default - so
-point your browser there and explore your new HFOS installation.
-
-You can change the port and ip using command line arguments.
-Try python hfos_launcher.py --help for more info.
 
 Docker-Install
 --------------
