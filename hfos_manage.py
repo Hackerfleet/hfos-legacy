@@ -337,6 +337,27 @@ def list_users(args):
 
 
 def install_docs(args):
+    def make_docs():
+        hfoslog("Generating HTML documentation", emitter='MANAGE')
+
+        try:
+            build = Popen(
+                [
+                    'make',
+                    'html'
+                ],
+                cwd='docs/'
+            )
+
+            build.wait()
+        except Exception as e:
+            hfoslog("Problem during documentation building: ", e, type(e),
+                    exc=True, emitter='MANAGE', lvl=error)
+            return False
+        return True
+
+    make_docs()
+
     hfoslog("Updating documentation directory", emitter='MANAGE')
 
     # If these need changes, make sure they are watertight and don't remove
@@ -552,9 +573,10 @@ def install_frontend(self, forcereload=False, forcerebuild=False,
         npmbuild = Popen(["npm", "run", "build"], cwd=frontendroot)
         out, err = npmbuild.communicate()
         try:
-            npmbuild.wait(timeout=60)
-        except TimeoutExpired:
-            hfoslog("Timeout during build", lvl=error, emitter='MANAGE')
+            npmbuild.wait()
+        except Exception as e:
+            hfoslog("Error during frontend build", e, type(e),
+                    exc=True, lvl=error, emitter='MANAGE')
             return
 
         hfoslog("Frontend build done: ", out, err, lvl=debug, emitter='MANAGE')
@@ -579,14 +601,86 @@ def install_frontend(self, forcereload=False, forcerebuild=False,
 
 def uninstall(args):
     response = ask("This will delete all data of your HFOS installation! Type"
-                 "YES to continue:", default="N", showhint=False)
+                   "YES to continue:", default="N", showhint=False)
     if response == 'YES':
         shutil.rmtree('/var/lib/hfos')
         shutil.rmtree('/var/cache/hfos')
 
 
+def install_modules(args):
+    def install_module(module):
+        try:
+            setup = Popen(
+                [
+                    'python',
+                    'setup.py',
+                    'develop'
+                ],
+                cwd='modules/' + module + "/"
+            )
+
+            setup.wait()
+        except Exception as e:
+            hfoslog("Problem during module installation: ", module, e,
+                    type(e), exc=True, emitter='MANAGE', lvl=error)
+            return False
+        return True
+
+    modules = [
+        # Poor man's dependency management, as long as the modules are
+        # installed from local sources and they're not available on pypi,
+        # which would handle real dependency management for us:
+        'navdata',
+        'robot',
+
+        # Now all the rest:
+        'alert',
+        'busrepeater',
+        'camera',
+        'chat',
+        'comms',
+        'countables',
+        'crew',
+        'dash',
+        # 'dev',
+        'garden',
+        'ldap',
+        'library',
+        'logbook',
+        'fooooooooooo',
+        'maps',
+        'nmea',
+        'polls',
+        'project',
+        'quuuuuuuuuuuuuuux',
+        'protocols',
+        'shareables',
+        'switchboard',
+        'wiki'
+    ]
+
+    success = []
+    failed = []
+
+    for module in modules:
+        hfoslog('Installing module ', module, emitter='MANAGE')
+        if install_module(module):
+            success.append(module)
+        else:
+            failed.append(module)
+
+    hfoslog('Installed modules: ', success, emitter='MANAGE')
+    if len(failed) > 0:
+        hfoslog('Failed modules: ', failed, emitter='MANAGE')
+    hfoslog('Done!', emitter='MANAGE')
+
+
 def install_all(args):
+    # First install base
     install_var(args)
+    install_modules(args)
+
+    # Now the rest basing off that
     install_provisions(args)
     install_docs(args)
     install_frontend(args)
@@ -612,6 +706,8 @@ def main(args, parser):
         install_var(args)
     elif args.install_frontend:
         install_frontend(args)
+    elif args.install_modules:
+        install_modules(args)
     elif args.install_all:
         install_all(args)
     elif args.uninstall:
@@ -678,6 +774,10 @@ if __name__ == "__main__":
     parser.add_argument("-install-frontend",
                         help="Install HFOS frontend",
                         action="store_true", default=False)
+    parser.add_argument("-install-modules",
+                        help="Install all supplied Hackerfleet modules",
+                        action="store_true",
+                        default=False)
     parser.add_argument("-install-all",
                         help="Install all necessary things",
                         action="store_true",
