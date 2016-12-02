@@ -72,7 +72,7 @@ switchboard    Virtual switchboard
 wiki           Etherpad + Wiki = awesomeness
 ============== ==============================================================
 
-Most of these are not yet fully usable, so please help out and perhaps take ownership of one of these!
+Most of these are not yet fully usable, so please help out and perhaps take ownership of one (or more) of them!
 
 Navigation (Hackerfleet) modules
 --------------------------------
@@ -99,7 +99,6 @@ Work in progress
 -  Full GDAL based raster chart support
 -  Dynamic Logbook
 -  GRIB data (in charts)
--  GDAL based raster chart support
 -  Navigation aides, planning
 -  Datalog, automated navigational data exchange
 -  Crew management, more safety tools
@@ -191,14 +190,21 @@ database:
     $ cd hfos
     $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
     $ source venv/bin/activate
-    $ python setup.py install
-    $ python setup.py install_provisions
-    $ sudo python setup.py install_var
+    $ sudo venv/bin/python hfos_manage.py -install-all
     $ python hfos_launcher.py
 
 You may need to adapt permissions for the /var folders to accomodate the
 user you let hfos run with, until we re-add the daemon and package support
 foam, that does that automatically.
+
+We strongly suggest generating a SSL certificate and invoke the launcher thus:
+
+.. code-block:: bash
+    $ sudo ./venv/bin/python hfos_launcher.py --cert $YOURCERTIFICATE --port 443
+
+Running the launcher as root to be able to open ports below 1024 should be
+safe, as it tries to drop its root privileges, unless you specify --insecure,
+which is strongly discouraged.
 
 Frontend
 --------
@@ -228,23 +234,9 @@ Now you can install the modules you want activated in your local instance:
 
 Etc. - we're trying to come up with a nice way of automating or at least
 simplifying this.
-
-
-Build & Deploy Frontend
------------------------
-
-This is currently a bit hacky, we will change this procedure to be more automated, soon, too.
-
-In your running hfos_launcher process (it is also a console), enter
-
-.. code-block:: bash
-
-    /frontend install
-    /frontend force
-
-This will install the modules' own Javascript dependencies and then build the whole frontend.
-We hope to be able to supply modular pre-built frontend packages via Webpack, but currently that is not working, making
-this step necessary.
+You may get dependency errors upon a few modules (e.g. navdata/nmea) because
+they depend on each other - please bear with us, until we have automatic
+dependency management working.
 
 Documentation
 -------------
@@ -258,7 +250,7 @@ run these commands:
 
     $ pip install -r requirements-dev.txt
     $ python setup.py build_sphinx
-    $ sudo python setup.py install_doc
+    $ sudo ./venv/bin/python hfos_manage.py -install-doc
 
 This installs all necessary documentation tools and copies the files to the
 expected HFOS web data folder.
