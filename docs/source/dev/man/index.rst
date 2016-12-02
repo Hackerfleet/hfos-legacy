@@ -13,7 +13,7 @@ Core Library
        web
        schemata
        provisions
-                     authentication
+       authentication
 
 Miscellaneous
 -------------
