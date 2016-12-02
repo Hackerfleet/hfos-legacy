@@ -6,7 +6,7 @@ Development Processes
 
 
 We document all our internal development processes here so you know exactly
-how we work and what to expect. If you find any issues or problems please
+how we work and what to expect. If you find any issues or problems, please
 let us know!
 
 
@@ -17,7 +17,7 @@ Software Development Life Cycle (SDLC)
 We employ the use of the `SCRUM Agile Process <http://en.wikipedia.org/wiki/Scrum_(development)>`_
 and use our `Issue Tracker`_ to track features, bugs, chores and releases.
 If you wish to contribute to HFOS, please familiarize yourself with SCRUM
-and `GitHub <https://github.com>`_'s Issue Tracker.
+and `GitHub's Issue Tracker <https://github.com>`_.
 
 
 Bug Reports
@@ -33,7 +33,7 @@ Bug Reports
 - A fix developed that passes the unit test and breaks no others.
 - A `New Pull Request <https://github.com/hackerfleet/hfos/compare/>`_ created with the fix.
 
-  This must contains:
+  This should contain:
   - A new or modified unit test.
   - A patch that fixes the bug ensuring all unit tests pass.
   - The `Change Log <https://github.com/hackerfleet/hfos/tree/master/CHANGES.rst>`_ updated.
@@ -70,7 +70,7 @@ Writing new Code
 - Write your code.
 - Use `flake8 <http://pypi.python.org/pypi/flake8>`_ to ensure code quality.
 - Run the tests::
-      
+
     $ tox
 
 - Ensure any new or modified code does not break existing unit tests.
@@ -95,5 +95,5 @@ Please also ensure that you you have all supported versions of Python
 that HFOS supports installed in your local environment.
 
 To run the tests::
-    
+
     $ tox
