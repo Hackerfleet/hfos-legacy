@@ -408,8 +408,20 @@ def install_frontend(self, forcereload=False, forcerebuild=False,
         __file__)) + "/frontend")
     frontendtarget = '/var/lib/hfos/frontend'
 
-    if True:  # try:
+    cmdline = ["npm", "install"]
 
+    hfoslog("Running", cmdline, lvl=verbose,
+            emitter='MANAGE')
+    npminstall = Popen(cmdline, cwd=frontendroot)
+    out, err = npminstall.communicate()
+
+    npminstall.wait()
+
+    hfoslog("Frontend dependency installing done: ", out,
+            err, lvl=debug, emitter='MANAGE')
+
+
+    if True:  # try:
         from pkg_resources import iter_entry_points
 
         entry_point_tuple = (
