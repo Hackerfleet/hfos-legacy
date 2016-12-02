@@ -17,7 +17,7 @@ Communication
 - `Issue Tracker`_
 
 
-.. note:: If you are familiar with `IRC <http://en.wikipedia.org/wiki/Internet_Relay_Chat>`
+.. note:: If you are familiar with `IRC <http://en.wikipedia.org/wiki/Internet_Relay_Chat>`_
         and use your own IRC Client then connect to the FreeNode Network and ``/join #hackerfleet``.
 
 
@@ -57,7 +57,15 @@ We use the following tools to develop HFOS and share code:
   `Read the Docs <http://hfos.readthedocs.org>`_
 - **Package Hosting:**
   `Python Package Index (PyPi) <http://pypi.python.org/pypi/hfos>`_
+- **Docker Hub Automated Builds:**
+  `Dockerhub <https://hub.docker.com/r/hackerfleet/hfos/>`_
 - **Continuous Integration:**
   `Travis CI <https://travis-ci.org/Hackerfleet/hfos>`_
 - **Code Quality:**
   `Landscape <https://landscape.io/github/Hackerfleet/hfos/>`_
+- **Frontend Testing:**
+  `Browserstack <https://browserstack.com>`_
+
+We strongly suggest familiarizing with all of them, to make sure you understand our CI.
+
+Big thanks to all of these magnificent and free-for-opensource services!
