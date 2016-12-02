@@ -25,6 +25,7 @@ Sailor's Manual
     :maxdepth: 1
     :glob:
 
+    start/index
     manual/*
 
 Developer Documentation
@@ -34,9 +35,7 @@ Developer Documentation
 .. toctree::
     :maxdepth: 1
 
-    start/index
-    #tutorials/index
-    #dev/index
+    dev/index
     #dev/man/index
     #dev/api/index
     changes
