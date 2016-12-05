@@ -23,6 +23,8 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 from circuits import handler, Timer, Event
+
+from hfos.ui.builder import install_frontend
 # from hfos.schemata.component import ComponentBaseConfigSchema
 from hfos.database import initialize  # , schemastore
 from hfos.component import ConfigurableComponent
@@ -172,16 +174,16 @@ class Core(ConfigurableComponent):
             self.log("Not dropping privileges - this may be insecure!",
                      lvl=warn)
 
+    @handler("frontendbuildrequest", channel="setup")
+    def trigger_frontend_build(self, event):
+        install_frontend(forcerebuild=event.force, install=event.install)
+
     @handler("dropprivs")
     def drop_privileges(self, *args):
         self.log("Dropping privileges", args, lvl=warn)
         drop_privileges()
 
     # Moved to manage tool, maybe of interest later, though:
-    #
-    # @handler("frontendbuildrequest", channel="setup")
-    # def trigger_frontend_build(self, event):
-    #     self.update_components(forcerebuild=event.force, install=event.install)
     #
     # @handler("componentupdaterequest", channel="setup")
     # def trigger_component_update(self, event):
@@ -234,7 +236,6 @@ class Core(ConfigurableComponent):
                         hfoslog("Could not inspect entrypoint: ", e,
                                 type(e), entry_point, iterator, lvl=error,
                                 exc=True)
-                        break
 
                         # for name in components.keys():
                         #     try:
