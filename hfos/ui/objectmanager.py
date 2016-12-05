@@ -256,13 +256,13 @@ class ObjectManager(ConfigurableComponent):
                       }
 
         elif action == "put":
-            result, notification = self._put(schema, data)
+            result, notification = self._put(schema, data, event.client)
 
         elif action == 'delete':
-            result, notification = self._delete(schema, data)
+            result, notification = self._delete(schema, data, event.client)
 
         elif action == 'change':
-            result, notification = self._change(schema, data)
+            result, notification = self._change(schema, data, event.client)
 
         else:
             self.log("Unsupported action: ", action, event, event.__dict__,
@@ -297,7 +297,7 @@ class ObjectManager(ConfigurableComponent):
             self.log("Error during subscription update: ", type(e), e,
                      exc=True)
 
-    def _change(self, schema, data):
+    def _change(self, schema, data, client):
         try:
             uuid = data['uuid']
 
@@ -336,7 +336,7 @@ class ObjectManager(ConfigurableComponent):
             self.log("Object update failed. No object.", lvl=warn)
             return False, None
 
-    def _put(self, schema, data):
+    def _put(self, schema, data, client):
         try:
             clientobject = data['obj']
             uuid = clientobject['uuid']
@@ -370,9 +370,10 @@ class ObjectManager(ConfigurableComponent):
             # Notify backend listeners
 
             if uuid == 'create':
-                notification = objectcreation(storageobject.uuid, schema)
+                notification = objectcreation(storageobject.uuid, schema,
+                                              client)
             else:
-                notification = objectchange(storageobject.uuid, schema)
+                notification = objectchange(storageobject.uuid, schema, client)
 
             self._updateSubscribers(storageobject)
 
@@ -401,7 +402,7 @@ class ObjectManager(ConfigurableComponent):
                 self.log('Notifying subscriber: ', recipient, lvl=verbose)
                 self.fireEvent(send(recipient, update))
 
-    def _delete(self, schema, data):
+    def _delete(self, schema, data, client):
         if True:  # try:
             uuid = data['uuid']
 
