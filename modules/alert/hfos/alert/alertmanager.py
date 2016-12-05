@@ -12,7 +12,7 @@ AlertManager
 
 from circuits import handler
 from hfos.component import ConfigurableComponent
-from hfos.logger import hfoslog, error, warn, verbose, critical
+from hfos.logger import hfoslog, error, warn, verbose, critical, events
 from hfos.events.client import broadcast, send
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
@@ -47,7 +47,7 @@ class AlertManager(ConfigurableComponent):
         :param event with incoming referenceframe message
         """
 
-        self.log("Got a reference frame update! ", event, lvl=verbose)
+        self.log("Got a reference frame update! ", event, lvl=events)
 
         self.referenceframe = event.data
 
