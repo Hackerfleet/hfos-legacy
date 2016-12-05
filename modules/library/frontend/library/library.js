@@ -17,7 +17,7 @@ class librarycomponent {
             self.searching = true;
 
             console.log('Searching for book by ISBN:', self.searchISBN);
-            self.op.getlist('book', {'isbn': self.searchISBN}, ['*']);
+            self.op.getList('book', {'isbn': self.searchISBN}, ['*']);
         };
 
 
