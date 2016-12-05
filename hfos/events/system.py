@@ -71,11 +71,12 @@ class schemarequest(authorizedevent):
 class objectevent(Event):
     """A unspecified objectevent"""
 
-    def __init__(self, uuid, schema, *args, **kwargs):
+    def __init__(self, uuid, schema, client, *args, **kwargs):
         super(objectevent, self).__init__(*args, **kwargs)
 
         self.uuid = uuid
         self.schema = schema
+        self.client = client
 
         hfoslog("[OBJECT-EVENT] Object event created: ", self.__doc__,
                 self.__dict__, lvl=events)
