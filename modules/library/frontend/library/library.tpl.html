@@ -1,5 +1,5 @@
 <div class="container">
-    <div class="well">
+    <div class="jumbotron">
         <h1>Library</h1>
         <span>Search (and create) books by</span>
 
@@ -12,13 +12,13 @@
                         </a>
                     </h4>
                 </div>
-                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
                     <div class="panel-body">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="isbn" ng-model="searchISBN"
+                            <input type="text" class="form-control" id="isbn" ng-model="$ctrl.searchISBN"
                                    ng-disabled="searching"/>
                             <span class="input-group-btn">
-                                <button ng-click="searchByISBN()" class="btn btn-success">Search</button>
+                                <button ng-click="$ctrl.searchByISBN()" class="btn btn-success">Search</button>
                             </span>
                         </div>
                     </div>
@@ -35,10 +35,10 @@
                 <div class="panel-collapse" role="tabpanel" bs-collapse-target>
                     <div class="panel-body">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="meta" ng-model="searchMeta"
+                            <input type="text" class="form-control" id="meta" ng-model="$ctrl.searchMeta"
                                    ng-disabled="searching"/>
                             <span class="input-group-btn">
-                                <button ng-click="searchByMeta()" class="btn btn-success">Search</button>
+                                <button ng-click="$ctrl.searchByMeta()" class="btn btn-success">Search</button>
                             </span>
                         </div>
                     </div>
@@ -54,7 +54,7 @@
                 </div>
                 <div class="panel-collapse" role="tabpanel" bs-collapse-target>
                     <div class="panel-body">
-                        <a href="#/obj/book/create" class="btn">Create a new book</a>
+                        <objecteditor schema="book" action="create"></objecteditor>
                     </div>
                 </div>
             </div>
