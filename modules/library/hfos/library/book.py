@@ -109,6 +109,7 @@ BookForm = [
     },
     {
         'key': 'authors',
+        'title': 'Authors',
         'add': "Add author",
         'style': {
             'add': "btn-success"
@@ -121,21 +122,21 @@ BookForm = [
         'key': 'Lend',
         'type': 'button',
         'condition': 'model.available == true',
-        'onClick': 'formAction("library", "lend", model.uuid)',
+        'onClick': '$ctrl.formAction("library", "lend", $ctrl.model.uuid)',
         'title': 'Lend Book'
     },
     {
         'key': 'Return',
         'type': 'button',
         'condition': 'model.available != true',
-        'onClick': 'formAction("library", "return", model.uuid)',
+        'onClick': '$ctrl.formAction("library", "return", $ctrl.model.uuid)',
         'title': 'Return Book'
     },
     {
         'key': 'augment',
         'type': 'button',
         'condition': 'model.isbn',
-        'onClick': 'formAction("library", "augment", model.uuid)',
+        'onClick': '$ctrl.formAction("library", "augment", $ctrl.model.uuid)',
         'title': 'Augment Book from ISBN database'
     },
     editbuttons
