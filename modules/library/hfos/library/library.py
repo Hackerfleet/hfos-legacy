@@ -11,9 +11,10 @@ Module Library
 
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
-from hfos.logger import hfoslog, error, warn, critical
+from hfos.logger import hfoslog, error, warn, critical, hilight
 from datetime import datetime
-from hfos.events.system import updatesubscriptions, AuthorizedEvents, authorizedevent
+from hfos.events.system import updatesubscriptions, AuthorizedEvents, \
+    authorizedevent
 from hfos.events.client import send
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
@@ -68,7 +69,6 @@ class Library(ConfigurableComponent):
         self.log("Started")
 
     def libraryrequest(self, event):
-        self.log("Someone interacts with the library! Yay!", lvl=warn)
         try:
             book = None
 
@@ -102,7 +102,7 @@ class Library(ConfigurableComponent):
             if book:
                 self.fireEvent(
                     updatesubscriptions(uuid=book.uuid, schema='book',
-                                        data=book))
+                                        data=book, client=event.client))
         except Exception as e:
             self.log("Error during library handling: ", type(e), e,
                      lvl=critical, exc=True)
@@ -141,15 +141,24 @@ class Library(ConfigurableComponent):
 
                             mapping = libraryfieldmapping[
                                 self.config.isbnservice]
+
+                            newmeta = {}
+
                             for key in meta.keys():
                                 if key in mapping:
                                     if isinstance(mapping[key], tuple):
                                         name, conv = mapping[key]
-                                        meta[name] = conv(meta.pop(key))
+                                        try:
+                                            newmeta[name] = conv(meta[key])
+                                        except ValueError:
+                                            self.log(
+                                                'Bad value from lookup:',
+                                                name, conv, key
+                                            )
                                     else:
-                                        meta[mapping[key]] = meta.pop(key)
+                                        newmeta[mapping[key]] = meta[key]
 
-                            newbook.update(meta)
+                            newbook.update(newmeta)
                             newbook.save()
                             self.log("Book successfully augmented from ",
                                      self.config.isbnservice)
@@ -159,14 +168,17 @@ class Library(ConfigurableComponent):
                             self.fireEvent(send(client.uuid,
                                                 {'component': 'alert',
                                                  'action': 'error',
-                                                 'data': 'Could not look up metadata, sorry:' + str(
+                                                 'data': 'Could not look up '
+                                                         'metadata, sorry:'
+                                                         + str(
                                                      e)}))
                     else:
                         self.log(
                             'Saw something, but it is not to be looked up: ',
                             newbook._fields)
                 except Exception as e:
-                    self.log("Error during book update.")
+                    self.log("Error during book update.", e, type(e),
+                             exc=True, lvl=error)
 
         except Exception as e:
             self.log("Book creation notification error: ", uuid, e, type(e),
