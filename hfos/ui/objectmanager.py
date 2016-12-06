@@ -416,7 +416,7 @@ class ObjectManager(ConfigurableComponent):
                 storageobject.delete()
 
                 self.log("Preparing notification.", lvl=debug)
-                notification = objectdeletion(uuid, schema)
+                notification = objectdeletion(uuid, schema, client)
 
                 if uuid in self.subscriptions:
                     deletion = {'component': 'objectmanager',
