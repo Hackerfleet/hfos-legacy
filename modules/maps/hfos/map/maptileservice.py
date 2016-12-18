@@ -17,7 +17,7 @@ import errno
 from circuits import Worker, task
 from circuits.web.tools import serve_file
 from circuits.web.controllers import Controller
-from hfos.logger import hfoslog, error, verbose
+from hfos.logger import hfoslog, error, verbose, warn
 
 if six.PY2:
     from urllib import unquote, urlopen
@@ -72,8 +72,7 @@ class MaptileService(Controller):
 
     configprops = {}
 
-    def __init__(self, path="/tilecache", tilepath="/var/cache/hfos/tilecache",
-                 defaulttile=None, **kwargs):
+    def __init__(self, defaulttile=None, **kwargs):
         """
 
         :param path: Webserver path to offer cache on
@@ -85,17 +84,17 @@ class MaptileService(Controller):
         self.worker = Worker(process=False, workers=2,
                              channel="tcworkers").register(self)
 
-        self.tilepath = tilepath
-        self.path = path
+        self.cachepath = "/var/cache/hfos"
         self.defaulttile = defaulttile
         self._tilelist = []
 
-    def _splitURL(self, url):
+    def _splitCacheURL(self, url, urltype):
         try:
-            if self.path is not None:
-                url = url[len(self.path):]  # Cut off server's url path
-
+            # hfoslog('SPLITTING: ', url)
+            url = url[len('/' + urltype):].lstrip('/')
             url = unquote(url)
+
+            # hfoslog('SPLITDONE:', url)
 
             if '..' in url:  # Does this need more safety checks?
                 hfoslog("Fishy url with parent path: ", url, lvl=error,
@@ -104,13 +103,14 @@ class MaptileService(Controller):
 
             spliturl = url.split("/")
             service = "/".join(
-                spliturl[1:-3])  # get all but the coords as service
+                spliturl[0:-3])  # get all but the coords as service
+            # hfoslog('SERVICE:', service)
 
             x = spliturl[-3]
             y = spliturl[-2]
             z = spliturl[-1].split('.')[0]
 
-            filename = os.path.join(self.tilepath, service, x,
+            filename = os.path.join(self.cachepath, urltype, service, x,
                                     y) + "/" + z + ".png"
             realurl = "http://" + service + "/" + x + "/" + y + "/" + z + \
                       ".png"
@@ -120,18 +120,34 @@ class MaptileService(Controller):
 
         return filename, realurl
 
+    def rastertiles(self, event, *args, **kwargs):
+        request, response = event.args[:2]
+        try:
+            filename, url = self._splitCacheURL(request.path, 'rastertiles')
+        except UrlError as e:
+            hfoslog('Rastertile cache url error:', e, exc=True, lvl=warn)
+            return
+
+        # hfoslog("RASTER QUERY:", filename, lvl=error)
+        if os.path.exists(filename):
+            return serve_file(request, response, filename)
+        else:
+            hfoslog('Non-existing raster tile request:', filename, lvl=verbose)
+
     def tilecache(self, event, *args, **kwargs):
         """Checks and caches a requested tile to disk, then delivers it to
         client"""
         request, response = event.args[:2]
         try:
-            filename, url = self._splitURL(request.path)
+            filename, url = self._splitCacheURL(request.path, 'tilecache')
         except UrlError:
             return
 
+        # hfoslog('CACHE QUERY:', filename, url)
+
         # Do we have the tile already?
         if os.path.isfile(filename):
-            hfoslog("Tile exists in cache", emitter="MTS")
+            hfoslog("Tile exists in cache", emitter="MTS", lvl=verbose)
             # Don't set cookies for static content
             response.cookie.clear()
             try:
@@ -141,7 +157,7 @@ class MaptileService(Controller):
         else:
             # We will have to get it first.
             hfoslog("Tile not cached yet. Tile data: ", filename, url,
-                    emitter="MTS")
+                    emitter="MTS", lvl=verbose)
             if url in self._tilelist:
                 hfoslog("Getting a tile for the second time?!", lvl=error,
                         emitter="MTS")
@@ -150,7 +166,7 @@ class MaptileService(Controller):
             try:
                 tile, log = yield self.call(task(get_tile, url), "tcworkers")
                 if log:
-                    hfoslog("Thread error: ", log, emitter="MTS")
+                    hfoslog("Thread error: ", log, emitter="MTS", lvl=error)
             except Exception as e:
                 hfoslog("[MTS]", e, type(e))
                 tile = None
