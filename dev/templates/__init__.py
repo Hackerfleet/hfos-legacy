@@ -16,7 +16,9 @@ def format_template(template, content):
 
 def format_template_file(filename, content):
     with open(filename, 'r') as f:
-        template = f.read().decode('utf-8')
+        template = f.read()
+        if type(template) != str:
+            template = template.decode('utf-8')
 
     return format_template(template, content)
 
@@ -27,4 +29,6 @@ def write_template_file(source, target, content):
     data = format_template_file(source, content)
     with open(target, 'w') as f:
         for line in data:
-            f.write(line.encode('utf-8'))
+            if type(line) != str:
+                line = line.encode('utf-8')
+            f.write(line)

@@ -89,15 +89,14 @@ questions = OrderedDict({
     'version': '0.0.1',
     'githuburl': 'hackerfleet/example',
     'license': 'GPLv3',
-    'keywords': u'hfos example plugin'
+    'keywords': 'hfos example plugin'
 
 })
 
 infoheader = """The manage command guides you through setting up a new HFOS
 package.
 It provides basic setup. If you need dependencies or have other special
-needs, edit the resulting
-files by hand.
+needs, edit the resulting files by hand.
 
 You can press Ctrl-C any time to cancel this process.
 
@@ -111,9 +110,11 @@ def augment_info(info):
     info['year'] = localtime().tm_year
     info['licenselongtext'] = ''
 
-    info['keywordlist'] = ""
+    info['keywordlist'] = u""
     for keyword in info['keywords'].split(" "):
-        info['keywordlist'] += "'" + keyword + "', "
+        print(keyword)
+        info['keywordlist'] += u"\'" + str(keyword) + u"\', "
+    print(info['keywordlist'])
     if len(info['keywordlist']) > 0:
         # strip last comma
         info['keywordlist'] = info['keywordlist'][:-2]
@@ -172,7 +173,7 @@ def askquestionnaire():
 
     for question, default in questions.items():
         response = ask(question, default, type(default), showhint=True)
-        if type(default) == unicode:
+        if type(default) == unicode and type(response) != str:
             response = response.decode('utf-8')
         answers[question] = response
 
@@ -194,7 +195,7 @@ def create_module(args):
     while not done:
         info = askquestionnaire()
         pprint(info)
-        done = ask('Is the above correct?', default='y', datatype=bool)
+        done = ask('Is the above correct', default='y', datatype=bool)
 
     augmentedinfo = augment_info(info)
 
