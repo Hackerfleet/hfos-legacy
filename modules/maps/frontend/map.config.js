@@ -1,4 +1,5 @@
-import icon from './assets/iconmonstr-map-2-icon.svg';
+import mapicon from './assets/iconmonstr-map-view-icon.svg';
+import importicon from './assets/iconmonstr-map-import-icon.svg';
 
 
 export function routing($stateProvider) {
@@ -8,6 +9,12 @@ export function routing($stateProvider) {
             url: '/map',
             template: '<map></map>',
             label: 'Map',
-            icon: icon
+            icon: mapicon
+        })
+        .state('app.mapimport', {
+            url: '/mapimport',
+            template: '<mapimport></mapimport>',
+            label: 'Map Import',
+            icon: importicon
         });
 }
