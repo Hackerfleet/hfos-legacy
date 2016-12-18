@@ -31,13 +31,20 @@ layergroups = [
             '72611470-39b3-4982-8991-2ad467b06fc9'  # ESRI Satellite Shade Ovl
         ]
     }, {
+        "name": "GDAL Charts",
+        "uuid": "6a18fdad-93a2-4563-bb8a-cb5888f43300",
+        "shared": True,
+        "notes": "Imported GDAL charts",
+        "layers": [
+        ]
+    }, {
         "name": "Satellite",
         "uuid": "889f580f-0aa4-46b6-96a1-87ef19030b0b",
         "shared": True,
         "notes": "ESRI Satellite and Open Sea Map",
         "layers": [
-            '19e5704e-68a2-435e-9f21-ac389973cc7a',  # ESRI Satellite Hill Shade Base
             '582d2ef3-759e-49f7-81ab-8dbe224d618a',  # ESRI Satellite World Imagery Base
+            '19e5704e-68a2-435e-9f21-ac389973cc7a',  # ESRI Satellite Hill Shade Base
             '3a4cceaa-3e8b-4f65-85ee-2ff9f6de6a71',  # Openstreetmap Overlay
             '2bedb0d2-be9f-479c-9516-256cd5a0baae',  # OpenSeaMap Overlay
         ]
