@@ -41,6 +41,7 @@ This software package is a plugin module for HFOS.
       entry_points=
       """[hfos.components]
     map=hfos.map.maptileservice:MaptileService
+    gdal=hfos.map.gdal:GDAL
 [hfos.schemata]
     geoobject=hfos.map.geoobject:GeoObject
     layer=hfos.map.layer:Layer
