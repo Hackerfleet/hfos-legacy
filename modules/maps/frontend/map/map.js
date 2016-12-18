@@ -98,6 +98,48 @@ class mapcomponent {
             self.map.zoomOut();
         };
         
+        this.openOSMiD = function (e) {
+            var url = 'http://www.openstreetmap.org/edit?editor=id#map=', //52_17_28_N_5_32_32_E';
+                lat = e.latlng.lat,
+                lng = e.latlng.lng;
+    
+            url = url + self.map.getZoom() + '/' + lat.toString() + '/' + lng.toString();
+            console.log(url);
+            window.open(url, '_blank');
+            window.focus();
+        };
+            
+        this.openGeohack = function (e) {
+            var url = 'https://tools.wmflabs.org/geohack/geohack.php?params=', //52_17_28_N_5_32_32_E';
+                lat = e.latlng.lat,
+                lng = e.latlng.lng;
+            
+            function getDegrees(angle) {
+                var degrees = Math.floor(angle),
+                    minutes = Math.floor(60*(angle - degrees)),
+                    seconds = Math.floor(3600 * (angle - degrees) - 60 * minutes);
+                return degrees + "_" + minutes + "_" + seconds;
+            }
+            
+            url = url + getDegrees(lat) + "_";
+            if (lat > 0) {
+                url = url + "N"
+            } else {
+                url = url + "S"
+            }
+            
+            url = url + "_" + getDegrees(lng) + "_";
+            if (lng > 0) {
+                url = url + "E"
+            } else {
+                url = url + "W"
+            }
+    
+            console.log(url);
+            window.open(url, '_blank');
+            window.focus();
+        };
+    
         this.defaults = {
             map: {
                 contextmenu: true,
@@ -105,6 +147,12 @@ class mapcomponent {
                 contextmenuItems: [{
                     text: 'Copy coordinates',
                     callback: this.copyCoordinates
+                }, {
+                    text: 'Lookup on Geohack',
+                    callback: this.openGeohack
+                }, {
+                    text: 'Edit map on OSM',
+                    callback: this.openOSMiD
                 }, {
                     text: 'Center map here',
                     callback: this.centerMap
@@ -412,10 +460,6 @@ class mapcomponent {
             map.on('click', function (e) {
                 $('#statusCenter').html = 'Latitude: ' + e.latlng.lat + ' Longitude: ' + e.latlng.lng;
             });
-            
-            // Resize map to accomodate for statusbar
-            //console.log('HEIGHTS:',  $('footer').height());
-            //$('.angular-leaflet-map').height($('.angular-leaflet-map').height() - $('footer').height());
             
             map.setZoom(2);
             //map.panTo({lat: 52.513, lon: 13.41998});
