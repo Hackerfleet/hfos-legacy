@@ -15,6 +15,7 @@ import datetime
 import json
 import random
 from uuid import uuid4
+from base64 import b64decode
 
 from circuits import handler
 from circuits.net.events import write
@@ -343,6 +344,10 @@ class ClientManager(ConfigurableComponent):
 
         try:
             requestdata = msg['data']
+            if 'raw' in requestdata:
+                #self.log(requestdata['raw'], lvl=critical)
+                requestdata['raw'] = b64decode(requestdata['raw'])
+                #self.log(requestdata['raw'])
         except (KeyError, AttributeError) as e:
             self.log("No payload.", lvl=network)
             requestdata = None
