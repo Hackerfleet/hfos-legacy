@@ -40,8 +40,8 @@ This software package is a plugin module for HFOS.
       install_requires=['hfos==1.1.0'],
       entry_points=
       """[hfos.components]
-    map=hfos.map.maptileservice:MaptileService
     gdal=hfos.map.gdal:GDAL
+    map=hfos.map.maptileservice:MaptileService
 [hfos.schemata]
     geoobject=hfos.map.geoobject:GeoObject
     layer=hfos.map.layer:Layer
