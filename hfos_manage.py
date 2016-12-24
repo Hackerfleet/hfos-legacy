@@ -461,7 +461,7 @@ def install_all(args):
     # Now the rest basing off that
     install_provisions(args)
     install_docs(args)
-    install_frontend(args)
+    install_frontend(args, forcerebuild=True)
 
 
 def main(args, parser):
@@ -483,7 +483,7 @@ def main(args, parser):
     elif args.install_var:
         install_var(args)
     elif args.install_frontend:
-        install_frontend(args)
+        install_frontend(args, forcerebuild=True)
     elif args.install_modules:
         install_modules(args)
     elif args.install_all:
