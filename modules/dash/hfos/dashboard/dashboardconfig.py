@@ -57,7 +57,9 @@ DashboardSchema = {
                         'type': 'string',
                         'enum': [
                             'simplebarreadout',
-                            'digitalreadout'
+                            'historybarreadout',
+                            'digitalreadout',
+
                         ]
                     },
                     'valuetype': {'type': 'string'},
