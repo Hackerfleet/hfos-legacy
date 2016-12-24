@@ -33,13 +33,19 @@ class Recorder(ConfigurableComponent):
     def __init__(self, *args):
         super(Recorder, self).__init__("REC", *args)
 
-        self.logfile = open('/tmp/hfos_recording', 'w')
+        self.active = False
 
-        self.log("Started")
+        if self.active:
+            self.logfile = open('/tmp/hfos_recording', 'w')
+
+            self.log("Started")
 
     @handler()
     def eventhandler(self, event, *args, **kwargs):
-        if isinstance(event, authorizedevent):
-            self.log("Recording event: ", event, lvl=hilight)
-
-            self.logfile.write(dumps({time(): event}))
+        if self.active and isinstance(event, authorizedevent):
+            self.log("Recording event", lvl=hilight)
+            # TODO: The event fields must be serialized to record everything
+            #  in order. Component is deactivated until that can be done.
+            data = dumps({time(): [event.user.uuid, event.action, event.data]})
+            self.logfile.write(data)
+            self.logfile.flush()
