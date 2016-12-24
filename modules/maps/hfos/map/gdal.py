@@ -38,6 +38,13 @@ except ImportError:
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
+# TODO:
+# * Thread the call to gdal utilities
+# * Add grib import
+#  * Grib conversion to tiles / vectors
+#  * Grib layer creation
+#  * GeoJSON delivery for vector data
+# * Rename component to mapimporter
 
 class UrlError(Exception):
     pass
