@@ -38,12 +38,11 @@ This package a few modules to debug others, as well as the core system.
       dependency_links=[],
       install_requires=[
           'hfos==1.1.0',
-          'camelcase>=0.2.0',
-          'pystache>=0.5.4'
       ],
       entry_points="""[hfos.components]
-    recorder=dev.misc.recorder:Recorder
-    playback=dev.misc.playback:Playback
+    recorder=hfos.misc.recorder:Recorder
+    playback=hfos.misc.playback:Playback
+    navdatasim=hfos.misc.navdatasim:NavdataSim
     """,
       test_suite="tests.main.main",
       )
