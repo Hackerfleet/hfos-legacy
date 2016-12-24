@@ -96,7 +96,7 @@ class ObjectManager(ConfigurableComponent):
                         self.log("Faulty object or field: ", e, type(e),
                                  item._fields, fields, lvl=error,
                                  exc=True)
-                self.log("Generated object list: ", objlist)
+                #self.log("Generated object list: ", objlist)
 
                 result = {'component': 'objectmanager',
                           'action': 'list',
