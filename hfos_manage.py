@@ -349,7 +349,12 @@ def install_var(args):
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
     target_paths = (
-        '/var/lib/hfos', '/var/cache/hfos', '/var/cache/hfos/tilecache')
+        '/var/lib/hfos',
+        '/var/cache/hfos',
+        '/var/cache/hfos/tilecache',
+        '/var/cache/hfos/rastertiles',
+        '/var/cache/hfos/rastercache'
+    )
 
     for item in target_paths:
         if os.path.exists(item):
