@@ -20,6 +20,7 @@ class taskgridcomponent {
         this.op = ObjectProxy;
 
         this.columns = {};
+        this.columnsize = 4;
 
         this.columnsVisible = {
             'Open': 0,
@@ -37,7 +38,7 @@ class taskgridcomponent {
         this.updateVisibleColumns = function() {
             self.items = [];
             self.populateHeaders();
-        
+
             for (var task of self.tasklist) {
                 console.log(self.columns, task.status);
                 if (self.columnsVisible[task.status] !== -1) {
@@ -53,6 +54,9 @@ class taskgridcomponent {
                     self.columns[task.status].push(newitem);
                 }
             }
+
+            self.columnsize = 12 / Object.keys(self.columns).length;
+            console.log('COLUMNS:', self.columnsize);
             console.log('Tasks', self.columns);
         };
 
@@ -79,11 +83,6 @@ class taskgridcomponent {
         console.log('[TASKGRID] Switching tab to ', tabname);
         $('.nav-pills .active, .tab-content .active').removeClass('active');
         $('#' + tabname).addClass('active');
-    }
-
-    addTask() {
-        console.log('[TASKGRID] Switching to add task view');
-        this.state.go('app.editor', {schema: 'task', action: 'edit', 'uuid': 'create'});
     }
 
     onDropComplete(task, ev, status) {
