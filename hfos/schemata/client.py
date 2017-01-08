@@ -90,7 +90,7 @@ ClientconfigForm = [
         'type': 'strapselect',
         'placeholder': 'Select a Dashboard',
         'options': {
-            "type": "dashboard",
+            "type": "dashboardconfig",
             "asyncCallback": "$ctrl.getFormData",
             "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
         }
