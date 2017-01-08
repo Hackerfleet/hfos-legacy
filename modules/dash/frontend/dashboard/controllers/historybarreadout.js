@@ -34,7 +34,7 @@ class HistoryBarReadout {
 
         this.valuetype = this.scope.$parent.valuetype;
         this.scalevalue = 0;
-        this.scaleprop = '0%'
+        this.scaleprop = '0%';
         this.value = 0;
         this.age = 0;
         this.max = 1;
@@ -57,7 +57,7 @@ class HistoryBarReadout {
         };
 
         this.handleNavdata = function (msg) {
-            console.log('[DASH-HBR] NAVDATA: ', msg, self.valuetype);
+            //console.log('[DASH-HBR] NAVDATA: ', msg, self.valuetype);
             if (msg.data.type === self.valuetype) {
                 var data = msg.data;
 
@@ -74,7 +74,7 @@ class HistoryBarReadout {
                 self.age = data.timestamp;
                 self.updateAge();
 
-                console.log('[DASH-HBR] Updating HistoryBarReadout: ', data, data.value, data.type, self.history);
+                //console.log('[DASH-HBR] Updating HistoryBarReadout: ', data, data.value, data.type, self.history);
                 self.scope.$apply();
             }
         };

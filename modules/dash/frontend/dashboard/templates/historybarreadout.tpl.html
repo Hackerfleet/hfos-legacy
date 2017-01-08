@@ -23,10 +23,10 @@
   -->
 
 <div class="historybarreadout" ng-controller="historybarreadout as ctrl">
-    <span class="digital-inverted center-block" ng-bind="ctrl.value">{{ctrl.value}}</span>
-    <div class="historybars" ng-repeat="historyvalue in ctrl.history track by $index">
-        <div class="historybar" ng-style="{height: historyvalue, 'background-color': ctrl.color}">
-            TA {{$index}}: {{historyvalue}}
+    <span class="digital-inverted-right center-block" ng-bind="ctrl.value">{{ctrl.value}}</span>
+    <div class="historybars">
+        <div class="historybar-placeholder historybar"></div>
+        <div class="historybar" ng-repeat="historyvalue in ctrl.history track by $index" ng-style="{height: historyvalue, 'background-color': ctrl.color}">
         </div>
     </div>
     <span class="center-block small">
