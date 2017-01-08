@@ -226,7 +226,7 @@ class SimpleCompass {
             scaleMarks();
         };
         
-        this.UnitCircle();
+        this.Compass();
     }
 }
 
