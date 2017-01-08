@@ -59,7 +59,7 @@ DashboardSchema = {
                             'simplebarreadout',
                             'historybarreadout',
                             'digitalreadout',
-
+                            'simplecompass'
                         ]
                     },
                     'valuetype': {'type': 'string'},

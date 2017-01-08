@@ -10,6 +10,7 @@ import dashboardcomponent from './dashboard/dashboard';
 import digitalreadout from './dashboard/controllers/digitalreadout';
 import simplebarreadout from './dashboard/controllers/simplebarreadout';
 import historybarreadout from './dashboard/controllers/historybarreadout';
+import simplecompass from './dashboard/controllers/simplecompass';
 
 import template from './dashboard/dashboard.tpl.html';
 
@@ -22,5 +23,6 @@ export default angular
     .controller('digitalreadout', digitalreadout)
     .controller('simplebarreadout', simplebarreadout)
     .controller('historybarreadout', historybarreadout)
+    .controller('simplecompass', simplecompass)
     .directive('ngDynamicController', dynamiccontroller)
     .name;

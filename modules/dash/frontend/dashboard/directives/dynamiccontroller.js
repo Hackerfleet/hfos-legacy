@@ -2,7 +2,7 @@
  * Created by riot on 14.05.16.
  */
 
-const widgettypes = ['digitalreadout', 'simplebarreadout', 'historybarreadout'];
+const widgettypes = ['digitalreadout', 'simplebarreadout', 'historybarreadout', 'simplecompass'];
 
 const widgettemplates = {};
 
