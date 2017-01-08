@@ -11,7 +11,12 @@
         <div class="tab-pane active" id="dashboard">
             <div gridster="$ctrl.gridsterOptions">
                 <ul>
-                    <li gridster-item="widget" ng-repeat="widget in $ctrl.dashboard.cards">
+                    <li gridster-item="widget"
+                        data-row="widget.row"
+                        data-col="widget.col"
+                        data-sizex="widget.sizex"
+                        data-sizey="widget.sizey"
+                        ng-repeat="widget in $ctrl.dashboard.cards">
                         <div class="box">
                             <div class="box-header">
                                 <h3>{{ widget.title }} - {{widget.widgettype}}</h3>
