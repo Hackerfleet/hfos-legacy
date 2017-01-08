@@ -41,7 +41,7 @@ class NavdataSim(ConfigurableComponent):
 
     @handler('generatenavdata')
     def generatenavdata(self, *args):
-        self.log('Sending out simulated package.', lvl=hilight)
+        self.log('Sending out simulated package.', lvl=verbose)
         data = {'DBT_depth_meters': randint(1, 250)}
         event = sensordata(data, time(), 'SIM')
         self.fireEvent(event, 'navdata')
