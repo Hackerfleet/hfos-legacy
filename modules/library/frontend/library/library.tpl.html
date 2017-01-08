@@ -1,61 +1,59 @@
-<div class="container">
-    <div class="jumbotron">
-        <h1>Library</h1>
-        <span>Search (and create) books by</span>
+<div class="well">
+    <h1>Library</h1>
+    <span>Search (and create) books by</span>
 
-        <div class="panel-group" ng-model="panels.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
-            <div class="panel panel-default">
-                <div class="panel-heading panel-hover" role="tab">
-                    <h4 class="panel-title">
-                        <a bs-collapse-toggle>
-                            ISBN
-                        </a>
-                    </h4>
-                </div>
-                <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="isbn" ng-model="$ctrl.searchISBN"
-                                   ng-disabled="searching"/>
-                            <span class="input-group-btn">
+    <div class="panel-group" ng-model="panels.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        ISBN
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
+                <div class="panel-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="isbn" ng-model="$ctrl.searchISBN"
+                               ng-disabled="searching"/>
+                        <span class="input-group-btn">
                                 <button ng-click="$ctrl.searchByISBN()" class="btn btn-success">Search</button>
                             </span>
-                        </div>
                     </div>
                 </div>
             </div>
-            <div class="panel panel-default">
-                <div class="panel-heading panel-hover" role="tab">
-                    <h4 class="panel-title">
-                        <a bs-collapse-toggle>
-                            Metadata search
-                        </a>
-                    </h4>
-                </div>
-                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
-                    <div class="panel-body">
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="meta" ng-model="$ctrl.searchMeta"
-                                   ng-disabled="searching"/>
-                            <span class="input-group-btn">
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        Metadata search
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="meta" ng-model="$ctrl.searchMeta"
+                               ng-disabled="searching"/>
+                        <span class="input-group-btn">
                                 <button ng-click="$ctrl.searchByMeta()" class="btn btn-success">Search</button>
                             </span>
-                        </div>
                     </div>
                 </div>
             </div>
-            <div class="panel panel-default">
-                <div class="panel-heading panel-hover" role="tab">
-                    <h4 class="panel-title">
-                        <a bs-collapse-toggle>
-                            Editor
-                        </a>
-                    </h4>
-                </div>
-                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
-                    <div class="panel-body">
-                        <objecteditor schema="book" action="create"></objecteditor>
-                    </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        Editor
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                <div class="panel-body">
+                    <objecteditor schema="book" action="create"></objecteditor>
                 </div>
             </div>
         </div>
