@@ -37,7 +37,7 @@ class NavdataSim(ConfigurableComponent):
         super(NavdataSim, self).__init__("NAVSIM", *args)
 
         self.log("Started, channel:", self.channel)
-        Timer(1, generatenavdata(), persist=True).register(self)
+        Timer(3, generatenavdata(), persist=True).register(self)
 
     @handler('generatenavdata')
     def generatenavdata(self, *args):
