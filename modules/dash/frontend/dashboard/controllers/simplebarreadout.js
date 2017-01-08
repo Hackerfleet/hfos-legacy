@@ -31,7 +31,7 @@ class SimpleBarReadout {
         };
 
         this.handleNavdata = function (msg) {
-            console.log('[DASH-SBR] NAVDATA: ', msg, self.valuetype);
+            //console.log('[DASH-SBR] NAVDATA: ', msg, self.valuetype);
             if (msg.data.type === self.valuetype) {
                 var data = msg.data;
 
@@ -42,7 +42,7 @@ class SimpleBarReadout {
                 self.age = data.timestamp;
                 self.updateAge();
 
-                console.log('[DASH-SBR] Updating SimpleBarReadout: ', data, data.value, data.type, self.scalevalue);
+                //console.log('[DASH-SBR] Updating SimpleBarReadout: ', data, data.value, data.type, self.scalevalue);
                 self.scope.$apply();
             }
         };
