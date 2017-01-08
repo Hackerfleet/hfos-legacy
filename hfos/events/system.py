@@ -56,8 +56,8 @@ class profilerequest(authorizedevent):
         """
         super(profilerequest, self).__init__(*args)
 
-        hfoslog("[PROFILE-EVENT] Profile update request: ", self.__dict__,
-                lvl=events)
+        hfoslog("Profile update request: ", self.__dict__,
+                lvl=events, emitter="PROFILE-EVENT")
 
 
 # Schemata requests
@@ -78,8 +78,8 @@ class objectevent(Event):
         self.schema = schema
         self.client = client
 
-        hfoslog("[OBJECT-EVENT] Object event created: ", self.__doc__,
-                self.__dict__, lvl=events)
+        hfoslog("Object event created: ", self.__doc__,
+                self.__dict__, lvl=events, emitter="OBJECT-EVENT")
 
 
 class objectchange(objectevent):
@@ -136,7 +136,7 @@ class debugrequest(authorizedevent):
     def __init__(self, *args):
         super(debugrequest, self).__init__(*args)
 
-        hfoslog('[DEBUG-EVENT] CREATED.', lvl=critical)
+        hfoslog('CREATED.', lvl=critical, emitter="DEBUG-EVENT")
 
 
 AuthorizedEvents = {
