@@ -132,7 +132,7 @@ class ObjectManager(ConfigurableComponent):
                          lvl=warn)
                 # for item in collections[schema].find(objectfilter):
                 for item in collections[schema].find(objectfilter):
-                    self.log("Search found item: ", item, lvl=warn)
+                    # self.log("Search found item: ", item, lvl=warn)
                     try:
                         # TODO: Fix bug in warmongo that needs this workaround:
                         item = objectmodels[schema](item)
@@ -150,7 +150,7 @@ class ObjectManager(ConfigurableComponent):
                     except Exception as e:
                         self.log("Faulty object or field: ", e, type(e),
                                  item._fields, fields, lvl=error)
-                self.log("Generated object search list: ", objlist)
+                # self.log("Generated object search list: ", objlist)
 
                 result = {'component': 'objectmanager',
                           'action': 'search',
