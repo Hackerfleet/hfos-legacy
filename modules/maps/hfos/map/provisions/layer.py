@@ -236,7 +236,7 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
 
 
 def provision():
-    provisionList(layers, objectmodels['layer'], overwrite=True, clear=True)
+    provisionList(layers, objectmodels['layer'], overwrite=False, clear=False)
     hfoslog('Provisioning: Layers: Done.', emitter='PROVISIONS')
 
 
