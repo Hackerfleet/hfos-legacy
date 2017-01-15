@@ -5,7 +5,7 @@ Schema: Dashboard
 Contains
 --------
 
-Dashboard: Dashboard config to store deckster settings
+Dashboard: Dashboard config to store gridster settings
 
 :copyright: (C) 2011-2016 riot@c-base.org
 :license: GPLv3 (See LICENSE)
@@ -64,14 +64,14 @@ DashboardSchema = {
                     },
                     'valuetype': {'type': 'string'},
                     'title': {'type': 'string'},
-                    'size': {
+                    'position': {
                         'type': 'object',
                         'properties': {
                             'x': {'type': 'number'},
                             'y': {'type': 'number'}
                         }
                     },
-                    'position': {
+                    'size': {
                         'type': 'object',
                         'properties': {
                             'width': {'type': 'number'},

@@ -11,25 +11,25 @@
         <div class="tab-pane active" id="dashboard">
             <div gridster="$ctrl.gridsterOptions">
                 <ul>
-                    <li gridster-item="widget"
-                        data-row="widget.row"
-                        data-col="widget.col"
-                        data-sizex="widget.sizex"
-                        data-sizey="widget.sizey"
-                        ng-repeat="widget in $ctrl.dashboard.cards">
+                    <li data-gridster-item
+                        data-row="item.position.x"
+                        data-col="item.position.y"
+                        data-sizex="item.size.width"
+                        data-sizey="item.size.height"
+                        ng-repeat="item in $ctrl.dashboard.cards">
                         <div class="box">
                             <div class="box-header">
-                                <h3>{{ widget.title }} - {{widget.widgettype}}</h3>
+                                <h3>{{ item.title }} - {{item.widgettype}}</h3>
 
                                 <div class="hidden box-header-btns pull-right">
-                                    <a title="settings" ng-click="$ctrl.openSettings(widget)"><i
+                                    <a title="settings" ng-click="$ctrl.openSettings(item)"><i
                                         class="glyphicon glyphicon-cog"></i></a>
-                                    <a title="Remove widget" ng-click="$ctrl.remove(widget)"><i
+                                    <a title="Remove widget" ng-click="$ctrl.remove(item)"><i
                                         class="glyphicon glyphicon-trash"></i></a>
                                 </div>
                             </div>
-                            <div class="box-content" ng-dynamic-controller="widget.widgettype"
-                                 valuetype="widget.valuetype">
+                            <div class="box-content" ng-dynamic-controller="item.widgettype"
+                                 valuetype="item.valuetype">
                             </div>
                         </div>
                     </li>
