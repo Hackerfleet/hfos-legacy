@@ -103,11 +103,27 @@ class NavData(ConfigurableComponent):
 
             for item in event.data:
                 if item in self.subscriptions:
-                    self.subscriptions[item].append(event.client.uuid)
-                    self.log("Appended subscription for ", item)
+                    if event.client.uuid not in self.subscriptions[item]:
+                        self.subscriptions[item].append(event.client.uuid)
+                        self.log("Appended subscription for ", item)
+                    else:
+                        self.log("Client was already subscribed for that "
+                                 "value", lvl=warn)
                 else:
                     self.subscriptions[item] = [event.client.uuid]
                     self.log("Created new subscription for ", item)
+        elif event.action == 'unsubscribe':
+            self.log('Navdata unsubscription requested for', event.data)
+
+            for item in event.data:
+                if item in self.subscriptions:
+                    if event.client.uuid in self.subscriptions[item]:
+                        self.subscriptions[item].remove(event.client.uuid)
+                        if len(self.subscriptions[item]) == 0:
+                            del self.subscriptions[item]
+                            self.log("Removed last subscription for ", item)
+                        else:
+                            self.log("Removed subscription for ", item)
 
     @handler('clientdisconnect', channel='hfosweb')
     def clientdisconnect(self, event):
@@ -171,6 +187,7 @@ class NavData(ConfigurableComponent):
 
                         self.log("Serving update: ", packet, lvl=verbose)
                         for uuid in self.subscriptions[ref.name]:
+                            self.log("Serving to ", uuid, lvl=events)
                             self.fireEvent(send(uuid, packet),
                                            'hfosweb')
 
