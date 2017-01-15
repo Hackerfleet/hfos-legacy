@@ -13,8 +13,8 @@ import configtemplate from './config.tpl.html';
  */
 class Dashboard {
     
-    constructor(scope, rootscope, $modal, navdata, user, objectproxy, socket, menu) {
-        this.scope = scope;
+    constructor($scope, rootscope, $modal, navdata, user, objectproxy, socket, menu, $timeout) {
+        this.scope = $scope;
         this.rootscope = rootscope;
         this.$modal = $modal;
         this.navdata = navdata;
@@ -22,6 +22,7 @@ class Dashboard {
         this.op = objectproxy;
         this.socket = socket;
         this.menu = menu;
+        this.timeout = $timeout;
         
         this.humanize = humanizeDuration;
         
@@ -33,6 +34,8 @@ class Dashboard {
             rowHeight: 75,
             colWidth: 75
         };
+        
+        this.changetimeout = null;
         
         this.dashboarduuid = user.clientconfig.dashboarduuid;
         this.dashboard = {};
@@ -58,17 +61,8 @@ class Dashboard {
         
         var self = this;
         
-        /*
-         this.handleNavdata = function (msg) {
-         console.log('Updating Dashboard');
-         self.referencedata[msg.data.type] = msg.data.value;
-         self.referenceages[msg.data.type] = msg.data.timestamp;
-         };
-         
-         self.socket.listen('navdata', this.handleNavdata);
-         */
-        
         this.handleNavdata = function (msg) {
+            console.log('DASHBOARD HANDLING NAVDATA');
             if (msg.action === 'list') {
                 console.log('[DASH] Got a navdata list:', msg.data);
                 if ('sensed' in msg.data) {
@@ -79,7 +73,24 @@ class Dashboard {
             }
         };
         
-        self.socket.listen('navdata', this.handleNavdata);
+        self.socket.listen('navdata', self.handleNavdata);
+        
+        this.stopSubscriptions = function () {
+            console.log('[DASH] Finally destroying all subscriptions');
+            self.stopObserved();
+            self.socket.unlisten('navdata', self.handleNavdata);
+        };
+        
+        self.rootscope.$on('$stateChangeStart',
+            function (event, toState, toParams, fromState, fromParams, options) {
+                console.log('DASH] States: ', toState, fromState);
+                if (toState != 'Dashboard') {
+                    self.stopSubscriptions();
+                }
+            });
+        
+        self.scope.$on('$destroy', function () {
+        });
         
         this.switchDashboard = function (uuid) {
             self.dashboarduuid = uuid;
@@ -118,6 +129,23 @@ class Dashboard {
             }
         });
         
+        this.storeMenuConfig = function () {
+            console.log('[MENU] Pushing menu to profile:', menu);
+            for (var card of self.dashboard.cards) {
+                delete card['$$hashKey'];
+            }
+            self.op.putObject('dashboardconfig', self.dashboard);
+            
+            self.changetimeout = null;
+        };
+        
+        $scope.$watch('$ctrl.dashboard.cards', function (items) {
+            if (self.changetimeout !== null) {
+                $timeout.cancel(self.changetimeout);
+            }
+            self.changetimeout = $timeout(self.storeMenuConfig, 2000);
+        }, true);
+        
         this.requestDashboards = function () {
             console.log('[DASH] Getting list of dashboards');
             self.op.getList('dashboardconfig');
@@ -136,12 +164,30 @@ class Dashboard {
         console.log('[DASH] Starting');
     }
     
+    stopObserved() {
+        if (this.observed.length > 0) {
+            console.log('[DASH] Stopping current navdata subscriptions');
+            var request = {
+                component: 'navdata',
+                action: 'unsubscribe',
+                data: this.observed
+            };
+            this.socket.send(request);
+        } else {
+            console.log('[DASH] No subscriptions to remove');
+        }
+    }
+    
     updateObserved() {
+        this.stopObserved();
         console.log('[DASH] Updating observed values from ', this.dashboard.cards);
         this.observed = [];
         for (var card of this.dashboard.cards) {
-            console.log('[DASH]', card);
-            this.observed.push(card.valuetype);
+            console.log('[DASH] Inspecting card:', this.observed, card.valuetype, this.observed.indexOf(card.valuetype));
+            if (this.observed.indexOf(card.valuetype) == -1) {
+                console.log('[DASH] Adding: ', card.valuetype);
+                this.observed.push(card.valuetype);
+            }
         }
         console.log(this.observed);
         var request = {
@@ -217,6 +263,6 @@ class Dashboard {
     }
 }
 
-Dashboard.$inject = ['$scope', '$rootScope', '$modal', 'navdata', 'user', 'objectproxy', 'socket', 'menu'];
+Dashboard.$inject = ['$scope', '$rootScope', '$modal', 'navdata', 'user', 'objectproxy', 'socket', 'menu', '$timeout'];
 
 export default Dashboard;

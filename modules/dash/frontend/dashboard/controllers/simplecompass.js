@@ -90,7 +90,11 @@ class SimpleCompass {
         
         this.interval(this.updateAge, 1000);
         
-        self.socket.listen('navdata', this.handleNavdata);
+        self.socket.listen('navdata', self.handleNavdata);
+    
+        self.scope.$on('$destroy', function() {
+            self.socket.unlisten('navdata', self.handleNavdata);
+        });
         
         this.drawAngleSweep = function (realangle) {
             // TODO: Remove the right element via angular's component element, not via jquery

@@ -40,7 +40,12 @@ class DigitalReadout {
 
         this.interval(this.updateAge, 1000);
 
-        self.socket.listen('navdata', this.handleNavdata);
+        self.socket.listen('navdata', self.handleNavdata);
+        
+        self.scope.$on('$destroy', function() {
+            console.log('[DASH-DR] UNLISTENING');
+            self.socket.unlisten('navdata', self.handleNavdata);
+        });
     }
 }
 
