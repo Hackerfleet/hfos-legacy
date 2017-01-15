@@ -117,7 +117,17 @@ DashboardForm = [
         'items': [
             'cards[].title',
             'cards[].widgettype',
-            'cards[].valuetype',
+            {
+                'key': 'cards[].valuetype',
+                'type': 'strapselect',
+                'placeholder': 'Select a Sensor Value',
+                'options': {
+                    "type": "sensordatatype",
+                    "asyncCallback": "$ctrl.getFormData",
+                    "map": {'valueProperty': "name", 'nameProperty':
+                        'name'}
+                }
+            },
             {'type': 'section',
              'htmlClass': 'row',
              'items': [
