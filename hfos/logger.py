@@ -65,13 +65,15 @@ error = 40
 critical = 50
 hilight = 60
 off = 100
+
+# https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 lvldata = {
     events: ['EVENT', '\033[1:36m'],
     verbose: ['VERB', '\033[1;30m'],
     network: ['NET', '\033[1;34m'],
     debug: ['DEBUG', '\033[1;97m'],
     info: ['INFO', '\033[1;92m'],
-    warn: ['WARN', '\033[1;91m'],
+    warn: ['WARN', '\033[1;93m'],
     error: ['ERROR', '\033[1;31;43m'],
     critical: ['CRIT', '\033[1;33;41m'],
     hilight: ['HILIGHT', '\033[1;4;30;106m']
