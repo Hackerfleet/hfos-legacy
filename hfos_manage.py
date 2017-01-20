@@ -382,7 +382,7 @@ def install_provisions(args):
 
     if args.provision is not None and args.provision in provisionstore:
         hfoslog("Provisioning ", args.provision, emitter="MANAGE")
-        provisionstore[args.provision]
+        provisionstore[args.provision]()
     elif args.provision is None:
         for provision_name in provisionstore:
             hfoslog("Provisioning " + provision_name, emitter='MANAGE')
