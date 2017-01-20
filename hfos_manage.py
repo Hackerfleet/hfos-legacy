@@ -379,9 +379,20 @@ def install_provisions(args):
     initialize(args.dbhost)
 
     from hfos.provisions import provisionstore
-    for provision_name in provisionstore:
-        hfoslog("Provisioning " + provision_name, emitter='MANAGE')
-        provisionstore[provision_name]()
+
+    if args.provision is not None and args.provision in provisionstore:
+        hfoslog("Provisioning ", args.provision, emitter="MANAGE")
+        provisionstore[args.provision]
+    elif args.provision is None:
+        for provision_name in provisionstore:
+            hfoslog("Provisioning " + provision_name, emitter='MANAGE')
+            provisionstore[provision_name]()
+    else:
+        hfoslog("Unknown provision: ", args.provision, "\nValid provisions "
+                                                       "are",
+                list(provisionstore.keys()),
+                lvl=error,
+                emitter='MANAGE')
 
 
 def uninstall(args):
@@ -514,12 +525,16 @@ if __name__ == "__main__":
     parser.add_argument("--yes", "-y", help="Assume yes on any yes/no "
                                             "questions",
                         action="store_true", default=False)
-
     parser.add_argument("--target",
                         help="Create module in the given folder (uses ./ if "
                              "omitted)",
                         action="store",
                         default=".")
+    parser.add_argument("--provision",
+                        "-p",
+                        help="Install only given provision data",
+                        action="store",
+                        default=None)
     # TODO: Clarify these, make their functions more obvious
     parser.add_argument("--clear", help="Clear target path if it exists",
                         action="store_true", default=False)
