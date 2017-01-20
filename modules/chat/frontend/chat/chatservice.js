@@ -10,7 +10,7 @@
 
 class chatservice {
     
-    constructor(interval, socket, rootscope) {
+    constructor(interval, socket, rootscope, $timeout) {
         this.interval = interval;
         this.socket = socket;
         this.rootscope = rootscope;
@@ -46,7 +46,10 @@ class chatservice {
             console.log('Incoming chat data: ', msg);
             self.messages.push(msg.data);
             self.rootscope.$broadcast('Chat.Message');
-
+            $timeout(function() {
+                  var scroller = document.getElementById("chatdisplay");
+                  scroller.scrollTop = scroller.scrollHeight;
+                }, 250, false);
             //if($scope.chat.open === false) {
             self.blinkstate = 1;
             self.blinker = self.interval(self.blinkfunc, 1500, 5);
@@ -66,6 +69,6 @@ class chatservice {
 
 }
 
-chatservice.$inject = ['$interval', 'socket', '$rootScope'];
+chatservice.$inject = ['$interval', 'socket', '$rootScope', '$timeout'];
 
 export default chatservice;
