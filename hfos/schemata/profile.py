@@ -12,7 +12,7 @@ Profile: Userprofile with general flags and fields
 :license: GPLv3 (See LICENSE)
 
 """
-from hfos.schemata.defaultform import changeonlyform
+from hfos.schemata.defaultform import savebutton
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -60,6 +60,7 @@ ProfileSchema = {
                 'notes': {'type': 'string', 'format': 'html',
                           'title': 'User notes',
                           'description': 'Custom user notes'},
+                'image': {'type': 'string'}
             }
         },
         "components": {
@@ -137,6 +138,18 @@ ProfileSchema = {
                                '4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                     'type': 'string',
                     'title': 'Default Unique Mapview ID'
+                },
+                'taskgriduuid': {
+                    'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
+                               '4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                    'type': 'string',
+                    'title': 'Default Unique Taskgrid ID'
+                },
+                'dashboarduuid': {
+                    'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
+                               '4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                    'type': 'string',
+                    'title': 'Default Unique Dashboard ID'
                 }
             }
         },
@@ -156,4 +169,109 @@ ProfileSchema = {
     ]
 }
 
-Profile = {'schema': ProfileSchema, 'form': changeonlyform}
+ProfileForm = [
+    'name',
+    {
+        'type': 'section',
+        'htmlClass': 'row',
+        'items': [
+            {
+                'type': 'help',
+                'helpvalue': '<h2>User information</h2>'
+            },
+            {
+                'type': 'section',
+                'htmlClass': 'col-xs-4',
+                'items': [
+                    'userdata.name', 'userdata.d-o-b', 'userdata.shift'
+                ]
+            }, {
+                'type': 'section',
+                'htmlClass': 'col-xs-4',
+                'items': [
+                    'userdata.familyname', 'userdata.callsign',
+                    'userdata.location'
+                ]
+            },
+            {
+                'type': 'section',
+                'htmlClass': 'col-xs-4',
+                'items': [
+                    'userdata.nick', 'userdata.phone', 'userdata.visa'
+                ]
+            }
+        ]
+    },
+    {
+        'type': 'section',
+        'htmlClass': 'row',
+        'items': [
+            {
+                'type': 'help',
+                'helpvalue': '<h2>User interface settings</h2>'
+            },
+            {
+                'type': 'section',
+                'htmlClass': 'col-xs-3',
+                'items': [
+                    'settings.color', 'settings.theme'
+                ]
+            }, {
+                'type': 'section',
+                'htmlClass': 'col-xs-9',
+                'items': [
+                    'settings.background'
+                ]
+            }
+        ]
+    },
+    'settings.notifications',
+    {
+        'type': 'section',
+        'htmlClass': 'row',
+        'items': [
+            {
+                'type': 'help',
+                'helpvalue': '<h2>Default module configurations</h2>'
+            },
+            {
+                'key': 'settings.dashboarduuid',
+                'htmlClass': 'col-xs-4',
+                'type': 'strapselect',
+                'placeholder': 'Select a Dashboard',
+                'options': {
+                    "type": "dashboardconfig",
+                    "asyncCallback": "$ctrl.getFormData",
+                    "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+                }
+            },
+            {
+                'key': 'settings.taskgriduuid',
+                'htmlClass': 'col-xs-4',
+                'type': 'strapselect',
+                'placeholder': 'Select a Taskgrid Configuration',
+                'options': {
+                    "type": "taskgridconfig",
+                    "asyncCallback": "$ctrl.getFormData",
+                    "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+                }
+            },
+            {
+                'key': 'settings.mapviewuuid',
+                'htmlClass': 'col-xs-4',
+                'type': 'strapselect',
+                'placeholder': 'Select a MapView',
+                'options': {
+                    "type": "mapview",
+                    "asyncCallback": "$ctrl.getFormData",
+                    "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+                }
+            }
+        ],
+    },
+    'alertconfig',
+    'userdata.notes',
+    savebutton
+]
+
+Profile = {'schema': ProfileSchema, 'form': ProfileForm}
