@@ -22,6 +22,7 @@ from circuits.web.tools import serve_file
 from circuits.web.controllers import Controller
 from hfos.component import ConfigurableComponent
 from hfos.events.system import AuthorizedEvents, authorizedevent
+from hfos.events.client import send
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, error, verbose, warn, hilight, events
 
@@ -38,6 +39,7 @@ except ImportError:
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
+
 # TODO:
 # * Thread the call to gdal utilities
 # * Add grib import
@@ -53,11 +55,19 @@ class UrlError(Exception):
 class mapimport(authorizedevent):
     def __init__(self, *args):
         super(mapimport, self).__init__(*args)
-        hfoslog('mapimporterrequest generated:', args, emitter='mapimportER',
+        hfoslog('mapimporterrequest generated:', args, emitter='mapimporter',
+                lvl=events)
+
+
+class maprescan(authorizedevent):
+    def __init__(self, *args):
+        super(maprescan, self).__init__(*args)
+        hfoslog('maprescanrequest generated:', args, emitter='mapimporter',
                 lvl=events)
 
 
 AuthorizedEvents['mapimport'] = mapimport
+AuthorizedEvents['maprescan'] = maprescan
 
 
 class GDAL(ConfigurableComponent):
@@ -159,13 +169,62 @@ class GDAL(ConfigurableComponent):
 
         self.log('Done tiling: ', filename, target, lvl=hilight)
 
-        self._register_map(name.rstrip('.KAP'), event.client)
+        newlayer = self._register_map(name.rstrip('.KAP'), event.client)
+
+        notification = {
+            'component': 'alert',
+            'action': 'success',
+            'data': 'New rasterchart rendered: <a href="#/editor/layer/' +
+                    str(newlayer.uuid) + '/edit">' + newlayer.name + '</a>'
+        }
+        self.fireEvent(send(event.client.uuid, notification))
+
+    def maprescan(self, event):
+        self.log('Rescanning gdal map folder for new maps')
+
+        f = []
+        for (dirpath, dirnames, filenames) in os.walk(self.tilepath):
+            f.extend(dirnames)
+            break
+
+        self.log('Found folders:', f, lvl=hilight)
+
+        count = 0
+
+        for map in f:
+            if os.path.exists(os.path.join(self.tilepath, map,
+                                           'tilemapresource.xml')):
+                self.log('Raster chart found')
+                layer = objectmodels['layer'].find_one({'path': map})
+                if layer is not None:
+                    self.log('Layer exists: ', layer.uuid, layer.name)
+                else:
+                    self._register_map(map, event.client)
+                    count += 1
+            else:
+                self.log('Invalid raster tilecache found: ', map, lvl=warn)
+
+        if count > 0:
+            data = 'Found and added %i new rasterchart' % count
+            if count > 1:
+                data += 's'
+            data += ' during rasterchart rescan.'
+        else:
+            data = 'No new rastercharts added.'
+
+        notification = {
+            'component': 'alert',
+            'action': 'warning' if count == 0 else 'success',
+            'data': data
+        }
+        self.fireEvent(send(event.client.uuid, notification))
 
     def _register_map(self, name, client):
         self.log('Storing new GDAL layer ', name, lvl=verbose)
         layer = objectmodels['layer']()
         layer.uuid = str(uuid4())
         layer.name = name
+        layer.path = name
         layer.owner = client.useruuid
         layer.notes = "Imported GDAL chart"
         layer.description = "Imported GDAL chart '%s'" % name
@@ -186,3 +245,5 @@ class GDAL(ConfigurableComponent):
         gdal_layers.save()
 
         self.log('New GDAL layer stored:', layer._fields, lvl=hilight)
+
+        return layer

@@ -31,6 +31,16 @@ class importercomponent {
         this.socket.sendFile(file, 'mapimport', 'upload');
         
     }
+    
+    rescan() {
+        console.log('Triggering rastertile path rescan.');
+    
+        this.socket.send({
+            component: 'maprescan',
+            action:'rescan'
+        });
+    
+    }
 }
 
 importercomponent.$inject = ['$scope', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard'];

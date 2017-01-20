@@ -48,6 +48,8 @@ LayerSchema = {
                       'description': 'Current size of cache.'},
         'url': {'type': 'string', 'format': 'html', 'title': 'User notes',
                 'description': 'Layer URL'},
+        'path': {'type': 'string', 'title': 'Filesystem location of layer',
+                 'description': 'HIDDEN'},
         'layerOptions': {
             'minZoom': {'type': 'number',
                         'description': 'Minimum zoom number.', 'default': 0},
