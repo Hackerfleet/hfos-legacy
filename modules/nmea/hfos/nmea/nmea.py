@@ -114,7 +114,8 @@ class NMEAParser(ConfigurableComponent):
         try:
             super(NMEAParser, self).__init__('NMEA', *args, **kwargs)
         except ValidationError:
-            self.log('OUPS.', lvl=hilight)
+            self.log('Error during validation - no serialport available?',
+                     lvl=warn)
             # TODO: This was meant for catching unavailable serial-devices.
             # Needs a better way of handling that.
 
