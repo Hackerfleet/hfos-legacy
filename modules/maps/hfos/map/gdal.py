@@ -141,7 +141,6 @@ class GDAL(ConfigurableComponent):
         command = [
             self.tiler_binary,
             '-w', 'none',
-            '-q',
             filename
         ]
 
