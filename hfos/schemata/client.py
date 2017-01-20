@@ -61,6 +61,12 @@ ClientconfigSchema = {
             'type': 'string',
             'title': 'Associated Unique Dashboard ID'
             },
+        'taskgriduuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Associated Unique Task Grid ID'
+        },
     }
 }
 
@@ -91,6 +97,16 @@ ClientconfigForm = [
         'placeholder': 'Select a Dashboard',
         'options': {
             "type": "dashboardconfig",
+            "asyncCallback": "$ctrl.getFormData",
+            "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+        }
+    },
+    {
+        'key': 'taskgriduuid',
+        'type': 'strapselect',
+        'placeholder': 'Select a Taskgrid Configuration',
+        'options': {
+            "type": "taskgridconfig",
             "asyncCallback": "$ctrl.getFormData",
             "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
         }
