@@ -5,6 +5,8 @@ import uirouter from 'angular-ui-router';
 
 import { routing } from './chat.config.js';
 
+import './chat/chat.scss';
+
 import chatservice from './chat/chatservice.js';
 import chatcomponent from './chat/chatcomponent.js';
 

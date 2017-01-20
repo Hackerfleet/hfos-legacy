@@ -1,23 +1,36 @@
-<div class="jumbotron">
-    <h1>Chat</h1>
+<div class="well chat">
+    <div class="row">
+        <h2>Chat</h2>
+    </div>
 
-    <div>
-        <ul>
+    <div class="row" id="chatdisplay">
+        <ul class="chatmessages">
             <li ng-repeat="msg in $ctrl.messages">
+                <img src="/assets/iconmonstr-speech-bubble-26.svg" height="32px" width="32px"/>
                 <span>{{msg.timestamp | date: 'HH:mm:ss'}}</span>
                 <span>{{msg.sender}}</span>
-                <span>{{msg.content}}</span>
+                <br/>
+                <span ng-bind-html="msg.content"></span>
             </li>
         </ul>
     </div>
-    <form>
-        <div class="row">
-            <div class="col-md-4">
-                <input type="text" id="chatinput" ng-model="$ctrl.input"/><br/>
+
+    <div class="row chatinput">
+        <form class="form-horizontal">
+            <div class="input-group">
+                <textarea
+                        class="col-sm-11 form-control"
+                        rows="1" id="chatinput"
+                        ng-model="$ctrl.input"
+                        placeholder="Enter message..."
+                        ng-keyup="$event.keyCode == 13 && !$event.shiftKey && $ctrl.chatsend()"
+                ></textarea>
+                <div class="input-group-btn">
+                    <button type="submit" class="btn btn-default" ng-click="$ctrl.chatsend()">Send
+                    </button>
+                </div>
             </div>
-            <div class="col-md-8">
-                <button type="submit" class="btn btn-default" ng-click="$ctrl.chatsend()">Send</button>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
+
 </div>
