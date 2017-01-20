@@ -14,7 +14,7 @@ Basic functionality around provisioning.
 """
 
 from jsonschema import ValidationError
-from hfos.logger import hfoslog, warn
+from hfos.logger import hfoslog, warn, debug
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -41,16 +41,23 @@ def provisionList(items, dbobject, overwrite=False, clear=False, indexes=None):
     counter = 0
 
     for no, item in enumerate(items):
+        newobject = None
         itemuuid = item['uuid']
         hfoslog("Validating object (%i/%i):" % (no+1, len(items)), itemuuid,
-                emitter='PROVISIONS')
+                emitter='PROVISIONS', lvl=debug)
 
-        if dbobject.count({'uuid': itemuuid}) > 0 and not overwrite:
-            hfoslog("Not updating item", item, lvl=warn,
+        if dbobject.count({'uuid': itemuuid}) > 0:
+            if not overwrite:
+                hfoslog("Not updating item", item, lvl=warn,
                     emitter='PROVISIONS')
+            else:
+                hfoslog("Overwriting item: ", itemuuid, lvl=warn)
+                newobject = dbobject.find_one({'uuid': itemuuid})
+                newobject._fields.update(item)
         else:
             newobject = dbobject(item)
 
+        if newobject is not None:
             try:
                 newobject.validate()
                 newobject.save()
