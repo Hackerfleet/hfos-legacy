@@ -151,8 +151,7 @@ class Core(ConfigurableComponent):
 
         secure = self.certificate is not None
         if secure:
-            self.log("Running SSL server with cert:", self.certificate,
-                     lvl=hilight)
+            self.log("Running SSL server with cert:", self.certificate)
         else:
             self.log("Running insecure server without SSL!", lvl=warn)
 
@@ -310,7 +309,7 @@ class Core(ConfigurableComponent):
                     self.runningcomponents[name] = runningcomponent
             except Exception as e:
                 self.log("Could not register component: ", name, e,
-                         type(e), lvl=error, exc=True)  # ().register(self)
+                         type(e), lvl=error, exc=True)
 
     def started(self, component):
         """Sets up the application after startup."""
@@ -333,13 +332,11 @@ def construct_graph(args):
 
     setup_root(app)
 
-    # if dodebug:
-    # from circuits import Debugger
-
-    # dbg = Debugger()
-    # dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
-
-    # HFDebugger(root=server).register(server)
+    if args.debug:
+        from circuits import Debugger
+        hfoslog("Starting circuits debugger", lvl=warn, emitter='GRAPH')
+        dbg = Debugger().register(app)
+        dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
 
     hfoslog("Beginning graph assembly.", emitter='GRAPH')
 
@@ -378,6 +375,8 @@ def launch(run=True):
                         action="store_true")
     parser.add_argument("--log", help="Define log level (0-100)",
                         type=int, default=20)
+    parser.add_argument("--debug", help="Run circuits debugger",
+                        action="store_true")
 
     parser.add_argument("--insecure", help="Keep privileges - INSECURE",
                         action="store_true")
