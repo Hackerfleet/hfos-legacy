@@ -15,6 +15,7 @@ from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, error, warn
 from hfos.events.client import broadcast
 from hfos.events.system import authorizedevent, AuthorizedEvents
+import cgi
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -80,12 +81,15 @@ class Chat(ConfigurableComponent):
             username = self._getusername(event)
 
             if action == "say":
+                msg = cgi.escape(str(data))
+                msg = msg.replace('\n', '<br \>')
+
                 chatpacket = {'component': 'chat',
                               'action': 'broadcast',
                               'data': {
                                   'sender': username,
                                   'timestamp': time(),
-                                  'content': str(data.encode('utf-8'))
+                                  'content': msg
                               }
                               }
             else:
