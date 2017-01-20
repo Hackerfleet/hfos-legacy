@@ -67,8 +67,13 @@ WikiPageForm = [
     #         ]
     #     }
     #
+    {
+        'type': 'button',
+        'title': 'Go to Wiki',
+        'onClick': "$ctrl.switchState('app.wiki', {name: $ctrl.model.name})",
+        'condition': "$ctrl.action == 'Edit'"
+    },
     editbuttons
-
 ]
 
 WikiTemplateSchema = deepcopy(WikiPageSchema)
