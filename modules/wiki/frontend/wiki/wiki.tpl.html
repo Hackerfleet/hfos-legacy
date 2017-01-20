@@ -9,29 +9,26 @@
             </span>
 
             <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.editpage()"
-                    ng-hide="$ctrl.pageuuid == ''">Edit page
+                    ng-hide="$ctrl.pageuuid == ''">Edit
             </button>
             <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.edithere = !$ctrl.edithere"
                     ng-hide="$ctrl.pageuuid == ''">Edit here
             </button>
 
-            <div class="form-inline">
-                <div class="form-group" ng-hide="$ctrl.pageuuid != ''">
-                    <button class="btn btn-default btn-xs" type="button"
-                            ng-click="$ctrl.createPage()">Create from template:
-                    </button>
+            <button class="btn btn-default btn-xs" type="button"
+                    ng-click="$ctrl.createPage()">Create from template:
+            </button>
 
-                    <select class="inline-form" ng-model="$ctrl.selectedtemplate">
-                        <option selected="true" value="empty">Empty page</option>
-                        <option ng-repeat="template in $ctrl.templates" value="{{template.uuid}}">
+            <select ng-model="$ctrl.selectedtemplate">
+                <option selected="true" value="empty">Empty page</option>
+                <option ng-repeat="template in $ctrl.templates" value="{{template.uuid}}">
                         <span>
                             <span class="fa" ng-class="template.icon"></span>
                             {{template.name}}
                         </span>
-                        </option>
-                    </select>
-                </div>
-            </div>
+                </option>
+            </select>
+
         </small>
 
         <div ng-bind-html="$ctrl.html"></div>
