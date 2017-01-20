@@ -18,7 +18,7 @@ Provisions
 
 """
 
-from hfos.schemata.defaultform import defaultform
+from hfos.schemata.defaultform import editbuttons
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -52,4 +52,29 @@ LayerGroupSchema = {
     }
 }
 
-LayerGroup = {'schema': LayerGroupSchema, 'form': defaultform}
+LayerGroupForm = [
+    'name',
+    'notes',
+    {
+         'key': 'layers',
+         'add': "Add layer",
+         'style': {
+             'add': "btn-success"
+         },
+         'items': [
+             {
+                 'key': 'layers[]',
+                 'type': 'strapselect',
+                 'placeholder': 'Select a Layer',
+                 'options': {
+                     "type": "layer",
+                     "asyncCallback": "$ctrl.getFormData",
+                     "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+                 }
+             }
+         ]
+    },
+    editbuttons
+]
+
+LayerGroup = {'schema': LayerGroupSchema, 'form': LayerGroupForm}
