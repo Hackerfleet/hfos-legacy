@@ -31,27 +31,41 @@ TaskSchema = {
                  'description': 'HIDDEN'},
         'name': {'type': 'string', 'title': 'Name',
                  'description': 'Name of Task'},
-        'project': {'type': 'string', 'title': 'Project',
-                    'description': 'Project, the Task belongs to'},
+        'project': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Project which this task is part of'},
         'creator': {'type': 'string', 'title': 'Creator',
                     'description': 'Creator of Task'},
         'owneruuid': {'type': 'string', 'minLength': 36,
                       'title': "Owner's Unique ID", 'description': 'HIDDEN'},
-        'status': {
-            'type': 'string', 'title': 'Task status', 'default': 'Open',
-            'description': 'Last status', 'enum': [
-                'Open',
-                'Closed',
-                'Resolved',
-                'In progress',
-                'Duplicate',
-                'Invalid',
-                'Cannot reproduce',
-                'Waiting',
-            ]
+        'taskgroup': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Task group',
+            'description': 'Group, this task belongs to'
         },
-        'tags': {'type': 'string', 'title': 'Tags',
-                 'description': 'Attached tags'},
+        'tags': {
+            'type': 'array',
+            'title': 'Tags',
+            'description': 'Attached tags',
+            'default': [],
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'uuid': {
+                        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
+                                   'a-fA-F0-9]{4}-['
+                                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                        'type': 'string',
+                        'title': 'Referenced Tag'
+                    }
+                }
+
+            }
+        },
         'priority': {'type': 'number', 'title': 'Priority',
                      'description': '1 is Highest priority', 'minimum': 1},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
@@ -130,7 +144,7 @@ TaskForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-6',
                 'items': [
-                    'name', 'tags', {
+                    'name', {
                         'key': 'project',
                         'type': 'strapselect',
                         'placeholder': 'Select a Project',
@@ -147,9 +161,44 @@ TaskForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-6',
                 'items': [
-                    'status', 'priority'
+                    'priority', {
+                        'key': 'taskgroup',
+                        'type': 'strapselect',
+                        'placeholder': 'Select a Task Group',
+                        'options': {
+                            "type": "taskgroup",
+                            "asyncCallback": "$ctrl.getFormData",
+                            "map": {'valueProperty': "uuid",
+                                    'nameProperty': 'name'}
+                        }
+                    }
                 ]
             },
+        ]
+    },
+    {
+        'type': 'fieldset',
+        'items': [
+            {
+                'key': 'tags',
+                'add': 'Add Tag',
+                'style': {
+                    'add': 'btn-success'
+                },
+                'items': [
+                    {
+                        'key': 'tags[].uuid',
+                        'type': 'strapselect',
+                        'placeholder': 'Select a tag',
+                        'options': {
+                            "type": "tag",
+                            "asyncCallback": "$ctrl.getFormData",
+                            "map": {'valueProperty': "uuid",
+                                    'nameProperty': 'name'}
+                        }
+                    }
+                ]
+            }
         ]
     },
     'notes',
@@ -167,7 +216,7 @@ TaskForm = [
                     {
                         'key': 'references[].task',
                         'type': 'strapselect',
-                        'placeholder': 'Select a Project',
+                        'placeholder': 'Select a reference',
                         'options': {
                             "type": "task",
                             "asyncCallback": "$ctrl.getFormData",
