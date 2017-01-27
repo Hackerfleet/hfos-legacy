@@ -408,7 +408,7 @@ def install_modules(args):
         try:
             setup = Popen(
                 [
-                    'python',
+                    sys.executable,
                     'setup.py',
                     'develop'
                 ],
@@ -444,6 +444,7 @@ def install_modules(args):
         'library',
         'logbook',
         'maps',
+        'mesh',
         'nmea',
         'polls',
         'project',
