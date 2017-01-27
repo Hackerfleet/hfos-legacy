@@ -41,6 +41,8 @@ This software package is a plugin module for HFOS.
       entry_points="""[hfos.schemata]
       project=hfos.project.project:Project
       task=hfos.project.task:Task
+      taskgroup=hfos.project.taskgroup:TaskGroup
+      taskgridconfig=hfos.project.taskgridconfig:TaskGridConfig
       [hfos.components]
       projectservice=hfos.project.projectservice:ProjectService
     """,
