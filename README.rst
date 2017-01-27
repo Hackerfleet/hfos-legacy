@@ -172,6 +172,23 @@ package:
 
     $ sudo apt-get install npm nodejs-legacy
 
+If you want to install the full development dependencies to write
+documentation as well, you need to install the enchant package:
+
+.. code-block:: bash
+
+    $ sudo apt-get install enchant
+
+In case you want to use raster (or in future: vector) charts, you'll
+need to install libgdal and its binaries:
+
+.. code-block:: bash
+
+    $ sudo apt-get install gdal-bin python-gdal
+
+Note, that it is necessary to install python-gdal not the python3 variant,
+as the scripts are not included in that.
+
 Backend
 -------
 
@@ -191,13 +208,16 @@ database:
     $ cd hfos
     $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
     $ source venv/bin/activate
-    $ pip install -Ur requirements-dev.txt
+    $ pip install -Ur requirements.txt
+    $ python setup.py develop
     $ sudo venv/bin/python hfos_manage.py -install-all
     $ python hfos_launcher.py
 
 You may need to adapt permissions for the /var folders to accomodate the
 user you let hfos run with, until we re-add the daemon and package support
 foam, that does that automatically.
+If you want to develop (documentation) as well, you'll need to use the
+`requirements-dev.txt` instead of the normal one.
 
 We strongly suggest generating a SSL certificate and invoke the launcher thus:
 
@@ -207,7 +227,7 @@ We strongly suggest generating a SSL certificate and invoke the launcher thus:
 
 Running the launcher as root to be able to open ports below 1024 should be
 safe, as it drops its root privileges, unless you specify --insecure,
-which is strongly discouraged.
+which is strongly discouraged and only meant for development purposes.
 
 
 Documentation
