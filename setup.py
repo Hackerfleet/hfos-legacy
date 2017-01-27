@@ -78,6 +78,7 @@ See https://github.com/hackerfleet/hfos""",
     profile=hfos.schemata.profile:Profile
     user=hfos.schemata.user:User
     logmessage=hfos.schemata.logmessage:LogMessage
+    tag=hfos.schemata.tag:Tag
 
     [hfos.provisions]
     system=hfos.provisions.system:provision
