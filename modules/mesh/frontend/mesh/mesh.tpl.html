@@ -1,0 +1,77 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div class="container">
+    <div class="well">
+        <h1>Mesh</h1>
+        <span>Manage mesh connections</span>
+
+        <div class="panel-group" ng-model="panels.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
+            <div class="panel panel-default">
+                <div class="panel-heading panel-hover" role="tab">
+                    <h4 class="panel-title">
+                        <a bs-collapse-toggle>
+                            Nearby nodes
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <div class="panel-body">
+                        <span>This would list nearby online nodes
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading panel-hover" role="tab">
+                    <h4 class="panel-title">
+                        <a bs-collapse-toggle>
+                            Known nodes
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <div class="panel-body">
+                        <span>This would list known, but not connected nodes</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading panel-hover" role="tab">
+                    <h4 class="panel-title">
+                        <a bs-collapse-toggle>
+                            Hubs
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <div class="panel-body">
+                        <span>This would list known hubs
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
