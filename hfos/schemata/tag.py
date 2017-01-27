@@ -17,11 +17,12 @@ Provisions
 :license: GPLv3 (See LICENSE)
 
 """
-from hfos.schemata.defaultform import savebutton
+
+from hfos.schemata.defaultform import editbuttons
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-Tag = {
+TagSchema = {
     'type': 'object',
     'id': '#tag',
     'name': 'tag',
@@ -57,10 +58,10 @@ Tag = {
 }
 
 TagForm = [
-    'name'
-    'color'
+    'name',
+    'color',
     'notes',
-    savebutton
+    editbuttons
 ]
 
-Tag = {'schema': Tag, 'form': TagForm}
+Tag = {'schema': TagSchema, 'form': TagForm}
