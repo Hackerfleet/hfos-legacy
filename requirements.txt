@@ -1,4 +1,5 @@
 # Basics
+setuptools
 git+https://github.com/circuits/circuits.git
 pymongo>=3.2
 jsonschema==2.5.1
