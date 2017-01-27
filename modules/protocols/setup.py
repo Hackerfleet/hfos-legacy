@@ -37,16 +37,20 @@ Currently in development:
 * MQTT
 
 Planned:
-* ZMQ
 * XMPP
 
 This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
-      install_requires=['hfos==1.1.0'],
+      install_requires=[
+            'hfos==1.1.0',
+            'paho-mqtt==1.2',
+            'netifaces==0.10.5'
+      ],
       entry_points="""[hfos.schemata]
       [hfos.components]
       mqttgateway=hfos.protocols.mqtt:MQTTGateway
+      zmqlistener=hfos.protocols.zmq:ZMQListener
     """,
       test_suite="tests.main.main",
       )
