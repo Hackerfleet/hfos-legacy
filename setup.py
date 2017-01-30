@@ -19,6 +19,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from setuptools import setup
+from glob import glob
+import sys
 
 # TODO:
 # Classifiers
@@ -26,11 +28,48 @@ from setuptools import setup
 # download_url
 # platform
 
+ignore = [
+    '/frontend/node_modules',
+    '/frontend/build',
+    '/frontend/src/components',
+    '/docs/build',
+    '__pycache__'
+]
+datafiles = []
+manifestfiles = []
+
+
+def prune(thing):
+    for part in ignore:
+        part = part[1:] if part.startswith('/') else part
+        if part in thing:
+            return True
+    return False
+
+
+def add_datafiles(*paths):
+    manifest = open('MANIFEST.in', 'w')
+
+    for path in paths:
+        files = []
+        manifest.write('recursive-include ' + path + ' *\n')
+        for datafile in glob(path + '/**/*.*', recursive=True):
+            if not prune(datafile):
+                files.append(datafile)
+                manifestfiles.append(datafile)
+
+        datafiles.append(('/opt/hfos/' + path, files))
+
+    for part in ignore:
+        if part.startswith('/'):
+            manifest.write('prune ' + part[1:] + '\n')
+        else:
+            manifest.write('global-exclude ' + part + '/*\n')
+
+add_datafiles('frontend', 'docs')
 
 setup(name="hfos",
-      version="1.1.0",
       description="hfos",
-
       author="Hackerfleet Community",
       author_email="riot@c-base.org",
       url="https://github.com/hackerfleet/hfos",
@@ -60,6 +99,7 @@ See https://github.com/hackerfleet/hfos""",
                         'jsonschema>=2.5.1',
                         'six'
                         ],
+      data_files=datafiles,
       entry_points=
       """[hfos.base]
     debugger=hfos.debugger:HFDebugger
@@ -84,5 +124,11 @@ See https://github.com/hackerfleet/hfos""",
     system=hfos.provisions.system:provision
     user=hfos.provisions.user:provision
     """,
+      use_scm_version={
+            "write_to": "hfos/version.py",
+      },
+      setup_requires=[
+            "setuptools_scm"
+      ],
       test_suite="tests.main.main",
       )

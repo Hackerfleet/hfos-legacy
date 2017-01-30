@@ -13,6 +13,8 @@ docs/hfos-docs-docs.xml
 debian/python-hfos*
 debian/files
 
+# SCM versioning
+hfos/version.py
 
 # Testing stuff
 .tox
