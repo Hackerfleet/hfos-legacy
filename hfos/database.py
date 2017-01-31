@@ -68,7 +68,7 @@ def _build_schemastore_new():
                     schema_entrypoint.name, exc=True, lvl=warn,
                     emitter='SCHEMATA')
 
-    hfoslog("Found schemata: ", available.keys(),
+    hfoslog("Found schemata: ", available.keys(), lvl=debug,
             emitter='SCHEMATA')
     # pprint(available)
 
@@ -122,7 +122,7 @@ def _build_collections(store):
     return result
 
 
-def initialize(address):
+def initialize(address='127.0.0.1:27017'):
     global schemastore
     global objectmodels
     global collections
