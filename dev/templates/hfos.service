@@ -1,0 +1,18 @@
+[Unit]
+Description=Hackerfleet Operating System
+After=network.target
+Wants=mongodb.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/
+ExecStart={{executable}}
+StandardOutput=syslog
+StandardError=syslog
+Restart=True
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
