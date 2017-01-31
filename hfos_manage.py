@@ -368,6 +368,9 @@ def install_var(args):
     hfoslog("Checking frontend library and cache directories",
             emitter='MANAGE')
 
+    uid = pwd.getpwnam("hfos").pw_uid
+    gid = grp.getgrnam("hfos").gr_gid
+
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
     target_paths = (
@@ -389,11 +392,10 @@ def install_var(args):
         if not os.path.exists(item):
             hfoslog("Creating path: " + item, emitter='MANAGE')
             os.mkdir(item)
+            os.chown(item, uid, gid)
 
     # Touch logfile to make sure it exists
     open(logfile, "a").close()
-    uid = pwd.getpwnam("hfos").pw_uid
-    gid = grp.getgrnam("hfos").gr_gid
     os.chown(logfile, uid, gid)
 
 
