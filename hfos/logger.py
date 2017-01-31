@@ -100,6 +100,9 @@ solo = []
 
 start = time.time()
 
+def set_logfile(path):
+    global logfile
+    logfile = path
 
 class logevent(Event):
     """
@@ -281,13 +284,18 @@ def hfoslog(*what, **kwargs):
             f.flush()
             f.close()
         except IOError:
-            print("Can't open logfile for writing!")
+            print("Can't open logfile %s for writing!" % logfile)
             # sys.exit(23)
 
     if lvl >= verbosity['console']:
         output = str(msg)
         if six.PY3:
             output = lvldata[lvl][1] + output + terminator
-        print(output)
+        try:
+            print(output)
+        except UnicodeEncodeError as e:
+            print(output.encode("utf-8"))
+            hfoslog("Bad encoding encountered on previous message:", e,
+                    lvl=error)
     if lvl >= verbosity['system'] and root and output:
         root.fire(logevent(now, lvl, emitter, callee, content), "logger")
