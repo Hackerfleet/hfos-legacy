@@ -14,9 +14,9 @@
     :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://badge.fury.io/py/hfos.svg
-    :target: http://badge.fury.io/py/hfos
-    :alt: Pypi Package
+_.. image:: https://badge.fury.io/py/hfos.svg
+    _:target: http://badge.fury.io/py/hfos
+    _:alt: Pypi Package
 
 .. image:: https://badge.waffle.io/hackerfleet/hfos.svg?label=ready&title=Ready
     :target: https://waffle.io/hackerfleet/hfos
@@ -63,8 +63,9 @@ dash           Dashboard information system
 garden         Garden automation tools
 ldap           LDAP user authorization
 library        Library management
+mesh           Mesh networking
 polls          Tool for lightweight internet voting
-project        Simple project management tools
+project        Project management tools
 protocols      Miscellaneous communication protocols
 robot          RC remote control unit
 shareables     Shared resource blocking tool
@@ -96,7 +97,7 @@ nmea           NMEA-0183 Navigation data bus parser
 Work in progress
 ----------------
 
--  Full GDAL based raster chart support
+-  Full GDAL based vector chart support (Currently only raster charts)
 -  Dynamic Logbook
 -  GRIB data (in charts)
 -  Navigation aides, planning
@@ -192,9 +193,15 @@ as the scripts are not included in that.
 Backend
 -------
 
-The manage tool usually can install everything you need.
-This involves getting the frontend dependencies, installing the supplied modules,
-building and installing the documentation, etc.
+The manage tool usually can install everything you need. It starts by adding
+a new system user for HFOS and generating a (currently only self signed)
+certificate.
+
+The process also involves getting the frontend dependencies, installing the
+supplied modules, building and installing the documentation, etc.
+
+It also installs and activates a systemd service script to launch HFOS on
+bootup.
 
 We also create two folders in /var (lib/hfos and cache/hfos) for hfos' tile-
 cache and other stuff as well as install basic default provisions into the
@@ -213,22 +220,18 @@ database:
     $ sudo venv/bin/python hfos_manage.py -install-all
     $ python hfos_launcher.py
 
-You may need to adapt permissions for the /var folders to accomodate the
-user you let hfos run with, until we re-add the daemon and package support
-foam, that does that automatically.
 If you want to develop (documentation) as well, you'll need to use the
 `requirements-dev.txt` instead of the normal one.
 
-We strongly suggest generating a SSL certificate and invoke the launcher thus:
+If you want to manually start HFOS, invoke the launcher thus:
 
 .. code-block:: bash
 
-    $ sudo ./venv/bin/python hfos_launcher.py --cert $YOURCERTIFICATE --port 443
+    $ sudo ./venv/bin/python hfos_launcher.py --cert /etc/ssl/certs/hfos/selfsigned.pem --port 443
 
 Running the launcher as root to be able to open ports below 1024 should be
 safe, as it drops its root privileges, unless you specify --insecure,
 which is strongly discouraged and only meant for development purposes.
-
 
 Documentation
 -------------
@@ -295,7 +298,7 @@ Assets
 License
 =======
 
-Copyright (C) 2011-2016 riot <riot@c-base.org> and others.
+Copyright (C) 2011-2017 riot <riot@c-base.org> and others.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
