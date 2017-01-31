@@ -22,12 +22,17 @@ import os
 import sys
 import shutil
 import argparse
+import pwd
+import grp
+
 from distutils.dir_util import copy_tree
 from time import localtime
-from pprint import pprint
 from collections import OrderedDict
 from dev.templates import write_template_file
 from hashlib import sha512
+from OpenSSL import crypto
+from socket import gethostname
+from pprint import pprint
 
 from hfos.ui.builder import install_frontend
 from hfos.logger import verbose, debug, warn, error, critical, verbosity, \
@@ -40,9 +45,9 @@ except NameError:
     pass
 
 try:
-    from subprocess import Popen
+    from subprocess import Popen, PIPE
 except ImportError:
-    from subprocess32 import Popen  # NOQA
+    from subprocess32 import Popen, PIPE  # NOQA
 
 try:
     unicode  # NOQA
@@ -56,6 +61,8 @@ try:
     salt = 'FOOBAR'.encode('utf-8')
 except UnicodeEncodeError:
     salt = u'FOOBAR'
+
+servicetemplate = 'hfos.service'
 
 paths = [
     'hfos',
@@ -355,6 +362,7 @@ def install_var(args):
         '/var/cache/hfos/rastertiles',
         '/var/cache/hfos/rastercache'
     )
+    logfile = "/var/log/hfos.log"
 
     for item in target_paths:
         if os.path.exists(item):
@@ -366,6 +374,12 @@ def install_var(args):
         if not os.path.exists(item):
             hfoslog("Creating path: " + item, emitter='MANAGE')
             os.mkdir(item)
+
+    # Touch logfile to make sure it exists
+    open(logfile, "a").close()
+    uid = pwd.getpwnam("hfos").pw_uid
+    gid = grp.getgrnam("hfos").gr_gid
+    os.chown(logfile, uid, gid)
 
 
 def install_provisions(args):
@@ -470,15 +484,181 @@ def install_modules(args):
     hfoslog('Done!', emitter='MANAGE')
 
 
+def install_service(args):
+    launcher = os.path.realpath(__file__).replace('manage', 'launcher')
+    executable = sys.executable + " " + launcher
+    executable += " --port 443 --cert /etc/ssl/certs/hfos/selfsigned.pem"
+    executable += " --dolog --logfile /var/log/hfos.log"
+    executable += " --logfileverbosity 30 -q"
+
+    definitions = {
+        'executable': executable
+    }
+
+    write_template_file(os.path.join('dev/templates', servicetemplate),
+                        '/etc/systemd/system/hfos.service',
+                        definitions)
+
+
+def install_user(args):
+    result = Popen(['/usr/sbin/adduser',
+                    '--system',
+                    '--quiet',
+                    '--home',
+                    '/var/run/hfos',
+                    '--group',
+                    '--disabled-password',
+                    '--disabled-login',
+                    'hfos'
+                    ])
+    hfoslog(result)
+
+
+def install_cert(args, selfsigned=False):
+    if selfsigned:
+        hfoslog('Generating self signed (insecure) certificate/key '
+                'combination')
+
+        try:
+            os.mkdir('/etc/ssl/certs/hfos')
+        except FileExistsError:
+            pass
+        except PermissionError:
+            hfoslog("Need root (e.g. via sudo) to generate ssl certificate")
+            sys.exit(1)
+
+        key_file = "/etc/ssl/certs/hfos/selfsigned.key"
+        cert_file = "/etc/ssl/certs/hfos/selfsigned.crt"
+        combined_file = "/etc/ssl/certs/hfos/selfsigned.pem"
+
+        def create_self_signed_cert():
+            # create a key pair
+            k = crypto.PKey()
+            k.generate_key(crypto.TYPE_RSA, 1024)
+
+            if os.path.exists(cert_file):
+                cert = open(cert_file, "r").read()
+                old_cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert)
+                serial = old_cert.get_serial_number() + 1
+            else:
+                serial = 1
+
+            # create a self-signed cert
+            cert = crypto.X509()
+            cert.get_subject().C = "DE"
+            cert.get_subject().ST = "Berlin"
+            cert.get_subject().L = "Berlin"
+            cert.get_subject().O = "Hackerfleet"
+            cert.get_subject().OU = "Hackerfleet"
+            cert.get_subject().CN = gethostname()
+            cert.set_serial_number(serial)
+            cert.gmtime_adj_notBefore(0)
+            cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
+            cert.set_issuer(cert.get_subject())
+            cert.set_pubkey(k)
+            cert.sign(k, 'sha512')
+
+            open(key_file, "wt").write(str(
+                crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
+                encoding="ASCII"))
+
+            open(cert_file, "wt").write(str(
+                crypto.dump_certificate(crypto.FILETYPE_PEM, cert),
+                encoding="ASCII"))
+
+            open(combined_file, "wt").write(str(
+                crypto.dump_certificate(crypto.FILETYPE_PEM, cert),
+                encoding="ASCII") + str(
+                crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
+                encoding="ASCII"))
+
+        create_self_signed_cert()
+
+        hfoslog('Done')
+    else:
+        hfoslog('Not implemented yet. You can build your own certificate and '
+                'store it in /etc/ssl/certs/hfos/server-cert.pem - it should '
+                'be a certificate with key, as this is used server side and '
+                'there is no way to enter a separate key.', lvl=error)
+
+
 def install_all(args):
-    # First install base
+    install_user(args)
+    install_cert(args)
+
     install_var(args)
     install_modules(args)
 
-    # Now the rest basing off that
     install_provisions(args)
     install_docs(args)
+
     install_frontend(args, forcerebuild=True)
+
+    install_service(args)
+
+
+def find_field(args, by_type=False):
+    # TODO: Fix this to work recursively on all possible subschemes
+    if args.search is not None:
+        search = args.search
+    else:
+        search = ask("Enter search term")
+
+    from hfos import database
+
+    database.initialize(args.dbhost)
+
+    def find(schema, search, by_type, result=[], key=""):
+        fields = schema['properties']
+        if not by_type:
+            if search in fields:
+                result.append(key)
+                # hfoslog("Found queried fieldname in ", model)
+        else:
+            for field in fields:
+                try:
+                    if "type" in fields[field]:
+                        # hfoslog(fields[field], field)
+                        if fields[field]["type"] == search:
+                            result.append((key, field))
+                            # hfoslog("Found field", field, "in", model)
+                except KeyError as e:
+                    hfoslog("Field access error:", e, type(e), exc=True,
+                            lvl=debug)
+
+        if 'properties' in fields:
+            # hfoslog('Sub properties checking:', fields['properties'])
+            result.append(find(fields['properties'], search, by_type,
+                               result, key=fields['name']))
+
+        for field in fields:
+            if 'items' in fields[field]:
+                if 'properties' in fields[field]['items']:
+                    # hfoslog('Sub items checking:', fields[field])
+                    result.append(find(fields[field]['items'], search,
+                                       by_type, result, key=field))
+                else:
+                    pass
+                    # hfoslog('Items without proper definition!')
+
+        return result
+
+    if args.object:
+        schema = database.objectmodels[args.object]._schema
+        result = find(schema, search, by_type, [], key="top")
+        if result:
+            # hfoslog(args.object, result)
+            print(args.object)
+            pprint(result)
+    else:
+        for model, obj in database.objectmodels.items():
+            schema = obj._schema
+
+            result = find(schema, search, by_type, [], key="top")
+            if result:
+                print(model)
+                # hfoslog(model, result)
+                pprint(result)
 
 
 def main(args, parser):
@@ -503,10 +683,20 @@ def main(args, parser):
         install_frontend(args, forcerebuild=True)
     elif args.install_modules:
         install_modules(args)
+    elif args.install_service:
+        install_service(args)
+    elif args.install_user:
+        install_user(args)
+    elif args.install_cert_self:
+        install_cert(args, selfsigned=True)
     elif args.install_all:
         install_all(args)
     elif args.uninstall:
         uninstall(args)
+    elif args.find_field:
+        find_field(args)
+    elif args.find_field_type:
+        find_field(args, by_type=True)
     else:
         parser.print_help()
 
@@ -549,6 +739,13 @@ if __name__ == "__main__":
     parser.add_argument("--dbhost", help="Define hostname for database server",
                         type=str, default='127.0.0.1:27017')
 
+    parser.add_argument("--search",
+                        help="Define search term for searches",
+                        type=str)
+    parser.add_argument("--object",
+                        help="Restrict actions to given object type",
+                        type=str)
+
     parser.add_argument("-create-module", help="Create a new module",
                         action="store_true", default=False)
 
@@ -564,6 +761,10 @@ if __name__ == "__main__":
     parser.add_argument("-install-var",
                         help="Install variable data locations",
                         action="store_true", default=False)
+    parser.add_argument("-install-cert-self",
+                        help="Generate and install self signed ssl "
+                             "certificate",
+                        action="store_true", default=False)
     parser.add_argument("-install-docs",
                         help="Install documentation",
                         action="store_true", default=False)
@@ -577,12 +778,28 @@ if __name__ == "__main__":
                         help="Install all supplied Hackerfleet modules",
                         action="store_true",
                         default=False)
+    parser.add_argument("-install-service",
+                        help="Install systemd service definition",
+                        action="store_true",
+                        default=False)
+    parser.add_argument("-install-user",
+                        help="Install system user",
+                        action="store_true",
+                        default=False)
     parser.add_argument("-install-all",
                         help="Install all necessary things",
                         action="store_true",
                         default=False)
     parser.add_argument("-uninstall",
                         help="Delete installed things and clean up",
+                        action="store_true",
+                        default=False)
+    parser.add_argument("-find-field",
+                        help="Find a field in the models",
+                        action="store_true",
+                        default=False)
+    parser.add_argument("-find-field-type",
+                        help="Find all fields by type",
                         action="store_true",
                         default=False)
 
