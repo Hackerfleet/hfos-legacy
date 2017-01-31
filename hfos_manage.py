@@ -111,6 +111,17 @@ See hfos_manage --help for more details.
 """
 
 
+def check_root():
+    if os.geteuid() != 0:
+        hfoslog("Need root access to install. Use sudo!", lvl=error)
+        hfoslog("If you installed into a virtual environment, don't forget to "
+                "specify the interpreter binary for sudo, e.g:\n"
+                "$ sudo /home/user/.virtualenv/hfos/bin/python3 "
+                "hfos_manage.py")
+
+        sys.exit(1)
+
+
 def augment_info(info):
     info['descriptionheader'] = "=" * len(info['description'])
     info['componentname'] = info['pluginname'].capitalize()
@@ -305,6 +316,8 @@ def list_users(args):
 
 
 def install_docs(args):
+    check_root()
+
     def make_docs():
         hfoslog("Generating HTML documentation", emitter='MANAGE')
 
@@ -350,6 +363,8 @@ def install_docs(args):
 
 
 def install_var(args):
+    check_root()
+
     hfoslog("Checking frontend library and cache directories",
             emitter='MANAGE')
 
@@ -410,6 +425,8 @@ def install_provisions(args):
 
 
 def uninstall(args):
+    check_root()
+
     response = ask("This will delete all data of your HFOS installation! Type"
                    "YES to continue:", default="N", showhint=False)
     if response == 'YES':
@@ -485,6 +502,8 @@ def install_modules(args):
 
 
 def install_service(args):
+    check_root()
+
     launcher = os.path.realpath(__file__).replace('manage', 'launcher')
     executable = sys.executable + " " + launcher
     executable += " --port 443 --cert /etc/ssl/certs/hfos/selfsigned.pem"
@@ -499,22 +518,34 @@ def install_service(args):
                         '/etc/systemd/system/hfos.service',
                         definitions)
 
+    Popen([
+        'systemctl',
+        'enable',
+        'hfos.service'
+    ])
+
 
 def install_user(args):
-    result = Popen(['/usr/sbin/adduser',
-                    '--system',
-                    '--quiet',
-                    '--home',
-                    '/var/run/hfos',
-                    '--group',
-                    '--disabled-password',
-                    '--disabled-login',
-                    'hfos'
-                    ])
-    hfoslog(result)
+    check_root()
+
+    Popen([
+        '/usr/sbin/adduser',
+        '--system',
+        '--quiet',
+        '--home',
+        '/var/run/hfos',
+        '--group',
+        '--disabled-password',
+        '--disabled-login',
+        'hfos'
+    ])
+
+    hfoslog("Done.")
 
 
 def install_cert(args, selfsigned=False):
+    check_root()
+
     if selfsigned:
         hfoslog('Generating self signed (insecure) certificate/key '
                 'combination')
@@ -583,6 +614,8 @@ def install_cert(args, selfsigned=False):
 
 
 def install_all(args):
+    check_root()
+
     install_user(args)
     install_cert(args)
 
