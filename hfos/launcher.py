@@ -22,14 +22,15 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
-from circuits import handler, Timer, Event
+# from circuits.app.daemon import Daemon
+from circuits import handler  # , Timer, Event
 
 from hfos.ui.builder import install_frontend
 # from hfos.schemata.component import ComponentBaseConfigSchema
 from hfos.database import initialize  # , schemastore
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
-    setup_root, verbosity, hilight
+    setup_root, verbosity, hilight, set_logfile
 
 import argparse
 import sys
@@ -40,10 +41,6 @@ import os
 # from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
-
-class dropprivs(Event):
-    pass
 
 
 def drop_privileges(uid_name='hfos', gid_name='hfos'):
@@ -99,15 +96,17 @@ class Core(ConfigurableComponent):
         }
     }
 
-    def __init__(self, insecure=False, host='localhost', port=80,
-                 certificate=None):
+    def __init__(self, args):
         super(Core, self).__init__("CORE")
         self.log("Booting. ", self.channel)
 
-        self.insecure = insecure
-        self.host = host
-        self.port = port
-        self.certificate = certificate
+        self.insecure = args.insecure
+        self.quiet = args.quiet
+        self.development = args.dev
+
+        self.host = args.host
+        self.port = args.port
+        self.certificate = certificate = args.certificate
 
         if certificate:
             if not os.path.exists(certificate):
@@ -149,6 +148,29 @@ class Core(ConfigurableComponent):
         self.update_components()
         self._write_config()
 
+        self.server = None
+
+        if self.insecure:
+            self.log("Not dropping privileges - this may be insecure!",
+                     lvl=warn)
+
+
+    @handler("started", channel="*")
+    def ready(self, source):
+        self._start_server()
+
+        if not self.insecure:
+            self._drop_privileges()
+
+    @handler("frontendbuildrequest", channel="setup")
+    def trigger_frontend_build(self, event):
+        install_frontend(forcerebuild=event.force,
+                         install=event.install,
+                         development=self.development
+                         )
+
+    def _start_server(self, *args):
+        self.log("Starting server", args, lvl=warn)
         secure = self.certificate is not None
         if secure:
             self.log("Running SSL server with cert:", self.certificate)
@@ -159,28 +181,17 @@ class Core(ConfigurableComponent):
             self.server = Server(
                 (self.host, self.port),
                 secure=secure,
-                certfile=self.certificate
+                certfile=self.certificate#,
+                #inherit=True
             ).register(self)
         except PermissionError:
             self.log('Could not open (privileged?) port, check '
                      'permissions!', lvl=critical)
 
-        if self.insecure is not True:
-            self.log("Setting five second timer to drop privileges.",
-                     lvl=debug)
-            Timer(5, dropprivs()).register(self)
-        else:
-            self.log("Not dropping privileges - this may be insecure!",
-                     lvl=warn)
-
-    @handler("frontendbuildrequest", channel="setup")
-    def trigger_frontend_build(self, event):
-        install_frontend(forcerebuild=event.force, install=event.install)
-
-    @handler("dropprivs")
-    def drop_privileges(self, *args):
+    def _drop_privileges(self, *args):
         self.log("Dropping privileges", args, lvl=warn)
         drop_privileges()
+
 
     # Moved to manage tool, maybe of interest later, though:
     #
@@ -323,12 +334,7 @@ class Core(ConfigurableComponent):
 def construct_graph(args):
     """Preliminary HFOS application Launcher"""
 
-    app = Core(
-        host=args.host,
-        port=args.port,
-        insecure=args.insecure,
-        certificate=args.cert
-    )
+    app = Core(args)
 
     setup_root(app)
 
@@ -361,7 +367,9 @@ def launch(run=True):
                         type=int, default=80)
     parser.add_argument("--host", help="Define hostname for server",
                         type=str, default='0.0.0.0')
-    parser.add_argument("--cert", help="Certificate file path",
+    parser.add_argument("--certificate",
+                        "--cert", '-c',
+                        help="Certificate file path",
                         type=str, default=None)
     parser.add_argument("--dbhost", help="Define hostname for database server",
                         type=str, default='127.0.0.1:27017')
@@ -373,9 +381,21 @@ def launch(run=True):
                                             "component graph "
                                             "after construction",
                         action="store_true")
-    parser.add_argument("--log", help="Define log level (0-100)",
+    parser.add_argument("--quiet", "-q", help="Suppress console output",
+                        action="store_true")
+    parser.add_argument("--log", help="Define console log level (0-100)",
                         type=int, default=20)
+    parser.add_argument("--logfileverbosity",
+                        help="Define file log level (0-100)",
+                        type=int, default=20)
+    parser.add_argument("--logfile", help="Logfile path",
+                        default='/tmp/hfos.log')
+    parser.add_argument("--dolog", help="Write to logfile",
+                        action="store_true")
     parser.add_argument("--debug", help="Run circuits debugger",
+                        action="store_true")
+
+    parser.add_argument("--dev", help="Run development server",
                         action="store_true")
 
     parser.add_argument("--insecure", help="Keep privileges - INSECURE",
@@ -384,8 +404,10 @@ def launch(run=True):
     args = parser.parse_args()
     # pprint(args)
 
-    verbosity['console'] = args.log
-    verbosity['global'] = args.log
+    verbosity['console'] = args.log if not args.quiet else 100
+    verbosity['global'] = min(args.log, args.logfileverbosity)
+    verbosity['file'] = args.logfileverbosity if args.dolog else 100
+    set_logfile(args.logfile)
 
     hfoslog("Running with Python", sys.version.replace("\n", ""),
             sys.platform, lvl=debug, emitter='CORE')
