@@ -14,10 +14,6 @@
     :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
-_.. image:: https://badge.fury.io/py/hfos.svg
-    _:target: http://badge.fury.io/py/hfos
-    _:alt: Pypi Package
-
 .. image:: https://badge.waffle.io/hackerfleet/hfos.svg?label=ready&title=Ready
     :target: https://waffle.io/hackerfleet/hfos
     :alt: Stories Ready
