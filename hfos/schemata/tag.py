@@ -57,11 +57,57 @@ TagSchema = {
     }
 }
 
-TagForm = [
+TagEditForm = [
     'name',
     'color',
     'notes',
     editbuttons
 ]
 
-Tag = {'schema': TagSchema, 'form': TagForm}
+TagData = {
+    'type': 'array',
+    'title': 'Tags',
+    'description': 'Attached tags',
+    'default': [],
+    'items': {
+        'type': 'object',
+        'properties': {
+            'uuid': {
+                'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
+                           'a-fA-F0-9]{4}-['
+                           'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                'type': 'string',
+                'title': 'Referenced Tag'
+            }
+        }
+
+    }
+}
+
+TagForm = {
+    'type': 'fieldset',
+    'items': [
+        {
+            'key': 'tags',
+            'add': 'Add Tag',
+            'style': {
+                'add': 'btn-success'
+            },
+            'items': [
+                {
+                    'key': 'tags[].uuid',
+                    'type': 'strapselect',
+                    'placeholder': 'Select a tag',
+                    'options': {
+                        "type": "tag",
+                        "asyncCallback": "$ctrl.getFormData",
+                        "map": {'valueProperty': "uuid",
+                                'nameProperty': 'name'}
+                    }
+                }
+            ]
+        }
+    ]
+}
+
+Tag = {'schema': TagSchema, 'form': TagEditForm}
