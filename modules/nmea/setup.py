@@ -38,7 +38,7 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=[
-          'hfos==1.1.0',
+          'hfos>=1.1.0',
           'pynmea2>=1.5.1',
           'pyserial>=3.1.1'
       ],

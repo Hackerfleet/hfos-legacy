@@ -35,10 +35,10 @@ A modern, opensource approach to library management.
 
 This software package is a plugin module for HFOS.
 """,
-      dependency_links=['https://github.com/Hackerfleet/isbntools/archive/master.zip#egg=isbntools-4.3.1.hf'],
       install_requires=[
-          'hfos==1.1.0',
-          'isbntools==4.3.3'
+          'hfos>=1.1.0',
+          'isbntools>=4.3.3',
+          'isbnlib>=3.6.6'
       ],
       entry_points="""[hfos.components]
     library=hfos.library.library:Library

@@ -38,7 +38,7 @@ This software package is a plugin module for HFOS and requires the hfos-navdata 
       dependency_links=[
       ],
       install_requires=[
-          'hfos==1.1.0',
+          'hfos>=1.1.0',
           'hfos-navdata>=0.0.1'
       ],
       entry_points=
