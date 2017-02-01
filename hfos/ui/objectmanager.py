@@ -15,7 +15,8 @@ from uuid import uuid4
 from hfos.events.system import objectcreation, objectchange, objectdeletion
 from hfos.events.client import send
 from hfos.component import ConfigurableComponent
-from hfos.database import objectmodels, collections, ValidationError, schemastore
+from hfos.database import objectmodels, collections, ValidationError, \
+    schemastore
 from hfos.logger import verbose, debug, error, warn, critical
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
@@ -96,7 +97,7 @@ class ObjectManager(ConfigurableComponent):
                         self.log("Faulty object or field: ", e, type(e),
                                  item._fields, fields, lvl=error,
                                  exc=True)
-                #self.log("Generated object list: ", objlist)
+                # self.log("Generated object list: ", objlist)
 
                 result = {'component': 'objectmanager',
                           'action': 'list',
@@ -112,13 +113,23 @@ class ObjectManager(ConfigurableComponent):
         elif action == "search":
             if schema in objectmodels.keys():
                 # objectfilter['$text'] = {'$search': str(data['search'])}
-                objectfilter = {
-                    'name': {'$regex': str(data['search']), '$options': '$i'}}
+                if 'fulltext' in data:
+                    objectfilter = {
+                        'name': {
+                            '$regex': str(data['search']),
+                            '$options': '$i'
+                        }
+                    }
+                else:
+                    if isinstance(data['search'], dict):
+                        objectfilter = data['search']
+                    else:
+                        objectfilter = {}
 
-                # if 'fields' in data:
-                #    fields = data['fields']
-                # else:
-                fields = []
+                if 'fields' in data:
+                    fields = data['fields']
+                else:
+                    fields = []
 
                 reqid = data['req']
 
@@ -129,24 +140,28 @@ class ObjectManager(ConfigurableComponent):
                              lvl=warn)
 
                 self.log("Objectfilter: ", objectfilter, ' Schema: ', schema,
+                         "Fields: ", fields,
                          lvl=warn)
                 # for item in collections[schema].find(objectfilter):
                 for item in collections[schema].find(objectfilter):
-                    # self.log("Search found item: ", item, lvl=warn)
+                    self.log("Search found item: ", item, lvl=warn)
                     try:
                         # TODO: Fix bug in warmongo that needs this workaround:
                         item = objectmodels[schema](item)
                         listitem = {'uuid': item.uuid}
-                        if 'name' in item._fields:
-                            listitem['name'] = item.name
+                        if fields in ('*', ['*']):
+                            objlist.append(item.serializablefields())
+                        else:
+                            if 'name' in item._fields:
+                                listitem['name'] = item.name
 
-                        for field in fields:
-                            if field in item._fields:
-                                listitem[field] = item._fields[field]
-                            else:
-                                listitem[field] = None
+                            for field in fields:
+                                if field in item._fields:
+                                    listitem[field] = item._fields[field]
+                                else:
+                                    listitem[field] = None
 
-                        objlist.append(listitem)
+                            objlist.append(listitem)
                     except Exception as e:
                         self.log("Faulty object or field: ", e, type(e),
                                  item._fields, fields, lvl=error)
@@ -176,7 +191,8 @@ class ObjectManager(ConfigurableComponent):
 
             if objectfilter == {}:
                 if uuid == "":
-                    self.log('Object with no filter/uuid requested:', schema, data,
+                    self.log('Object with no filter/uuid requested:', schema,
+                             data,
                              lvl=error)
                     return
                 objectfilter = {'uuid': uuid}
@@ -194,13 +210,17 @@ class ObjectManager(ConfigurableComponent):
 
                         self.log("Object not found, creating: ", data)
 
-                        storageobject = objectmodels[schema]({'uuid': str(uuid4())})
+                        storageobject = objectmodels[schema](
+                            {'uuid': str(uuid4())})
 
-                        if "useruuid" in schemastore[schema]['schema']['properties']:
+                        if "useruuid" in schemastore[schema]['schema'][
+                            'properties']:
                             storageobject.useruuid = event.user.uuid
-                            self.log("Attached initial owner's id: ", event.user.uuid)
+                            self.log("Attached initial owner's id: ",
+                                     event.user.uuid)
                     else:
-                        self.log("Object not found and not willing to create.", lvl=warn)
+                        self.log("Object not found and not willing to create.",
+                                 lvl=warn)
                         result = {
                             'component': 'objectmanager',
                             'action': 'nonexistant',
@@ -209,7 +229,8 @@ class ObjectManager(ConfigurableComponent):
                             }
                         }
             else:
-                self.log('Object for invalid schema requested!', schema, lvl=error)
+                self.log('Object for invalid schema requested!', schema,
+                         lvl=error)
 
             if storageobject:
                 self.log("Object found, delivering: ", data)
