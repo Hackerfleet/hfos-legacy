@@ -1,47 +1,79 @@
 <div class="well">
-    <ul class="nav nav-pills" role="tablist">
-        <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>
-        <li><a role="tab" ng-click="$ctrl.opentab('tasklist')" data-toggle="tab">Task List</a></li>
-        <li><a role="tab" ng-click="$ctrl.opentab('taskeditor')"><i class="fa fa-plus" aria-hidden="true"> </i> Add Task</a>
-        </li>
-    </ul>
+    <div class="taskgrid-nav navbar">
+        <ul class="nav nav-pills" role="tablist">
+            <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>
+            <li><a role="tab" ng-click="$ctrl.opentab('grideditor')" data-toggle="tab">Edit Grid</a></li>
+            <!--<li><a role="tab" ng-click="$ctrl.opentab('tasklist')" data-toggle="tab">Task List</a></li>-->
+            <li><a role="tab" ng-click="$ctrl.opentab('taskeditor')"><i class="fa fa-plus" aria-hidden="true"> </i> Add
+                Task</a>
+            <li><a role="tab" ng-click="$ctrl.opentab('taskgroupeditor')"><i class="fa fa-plus" aria-hidden="true"> </i>
+                Add Taskgroup</a>
+            </li>
+            <li class="pull-right">
+                <span class="taskGridLock"
+                      ng-click="$ctrl.toggleLock()"
+                      ng-class="{'fa-lock':!$ctrl.lockState,'fa-unlock':$ctrl.lockState}"
+                      ng-model="$ctrl.lockState"></span>
+            </li>
+        </ul>
+    </div>
 
     <!-- Tab panes -->
     <div class="tab-content">
-        <div class="tab-pane active" id="taskgrid">
 
-            <div class='container-fluid'>
-                <div class="row col-wrap" style="height: 100%;">
-                    <div ng-repeat="(key, item) in $ctrl.columns"
-                         class="col-sm-{{$ctrl.columnsize}} taskList-spacer col"
-                         ng-drop="true" ng-drop-success="$ctrl.onDropComplete($data,$event,key)">
-                        <div class="taskList">
-                            <div class="taskHeader" id="{{key}}">{{key}}</div>
-                            <div class="taskBox" ng-repeat="task in $ctrl.columns[key]" ng-show="task.name"
-                                 ng-drag="task.drag" ng-drag-data="task">
-                                <div class="taskBoxHeader">
-                                    <span style="text-align: right">{{task.priority}}</span>
-                                    <a style="text-align:right" href="#/editor/task/{{task.uuid}}/edit">
-                                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                                    </a>
-                                </div>
-                                <a ng-click="showtask(task.uuid)">
-                                    {{task.name}}
+        <div class="tab-pane active" id="taskgrid">
+            <div gridster="$ctrl.gridsterOptions">
+                <ul>
+                    <li data-gridster-item
+                        data-row="item.position.x"
+                        data-col="item.position.y"
+                        data-sizex="item.size.width"
+                        data-sizey="item.size.height"
+                        ng-repeat="item in $ctrl.taskgridconfig.cards"
+                        ng-style="{'background': $ctrl.taskgroups[item.taskgroup].color}"
+                        ng-drop="true"
+                        ng-drop-success="$ctrl.onDropComplete($data,$event,item.taskgroup)"
+                        class="taskBox">
+                        <div class="taskBoxOverlay" ng-show="$ctrl.lockState"></div>
+                        <div class="taskHeader">
+                            <h3>{{$ctrl.taskgroups[item.taskgroup].name }}
+                                <a class="pull-right" href="#/editor/taskgroup/{{item.taskgroup}}/edit">
+                                    <span class="fa fa-edit"></span>
                                 </a>
+                            </h3>
+
+                            <div class="hidden box-header-btns pull-right">
+                                <a title="settings" ng-click="$ctrl.openSettings(item)"><i
+                                        class="glyphicon glyphicon-cog"></i></a>
+                                <a title="Remove widget" ng-click="$ctrl.remove(item)"><i
+                                        class="glyphicon glyphicon-trash"></i></a>
                             </div>
                         </div>
-                    </div>
-                </div>
+                        <ul class="taskGridlist">
+                            <li class="taskBoxHeader"
+                                ng-drag="!$ctrl.lockState" ng-drag-data="task"
+                                ng-repeat="task in $ctrl.tasksByGroup[item.taskgroup]">
+                                <a href="#/editor/task/{{task.uuid}}/edit">{{task.name}}</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
-
         </div>
 
-        <div class="tab-pane" id="tasklist">
+        <div class="tab-pane" id="grideditor">
+            <div class="well">
+                <objecteditor schema="taskgridconfig" action="edit" uuid="{{$ctrl.taskgridconfiguuid}}"></objecteditor>
+            </div>
+        </div>
+
+        <!-- <div class="tab-pane" id="tasklist">
             <div class="well">
                 {{$ctrl.directiveschema}}
                 {{$ctrl.schemaname}}
             </div>
         </div>
+        -->
 
         <div class="tab-pane" id="taskeditor">
             <div class="well">
@@ -49,6 +81,11 @@
             </div>
         </div>
 
+        <div class="tab-pane" id="taskgroupeditor">
+            <div class="well">
+                <objecteditor schema="taskgroup" action="create"></objecteditor>
+            </div>
+        </div>
     </div>
 </div>
 

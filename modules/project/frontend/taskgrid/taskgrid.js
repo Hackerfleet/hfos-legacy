@@ -9,9 +9,10 @@
  */
 
 class taskgridcomponent {
-    constructor($scope, $rootScope, user, ObjectProxy, state, menu) {
+    constructor($scope, $rootScope, $timeout, user, ObjectProxy, state, menu) {
         this.scope = $scope;
         this.rootscope = $rootScope;
+        this.timeout = $timeout;
         this.user = user;
         this.state = state;
         this.op = ObjectProxy;
@@ -20,63 +21,50 @@ class taskgridcomponent {
         this.columns = {};
         this.columnsize = 4;
     
-        this.tasklist = [];
+        this.tasklist = {};
         
         this.taskgridconfig = {};
+        this.taskgridconfiguuid = "";
         this.taskgroups = {};
-        this.tasks = {};
+        this.tasksByGroup = {};
         
-        var self = this;
+        this.changetimeout = null;
+        this.lockState = false;
         
-        this.updateVisibleColumns = function() {
-            /*
-            self.items = [];
-            self.populateHeaders();
-            
-            for (var task of self.tasklist) {
-                console.log(self.columns, task.status);
-                if (self.columnsVisible[task.status] !== -1) {
-                    var newitem = {
-                        'name': task.name,
-                        'uuid': task.uuid,
-                        'drag': true,
-                        'priority': task.priority,
-                        'status': task.status,
-                        'url': 'obj/task/' + task.uuid + '/edit',
-                        'row': task.priority
-                    };
-                    self.columns[task.status].push(newitem);
-                }
+        this.gridsterOptions = {
+            // any options that you can set for angular-gridster (see:  http://manifestwebdesign.github.io/angular-gridster/)
+            columns: screen.width / 100,
+            rowHeight: 400,
+            colWidth: 100,
+            draggable: {
+                enabled: false
             }
-            
-
-            self.columnsize = 12 / Object.keys(self.columns).length;
-            console.log('COLUMNS:', self.columnsize);
-            console.log('Tasks', self.columns);
-            */
         };
+    
+        var self = this;
         
         this.switchtaskgridconfig = function (uuid) {
             self.taskgridconfiguuid = uuid;
             self.op.getObject('taskgridconfig', uuid);
         };
         
-        this.requesttaskgridconfigs = function () {
-            console.log('[TASKGRID] Getting list of taskgridconfigs');
-            self.op.getList('taskgridconfig');
-        };
-               
-        this.populateHeaders = function() {
-            /*
-            $.each(self.columnsVisible, function (key, value) {
-                if (value !== -1) {
-                    self.columns[key] = [];
-                }
-            });
-            console.log(self.items);
-            */
+        this.storeTaskGridConfig = function () {
+            console.log('[TASKGRID] Pushing taskgridconfig');
+            for (var card of self.taskgridconfig.cards) {
+                delete card['$$hashKey'];
+            }
+            self.op.putObject('taskgridconfig', self.taskgridconfig);
+        
+            self.changetimeout = null;
         };
     
+        $scope.$watch('$ctrl.taskgridconfig.cards', function (items) {
+            if (self.changetimeout !== null) {
+                self.timeout.cancel(self.changetimeout);
+            }
+            self.changetimeout = self.timeout(self.storeTaskGridConfig, 2000);
+        }, true);
+        
         this.rootscope.$on('Clientconfig.Update', function () {
             self.gettaskgridconfig();
         });
@@ -85,11 +73,34 @@ class taskgridcomponent {
             this.gettaskgridconfig();
         }
     
+        this.scope.$on('OP.Get', function (event, uuid, object, schema) {
+            if (uuid === self.taskgridconfiguuid) {
+                self.taskgridconfig = object;
+                for (let group of self.taskgridconfig.cards) {
+                    console.log('Getting taskgroup:', group);
+                    self.op.getObject('taskgroup', group.taskgroup);
+                }
+            } else if (schema === 'taskgroup') {
+                console.log('Getting tasksByGroup for taskgroup:', object);
+                self.taskgroups[object.uuid] = object;
+                self.op.searchItems('task', {taskgroup: object.uuid}, '*').then(function (tasks) {
+                    console.log('Found matching tasksByGroup:', tasks);
+    
+                    self.tasksByGroup[object.uuid] = [];
+                    for (let task of tasks.data) {
+                        console.log('Pushing task: ', task);
+                        self.tasksByGroup[object.uuid].push(task);
+                        self.tasklist[task.uuid] = task;
+                    }
+                });
+            }
+        });
+        
         this.scope.$on('OP.ListUpdate', function (event, schema) {
             if (schema === 'taskgridconfig') {
-                var taskgridconfiglist = self.op.lists.taskgridconfig;
-                var taskgridconfigmenu = [];
-                for (var taskgridconfig of taskgridconfiglist) {
+                let taskgridconfiglist = self.op.lists.taskgridconfig;
+                let taskgridconfigmenu = [];
+                for (let taskgridconfig of taskgridconfiglist) {
                     taskgridconfigmenu.push({
                         type: 'func',
                         name: taskgridconfig.uuid,
@@ -98,33 +109,39 @@ class taskgridcomponent {
                         args: taskgridconfig.uuid
                     });
                 }
-                self.menu.addMenu('taskgridconfigs', taskgridconfigmenu);
+                self.menu.addMenu('Taskgrids', taskgridconfigmenu);
             }
         });
         
         this.rootscope.$on('User.Login', function () {
             console.log('[TASKGRID] Login successful - fetching taskgridconfig data');
-            self.requesttaskgridconfigs();
+            self.gettaskgridconfig();
         });
     
         if (this.user.signedin === true) {
             console.log('[TASKGRID] Logged in - fetching taskgridconfig data');
-            this.requesttaskgridconfigs();
+            this.gettaskgridconfig();
         }
-        $scope.$on('OP.ListUpdate', function (event, schema) {
-            self.tasklist = self.op.lists[schema];
-
-            console.log(self.tasklist);
-            self.updateVisibleColumns();
-        });
-
-        this.updateVisibleColumns();
     }
     
+    toggleLock() {
+        this.lockState = !this.lockState;
+        this.gridsterOptions.draggable.enabled = this.lockState;
+    }
     
     gettaskgridconfig() {
-        console.log('[TASKGRID] Getting newly configured taskgridconfig');
-        this.taskgridconfiguuid = this.user.clientconfig.taskgridconfiguuid;
+        console.log('[TASKGRID] Getting list of taskgridconfigs');
+        this.op.getList('taskgridconfig');
+
+        console.log('[TASKGRID] Getting configured taskgridconfig');
+        let uuid = this.user.clientconfig.taskgriduuid;
+        
+        if (typeof uuid === 'undefined') {
+            uuid = this.user.profile.settings.taskgriduuid;
+        }
+        this.taskgridconfiguuid = uuid;
+        
+        console.log('[TASKGRID] Config: ', this.taskgridconfiguuid);
         this.op.getObject('taskgridconfig', this.taskgridconfiguuid);
     }
     
@@ -134,22 +151,18 @@ class taskgridcomponent {
         $('#' + tabname).addClass('active');
     }
 
-    onDropComplete(task, ev, status) {
-        console.log('DropComplete: ', task, ev, status);
-        var tasklist = this.columns[task.status];
-        console.log(this.columns[task.status]);
+    onDropComplete(task, ev, newgroup) {
+        console.log('DropComplete: ', task, ev, newgroup);
+        let oldgroup = this.tasksByGroup[task.taskgroup];
+        oldgroup.splice(oldgroup.indexOf(task), 1);
+        task.taskgroup = newgroup;
 
-        this.columns[task.status].splice(tasklist.indexOf(task), 1);
-        task.status = status;
+        this.tasksByGroup[newgroup].push(task);
 
-
-        this.columns[status].push(task);
-        console.log(this.columns);
-
-        this.op.changeObject('task', task.uuid, {'field': 'status', 'value': task.status});
+        this.op.changeObject('task', task.uuid, {'field': 'taskgroup', 'value': newgroup});
     }
 }
 
-taskgridcomponent.$inject = ['$scope', '$rootScope', 'user', 'objectproxy', '$state', 'menu'];
+taskgridcomponent.$inject = ['$scope', '$rootScope', '$timeout', 'user', 'objectproxy', '$state', 'menu'];
 
 export default taskgridcomponent;

@@ -1,0 +1,100 @@
+/*!
+ * #!/usr/bin/env python
+ * # -*- coding: UTF-8 -*-
+ *
+ * __license__ = """
+ * Hackerfleet Operating System
+ * ============================
+ * Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * """
+ */
+
+@import '../../../colors.scss';
+
+.taskgrid-nav {
+  margin-bottom: 0;
+}
+
+.taskGridLock {
+  font-size: 32px;
+}
+
+.taskGridlist {
+  list-style-type: none;
+  padding: 0;
+}
+
+.box-content {
+  overflow-y: auto;
+  text-align: left;
+}
+
+.taskList {
+  background-color: RGBA(58, 117, 168, 0.5);
+  padding: 0;
+  z-index: 11;
+  border-radius: 5px;
+}
+
+.taskBoxHeader {
+  padding: 0 2px;
+  margin: 5px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 5px;
+}
+
+.taskBox {
+  position: relative;
+  text-align: left;
+  background-color: rgba(255, 255, 255, 0.4);
+  margin: 5px;
+  border-radius: 5px;
+  z-index: 55;
+}
+
+.taskHeader {
+  text-align: left;
+  color: black;
+  font-size: larger;
+  padding: 2px;
+  margin: 2px;
+  border-radius: 5px;
+}
+
+.taskHeader span {
+  font-size: 18px;
+  margin-right: 10px;
+  color: #777;
+}
+
+.taskHeader span:hover {
+  color: $color-black;
+}
+
+.taskHeader h3 {
+  padding: 0;
+  margin: 0;
+}
+
+.taskBoxOverlay {
+  position: absolute;
+  background: rgba(64, 128, 255, 0.3);
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border-radius: 10px;
+}

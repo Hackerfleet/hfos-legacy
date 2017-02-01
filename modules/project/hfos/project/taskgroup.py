@@ -41,7 +41,7 @@ TaskGroup = {
         'tags': {'type': 'string', 'title': 'Tags',
                  'description': 'Attached tags'},
         'color': {'type': 'string', 'title': 'Task Group Color',
-                  'format': 'color',
+                  # 'format': 'color',
                   'description': 'Color used for this Task Group'},
         'priority': {'type': 'number', 'title': 'Priority',
                      'description': '1 is Highest priority', 'minimum': 1},
