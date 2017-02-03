@@ -49,10 +49,23 @@ TaskSchema = {
             'description': 'Group, this task belongs to'
         },
         'tags': TagData,
+        'alert': {'type': 'string', 'title': 'Alert',
+                  'format': 'datetimepicker',
+                  'description': 'Alert time'},
         'priority': {'type': 'number', 'title': 'Priority',
                      'description': '1 is Highest priority', 'minimum': 1},
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
                   'description': 'Entry notes'},
+        'comments': {
+            'type': 'array',
+            'default': [],
+            'items': {
+                'type': 'string',
+                'format': 'html',
+                'title': 'Comment',
+                'description': 'Comment text'
+            }
+        },
         'references': {
             'type': 'array',
             'default': [],
@@ -160,6 +173,7 @@ TaskForm = [
         ]
     },
     TagForm,
+    'alert',
     'notes',
     {
         'type': 'fieldset',
@@ -183,6 +197,21 @@ TaskForm = [
                                     'nameProperty': 'name'}
                         }
                     }
+                ]
+            }
+        ]
+    },
+    {
+        'type': 'fieldset',
+        'items': [
+            {
+                'key': 'comments',
+                'add': 'Add comment',
+                'style': {
+                    'add': 'btn-success'
+                },
+                'items': [
+                    "comments[]",
                 ]
             }
         ]
