@@ -36,6 +36,9 @@ layergroups = [
         "shared": True,
         "notes": "Imported GDAL charts",
         "layers": [
+            '2837298e-a3e8-4a2e-8df2-f475554d2f23',  # OSM
+            '2bedb0d2-be9f-479c-9516-256cd5a0baae',  # OpenSeaMap
+            '72611470-39b3-4982-8991-2ad467b06fc9'  # ESRI Satellite Shade Ovl
         ]
     }, {
         "name": "Satellite",
