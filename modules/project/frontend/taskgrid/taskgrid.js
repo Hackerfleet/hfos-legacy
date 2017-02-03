@@ -28,6 +28,9 @@ class taskgridcomponent {
         this.taskgroups = {};
         this.tasksByGroup = {};
         
+        this.tags = {};
+        this.projects = {};
+        
         this.changetimeout = null;
         this.lockState = false;
         
@@ -89,7 +92,9 @@ class taskgridcomponent {
                     self.tasksByGroup[object.uuid] = [];
                     for (let task of tasks.data) {
                         console.log('Pushing task: ', task);
-                        self.tasksByGroup[object.uuid].push(task);
+                        let visualTask = task;
+                        visualTask.showDescription = false;
+                        self.tasksByGroup[object.uuid].push(visualTask);
                         self.tasklist[task.uuid] = task;
                     }
                 });
@@ -132,7 +137,19 @@ class taskgridcomponent {
     gettaskgridconfig() {
         console.log('[TASKGRID] Getting list of taskgridconfigs');
         this.op.getList('taskgridconfig');
-
+        let self = this;
+        this.op.searchItems('project').then(function (projects) {
+            for (let project of projects.data) {
+                self.projects[project.uuid] = project;
+            }
+        });
+    
+        this.op.searchItems('tag', '', '*').then(function (tags) {
+            for (let tag of tags.data) {
+                self.tags[tag.uuid] = tag;
+            }
+        });
+        
         console.log('[TASKGRID] Getting configured taskgridconfig');
         let uuid = this.user.clientconfig.taskgriduuid;
         

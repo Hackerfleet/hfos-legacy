@@ -35,6 +35,12 @@
 .taskGridlist {
   list-style-type: none;
   padding: 0;
+  overflow: auto;
+  top: 2.5em;
+  bottom: 5px;
+  position: absolute;
+  right: 10px;
+  left: 0;
 }
 
 .box-content {
@@ -50,6 +56,7 @@
 }
 
 .taskBoxHeader {
+  position: relative;
   padding: 0 2px;
   margin: 5px;
   background-color: rgba(255, 255, 255, 0.4);
@@ -89,6 +96,26 @@
   margin: 0;
 }
 
+.tagList {
+  height: 5px;
+  position: absolute;
+  padding: 0;
+  top: -13px;
+  left: 0;
+  width: 100%;
+}
+
+.tagPill {
+  display: inline-block;
+  padding: 2px 20px;
+  border-radius: 2px;
+}
+
+.taskDescription {
+  overflow: auto;
+  max-height: 20vh;
+}
+
 .taskBoxOverlay {
   position: absolute;
   background: rgba(64, 128, 255, 0.3);
@@ -97,4 +124,23 @@
   left: -5px;
   right: -5px;
   border-radius: 10px;
+}
+
+.taskShowDesc {
+  position: absolute;
+  right: 10px;
+}
+
+.taskLabels {
+}
+
+.taskAlertTime {
+  background: $color-secondary-2-3;
+  color: $color-white;
+  border-radius: 3px;
+}
+
+.taskIcons {
+  margin-right: 5px;
+  text-align: right;
 }

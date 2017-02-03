@@ -53,7 +53,32 @@
                             <li class="taskBoxHeader"
                                 ng-drag="!$ctrl.lockState" ng-drag-data="task"
                                 ng-repeat="task in $ctrl.tasksByGroup[item.taskgroup]">
+                                <ul class="tagList">
+                                <li class="tagPill"
+                                        ng-repeat="tag in task.tags"
+                                        ng-style="{background: $ctrl.tags[tag.uuid].color}"></li>
+                                </ul>
                                 <a href="#/editor/task/{{task.uuid}}/edit">{{task.name}}</a>
+                                <span class="taskShowDesc pull-right"
+                                      ng-show="task.notes.length > 0"
+                                      ng-click="task.showDescription = !task.showDescription"
+                                      ng-class="{'fa-chevron-down':!task.showDescription,'fa-chevron-up':task.showDescription}"
+                                      ng-model="task.showDescription"></span>
+
+                                <div ng-show="task.showDescription" class="taskDescription"
+                                     ng-bind-html="$ctrl.tasklist[task.uuid].notes"></div>
+                                <div class="taskLabels">
+                                    <span class="taskProjectName"
+                                          ng-show="task.project != null"
+                                          ng-bind="$ctrl.projects[task.project].name"></span>
+                                    <span class="taskAlertTime"
+                                          ng-show="task.alert != null"><span class="fa fa-bell-o"></span>{{task.alert}}</span>
+
+                                    <div class="taskIcons">
+                                        <span class="fa fa-paperclip" title="Has {{task.references.length}} references" ng-show="task.references.length > 0"></span>
+                                        <span class="fa fa-comments" title="Has {{task.comments.length}} comments" ng-show="task.comments.length > 0"></span>
+                                    </div>
+                                </div>
                             </li>
                         </ul>
                     </li>
