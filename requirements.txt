@@ -5,6 +5,7 @@ pymongo>=3.2
 jsonschema==2.5.1
 git+https://github.com/hackerfleet/warmongo.git
 virtualenv-api>=2.1.11
+pyOpenSSL>=16.2.0
 
 # Compat
 six
