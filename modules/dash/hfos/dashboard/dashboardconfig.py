@@ -111,6 +111,7 @@ DashboardForm = [
     {
         'key': 'cards',
         'add': "Add widget",
+        'startEmpty': True,
         'style': {
             'add': "btn-success"
         },
