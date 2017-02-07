@@ -86,6 +86,7 @@ TagData = {
 
 TagForm = {
     'type': 'fieldset',
+    'startEmpty': True,
     'items': [
         {
             'key': 'tags',
