@@ -174,13 +174,22 @@ TaskForm = [
     },
     TagForm,
     'alert',
-    'notes',
+    {
+        'key': 'notes',
+        "tinymceOptions": {
+            "toolbar": [
+                "undo redo | styleselect | bold italic | link image",
+                "alignleft aligncenter alignright"
+            ]
+        }
+    },
     {
         'type': 'fieldset',
         'items': [
             {
                 'key': 'references',
                 'add': 'Add Reference',
+                'startEmpty': True,
                 'style': {
                     'add': 'btn-success'
                 },
@@ -207,6 +216,7 @@ TaskForm = [
             {
                 'key': 'comments',
                 'add': 'Add comment',
+                'startEmpty': True,
                 'style': {
                     'add': 'btn-success'
                 },
