@@ -14,17 +14,12 @@
                 </div>
                 <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
                     <div class="panel-body" style="min-height: 51vh">
-
-                        <tang-cloud on-click="$ctrl.count(id)" words="$ctrl.words" width="500"
-                                    height="50vh"></tang-cloud>
-                        <!--
                         <ul>
-                            <li ng-repeat="item in $ctrl.clouddata">
-                                <button type="button" ng-click="$ctrl.count(item.uuid)">{{ item.name }}</button>
+                            <li ng-repeat="item in $ctrl.words">
+                                <a ng-click="$ctrl.count(item.uuid)" ng-style="{'font-size': item.size + 'px'}">{{ item.name }}</a>
                             </li>
 
                         </ul>
-                        -->
                     </div>
                 </div>
             </div>
