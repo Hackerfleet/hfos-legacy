@@ -58,14 +58,14 @@ TaskGridConfigSchema = {
                                            'title': 'Associated Unique Task '
                                                     'Group ID'
                     },
-                    'size': {
+                    'position': {
                         'type': 'object',
                         'properties': {
                             'x': {'type': 'number'},
                             'y': {'type': 'number'}
                         }
                     },
-                    'position': {
+                    'size': {
                         'type': 'object',
                         'properties': {
                             'width': {'type': 'number'},
@@ -105,6 +105,7 @@ TaskGridConfigForm = [
     {
         'key': 'cards',
         'add': "Add Task Group",
+        'startEmpty': True,
         'style': {
             'add': "btn-success"
         },
@@ -119,26 +120,7 @@ TaskGridConfigForm = [
                     "map": {'valueProperty': "uuid",
                             'nameProperty': 'name'}
                 }
-            },
-            {'type': 'section',
-             'htmlClass': 'row',
-             'items': [
-                 {
-                     'type': 'section',
-                     'htmlClass': 'col-xs-4',
-                     'items': [
-                         'cards[].position'
-                     ]
-                 },
-                 {
-                     'type': 'section',
-                     'htmlClass': 'col-xs-4',
-                     'items': [
-                         'cards[].size'
-                     ]
-                 }
-             ]
-             }
+            }
         ]
     },
     'description',
