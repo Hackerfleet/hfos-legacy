@@ -138,9 +138,15 @@
   background: $color-secondary-2-3;
   color: $color-white;
   border-radius: 3px;
+  padding: 0 2px;
 }
 
 .taskIcons {
   margin-right: 5px;
   text-align: right;
+}
+
+.gridster-mobile .gridster-item {
+  position: relative;
+  min-height: 25vh;
 }
