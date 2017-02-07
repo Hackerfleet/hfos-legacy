@@ -144,7 +144,7 @@ class ObjectManager(ConfigurableComponent):
                          lvl=warn)
                 # for item in collections[schema].find(objectfilter):
                 for item in collections[schema].find(objectfilter):
-                    self.log("Search found item: ", item, lvl=warn)
+                    self.log("Search found item: ", item, lvl=verbose)
                     try:
                         # TODO: Fix bug in warmongo that needs this workaround:
                         item = objectmodels[schema](item)
