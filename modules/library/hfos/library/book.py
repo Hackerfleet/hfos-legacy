@@ -111,6 +111,7 @@ BookForm = [
         'key': 'authors',
         'title': 'Authors',
         'add': "Add author",
+        'startEmpty': True,
         'style': {
             'add': "btn-success"
         },
