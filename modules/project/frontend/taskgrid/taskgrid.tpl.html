@@ -1,16 +1,19 @@
 <div class="well">
     <div class="taskgrid-nav navbar">
         <ul class="nav nav-pills" role="tablist">
-            <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>
-            <li><a role="tab" ng-click="$ctrl.opentab('grideditor')" data-toggle="tab">Edit Grid</a></li>
+            <!-- <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>-->
             <!--<li><a role="tab" ng-click="$ctrl.opentab('tasklist')" data-toggle="tab">Task List</a></li>-->
-            <li><a role="tab" ng-click="$ctrl.opentab('taskeditor')"><i class="fa fa-plus" aria-hidden="true"> </i> Add
+            <li><a role="button" href="#/editor/taskgridconfig/{{$ctrl.taskgridconfiguuid}}/edit">
+                <i class="fa fa-gear"></i></a>
+            </li>
+            <li><a role="button" href="#/editor/taskgroup//create"><i class="fa fa-plus" aria-hidden="true"></i>
+                Taskgroup</a>
+            </li>
+            <li><a role="button" href="#/editor/task//create"><i class="fa fa-plus" aria-hidden="true"></i>
                 Task</a>
-            <li><a role="tab" ng-click="$ctrl.opentab('taskgroupeditor')"><i class="fa fa-plus" aria-hidden="true"> </i>
-                Add Taskgroup</a>
             </li>
             <li class="pull-right">
-                <span class="taskGridLock"
+                <span class="taskGridLock fa"
                       ng-click="$ctrl.toggleLock()"
                       ng-class="{'fa-lock':!$ctrl.lockState,'fa-unlock':$ctrl.lockState}"
                       ng-model="$ctrl.lockState"></span>
@@ -54,12 +57,12 @@
                                 ng-drag="!$ctrl.lockState" ng-drag-data="task"
                                 ng-repeat="task in $ctrl.tasksByGroup[item.taskgroup]">
                                 <ul class="tagList">
-                                <li class="tagPill"
+                                    <li class="tagPill"
                                         ng-repeat="tag in task.tags"
                                         ng-style="{background: $ctrl.tags[tag.uuid].color}"></li>
                                 </ul>
                                 <a href="#/editor/task/{{task.uuid}}/edit">{{task.name}}</a>
-                                <span class="taskShowDesc pull-right"
+                                <span class="taskShowDesc pull-right fa"
                                       ng-show="task.notes.length > 0"
                                       ng-click="task.showDescription = !task.showDescription"
                                       ng-class="{'fa-chevron-down':!task.showDescription,'fa-chevron-up':task.showDescription}"
@@ -72,11 +75,13 @@
                                           ng-show="task.project != null"
                                           ng-bind="$ctrl.projects[task.project].name"></span>
                                     <span class="taskAlertTime"
-                                          ng-show="task.alert != null"><span class="fa fa-bell-o"></span>{{task.alert}}</span>
+                                          ng-show="task.alert != null"><span class="fa fa-bell-o"></span>{{::task.alert}}</span>
 
                                     <div class="taskIcons">
-                                        <span class="fa fa-paperclip" title="Has {{task.references.length}} references" ng-show="task.references.length > 0"></span>
-                                        <span class="fa fa-comments" title="Has {{task.comments.length}} comments" ng-show="task.comments.length > 0"></span>
+                                        <span class="fa fa-paperclip" title="Has {{task.references.length}} references"
+                                              ng-show="task.references.length > 0"></span>
+                                        <span class="fa fa-comments" title="Has {{task.comments.length}} comments"
+                                              ng-show="task.comments.length > 0"></span>
                                     </div>
                                 </div>
                             </li>
@@ -85,32 +90,33 @@
                 </ul>
             </div>
         </div>
+        <!--
+                <div class="tab-pane" id="grideditor">
+                    <div class="well">
+                        <objecteditor schema="taskgridconfig" action="edit" uuid="{{$ctrl.taskgridconfiguuid}}"></objecteditor>
+                    </div>
+                </div>
 
-        <div class="tab-pane" id="grideditor">
-            <div class="well">
-                <objecteditor schema="taskgridconfig" action="edit" uuid="{{$ctrl.taskgridconfiguuid}}"></objecteditor>
-            </div>
-        </div>
+                <!-- <div class="tab-pane" id="tasklist">
+                    <div class="well">
+                        {{$ctrl.directiveschema}}
+                        {{$ctrl.schemaname}}
+                    </div>
+                </div>
+                -->
+        <!--
+                <div class="tab-pane" id="taskeditor">
+                    <div class="well">
+                        <objecteditor schema="task" action="create"></objecteditor>
+                    </div>
+                </div>
 
-        <!-- <div class="tab-pane" id="tasklist">
-            <div class="well">
-                {{$ctrl.directiveschema}}
-                {{$ctrl.schemaname}}
-            </div>
-        </div>
-        -->
-
-        <div class="tab-pane" id="taskeditor">
-            <div class="well">
-                <objecteditor schema="task" action="create"></objecteditor>
-            </div>
-        </div>
-
-        <div class="tab-pane" id="taskgroupeditor">
-            <div class="well">
-                <objecteditor schema="taskgroup" action="create"></objecteditor>
-            </div>
-        </div>
+                <div class="tab-pane" id="taskgroupeditor">
+                    <div class="well">
+                        <objecteditor schema="taskgroup" action="create"></objecteditor>
+                    </div>
+                </div>
+                -->
     </div>
 </div>
 
