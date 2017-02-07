@@ -18,7 +18,7 @@ class DashboardConfigCtrl {
 
         var self = this;
 
-        this.rootscope.$on('OP.ListUpdate', function (ev, schema) {
+        this.listener = this.rootscope.$on('OP.ListUpdate', function (ev, schema) {
             console.log('[DASHBOARDCONFIG] List update:', schema);
 
             if (schema === 'dashboard') {
@@ -27,6 +27,8 @@ class DashboardConfigCtrl {
                 //$scope.$apply();
             }
         });
+        
+        this.scope.$on('$destroy', this.listener);
     }
 
     selectDashboard(uuid) {

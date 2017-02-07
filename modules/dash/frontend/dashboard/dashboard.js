@@ -81,7 +81,7 @@ class Dashboard {
             self.socket.unlisten('navdata', self.handleNavdata);
         };
         
-        self.rootscope.$on('$stateChangeStart',
+        this.statechange = self.rootscope.$on('$stateChangeStart',
             function (event, toState, toParams, fromState, fromParams, options) {
                 console.log('DASH] States: ', toState, fromState);
                 if (toState != 'Dashboard') {
@@ -89,28 +89,40 @@ class Dashboard {
                 }
             });
         
-        self.scope.$on('$destroy', function () {
-        });
+        
         
         this.switchDashboard = function (uuid) {
             self.dashboarduuid = uuid;
             self.op.getObject('dashboardconfig', uuid);
         };
-        
-        this.rootscope.$on('OP.Get', function (ev, uuid) {
+    
+        this.dashboardupdate = this.rootscope.$on('OP.Get', function (ev, uuid) {
             if (uuid === self.dashboarduuid) {
                 console.log('[DASH] Received dashboard configuration');
                 self.resetDashboard();
             }
         });
-        
-        this.rootscope.$on('Clientconfig.Update', function () {
+    
+        this.loginupdate = this.rootscope.$on('User.Login', function () {
+            console.log('[DASH] Login successful - fetching dashboard data');
+            self.requestDashboards();
+        });
+    
+        this.clientconfigupdate = this.rootscope.$on('Clientconfig.Update', function () {
             self.getDashboard();
         });
         
         if (typeof user.clientconfig.dashboarduuid !== 'undefined') {
             this.getDashboard();
         }
+    
+        self.scope.$on('$destroy', function() {
+            self.stopSubscriptions()
+            self.dashboardupdate();
+            self.clientconfigupdate();
+            self.loginupdate();
+            self.statechange();
+        });
         
         this.scope.$on('OP.ListUpdate', function (event, schema) {
             if (schema === 'dashboardconfig') {
@@ -125,6 +137,7 @@ class Dashboard {
                         args: dashboard.uuid
                     });
                 }
+                self.menu.removeMenu('Dashboards');
                 self.menu.addMenu('Dashboards', dashboardmenu);
             }
         });
@@ -150,11 +163,6 @@ class Dashboard {
             console.log('[DASH] Getting list of dashboards');
             self.op.getList('dashboardconfig');
         };
-        
-        this.rootscope.$on('User.Login', function () {
-            console.log('[DASH] Login successful - fetching dashboard data');
-            self.requestDashboards();
-        });
         
         if (this.user.signedin === true) {
             console.log('[DASH] Logged in - fetching dashboard data');
