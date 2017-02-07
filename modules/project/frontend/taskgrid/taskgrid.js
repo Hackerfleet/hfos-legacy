@@ -17,10 +17,10 @@ class taskgridcomponent {
         this.state = state;
         this.op = ObjectProxy;
         this.menu = menu;
-
+        
         this.columns = {};
         this.columnsize = 4;
-    
+        
         this.tasklist = {};
         
         this.taskgridconfig = {};
@@ -41,9 +41,12 @@ class taskgridcomponent {
             colWidth: 100,
             draggable: {
                 enabled: false
+            },
+            resizable: {
+                enabled: false
             }
         };
-    
+        
         var self = this;
         
         this.switchtaskgridconfig = function (uuid) {
@@ -53,32 +56,40 @@ class taskgridcomponent {
         
         this.storeTaskGridConfig = function () {
             console.log('[TASKGRID] Pushing taskgridconfig');
+            
             for (var card of self.taskgridconfig.cards) {
                 delete card['$$hashKey'];
             }
             self.op.putObject('taskgridconfig', self.taskgridconfig);
-        
+            
             self.changetimeout = null;
         };
-    
-        $scope.$watch('$ctrl.taskgridconfig.cards', function (items) {
+        
+        this.handleGridChange = function (newVal, oldVal) {
+            if (newVal === oldVal) {
+                console.log('No actual change');
+                return;
+            }
             if (self.changetimeout !== null) {
                 self.timeout.cancel(self.changetimeout);
             }
             self.changetimeout = self.timeout(self.storeTaskGridConfig, 2000);
-        }, true);
+        };
+        
+        this.gridChangeWatcher = null;
         
         this.rootscope.$on('Clientconfig.Update', function () {
             self.gettaskgridconfig();
         });
-    
+        
         if (typeof user.clientconfig.taskgridconfiguuid !== 'undefined') {
             this.gettaskgridconfig();
         }
-    
+        
         this.scope.$on('OP.Get', function (event, uuid, object, schema) {
             if (uuid === self.taskgridconfiguuid) {
                 self.taskgridconfig = object;
+                
                 for (let group of self.taskgridconfig.cards) {
                     console.log('Getting taskgroup:', group);
                     self.op.getObject('taskgroup', group.taskgroup);
@@ -87,11 +98,8 @@ class taskgridcomponent {
                 console.log('Getting tasksByGroup for taskgroup:', object);
                 self.taskgroups[object.uuid] = object;
                 self.op.searchItems('task', {taskgroup: object.uuid}, '*').then(function (tasks) {
-                    console.log('Found matching tasksByGroup:', tasks);
-    
                     self.tasksByGroup[object.uuid] = [];
                     for (let task of tasks.data) {
-                        console.log('Pushing task: ', task);
                         let visualTask = task;
                         visualTask.showDescription = false;
                         self.tasksByGroup[object.uuid].push(visualTask);
@@ -114,6 +122,7 @@ class taskgridcomponent {
                         args: taskgridconfig.uuid
                     });
                 }
+                self.menu.removeMenu('Taskgrids');
                 self.menu.addMenu('Taskgrids', taskgridconfigmenu);
             }
         });
@@ -122,7 +131,7 @@ class taskgridcomponent {
             console.log('[TASKGRID] Login successful - fetching taskgridconfig data');
             self.gettaskgridconfig();
         });
-    
+        
         if (this.user.signedin === true) {
             console.log('[TASKGRID] Logged in - fetching taskgridconfig data');
             this.gettaskgridconfig();
@@ -132,6 +141,13 @@ class taskgridcomponent {
     toggleLock() {
         this.lockState = !this.lockState;
         this.gridsterOptions.draggable.enabled = this.lockState;
+        this.gridsterOptions.resizable.enabled = this.lockState;
+        if (this.lockState) {
+            console.log('Enabling gridwatcher');
+            this.gridChangeWatcher = this.scope.$watch('$ctrl.taskgridconfig.cards', this.handleGridChange, true);
+        } else {
+            this.gridChangeWatcher();
+        }
     }
     
     gettaskgridconfig() {
@@ -143,7 +159,7 @@ class taskgridcomponent {
                 self.projects[project.uuid] = project;
             }
         });
-    
+        
         this.op.searchItems('tag', '', '*').then(function (tags) {
             for (let tag of tags.data) {
                 self.tags[tag.uuid] = tag;
@@ -167,15 +183,19 @@ class taskgridcomponent {
         $('.nav-pills .active, .tab-content .active').removeClass('active');
         $('#' + tabname).addClass('active');
     }
-
+    
     onDropComplete(task, ev, newgroup) {
+        if (task === null) {
+            return
+        }
+        
         console.log('DropComplete: ', task, ev, newgroup);
         let oldgroup = this.tasksByGroup[task.taskgroup];
         oldgroup.splice(oldgroup.indexOf(task), 1);
         task.taskgroup = newgroup;
-
+        
         this.tasksByGroup[newgroup].push(task);
-
+        
         this.op.changeObject('task', task.uuid, {'field': 'taskgroup', 'value': newgroup});
     }
 }
