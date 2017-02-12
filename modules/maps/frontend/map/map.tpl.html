@@ -1,5 +1,11 @@
-<!-- <dashboard></dashboard> <!-- Experimental dashboard overlay -->
-<leaflet defaults="$ctrl.defaults" center="$ctrl.center" controls="$ctrl.controls" height="100%" width="100%" layers="$ctrl.layers"></leaflet>
+<dashboard hideui="true" ng-show="$ctrl.dashboardoverlay"></dashboard>
+
+<leaflet defaults="$ctrl.defaults" center="$ctrl.center" controls="$ctrl.controls" height="100%" width="100%" layers="$ctrl.leafletlayers"></leaflet>
+
+<button id="sidebargrab" type="button" ng-click="$ctrl.showSidebar()">
+    <span id="sidebargrabicon" class="fa fa-arrow-left"></span>
+</button>
+
 <div class="well hidden">
     <span>Events</span>
 
