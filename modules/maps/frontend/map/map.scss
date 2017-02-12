@@ -11,3 +11,12 @@
 .leaflet-bottom {
   bottom: 20px !important;
 }
+
+.aside {
+  z-index: 99;
+}
+
+#mapsidebar ul {
+  list-style-type: none;
+  padding-left: 10px;
+}
