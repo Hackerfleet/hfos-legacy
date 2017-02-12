@@ -39,4 +39,8 @@ UserSchema = {
     }
 }
 
-User = {'schema': UserSchema, 'form': noform}
+UserOptions = {
+    'hidden': ['passhash']
+}
+
+User = {'schema': UserSchema, 'form': noform, 'options': UserOptions}

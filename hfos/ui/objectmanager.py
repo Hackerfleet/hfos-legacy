@@ -72,6 +72,9 @@ class ObjectManager(ConfigurableComponent):
 
                 objlist = []
 
+                opts = schemastore[schema].get('options', {})
+                hidden = opts.get('hidden', [])
+
                 if objectmodels[schema].count(objectfilter) > WARNSIZE:
                     self.log("Getting a very long list of items for ", schema,
                              lvl=warn)
@@ -79,7 +82,10 @@ class ObjectManager(ConfigurableComponent):
                 for item in objectmodels[schema].find(objectfilter):
                     try:
                         if fields in ('*', ['*']):
-                            objlist.append(item.serializablefields())
+                            itemfields = item.serializablefields()
+                            for field in hidden:
+                                itemfields.pop(field, None)
+                            objlist.append(itemfields)
                         else:
                             listitem = {'uuid': item.uuid}
 
@@ -87,7 +93,8 @@ class ObjectManager(ConfigurableComponent):
                                 listitem['name'] = item._fields['name']
 
                             for field in fields:
-                                if field in item._fields:
+                                if field in item._fields and not field in \
+                                        hidden:
                                     listitem[field] = item._fields[field]
                                 else:
                                     listitem[field] = None
@@ -139,6 +146,9 @@ class ObjectManager(ConfigurableComponent):
                     self.log("Getting a very long list of items for ", schema,
                              lvl=warn)
 
+                opts = schemastore[schema].get('options', {})
+                hidden = opts.get('hidden', [])
+
                 self.log("Objectfilter: ", objectfilter, ' Schema: ', schema,
                          "Fields: ", fields,
                          lvl=warn)
@@ -150,13 +160,17 @@ class ObjectManager(ConfigurableComponent):
                         item = objectmodels[schema](item)
                         listitem = {'uuid': item.uuid}
                         if fields in ('*', ['*']):
-                            objlist.append(item.serializablefields())
+                            itemfields = item.serializablefields()
+                            for field in hidden:
+                                itemfields.pop(field, None)
+                            objlist.append(itemfields)
                         else:
                             if 'name' in item._fields:
                                 listitem['name'] = item.name
 
                             for field in fields:
-                                if field in item._fields:
+                                if field in item._fields and field not in \
+                                        hidden:
                                     listitem[field] = item._fields[field]
                                 else:
                                     listitem[field] = None
@@ -188,6 +202,9 @@ class ObjectManager(ConfigurableComponent):
                 uuid = str(data['uuid'])
             except (KeyError, TypeError):
                 uuid = ""
+
+            opts = schemastore[schema].get('options', {})
+            hidden = opts.get('hidden', [])
 
             if objectfilter == {}:
                 if uuid == "":
@@ -234,6 +251,10 @@ class ObjectManager(ConfigurableComponent):
 
             if storageobject:
                 self.log("Object found, delivering: ", data)
+
+                for field in hidden:
+                    storageobject._fields.pop(field, None)
+
                 if subscribe and uuid != "":
                     self.log('Updating subscriptions', lvl=debug)
                     if uuid in self.subscriptions:
