@@ -9,6 +9,8 @@
 
 import L from 'leaflet';
 
+import sidebar from './mapsidebar.tpl.html';
+
 import leafletoverpasslayer from 'leaflet-overpass-layer';
 import leafletdraw from 'leaflet-draw';
 import leafletterminator from 'leaflet-terminator';
@@ -25,7 +27,7 @@ import 'leaflet.zoomslider/src/L.Control.Zoomslider.css';
 
 class mapcomponent {
     
-    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert, clipboard, navdata) {
+    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert, clipboard, navdata, $compile, $aside) {
         this.scope = scope;
         this.leaflet = leafletData;
         this.op = objectproxy;
@@ -38,8 +40,27 @@ class mapcomponent {
         this.clipboard = clipboard;
         this.navdata = navdata;
         
+        this.mapviews = null;
+        this.geoobjects = null;
+        
+        this.baseLayer = null;
+        
         this.drawnLayer = '';
         this.map = '';
+        
+        this.leafletlayers = {
+            overlays: {
+                draw: {
+                    name: 'draw',
+                    type: 'group',
+                    visible: true,
+                    layerParams: {
+                        showOnSelector: false
+                    }
+                }
+            },
+            baselayers: {}
+        };
         
         this.host = 'http';
         if (socket.protocol === 'wss') {
@@ -80,7 +101,7 @@ class mapcomponent {
         
         this.terminator = null;
         this.grid = null;
-
+        
         this.copyCoordinates = function (e) {
             console.log(e);
             self.clipboard.copyText(e.latlng);
@@ -102,13 +123,13 @@ class mapcomponent {
             var url = 'http://www.openstreetmap.org/edit?editor=id#map=', //52_17_28_N_5_32_32_E';
                 lat = e.latlng.lat,
                 lng = e.latlng.lng;
-    
+            
             url = url + self.map.getZoom() + '/' + lat.toString() + '/' + lng.toString();
             console.log(url);
             window.open(url, '_blank');
             window.focus();
         };
-            
+        
         this.openGeohack = function (e) {
             var url = 'https://tools.wmflabs.org/geohack/geohack.php?params=', //52_17_28_N_5_32_32_E';
                 lat = e.latlng.lat,
@@ -116,7 +137,7 @@ class mapcomponent {
             
             function getDegrees(angle) {
                 var degrees = Math.floor(angle),
-                    minutes = Math.floor(60*(angle - degrees)),
+                    minutes = Math.floor(60 * (angle - degrees)),
                     seconds = Math.floor(3600 * (angle - degrees) - 60 * minutes);
                 return degrees + "_" + minutes + "_" + seconds;
             }
@@ -134,12 +155,12 @@ class mapcomponent {
             } else {
                 url = url + "W"
             }
-    
+            
             console.log(url);
             window.open(url, '_blank');
             window.focus();
         };
-    
+        
         this.defaults = {
             map: {
                 contextmenu: true,
@@ -185,16 +206,7 @@ class mapcomponent {
                     }
                 }
             },
-            overlays: {
-                draw: {
-                    name: 'draw',
-                    type: 'group',
-                    visible: true,
-                    layerParams: {
-                        showOnSelector: false
-                    }
-                }
-            }
+            overlays: {}
         };
         
         this.events = {
@@ -213,6 +225,10 @@ class mapcomponent {
                 self.clearLayers();
             } else if (schema === 'geoobject') {
                 console.log('I think this is relevant: ', obj);
+    
+                var myLayer = L.geoJson().addTo(self.map);
+                console.log('This strange thing:', myLayer);
+                myLayer.addData(obj.geojson);
             } else if (schema === 'layergroup') {
                 console.log('Layergroup received:', obj);
                 
@@ -226,6 +242,7 @@ class mapcomponent {
             } else if (schema === 'layer') {
                 console.log('Received layer object: ', obj);
                 self.addLayer(objuuid);
+                self.renderLayerMenu();
             }
         });
         
@@ -236,6 +253,10 @@ class mapcomponent {
         
         this.addLayer = function (uuid) {
             var layer = self.op.objects[uuid];
+            if (layer.layerOptions.minZoom == null || layer.layerOptions.maxZoom == null) {
+                layer.layerOptions.minZoom = 0;
+                layer.layerOptions.maxZoom = 17;
+            }
             layer.url = layer.url.replace('http://hfoshost/', self.host);
             
             console.log('Adding layer:', layer);
@@ -265,6 +286,29 @@ class mapcomponent {
             }
         };
         
+        this.switchLayer = function (type, uuid) {
+            console.log('[MAP] Current Layers:', self.layers);
+            if (type == 'baselayers') {
+                console.log('[MAP] Switching base layer: ', uuid);
+                this.baseLayer = uuid;
+                this.leafletlayers.baselayers = {};
+                this.leafletlayers.baselayers[uuid] = this.layers.baselayers[uuid];
+            } else {
+                console.log('[MAP] Switching overlay: ', uuid);
+                var overlays = this.leafletlayers.overlays;
+                if (overlays.hasOwnProperty(uuid)) {
+                    delete overlays[uuid];
+                } else {
+                    var layer = this.layers.overlays[uuid];
+                    layer.visible = true;
+                    console.log('[MAP] New overlay:', layer);
+                    overlays[uuid] = layer;
+                }
+            }
+            console.log('LAYERS:', self.leafletlayers);
+        };
+        
+        
         this.switchLayergroup = function (uuid) {
             console.log('Switching to new layergroup: ', uuid);
             self.op.getObject('layergroup', uuid);
@@ -274,6 +318,10 @@ class mapcomponent {
             console.log('Switching to new mapview: ', uuid);
             self.mapviewuuid = uuid;
             self.op.getObject('mapview', uuid);
+        };
+        
+        this.switchGeoobject = function (uuid) {
+            this.op.getObject('geoobject', uuid)
         };
         
         this.getLayergroups = function () {
@@ -291,18 +339,19 @@ class mapcomponent {
                 var list = self.op.lists.geoobject;
                 
                 console.log('Map received a list of geoobjects: ', schema, list);
+                self.geoobjects = list;
                 
-                for (var item of list) {
+                /*for (var item of list) {
                     console.log('Item:', item);
                     console.log('Layer:', self.drawnLayer);
-                    
-                    
+    
+    
                     var myLayer = L.geoJson().addTo(self.map);
                     console.log('This strange thing:', myLayer);
                     myLayer.addData(item.geojson);
                     
                     //self.drawnLayer.addData(item.geojson);
-                }
+                }*/
             }
             if (schema === 'layergroup') {
                 var grouplist = self.op.lists.layergroup;
@@ -316,29 +365,11 @@ class mapcomponent {
                         args: group.uuid
                     });
                 }
+                self.menu.removeMenu('Layergroups');
                 self.menu.addMenu('Layergroups', layermenu);
             }
             if (schema === 'mapview') {
-                var mapviewlist = self.op.lists.mapview;
-                var mapviewmenu = [];
-                for (var mapview of mapviewlist) {
-                    var icon='';
-
-                    if (mapview.viewtype == 'vessel') {
-                        icon = '<i class="fa fa-ship menu-icon-tiny"></i>';
-                    } else {
-                        icon = '<i class="fa fa-user menu-icon-tiny"></i>';
-                    }
-
-                    mapviewmenu.push({
-                        type: 'func',
-                        name: mapview.uuid,
-                        text: icon + mapview.name,
-                        callback: self.switchMapview,
-                        args: mapview.uuid
-                    });
-                }
-                self.menu.addMenu('Mapviews', mapviewmenu);
+                self.mapviews = self.op.lists.mapview;
             }
         });
         
@@ -425,6 +456,17 @@ class mapcomponent {
             self.op.unsubscribeObject(self.mapviewuuid, 'mapview');
         };
         
+        var mapsidebar = $aside({scope: this.scope, template: sidebar, backdrop: false, show: true});
+        
+        this.showSidebar = function (event) {
+            console.log('[MAP] Opening sidebar: ', mapsidebar);
+            
+            mapsidebar.$promise.then(function () {
+                console.log("[MAP] Sidebar:", mapsidebar);
+                mapsidebar.show();
+            });
+        };
+        
         var mapEvents = self.events.map.enable;
         
         var handleEvent = function (event) {
@@ -436,9 +478,9 @@ class mapcomponent {
                         self.syncToMapview();
                     }
                 } else if (event.name === 'leafletDirectiveMap.dblclick') {
-                    console.log(self.layers);
+                    //console.log(self.layers);
                 } else if (event.name === 'leafletDirectiveMap.mousemove') {
-                    console.log(event);
+                    //console.log(event);
                 }
             }
             if (event.name === 'leafletDirectiveMap.mousemove') {
@@ -565,9 +607,34 @@ class mapcomponent {
                 title: 'Toggle synchronization to ship'
             });
             
+            self.toggledash = L.easyButton({
+                id: 'btn_toggledash',
+                states: [{
+                    stateName: 'nodash',
+                    icon: 'fa-tachometer',
+                    onClick: function (control) {
+                        console.log('[MAP] Enabling Dashboard');
+                        self.dashboardoverlay = true;
+                        $('#btn_toggledash').css({'color': '#000'});
+                        control.state('dash');
+                    }
+                }, {
+                    stateName: 'dash',
+                    icon: 'fa-tachometer',
+                    onClick: function (control) {
+                        console.log('[MAP] Disabling Dashboard');
+                        self.dashboardoverlay = false;
+                        $('#btn_toggledash').css({'color': '#aaa'});
+                        control.state('nodash');
+                    }
+                }],
+                title: 'Toggle dashboard overlay'
+            });
+            
             self.toggledraw.addTo(map);
             self.togglefollow.addTo(map);
             self.togglesync.addTo(map);
+            self.toggledash.addTo(map);
             
             leafletData.getLayers().then(function (baselayers) {
                 var drawnItems = baselayers.overlays.draw;
@@ -736,7 +803,7 @@ class mapcomponent {
                 }],
                 title: 'Toggle radio range display of nearby vessels'
             });
-    
+            
             self.togglevesseldisplay.addTo(map);
             self.toggleradiorange.addTo(map);
             
@@ -766,7 +833,7 @@ class mapcomponent {
                                  target[0] = Math.asin( Math.sin(coords[0])*Math.cos(d/R) + Math.cos(coords[0])*Math.sin(d/R)*Math.cos(course) );
                                  target[1] = coords[1] + Math.atan2(Math.sin(course)*Math.sin(d/R)*Math.cos(coords[0]), Math.cos(d/R)-Math.sin(coords[0])*Math.sin(target
                                  */
-                                        
+                                
                                 var lat1 = Geo.parseDMS(vessel.coords[0]);
                                 var lon1 = Geo.parseDMS(vessel.coords[1]);
                                 var brng = Geo.parseDMS(vessel.course);
@@ -812,22 +879,22 @@ class mapcomponent {
             
             function UpdateMapMarker() {
                 console.log('Getting current Vessel position');
-    
+                
                 Coords = response.coords;
                 Course = response.course;
                 console.log('Coords: ' + Coords + ' Course:' + Course);
-    
+                
                 courseplot.addLatLng(Coords);
                 plotted = courseplot.getLatLngs();
-    
+                
                 if (plotted.length > 50) {
                     courseplot.spliceLatLngs(0, 1);
                 }
-    
+                
                 VesselMarker.setLatLng(Coords);
                 VesselMarker.options.angle = Course;
                 VesselMarker.update();
-    
+                
                 if ($('#cb_show_radiorange').is(':checked')) {
                     if (RangeDisplay == false) {
                         var circle = L.circle(Coords, Radiorange, {
@@ -854,6 +921,6 @@ class mapcomponent {
     
 }
 
-mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard', 'navdata'];
+mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard', 'navdata', '$compile', '$aside'];
 
 export default mapcomponent;
