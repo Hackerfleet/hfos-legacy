@@ -13,9 +13,9 @@ import configtemplate from './config.tpl.html';
  */
 class Dashboard {
     
-    constructor($scope, rootscope, $modal, navdata, user, objectproxy, socket, menu, $timeout) {
+    constructor($scope, $rootscope, $stateParams, $modal, navdata, user, objectproxy, socket, menu, $timeout) {
         this.scope = $scope;
-        this.rootscope = rootscope;
+        this.rootscope = $rootscope;
         this.$modal = $modal;
         this.navdata = navdata;
         this.user = user;
@@ -24,6 +24,7 @@ class Dashboard {
         this.menu = menu;
         this.timeout = $timeout;
         
+    
         this.humanize = humanizeDuration;
         
         this.now = new Date() / 1000;
@@ -32,12 +33,26 @@ class Dashboard {
             // any options that you can set for angular-gridster (see:  http://manifestwebdesign.github.io/angular-gridster/)
             columns: screen.width / 75,
             rowHeight: 75,
-            colWidth: 75
+            colWidth: 75,
+            floating: false
         };
         
         this.changetimeout = null;
+    
+        if (typeof this.uuid === 'undefined') {
+            this.dashboarduuid = $stateParams.uuid;
+        } else {
+            this.dashboarduuid = this.uuid;
+        }
         
-        this.dashboarduuid = user.clientconfig.dashboarduuid;
+        if (typeof this.hideui === 'undefined') {
+            this.hideui = false;
+        }
+    
+        if (typeof this.dashboarduuid === 'undefined') {
+            this.dashboarduuid = user.clientconfig.dashboarduuid;
+        }
+    
         this.dashboard = {};
         
         this.sensed = [];
@@ -271,6 +286,6 @@ class Dashboard {
     }
 }
 
-Dashboard.$inject = ['$scope', '$rootScope', '$modal', 'navdata', 'user', 'objectproxy', 'socket', 'menu', '$timeout'];
+Dashboard.$inject = ['$scope', '$rootScope', '$stateParams', '$modal', 'navdata', 'user', 'objectproxy', 'socket', 'menu', '$timeout'];
 
 export default Dashboard;

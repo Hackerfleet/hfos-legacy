@@ -1,5 +1,11 @@
-<div class="jumbotron" style="padding-top: 5px">
-    <ul class="nav nav-pills" role="tablist">
+<div id="dashboardjumbo"
+     class="jumbotron"
+     style="padding-top: 5px"
+     ng-style="{position: $ctrl.hideui && 'absolute' || 'relative'}">
+    {{$ctrl.hideui}}
+    <ul class="nav nav-pills"
+        role="tablist"
+        ng-style="{display: $ctrl.hideui && 'none' || 'block'}">
         <li class="active"><a role="tab" ng-click="$ctrl.opentab('dashboard')" data-toggle="tab">Dashboard</a></li>
         <li><a role="tab" ng-click="$ctrl.opentab('sensed')" data-toggle="tab">Received Sensordata</a></li>
         <li class="hidden"><a role="tab" ng-click="$ctrl.configureCards()">Configure Dashboard</a></li>
@@ -7,7 +13,8 @@
     </ul>
 
     <!-- Tab panes -->
-    <div class="tab-content">
+    <div class="tab-content"
+         ng-style="{position: $ctrl.hideui && 'absolute' || 'relative'}">
         <div class="tab-pane active" id="dashboard">
             <div gridster="$ctrl.gridsterOptions">
                 <ul>

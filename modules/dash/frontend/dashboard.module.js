@@ -19,7 +19,7 @@ import dynamiccontroller from './dashboard/directives/dynamiccontroller.js';
 export default angular
     .module('main.app.dashboard', [uirouter])
     .config(routing)
-    .component('dashboard', {controller: dashboardcomponent, template: template})
+    .component('dashboard', {controller: dashboardcomponent, template: template, bindings: {uuid: '@', hideui: '@'}})
     .controller('digitalreadout', digitalreadout)
     .controller('simplebarreadout', simplebarreadout)
     .controller('historybarreadout', historybarreadout)
