@@ -724,7 +724,7 @@ def main(args, parser):
     elif args.install_var:
         install_var(args)
     elif args.install_frontend:
-        install_frontend(args, forcerebuild=True)
+        install_frontend(args, forcerebuild=True, development=args.dev)
     elif args.install_modules:
         install_modules(args)
     elif args.install_service:
@@ -789,6 +789,8 @@ if __name__ == "__main__":
     parser.add_argument("--object",
                         help="Restrict actions to given object type",
                         type=str)
+    parser.add_argument("--dev", help="Use development location for frontend",
+                        action="store_true", default=False)
 
     parser.add_argument("-create-module", help="Create a new module",
                         action="store_true", default=False)
