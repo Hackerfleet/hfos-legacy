@@ -1,3 +1,5 @@
+@import '../../../colors';
+
 .leaflet-control-container > div {
   z-index: 30;
 }
@@ -14,6 +16,33 @@
 
 .aside {
   z-index: 99;
+}
+
+.layer-toggle {
+  color: $color-link;
+  width: 20px;
+  font-size: 18px;
+  vertical-align: bottom;
+}
+
+.leaflet-control-layers {
+  display: none;
+}
+
+.leaflet-grid-label .gridlabel-vert {
+  margin-left: 8px;
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+.leaflet-grid-label .gridlabel-vert,
+.leaflet-grid-label .gridlabel-horiz {
+  padding-left:2px;
+  mix-blend-mode: difference;
+  text-shadow: -1px -1px 0 $color-gray-light,
+               1px -1px 0 $color-gray-light,
+               -1px 1px 0 $color-gray-light,
+               1px 1px $color-gray-light;
 }
 
 #mapsidebar ul {
