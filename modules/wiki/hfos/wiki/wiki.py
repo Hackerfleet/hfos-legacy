@@ -72,6 +72,10 @@ class Wiki(ConfigurableComponent):
         index = wikipage.find_one({'name': 'Index'})
         index.html = "<ul>"
         for item in wikipage.find(sort=[("name", pymongo.DESCENDING)]):
+            try:
+                title = item.title
+            except AttributeError:
+                title = item.name
             index.html += '<li><a href="#/wiki/' + item.name + '">' + \
-                          item.title + '</a></li>'
+                          title + '</a></li>'
         index.save()

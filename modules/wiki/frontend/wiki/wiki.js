@@ -9,7 +9,7 @@ class wikicomponent {
         this.rootscope = $rootScope;
         this.alert = alert;
         
-        if (stateparams.name === ":name") {
+        if (stateparams.name === "*name") {
             this.pagename = 'Home';
         } else {
             this.pagename = stateparams.name;
@@ -77,7 +77,7 @@ class wikicomponent {
             if (schema === 'wikipage') {
                 console.log('[WIKI] Got a wikipage: ', obj, 'looking for:', self.pagename);
                 if (obj.name == self.pagename) {
-                    if (obj.title.startsWith('#redirect')) {
+                    if (typeof obj.title !== 'undefined' && obj.title.startsWith('#redirect')) {
                         console.log('[WIKI] Redirect hit, fetching new page.');
                         
                         self.note = 'Redirected from <a href="#/editor/wikipage/' +
