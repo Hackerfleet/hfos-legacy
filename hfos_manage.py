@@ -37,6 +37,7 @@ from pprint import pprint
 from hfos.ui.builder import install_frontend
 from hfos.logger import verbose, debug, warn, error, critical, verbosity, \
     hfoslog
+import getpass
 
 # 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
 try:
@@ -54,13 +55,6 @@ try:
 except NameError:
     unicode = str
 
-# Database salt
-try:
-    # TODO: Must be synchronized with hfos.ui.auth.Authenticator.salt!
-    # Currently this is set to a static value (no good,but better than nothing)
-    salt = 'FOOBAR'.encode('utf-8')
-except UnicodeEncodeError:
-    salt = u'FOOBAR'
 
 servicetemplate = 'hfos.service'
 
@@ -205,7 +199,7 @@ def create_module(args):
         else:
             hfoslog("Target exists! Use --clear to delete it first.",
                     emitter='MANAGE')
-            sys.exit(-1)
+            sys.exit(2)
 
     done = False
     info = None
@@ -226,8 +220,8 @@ def ask_password():
     password_trial = ""
 
     while password != password_trial:
-        password = ask("Enter password: ")
-        password_trial = ask("Repeat password: ")
+        password = getpass.getpass()
+        password_trial = getpass.getpass(prompt="Repeat:")
         if password != password_trial:
             print("\nPasswords do not match!")
 
@@ -235,6 +229,21 @@ def ask_password():
 
 
 def get_credentials(args):
+
+    # Database salt
+    from hfos import database
+
+    database.initialize(args.dbhost)
+    systemconfig = database.objectmodels['systemconfig'].find_one({'active':
+                                                                       True})
+    try:
+        salt = systemconfig.salt.encode('ascii')
+    except (KeyError, AttributeError):
+        hfoslog('No systemconfig or it is without a salt! '
+                'Reinstall the system provisioning with'
+                'hfos_manage.py -install-provisions -p system')
+        sys.exit(3)
+
     if not args.username:
         username = ask("Please enter username: ")
     else:
