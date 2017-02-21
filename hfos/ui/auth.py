@@ -15,12 +15,12 @@ from uuid import uuid4
 from circuits import handler
 from hfos.events.client import authentication, send
 from hfos.component import ConfigurableComponent
-from hfos.database import objectmodels
+from hfos.database import objectmodels, makesalt
 from hfos.logger import error, warn, debug, verbose
 from hashlib import sha512
+from random import randint
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
 
 
 class Authenticator(ConfigurableComponent):
@@ -34,9 +34,21 @@ class Authenticator(ConfigurableComponent):
 
     def __init__(self, *args):
         super(Authenticator, self).__init__('AUTH', *args)
+        #self.log(objectmodels['systemconfig'], lvl=error)
 
-        # TODO: Generate and store this upon first instantiation:
-        self.salt = "FOOBAR".encode("utf-8")
+        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
+
+
+        # TODO: Decouple systemconfig creation from authenticator
+        try:
+            salt = systemconfig.salt.encode('ascii')
+            self.log('Using active systemconfig salt')
+        except (KeyError, AttributeError):
+            self.log('No active system configuration found!', lvl=error)
+            salt = makesalt().encode('ascii')
+
+        self.salt = salt
+
 
     def makehash(self, word):
         self.log("TYPE: ", type(word))
@@ -110,18 +122,27 @@ class Authenticator(ConfigurableComponent):
             self.log("Auth request for ", event.username,
                      event.clientuuid)
 
+            # TODO: Move registration to its own part
             # TODO: Define the requirements for secure passwords etc.
-            # TODO: Notify problems here back to the frontend
+
             if (len(event.username) < 3) or (len(event.password) < 3):
                 self.log("Illegal username or password received, "
                          "login cancelled",
                          lvl=warn)
+                notification = {
+                    'component': 'auth',
+                    'action': 'fail',
+                    'data': 'Password or username too short'
+                }
+                self.fireEvent(send(event.clientuuid, notification,
+                                    sendtype='client'))
                 return
 
             useraccount = None
             clientconfig = None
             userprofile = None
 
+            # TODO: Notify problems here back to the frontend
             try:
                 useraccount = objectmodels['user'].find_one({
                     'name': event.username
@@ -168,7 +189,8 @@ class Authenticator(ConfigurableComponent):
                         clientconfig = objectmodels['client']()
                         clientconfig.uuid = event.clientuuid
                         clientconfig.name = "New client"
-                        clientconfig.description = "New client configuration from " + useraccount.name
+                        clientconfig.description = "New client configuration " \
+                                                   "from " + useraccount.name
                         clientconfig.useruuid = useraccount.uuid
                         # TODO: Make sure the profile is only saved if the
                         # client could store it, too
@@ -202,8 +224,11 @@ class Authenticator(ConfigurableComponent):
 
                 self.log("Done with Login request", lvl=debug)
 
-            else:
+            elif self.systemconfig.allowregister:
                 self.createuser(event)
+            else:
+                self.log('User not found and system configuration does not '
+                         'allow new users to be created', lvl=warn)
 
     def createuser(self, event):
         self.log("Creating user")
