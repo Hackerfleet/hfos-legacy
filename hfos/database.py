@@ -27,6 +27,7 @@ from hfos.logger import hfoslog, debug, warn, critical, verbose
 from jsonschema import ValidationError  # NOQA
 from pkg_resources import iter_entry_points, DistributionNotFound
 from pprint import pprint
+from random import choice
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -35,6 +36,15 @@ warmongo.connect("hfos")
 schemastore = None
 objectmodels = None
 collections = None
+
+
+def makesalt():
+    alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    chars = []
+    for i in range(16):
+        chars.append(choice(alphabet))
+
+    return "".join(chars)
 
 
 def clear_all():
