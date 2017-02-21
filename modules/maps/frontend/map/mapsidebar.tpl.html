@@ -8,15 +8,23 @@
             <div id="mapsidebar" class="aside-body bs-sidebar" style="float:right;">
                 <uib-tabset active="active">
                     <uib-tab index="0" heading="Layers">
-                        <span>Base layer:</span><span ng-bind="$ctrl.layers.baselayers[$ctrl.baseLayer].name"></span>
-
                         <ul class="layer-overview">
                             <li ng-repeat="(name, layers) in $ctrl.layers">
                                 <h4>{{name == 'baselayers' && 'Base ' || 'Overlay '}} Layers</h4>
                                 <ul class="layer-list">
                                     <li ng-repeat="(uuid, layer) in $ctrl.layers[name]">
                                         <!-- {{layer}} -->
-                                        <a ng-click="$ctrl.switchLayer(name, uuid)"><span ng-bind="layer.name"></span></a>
+
+                                        <a ng-click="$ctrl.switchLayer(name, uuid)">
+                                            <span class="layer-toggle fa"
+                                                  ng-class="
+                                                  {'fa-square-o': name == 'overlays' && !$ctrl.leafletlayers[name].hasOwnProperty(uuid),
+                                                   'fa-check-square-o': name == 'overlays' && $ctrl.leafletlayers[name].hasOwnProperty(uuid),
+                                                   'fa-circle-o': name == 'baselayers' && !$ctrl.leafletlayers[name].hasOwnProperty(uuid),
+                                                   'fa-dot-circle-o': name == 'baselayers' && $ctrl.leafletlayers[name].hasOwnProperty(uuid)
+                                                   }"></span>
+                                            <span ng-bind="layer.name"></span>
+                                        </a>
                                         <div class="pull-right">
                                             <a href="#/editor/layer/{{layer.uuid}}/edit"><span class="fa fa-pencil"></span></a>
                                             <a href="#/editor/layer/{{layer.uuid}}/copy"><span
@@ -24,6 +32,7 @@
                                         </div>
                                         <slider ng-show="name == 'overlays'"
                                                 ng-model="layer.layerOptions.opacity"
+                                                tooltip="hide"
                                                 step="0.1"
                                                 min="0"
                                                 max="1">
@@ -39,7 +48,14 @@
                     <uib-tab index="1" heading="Mapviews">
                         <ul>
                             <li ng-repeat="(name, mapview) in $ctrl.mapviews">
-                                <a ng-click="$ctrl.switchMapview(mapview.uuid)"><span ng-bind="mapview.name"></span></a>
+                                <a ng-click="$ctrl.switchMapview(mapview.uuid)">
+                                    <span class="layer-toggle fa"
+                                          ng-class="
+                                                  {'fa-circle-o': $ctrl.mapviewuuid != mapview.uuid,
+                                                   'fa-dot-circle-o': $ctrl.mapviewuuid == mapview.uuid
+                                                   }"></span>
+                                    <span ng-bind="mapview.name"></span>
+                                </a>
                                 <div class="pull-right">
                                     <a href="#/editor/mapview/{{mapview.uuid}}/edit"><span class="fa fa-pencil"></span></a>
                                     <a href="#/editor/mapview/{{mapview.uuid}}/copy"><span
