@@ -39,6 +39,8 @@ TaskSchema = {
             'title': 'Project which this task is part of'},
         'creator': {'type': 'string', 'title': 'Creator',
                     'description': 'Creator of Task'},
+        'assignee': {'type': 'string', 'title': 'Assignee',
+                     'description': 'Assigned user'},
         'owneruuid': {'type': 'string', 'minLength': 36,
                       'title': "Owner's Unique ID", 'description': 'HIDDEN'},
         'taskgroup': {
@@ -146,6 +148,33 @@ TaskForm = [
                         'placeholder': 'Select a Project',
                         'options': {
                             "type": "project",
+                            "asyncCallback": "$ctrl.getFormData",
+                            "map": {'valueProperty': "uuid",
+                                    'nameProperty': 'name'}
+                        }
+                    }
+                ]
+            },
+            {
+                'type': 'section',
+                'htmlClass': 'col-xs-6',
+                'items': [
+                    {
+                        'key': 'owneruuid',
+                        'type': 'strapselect',
+                        'placeholder': 'Select a new Owner',
+                        'options': {
+                            "type": "user",
+                            "asyncCallback": "$ctrl.getFormData",
+                            "map": {'valueProperty': "uuid",
+                                    'nameProperty': 'name'}
+                        }
+                    }, {
+                        'key': 'assignee',
+                        'type': 'strapselect',
+                        'placeholder': 'Select an Assignee',
+                        'options': {
+                            "type": "user",
                             "asyncCallback": "$ctrl.getFormData",
                             "map": {'valueProperty': "uuid",
                                     'nameProperty': 'name'}
