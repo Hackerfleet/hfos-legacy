@@ -51,13 +51,16 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
 
 # TODO: Installation of frontend requirements is currently disabled
 def install_frontend(forcereload=False, forcerebuild=False,
-                     forcecopy=True, install=True):
+                     forcecopy=True, install=True, development=False):
     hfoslog("Updating frontend components", emitter='MANAGE')
     components = {}
     loadable_components = {}
     # TODO: Fix this up, it is probably not a sane way to get at the real root
-    frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
-        __file__)) + "../../../frontend")
+    if development:
+        frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
+            __file__)) + "../../../frontend")
+    else:
+        frontendroot = '/opt/hfos/frontend'
     frontendtarget = '/var/lib/hfos/frontend'
 
     if install:
