@@ -15,21 +15,26 @@ from hfos.schemata.defaultform import savebutton
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-
 SystemconfigSchema = {
     'id': '#systemconfig',
     'type': 'object',
     'name': 'systemconfig',
     'properties': {
         'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
             'type': 'string',
             'title': 'Unique System ID'
         },
         'active': {
             'type': 'boolean', 'title': 'Active configuration',
-            'description': 'Determines which configuration will be used. Only one can be active.',
+            'description': 'Determines which configuration will be used. '
+                           'Only one can be active.',
             'default': False
+        },
+        'salt': {
+            'type': 'string', 'minLength': 1, 'title': 'Salt',
+            'description': 'System hashing salt'
         },
         'name': {
             'type': 'string', 'minLength': 1, 'title': 'Name',
@@ -40,6 +45,9 @@ SystemconfigSchema = {
             'title': 'Description',
             'description': 'System description'
         },
+        'allowregister': {'type': 'boolean', 'title': 'Registration open',
+                          'description': 'Allow self registration of new '
+                                         'users'},
         'owneruuid': {
             'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
                        'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
@@ -95,4 +103,9 @@ SystemconfigForm = [
     savebutton
 ]
 
-Systemconfig = {'schema': SystemconfigSchema, 'form': SystemconfigForm}
+SystemconfigOptions = {
+    'hidden': ['salt']
+}
+
+Systemconfig = {'schema': SystemconfigSchema, 'form': SystemconfigForm,
+                'options': SystemconfigOptions}
