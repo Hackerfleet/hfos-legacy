@@ -19,9 +19,14 @@ import leafletrotatedmarker from 'leaflet-rotatedmarker';
 import leafleteasybutton from 'leaflet-easybutton';
 import zoomslider from 'leaflet.zoomslider';
 import contextmenu from 'leaflet-contextmenu';
-// import leafletgrid from 'Leaflet.Grid/L.Grid';
 
 // import 'Leaflet.Grid/L.Grid.css';
+// import leafletgrid from 'Leaflet.Grid/L.Grid';
+
+//import 'leaflet.simplegraticule/L.SimpleGraticule.css';
+import 'leaflet.simplegraticule/L.SimpleGraticule.js';
+
+
 import 'leaflet-easybutton/src/easy-button.css';
 import 'leaflet.zoomslider/src/L.Control.Zoomslider.css';
 
@@ -47,6 +52,8 @@ class mapcomponent {
         
         this.drawnLayer = '';
         this.map = '';
+    
+        let self = this;
         
         this.leafletlayers = {
             overlays: {
@@ -101,7 +108,19 @@ class mapcomponent {
         
         this.terminator = null;
         this.grid = null;
+    
+        this.mapsidebar = $aside({scope: this.scope, template: sidebar, backdrop: false, show: false});
+    
+        this.showSidebar = function (event) {
+            console.log('[MAP] Opening sidebar: ', self.mapsidebar);
         
+            self.mapsidebar.$promise.then(function () {
+                console.log("[MAP] Sidebar:", self.mapsidebar);
+                self.mapsidebar.show();
+            });
+        };
+    
+    
         this.copyCoordinates = function (e) {
             console.log(e);
             self.clipboard.copyText(e.latlng);
@@ -139,6 +158,7 @@ class mapcomponent {
                 var degrees = Math.floor(angle),
                     minutes = Math.floor(60 * (angle - degrees)),
                     seconds = Math.floor(3600 * (angle - degrees) - 60 * minutes);
+                degrees = Math.abs(degrees);
                 return degrees + "_" + minutes + "_" + seconds;
             }
             
@@ -216,8 +236,6 @@ class mapcomponent {
             }
         };
         
-        var self = this;
-        
         this.scope.$on('OP.Get', function (event, objuuid, obj, schema) {
             console.log('[MAP] Object:', obj, schema);
             if (objuuid === self.mapviewuuid) {
@@ -225,7 +243,7 @@ class mapcomponent {
                 self.clearLayers();
             } else if (schema === 'geoobject') {
                 console.log('I think this is relevant: ', obj);
-    
+                
                 var myLayer = L.geoJson().addTo(self.map);
                 console.log('This strange thing:', myLayer);
                 myLayer.addData(obj.geojson);
@@ -342,16 +360,16 @@ class mapcomponent {
                 self.geoobjects = list;
                 
                 /*for (var item of list) {
-                    console.log('Item:', item);
-                    console.log('Layer:', self.drawnLayer);
-    
-    
-                    var myLayer = L.geoJson().addTo(self.map);
-                    console.log('This strange thing:', myLayer);
-                    myLayer.addData(item.geojson);
-                    
-                    //self.drawnLayer.addData(item.geojson);
-                }*/
+                 console.log('Item:', item);
+                 console.log('Layer:', self.drawnLayer);
+                 
+                 
+                 var myLayer = L.geoJson().addTo(self.map);
+                 console.log('This strange thing:', myLayer);
+                 myLayer.addData(item.geojson);
+                 
+                 //self.drawnLayer.addData(item.geojson);
+                 }*/
             }
             if (schema === 'layergroup') {
                 var grouplist = self.op.lists.layergroup;
@@ -455,18 +473,7 @@ class mapcomponent {
         this.unsubscribe = function () {
             self.op.unsubscribeObject(self.mapviewuuid, 'mapview');
         };
-        
-        var mapsidebar = $aside({scope: this.scope, template: sidebar, backdrop: false, show: true});
-        
-        this.showSidebar = function (event) {
-            console.log('[MAP] Opening sidebar: ', mapsidebar);
-            
-            mapsidebar.$promise.then(function () {
-                console.log("[MAP] Sidebar:", mapsidebar);
-                mapsidebar.show();
-            });
-        };
-        
+    
         var mapEvents = self.events.map.enable;
         
         var handleEvent = function (event) {
@@ -518,6 +525,16 @@ class mapcomponent {
                     fill: '#000'
                 }).addTo(map);
             
+            L.simpleGraticule({
+                interval: 20,
+                showOriginLabel: true,
+                redraw: 'move',
+                zoomIntervals: [
+                    {start: 0, end: 3, interval: 50},
+                    {start: 4, end: 5, interval: 5},
+                    {start: 6, end: 20, interval: 1}
+                ]
+            }).addTo(map);
             //self.grid = L.grid({redraw: 'moveend'}).addTo(map);
             
             //var PanControl = L.control.pan().addTo(map);
@@ -917,6 +934,11 @@ class mapcomponent {
             this.requestMapData();
         }
         
+        this.scope.$on('$destroy', function () {
+            console.log('[MAP] Destroying controller');
+            console.log(self.mapsidebar);
+            self.mapsidebar.hide();
+        })
     }
     
 }
