@@ -94,11 +94,11 @@ computer.
 See https://github.com/hackerfleet/hfos""",
       dependency_links=[
           'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg'
-          '=warmongo-0.5.3.hf'
+          '=warmongo-0.5.5.hf'
       ],
       install_requires=['circuits>=3.1',
                         'pymongo>=3.2',
-                        'jsonschema>=2.5.1',
+                        'jsonschema>=2.6.0',
                         'pystache>=0.5.4',
                         'six'
                         ],
