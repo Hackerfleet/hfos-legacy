@@ -132,7 +132,7 @@ class Dashboard {
         }
     
         self.scope.$on('$destroy', function() {
-            self.stopSubscriptions()
+            self.stopSubscriptions();
             self.dashboardupdate();
             self.clientconfigupdate();
             self.loginupdate();
