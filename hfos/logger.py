@@ -86,6 +86,7 @@ count = 0
 logfile = "/var/log/hfos/service.log"
 
 console = verbose
+live = False
 
 verbosity = {'global': console,
              'file': off,
@@ -94,9 +95,12 @@ verbosity = {'global': console,
              }
 
 uncut = True
+color = True  # TODO: Make this switchable via args
 
 mute = []
 solo = []
+
+LiveLog = []
 
 start = time.time()
 
@@ -289,7 +293,7 @@ def hfoslog(*what, **kwargs):
 
     if lvl >= verbosity['console']:
         output = str(msg)
-        if six.PY3:
+        if six.PY3 and color:
             output = lvldata[lvl][1] + output + terminator
         try:
             print(output)
@@ -299,3 +303,6 @@ def hfoslog(*what, **kwargs):
                     lvl=error)
     if lvl >= verbosity['system'] and root and output:
         root.fire(logevent(now, lvl, emitter, callee, content), "logger")
+
+    if live:
+        LiveLog.append(output)
