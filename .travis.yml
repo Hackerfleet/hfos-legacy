@@ -2,12 +2,10 @@ sudo: required
 language: python
 service:
   - docker
-before_install:
-  - echo "Would get the container now. Happily not doing that."
-before_script:
-  - sleep 15
+install:
+  - docker build -t hackerfleet/hfos -f docker/Dockerfile.debian .
 script:
-  - echo "I am the test procedure :)"
+  -  docker run -i -t hackerfleet/hfos py.test tests
 after_success:
   - coveralls
 notifications:
