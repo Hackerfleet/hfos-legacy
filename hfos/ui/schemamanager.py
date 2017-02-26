@@ -11,7 +11,7 @@ Module: SchemaManager
 from hfos.events.client import send
 from hfos.component import ConfigurableComponent
 from hfos.database import schemastore
-from hfos.logger import error
+from hfos.logger import error, warn
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -43,9 +43,11 @@ class SchemaManager(ConfigurableComponent):
                 if event.data in schemastore:
                     response = {'component': 'schema',
                                 'action': 'Get',
-                                'data': self.schemata[event.data]
+                                'data': schemastore[event.data]
                                 }
                     self.fireEvent(send(event.client.uuid, response))
+                else:
+                    self.log("Unavailable schema requested!", lvl=warn)
             elif event.action == "All":
                 self.log("Schemarequest for all schemata from ", event.user)
                 response = {'component': 'schema',
