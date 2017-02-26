@@ -30,17 +30,6 @@ systemconfig = {
 }
 
 
-def provision():
-    currentconfig = objectmodels['systemconfig'].find_one({'active': True})
-
-    if currentconfig is None:
-        provisionList([systemconfig], objectmodels['systemconfig'])
-        hfoslog('Provisioning: System: Done.', emitter='PROVISIONS')
-    else:
-        from pprint import pprint
-        pprint(currentconfig)
-        hfoslog(
-            'NOT provisioning system configuration, as there is an active '
-            'configuration in the database.\n'
-            'Please manually delete the mongo collection, until an override '
-            'has been implemented.')
+def provision(*args):
+    provisionList([systemconfig], objectmodels['systemconfig'], *args)
+    hfoslog('Provisioning: System: Done.', emitter='PROVISIONS')
