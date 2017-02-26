@@ -6,11 +6,11 @@
 # Usage Examples(s)::
 #
 #     $ docker run -i -t hackerfleet/hfos hfos_launcher.py
-#     $ docker run -i -t -p 127.0.0.1:80:80 --name hfos-test-live -t hackerfleet/hfos
+#     $ docker run -i -t -p 127.0.0.1:443:443 --name hfos-test-live -t hackerfleet/hfos
 #
-# VERSION: 1.1.0
+# VERSION: 1.1.1
 #
-# Last Updated: 20160723
+# Last Updated: 20170226
 
 FROM debian:experimental
 MAINTAINER Heiko 'riot' Weinen <riot@c-base.org>
@@ -27,9 +27,10 @@ RUN apt-get update && \
         npm \
         nodejs-legacy \
         libfontconfig \
+	    build-essential \
         enchant \
         python3-virtualenv \
-        python3.5 \
+	    python3-dev \
         python3-pymongo \
         python3-bson-ext \
         python3-pip \
@@ -46,72 +47,52 @@ RUN apt-get install -qy -t experimental mongodb
 
 RUN apt-get clean
 
-# Create virtual environment
-
-RUN python3 /usr/lib/python3/dist-packages/virtualenv.py -p /usr/bin/python3.5 --system-site-packages venv
-
-# Copy repository
-
-COPY . hfos
-WORKDIR hfos
-
-# Install HFOS
-
-RUN /venv/bin/pip3 install -r requirements-dev.txt
-RUN /venv/bin/pip3 install .
-
-# Install all modules
-
-WORKDIR modules
-
-# Install Navdata first (installer doesn't handle inter-hfos-module dependencies gracefully, yet)
-
-WORKDIR navdata
-RUN /venv/bin/python3 setup.py develop
-WORKDIR ..
-
-# Install the rest
-
-RUN /venv/bin/python3 install.py --all
-WORKDIR ..
-
-# Make sure /var/[cache,lib]/hfos etc exists
-
-RUN /venv/bin/python3 setup.py install_var
-
-# Generate & Install Documentation
-
-RUN /venv/bin/python3 setup.py build_sphinx
-RUN /venv/bin/python3 setup.py install_docs
-
-# Install Frontend
-
-RUN git submodule init && git submodule update
-
-# Upgrade npm (from ancient Debian version to current)
-
-RUN npm install npm -g
-
-#WORKDIR frontend
-#RUN npm install
-#WORKDIR ..
-
-# Mongo config (smallfiles), database startup and provisioning
+# Activate mongodb
 
 RUN echo smallfiles = true >> /etc/mongodb.conf
 
 # The next one was necessary on one installation, but that could've been due to a weird mongodb release
 #RUN echo setParameter = textSearchEnabled = true >> /etc/mongodb.conf
 
-RUN /etc/init.d/mongodb start && /venv/bin/python3 setup.py install_provisions
+# Create virtual environment
 
-# Add user account and group
+#RUN python3 /usr/lib/python3/dist-packages/virtualenv.py -p /usr/bin/python3.5 --system-site-packages venv
 
-RUN useradd -Ums /bin/sh hfos
+RUN useradd -ms /bin/bash hfos
+WORKDIR /home/hfos
+
+# Copy repository
+
+COPY . hfos
+WORKDIR hfos
+
+# Fetch Frontend
+
+RUN git submodule init && git submodule update
+
+# Install HFOS
+
+RUN pip3 install -r requirements-dev.txt
+RUN pip3 install -e .
+
+# Upgrade npm (from ancient Debian version to current)
+
+RUN npm install npm -g
+
+# Install HFOS
+
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-cert
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-var
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-modules
+# Temporary hack, until we have provisioning obey dependencies again:
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-provisions -p system
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-provisions
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-docs
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-frontend --dev
 
 #  Services
 
-EXPOSE 80
+EXPOSE 443
 
 # If you want to run the frontend development live server, uncomment this:
 # EXPOSE 8081
