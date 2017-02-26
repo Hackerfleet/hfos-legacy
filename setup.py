@@ -70,6 +70,7 @@ add_datafiles('frontend', 'docs')
 
 setup(name="hfos",
       description="hfos",
+      version="1.1.0",
       author="Hackerfleet Community",
       author_email="riot@c-base.org",
       maintainer="Hackerfleet Community",
@@ -127,11 +128,11 @@ See https://github.com/hackerfleet/hfos""",
     system=hfos.provisions.system:provision
     user=hfos.provisions.user:provision
     """,
-      use_scm_version={
-            "write_to": "hfos/version.py",
-      },
-      setup_requires=[
-            "setuptools_scm"
-      ],
+      # use_scm_version={
+      #       "write_to": "hfos/version.py",
+      # },
+      # setup_requires=[
+      #       "setuptools_scm"
+      # ],
       test_suite="tests.main.main",
       )
