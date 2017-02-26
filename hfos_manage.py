@@ -369,6 +369,7 @@ def install_docs(args):
 
     hfoslog("Copying docs to " + target, emitter='MANAGE')
     copy_tree(source, target)
+    hfoslog("Done: Install Docs")
 
 
 def install_var(args):
@@ -407,6 +408,8 @@ def install_var(args):
     open(logfile, "a").close()
     os.chown(logfile, uid, gid)
 
+    hfoslog("Done: Install Var")
+
 
 def install_provisions(args):
     hfoslog("Installing HFOS default provisions", emitter='MANAGE')
@@ -433,6 +436,8 @@ def install_provisions(args):
                 list(provisionstore.keys()),
                 lvl=error,
                 emitter='MANAGE')
+
+    hfoslog("Done: Install Provisions")
 
 
 def uninstall(args):
@@ -509,11 +514,13 @@ def install_modules(args):
     hfoslog('Installed modules: ', success, emitter='MANAGE')
     if len(failed) > 0:
         hfoslog('Failed modules: ', failed, emitter='MANAGE')
-    hfoslog('Done!', emitter='MANAGE')
+    hfoslog('Done: Install Modules', emitter='MANAGE')
 
 
 def install_service(args):
     check_root()
+
+    hfoslog("Installing systemd service", emitter="MANAGE")
 
     launcher = os.path.realpath(__file__).replace('manage', 'launcher')
     executable = sys.executable + " " + launcher
@@ -535,6 +542,8 @@ def install_service(args):
         'hfos.service'
     ])
 
+    hfoslog("Done: Install Service", emitter="MANAGE")
+
 
 def install_user(args):
     check_root()
@@ -551,10 +560,10 @@ def install_user(args):
         'hfos'
     ])
 
-    hfoslog("Done.")
+    hfoslog("Done: Setup User")
 
 
-def install_cert(args, selfsigned=False):
+def install_cert(args, selfsigned=True):
     check_root()
 
     if selfsigned:
@@ -616,7 +625,7 @@ def install_cert(args, selfsigned=False):
 
         create_self_signed_cert()
 
-        hfoslog('Done')
+        hfoslog('Done: Install Cert')
     else:
         hfoslog('Not implemented yet. You can build your own certificate and '
                 'store it in /etc/ssl/certs/hfos/server-cert.pem - it should '
@@ -732,7 +741,7 @@ def main(args, parser):
     elif args.install_user:
         install_user(args)
     elif args.install_cert_self:
-        install_cert(args, selfsigned=True)
+        install_cert(args)
     elif args.install_all:
         install_all(args)
     elif args.uninstall:
