@@ -73,7 +73,7 @@ RUN git submodule init && git submodule update
 # Install HFOS
 
 RUN pip3 install -r requirements-dev.txt
-RUN pip3 install -e .
+RUN python3 setup.py develop
 
 # Upgrade npm (from ancient Debian version to current)
 
