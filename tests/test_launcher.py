@@ -17,6 +17,16 @@ __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 initialize()  # Set up database access for testing once
 
+class args_mock(object):
+    def __init__(self):
+        object.__init__(self)
+        self.insecure = False
+        self.quiet = False
+        self.dev = False
+        self.port = 80
+        self.host = '127.0.0.1'
+        self.certificate = None
+
 
 def test_launcher():
     """Tests if the Core Launcher can be instantiated"""
@@ -24,6 +34,7 @@ def test_launcher():
     # Use a non privileged port for testing, until that part can be removed
     # from Core
 
-    core = Core(port=8123)
+    args = args_mock()
+    core = Core(args)
 
     assert type(core) == Core
