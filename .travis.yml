@@ -5,7 +5,7 @@ services:
 install:
   - docker build -t hackerfleet/hfos -f docker/Dockerfile.debian .
 script:
-  -  docker run -i -t hackerfleet/hfos py.test tests
+  -  docker run -i -t hackerfleet/hfos /etc/init.d/mongodb start && py.test tests
 after_success:
   - coveralls
 notifications:
