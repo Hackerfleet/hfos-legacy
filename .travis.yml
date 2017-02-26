@@ -1,6 +1,6 @@
 sudo: required
 language: python
-service:
+services:
   - docker
 install:
   - docker build -t hackerfleet/hfos -f docker/Dockerfile.debian .
