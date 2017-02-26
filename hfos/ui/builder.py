@@ -243,7 +243,7 @@ def install_frontend(forcereload=False, forcerebuild=False,
     if forcerebuild:
         _rebuild_frontend()
 
-    hfoslog("Done!", emitter='MANAGE')
+    hfoslog("Done: Install Frontend", emitter='MANAGE')
 
     # We have to find a way to detect if we need to rebuild (and
     # possibly wipe) stuff. This maybe the case, when a frontend
