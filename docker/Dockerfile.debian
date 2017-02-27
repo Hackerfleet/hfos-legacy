@@ -28,6 +28,8 @@ RUN apt-get update && \
         nodejs-legacy \
         libfontconfig \
 	    build-essential \
+	    gdal-bin \
+	    python-gdal \
         enchant \
         python3-virtualenv \
 	    python3-dev \
