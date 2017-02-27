@@ -48,6 +48,7 @@ class Authenticator(ConfigurableComponent):
             salt = makesalt().encode('ascii')
 
         self.salt = salt
+        self.systemconfig = systemconfig
 
 
     def makehash(self, word):
