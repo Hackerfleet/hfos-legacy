@@ -12,6 +12,8 @@ Test HFOS Basic Provisioning
 
 from hfos.database import _build_schemastore_new
 
+from pprint import pprint
+
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 def test_invalid_schema_store_generation():
@@ -22,3 +24,5 @@ def test_invalid_schema_store_generation():
     }
 
     schemastore = _build_schemastore_new()
+
+    #pprint(schemastore.keys())
