@@ -1,5 +1,6 @@
 # Basics
 -r requirements.txt
+-r requirements-test.txt
 
 # Linting, QA
 pyflakes
@@ -15,12 +16,6 @@ objgraph
 
 # Packaging
 wheel
-
-# Running Tests
-tox
-pytest
-coveralls
-pytest-cov
 
 # Generating Documentation
 MarkupSafe

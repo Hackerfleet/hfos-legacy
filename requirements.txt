@@ -4,7 +4,7 @@ git+https://github.com/circuits/circuits.git
 pymongo>=3.2
 jsonschema>=2.6.0
 git+https://github.com/hackerfleet/warmongo.git
-virtualenv-api>=2.1.11
+# virtualenv-api>=2.1.11
 pyOpenSSL>=16.2.0
 pystache>=0.5.4
 
