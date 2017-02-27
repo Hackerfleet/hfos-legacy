@@ -55,6 +55,18 @@ class ObjectManager(ConfigurableComponent):
                 self.log("No Schema given, cannot act!", lvl=critical)
                 return
 
+            if schema not in objectmodels.keys():
+                self.log("Schemata: ", objectmodels.keys())
+                self.log("List for unavailable schema requested: ", schema,
+                         lvl=warn)
+                result = {
+                    'component': 'objectmanager',
+                    'action': "noschema",
+                    'data': schema
+                }
+                self.fireEvent(send(event.client.uuid, result))
+                return
+
         if 'filter' in data:
             objectfilter = data['filter']
         else:
@@ -64,133 +76,124 @@ class ObjectManager(ConfigurableComponent):
         notification = None
 
         if action == "list":
-            if schema in objectmodels.keys():
-                if 'fields' in data:
-                    fields = data['fields']
-                else:
-                    fields = []
 
-                objlist = []
-
-                opts = schemastore[schema].get('options', {})
-                hidden = opts.get('hidden', [])
-
-                if objectmodels[schema].count(objectfilter) > WARNSIZE:
-                    self.log("Getting a very long list of items for ", schema,
-                             lvl=warn)
-
-                for item in objectmodels[schema].find(objectfilter):
-                    try:
-                        if fields in ('*', ['*']):
-                            itemfields = item.serializablefields()
-                            for field in hidden:
-                                itemfields.pop(field, None)
-                            objlist.append(itemfields)
-                        else:
-                            listitem = {'uuid': item.uuid}
-
-                            if 'name' in item._fields:
-                                listitem['name'] = item._fields['name']
-
-                            for field in fields:
-                                if field in item._fields and not field in \
-                                        hidden:
-                                    listitem[field] = item._fields[field]
-                                else:
-                                    listitem[field] = None
-
-                            objlist.append(listitem)
-                    except Exception as e:
-                        self.log("Faulty object or field: ", e, type(e),
-                                 item._fields, fields, lvl=error,
-                                 exc=True)
-                # self.log("Generated object list: ", objlist)
-
-                result = {'component': 'objectmanager',
-                          'action': 'list',
-                          'data': {'schema': schema,
-                                   'list': objlist
-                                   }
-                          }
+            if 'fields' in data:
+                fields = data['fields']
             else:
-                self.log("Schemata: ", objectmodels.keys())
-                self.log("List for unavailable schema requested: ", schema,
+                fields = []
+
+            objlist = []
+
+            opts = schemastore[schema].get('options', {})
+            hidden = opts.get('hidden', [])
+
+            if objectmodels[schema].count(objectfilter) > WARNSIZE:
+                self.log("Getting a very long list of items for ", schema,
                          lvl=warn)
 
-        elif action == "search":
-            if schema in objectmodels.keys():
-                # objectfilter['$text'] = {'$search': str(data['search'])}
-                if 'fulltext' in data:
-                    objectfilter = {
-                        'name': {
-                            '$regex': str(data['search']),
-                            '$options': '$i'
-                        }
-                    }
-                else:
-                    if isinstance(data['search'], dict):
-                        objectfilter = data['search']
+            for item in objectmodels[schema].find(objectfilter):
+                try:
+                    if fields in ('*', ['*']):
+                        itemfields = item.serializablefields()
+                        for field in hidden:
+                            itemfields.pop(field, None)
+                        objlist.append(itemfields)
                     else:
-                        objectfilter = {}
-
-                if 'fields' in data:
-                    fields = data['fields']
-                else:
-                    fields = []
-
-                reqid = data['req']
-
-                objlist = []
-
-                if collections[schema].count() > WARNSIZE:
-                    self.log("Getting a very long list of items for ", schema,
-                             lvl=warn)
-
-                opts = schemastore[schema].get('options', {})
-                hidden = opts.get('hidden', [])
-
-                self.log("Objectfilter: ", objectfilter, ' Schema: ', schema,
-                         "Fields: ", fields,
-                         lvl=warn)
-                # for item in collections[schema].find(objectfilter):
-                for item in collections[schema].find(objectfilter):
-                    self.log("Search found item: ", item, lvl=verbose)
-                    try:
-                        # TODO: Fix bug in warmongo that needs this workaround:
-                        item = objectmodels[schema](item)
                         listitem = {'uuid': item.uuid}
-                        if fields in ('*', ['*']):
-                            itemfields = item.serializablefields()
-                            for field in hidden:
-                                itemfields.pop(field, None)
-                            objlist.append(itemfields)
-                        else:
-                            if 'name' in item._fields:
-                                listitem['name'] = item.name
 
-                            for field in fields:
-                                if field in item._fields and field not in \
-                                        hidden:
-                                    listitem[field] = item._fields[field]
-                                else:
-                                    listitem[field] = None
+                        if 'name' in item._fields:
+                            listitem['name'] = item._fields['name']
 
-                            objlist.append(listitem)
-                    except Exception as e:
-                        self.log("Faulty object or field: ", e, type(e),
-                                 item._fields, fields, lvl=error)
-                # self.log("Generated object search list: ", objlist)
+                        for field in fields:
+                            if field in item._fields and not field in \
+                                    hidden:
+                                listitem[field] = item._fields[field]
+                            else:
+                                listitem[field] = None
 
-                result = {'component': 'objectmanager',
-                          'action': 'search',
-                          'data': {'schema': schema,
-                                   'list': objlist,
-                                   'req': reqid
-                                   }
-                          }
+                        objlist.append(listitem)
+                except Exception as e:
+                    self.log("Faulty object or field: ", e, type(e),
+                             item._fields, fields, lvl=result,
+                             exc=True)
+            # self.log("Generated object list: ", objlist)
+
+            result = {'component': 'objectmanager',
+                      'action': 'list',
+                      'data': {'schema': schema,
+                               'list': objlist
+                               }
+                      }
+        elif action == "search":
+            # objectfilter['$text'] = {'$search': str(data['search'])}
+            if 'fulltext' in data:
+                objectfilter = {
+                    'name': {
+                        '$regex': str(data['search']),
+                        '$options': '$i'
+                    }
+                }
             else:
-                self.log("List for unavailable schema requested: ", schema,
+                if isinstance(data['search'], dict):
+                    objectfilter = data['search']
+                else:
+                    objectfilter = {}
+
+            if 'fields' in data:
+                fields = data['fields']
+            else:
+                fields = []
+
+            reqid = data['req']
+
+            objlist = []
+
+            if collections[schema].count() > WARNSIZE:
+                self.log("Getting a very long list of items for ", schema,
                          lvl=warn)
+
+            opts = schemastore[schema].get('options', {})
+            hidden = opts.get('hidden', [])
+
+            self.log("Objectfilter: ", objectfilter, ' Schema: ', schema,
+                     "Fields: ", fields,
+                     lvl=warn)
+            # for item in collections[schema].find(objectfilter):
+            for item in collections[schema].find(objectfilter):
+                self.log("Search found item: ", item, lvl=verbose)
+                try:
+                    # TODO: Fix bug in warmongo that needs this workaround:
+                    item = objectmodels[schema](item)
+                    listitem = {'uuid': item.uuid}
+                    if fields in ('*', ['*']):
+                        itemfields = item.serializablefields()
+                        for field in hidden:
+                            itemfields.pop(field, None)
+                        objlist.append(itemfields)
+                    else:
+                        if 'name' in item._fields:
+                            listitem['name'] = item.name
+
+                        for field in fields:
+                            if field in item._fields and field not in \
+                                    hidden:
+                                listitem[field] = item._fields[field]
+                            else:
+                                listitem[field] = None
+
+                        objlist.append(listitem)
+                except Exception as e:
+                    self.log("Faulty object or field: ", e, type(e),
+                             item._fields, fields, lvl=result)
+            # self.log("Generated object search list: ", objlist)
+
+            result = {'component': 'objectmanager',
+                      'action': 'search',
+                      'data': {'schema': schema,
+                               'list': objlist,
+                               'req': reqid
+                               }
+                      }
 
         elif action == "get":
             if 'subscribe' in data:
@@ -210,44 +213,40 @@ class ObjectManager(ConfigurableComponent):
                 if uuid == "":
                     self.log('Object with no filter/uuid requested:', schema,
                              data,
-                             lvl=error)
+                             lvl=result)
                     return
                 objectfilter = {'uuid': uuid}
 
             storageobject = None
 
-            if schema in objectmodels.keys():
-                storageobject = objectmodels[schema].find_one(objectfilter)
+            storageobject = objectmodels[schema].find_one(objectfilter)
 
-                if not storageobject:
-                    if uuid.upper == "CREATE":
-                        # TODO: Fix this, a request for an existing object is a
-                        # request for an existing object, a creation request is
-                        # not.
+            if not storageobject:
+                if uuid.upper == "CREATE":
+                    # TODO: Fix this, a request for an existing object is a
+                    # request for an existing object, a creation request is
+                    # not.
 
-                        self.log("Object not found, creating: ", data)
+                    self.log("Object not found, creating: ", data)
 
-                        storageobject = objectmodels[schema](
-                            {'uuid': str(uuid4())})
+                    storageobject = objectmodels[schema](
+                        {'uuid': str(uuid4())})
 
-                        if "useruuid" in schemastore[schema]['schema'][
-                            'properties']:
-                            storageobject.useruuid = event.user.uuid
-                            self.log("Attached initial owner's id: ",
-                                     event.user.uuid)
-                    else:
-                        self.log("Object not found and not willing to create.",
-                                 lvl=warn)
-                        result = {
-                            'component': 'objectmanager',
-                            'action': 'nonexistant',
-                            'data': {
-                                'schema': schema,
-                            }
+                    if "useruuid" in schemastore[schema]['schema'][
+                        'properties']:
+                        storageobject.useruuid = event.user.uuid
+                        self.log("Attached initial owner's id: ",
+                                 event.user.uuid)
+                else:
+                    self.log("Object not found and not willing to create.",
+                             lvl=warn)
+                    result = {
+                        'component': 'objectmanager',
+                        'action': 'noobject',
+                        'data': {
+                            'schema': schema,
                         }
-            else:
-                self.log('Object for invalid schema requested!', schema,
-                         lvl=error)
+                    }
 
             if storageobject:
                 self.log("Object found, delivering: ", data)
@@ -316,14 +315,14 @@ class ObjectManager(ConfigurableComponent):
                 self.fireEvent(notification)
             except Exception as e:
                 self.log("Transmission error during notification: %s" % e,
-                         lvl=error)
+                         lvl=result)
 
         if result:
             try:
                 self.fireEvent(send(event.client.uuid, result))
             except Exception as e:
                 self.log("Transmission error during response: %s" % e,
-                         lvl=error)
+                         lvl=result)
 
     def updatesubscriptions(self, event):
         """OM event handler for to be stored and client shared objectmodels
