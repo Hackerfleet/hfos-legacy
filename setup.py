@@ -19,8 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from setuptools import setup
-from glob import glob
-import sys
+import os
 
 # TODO:
 # Classifiers
@@ -53,10 +52,14 @@ def add_datafiles(*paths):
     for path in paths:
         files = []
         manifest.write('recursive-include ' + path + ' *\n')
-        for datafile in glob(path + '/**/*.*', recursive=True):
-            if not prune(datafile):
-                files.append(datafile)
-                manifestfiles.append(datafile)
+
+        for root, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                datafile = os.path.join(root, filename)
+
+                if not prune(datafile):
+                    files.append(datafile)
+                    manifestfiles.append(datafile)
 
         datafiles.append(('/opt/hfos/' + path, files))
 
