@@ -45,7 +45,7 @@ class HFDebugger(ConfigurableComponent):
             'type': 'array',
             'title': 'Notification receivers',
             'description': 'Users that should be notified about exceptions.',
-            'default': ['riot'],
+            'default': [],
             'items': {'type': 'string'}
         }
     }
