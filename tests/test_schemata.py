@@ -11,12 +11,9 @@ Test HFOS Basic Provisioning
 """
 
 import pytest
-
-from hfos.database import initialize, schemastore
+from hfos.database import schemastore
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
-initialize()
 
 schemata = schemastore.keys()
 

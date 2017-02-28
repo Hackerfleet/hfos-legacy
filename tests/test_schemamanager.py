@@ -10,7 +10,7 @@ Test HFOS Launcher
 
 """
 
-from hfos.database import initialize, schemastore
+from hfos.database import schemastore
 from hfos.ui.clientobjects import User, Client
 from circuits import Manager
 import pytest
@@ -21,8 +21,6 @@ from hfos.events.system import schemarequest
 from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
-initialize()  # Set up database access for testing once
 
 m = Manager()
 sm = SchemaManager().register(m)

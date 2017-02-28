@@ -10,11 +10,6 @@ Test HFOS Launcher
 
 """
 
-from hfos.database import initialize
-
-initialize()  # Set up database access for testing once
-
-
 from hfos.ui.clientobjects import User, Client
 from circuits import Manager
 import pytest

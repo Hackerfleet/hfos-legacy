@@ -10,10 +10,6 @@ Test HFOS Launcher
 
 """
 
-from hfos.database import initialize
-
-initialize()  # Set up database access for testing once
-
 from hfos.database import schemastore, objectmodels
 
 from hfos.ui.clientobjects import User, Client

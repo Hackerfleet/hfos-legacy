@@ -10,12 +10,9 @@ Test HFOS Launcher
 
 """
 
-from hfos.database import initialize
 from hfos.launcher import Core
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
-initialize()  # Set up database access for testing once
 
 class args_mock(object):
     def __init__(self):
