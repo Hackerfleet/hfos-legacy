@@ -72,3 +72,22 @@ readonlyform = [
 ]
 
 noform = []
+
+
+def lookup_field(key, lookup_type, placeholder=None, html_class="",
+                 select_type="strapselect", mapping="uuid"):
+    if placeholder is None:
+        placeholder = "Select a " + lookup_type
+    result = {
+        'key': key,
+        'htmlClass': html_class,
+        'type': select_type,
+        'placeholder': placeholder,
+        'options': {
+            "type": lookup_type,
+            "asyncCallback": "$ctrl.getFormData",
+            "map": {'valueProperty': mapping, 'nameProperty': 'name'}
+        }
+    }
+
+    return result
