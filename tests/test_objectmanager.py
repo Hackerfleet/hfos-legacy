@@ -14,7 +14,7 @@ from hfos.database import initialize
 
 initialize()  # Set up database access for testing once
 
-from hfos.database import schemastore
+from hfos.database import schemastore, objectmodels
 
 from hfos.ui.clientobjects import User, Client
 from circuits import Manager
@@ -57,6 +57,13 @@ def transmit(action, data):
     return packet
 
 
+system_configs = transmit('list', {
+    'schema': 'systemconfig'
+})['data']['list']
+system_config_uuid = system_configs[0]['uuid']
+pprint(system_config_uuid)
+
+
 def test_unfiltered_list():
     """Tests if the objectmanager returns a valid list of objects"""
 
@@ -86,6 +93,15 @@ def test_list_all_fields():
 
     assert 'uuid' in obj
     assert 'active' in obj
+
+
+def test_no_schema():
+    """Tests if unspecified schema leads to 'noschema' error feedback"""
+
+    packet = transmit('get', {
+    })
+
+    assert packet['action'] == 'noschema'
 
 
 def test_invalid_schema():
@@ -131,13 +147,9 @@ def test_get_object_invalid():
 def test_get_object():
     """Tests if a systemconfig can be retrieved"""
 
-    uuid = transmit('list', {
-        'schema': 'systemconfig'
-    })['data']['list'][0]['uuid']
-
     packet = transmit('get', {
         'schema': 'systemconfig',
-        'uuid': uuid
+        'uuid': system_config_uuid
     })
 
     assert packet['action'] == 'get'
@@ -145,4 +157,57 @@ def test_get_object():
 
     obj = packet['data']
 
-    assert obj['uuid'] == uuid
+    assert obj['uuid'] == system_config_uuid
+
+
+def test_list_filtered():
+    """Tests if a systemconfig can be retrieved by filter"""
+
+    packet = transmit('list', {
+        'schema': 'systemconfig',
+        'filter': {'active': True},
+        'fields': ['active']
+    })
+
+    assert packet['action'] == 'list'
+    assert 'data' in packet
+    assert packet['data']['schema'] == 'systemconfig'
+
+    result = packet['data']['list']
+
+    assert len(result) > 0
+    for item in result:
+        assert item['active']
+
+
+def test_subscribe():
+    """Tests if subscribing to an object works"""
+
+    packet = transmit('subscribe', system_config_uuid)
+
+    assert packet['data']['success']
+    assert packet['data']['uuid'] == system_config_uuid
+
+
+def test_unsubscribe():
+    """Tests if unsubscribing to an object works"""
+
+    packet = transmit('unsubscribe', system_config_uuid)
+
+    assert packet['data']['success']
+    assert packet['data']['uuid'] == system_config_uuid
+
+
+def test_put_new():
+    obj = objectmodels['systemconfig']()
+    obj.active = False
+    obj.uuid = str(uuid4())
+    obj.name = 'TEST SYSTEMCONFIG'
+
+    packet = transmit('put', {
+        'schema': 'systemconfig',
+        'obj': obj.serializablefields(),
+        'uuid': 'create'
+    })
+
+    assert packet['data'][0]
