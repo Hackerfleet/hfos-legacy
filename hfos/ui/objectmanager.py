@@ -49,23 +49,22 @@ class ObjectManager(ConfigurableComponent):
         action = event.action
         data = event.data
         if action not in ['subscribe', 'unsubscribe']:
-            if 'schema' in data:
-                schema = data['schema']
-            else:
-                self.log("No Schema given, cannot act!", lvl=critical)
-                return
-
-            if schema not in objectmodels.keys():
+            if 'schema' not in data or data['schema'] not in \
+                    objectmodels.keys():
+                thing = data['schema'] if 'schema' in data else None
                 self.log("Schemata: ", objectmodels.keys())
-                self.log("List for unavailable schema requested: ", schema,
+                self.log("List for unavailable schema requested: ",
+                         thing,
                          lvl=warn)
                 result = {
                     'component': 'objectmanager',
                     'action': "noschema",
-                    'data': schema
+                    'data': thing
                 }
                 self.fireEvent(send(event.client.uuid, result))
                 return
+            else:
+                schema = data['schema']
 
         if 'filter' in data:
             objectfilter = data['filter']
@@ -213,7 +212,7 @@ class ObjectManager(ConfigurableComponent):
                 if uuid == "":
                     self.log('Object with no filter/uuid requested:', schema,
                              data,
-                             lvl=result)
+                             lvl=warn)
                     return
                 objectfilter = {'uuid': uuid}
 
@@ -383,6 +382,7 @@ class ObjectManager(ConfigurableComponent):
             uuid = clientobject['uuid']
         except KeyError:
             self.log("Put request with missing arguments!", data, lvl=critical)
+            return
 
         try:
             if uuid != 'create':
