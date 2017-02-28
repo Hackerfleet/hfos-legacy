@@ -11,7 +11,7 @@ System: Global systemwide settings
 :license: GPLv3 (See LICENSE)
 
 """
-from hfos.schemata.defaultform import savebutton
+from hfos.schemata.defaultform import savebutton, lookup_field
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -72,6 +72,12 @@ SystemconfigSchema = {
             'type': 'string',
             'title': 'Default Dashboard Unique ID'
         },
+        'defaulttaskgriduuid': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+            'type': 'string',
+            'title': 'Default Taskgrid Unique ID'
+        },
         'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
                          'description': 'Default theme used for user '
                                         'interface'},
@@ -87,18 +93,28 @@ SystemconfigForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'name', 'theme'
+                    'name'
                 ]
             },
             {
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    {'key': 'active', 'readonly': True}, 'locked'
+                    {'key': 'active', 'readonly': True}, 'allowregister'
+                ]
+            },
+            {
+                'type': 'section',
+                'htmlClass': 'col-xs-4',
+                'items': [
+                    lookup_field('defaultmapviewuuid', 'mapview'),
+                    lookup_field('defaultdashboarduuid', 'dashboardconfig'),
+                    lookup_field('defaulttaskgriduuid', 'taskgridconfig')
                 ]
             }
         ]
     },
+
     'description',
     savebutton
 ]
