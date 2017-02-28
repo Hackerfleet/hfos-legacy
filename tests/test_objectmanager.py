@@ -57,13 +57,6 @@ def transmit(action, data):
     return packet
 
 
-system_configs = transmit('list', {
-    'schema': 'systemconfig'
-})['data']['list']
-system_config_uuid = system_configs[0]['uuid']
-pprint(system_config_uuid)
-
-
 def test_unfiltered_list():
     """Tests if the objectmanager returns a valid list of objects"""
 
@@ -147,6 +140,11 @@ def test_get_object_invalid():
 def test_get_object():
     """Tests if a systemconfig can be retrieved"""
 
+    system_configs = transmit('list', {
+        'schema': 'systemconfig'
+    })['data']['list']
+    system_config_uuid = system_configs[0]['uuid']
+
     packet = transmit('get', {
         'schema': 'systemconfig',
         'uuid': system_config_uuid
@@ -183,6 +181,11 @@ def test_list_filtered():
 def test_subscribe():
     """Tests if subscribing to an object works"""
 
+    system_configs = transmit('list', {
+        'schema': 'systemconfig'
+    })['data']['list']
+    system_config_uuid = system_configs[0]['uuid']
+
     packet = transmit('subscribe', system_config_uuid)
 
     assert packet['data']['success']
@@ -191,6 +194,11 @@ def test_subscribe():
 
 def test_unsubscribe():
     """Tests if unsubscribing to an object works"""
+
+    system_configs = transmit('list', {
+        'schema': 'systemconfig'
+    })['data']['list']
+    system_config_uuid = system_configs[0]['uuid']
 
     packet = transmit('unsubscribe', system_config_uuid)
 
