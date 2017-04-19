@@ -9,7 +9,7 @@ class countablescomponent {
         this.scope = $scope;
         this.socket = socket;
 
-        var self = this;
+        let self = this;
 
         self.words = [
             /*{word: 'Hallo', size: 1, id: '1f37637c-20b6-4073-b4a0-ae72426a5783'},
@@ -19,13 +19,14 @@ class countablescomponent {
         
         this.getCountables = function () {
             self.op.searchItems('countable', '', ['amount']).then(function(result){
-                var tags = [];
-                var max = 0;
-                for (var item of result.data) {
+                let tags = [];
+                let max = 0;
+                let item=null;
+                for (item of result.data) {
                     tags.push({name: item.name + '(' + item.amount + ')', size: item.amount, uuid: item.uuid});
                     max = Math.max(max, item.amount);
                 }
-                for (var item of tags) {
+                for (item of tags) {
                     item.size = Math.max(8, Math.round((item.size / max) * 42));
                     console.log(item)
                 }
@@ -46,7 +47,7 @@ class countablescomponent {
     }
 
     count(uuid) {
-        var packet = {
+        let packet = {
             component: 'countablewatcher',
             action: 'count',
             data: uuid
