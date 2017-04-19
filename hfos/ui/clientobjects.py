@@ -77,3 +77,6 @@ class User(object):
         self.uuid = uuid
         self.profile = profile
         self.account = account
+
+    def __repr__(self):
+        return str(self.account)

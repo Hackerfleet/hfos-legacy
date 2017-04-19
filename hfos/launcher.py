@@ -23,7 +23,7 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 # from circuits.app.daemon import Daemon
-from circuits import handler  # , Timer, Event
+from circuits import handler, reprhandler, Event
 
 from hfos.ui.builder import install_frontend
 # from hfos.schemata.component import ComponentBaseConfigSchema
@@ -41,6 +41,10 @@ import os
 # from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
+
+
+class ready(Event):
+    pass
 
 
 def drop_privileges(uid_name='hfos', gid_name='hfos'):
@@ -96,9 +100,9 @@ class Core(ConfigurableComponent):
         }
     }
 
-    def __init__(self, args):
-        super(Core, self).__init__("CORE")
-        self.log("Booting. ", self.channel)
+    def __init__(self, args, **kwargs):
+        super(Core, self).__init__("CORE", args, **kwargs)
+        self.log("Starting system (channel ", self.channel, ")")
 
         self.insecure = args.insecure
         self.quiet = args.quiet
@@ -125,8 +129,9 @@ class Core(ConfigurableComponent):
         self.static = None
         self.websocket = None
 
-        self.banlist = [  # 'camera',
-            'logger'
+        self.component_blacklist = [  # 'camera',
+            'logger',
+            # 'debugger'
             # 'ldap',
             # 'navdata',
             # 'nmeaparser',
@@ -154,9 +159,11 @@ class Core(ConfigurableComponent):
             self.log("Not dropping privileges - this may be insecure!",
                      lvl=warn)
 
-
     @handler("started", channel="*")
     def ready(self, source):
+        from hfos.database import configschemastore
+        configschemastore[self.name] = self.configschema
+
         self._start_server()
 
         if not self.insecure:
@@ -181,8 +188,8 @@ class Core(ConfigurableComponent):
             self.server = Server(
                 (self.host, self.port),
                 secure=secure,
-                certfile=self.certificate#,
-                #inherit=True
+                certfile=self.certificate  # ,
+                # inherit=True
             ).register(self)
         except PermissionError:
             self.log('Could not open (privileged?) port, check '
@@ -192,7 +199,6 @@ class Core(ConfigurableComponent):
         self.log("Dropping privileges", args, lvl=warn)
         drop_privileges()
 
-
     # Moved to manage tool, maybe of interest later, though:
     #
     # @handler("componentupdaterequest", channel="setup")
@@ -200,7 +206,7 @@ class Core(ConfigurableComponent):
     #     self.update_components(forcereload=event.force)
 
     def update_components(self, forcereload=False, forcerebuild=False,
-                      forcecopy=True, install=False):
+                          forcecopy=True, install=False):
 
         # TODO: See if we can pull out major parts of the component handling.
         # They are also used in the manage tool to instantiate the
@@ -266,8 +272,7 @@ class Core(ConfigurableComponent):
                         #
                         # schemastore['component'] = ComponentBaseConfigSchema
 
-
-        #except Exception as e:
+        # except Exception as e:
         #    hfoslog("Error: ", e, type(e), lvl=error, exc=True)
         #    return
 
@@ -291,7 +296,8 @@ class Core(ConfigurableComponent):
         self.log(self.config, self.config.frontendenabled, lvl=verbose)
         if self.config.frontendenabled and not self.frontendrunning \
                 or restart:
-            self.log("Restarting webfrontend services on", self.config.frontendtarget)
+            self.log("Restarting webfrontend services on",
+                     self.config.frontendtarget)
 
             self.static = Static("/",
                                  docroot=self.config.frontendtarget).register(
@@ -307,8 +313,15 @@ class Core(ConfigurableComponent):
                 del comp
             self.runningcomponents = {}
 
+        self.log('Not running blacklisted components: ',
+                 self.component_blacklist,
+                 lvl=debug)
+
+        running = set(self.loadable_components.keys()).difference(
+            self.component_blacklist)
+        self.log('Starting components: ', running)
         for name, componentdata in self.loadable_components.items():
-            if name in self.banlist:
+            if name in self.component_blacklist:
                 continue
             self.log("Running component: ", name, lvl=debug)
             try:
@@ -329,6 +342,7 @@ class Core(ConfigurableComponent):
 
         self._instantiate_components()
         self._start_frontend()
+        self.fire(ready(), "hfosweb")
 
 
 def construct_graph(args):
@@ -373,7 +387,8 @@ def launch(run=True):
                         type=str, default=None)
     parser.add_argument("--dbhost", help="Define hostname for database server",
                         type=str, default='127.0.0.1:27017')
-    parser.add_argument("--profile", help="Enable profiler", action="store_true")
+    parser.add_argument("--profile", help="Enable profiler",
+                        action="store_true")
     parser.add_argument("--opengui", help="Launch webbrowser for GUI "
                                           "inspection after startup",
                         action="store_true")

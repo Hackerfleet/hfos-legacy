@@ -24,7 +24,7 @@ from hfos.events.client import authenticationrequest, send, clientdisconnect, \
     userlogin
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
-from hfos.logger import error, warn, critical, debug, info, network
+from hfos.logger import error, warn, critical, debug, info, network, verbose
 from hfos.ui.clientobjects import Socket, Client, User
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
@@ -110,14 +110,14 @@ class ClientManager(ConfigurableComponent):
     def connect(self, *args):
         """Registers new sockets and their clients and allocates uuids"""
 
-        self.log("Connect ", args)
+        self.log("Connect ", args, lvl=debug)
 
         try:
             sock = args[0]
             ip = args[1]
 
             if sock not in self._sockets:
-                self.log("New ip!", ip)
+                self.log("New ip!", ip, lvl=debug)
                 clientuuid = str(uuid4())
                 self._sockets[sock] = Socket(ip, clientuuid)
                 # Key uuid is temporary, until signin, will then be replaced
@@ -345,9 +345,9 @@ class ClientManager(ConfigurableComponent):
         try:
             requestdata = msg['data']
             if 'raw' in requestdata:
-                #self.log(requestdata['raw'], lvl=critical)
+                # self.log(requestdata['raw'], lvl=critical)
                 requestdata['raw'] = b64decode(requestdata['raw'])
-                #self.log(requestdata['raw'])
+                # self.log(requestdata['raw'])
         except (KeyError, AttributeError) as e:
             self.log("No payload.", lvl=network)
             requestdata = None
@@ -385,7 +385,7 @@ class ClientManager(ConfigurableComponent):
         then notifies the client"""
         try:
             self.log("Authorization has been granted by DB check: %s" %
-                     event)
+                     event.username)
 
             account, profile, clientconfig = event.userdata
 
@@ -421,7 +421,6 @@ class ClientManager(ConfigurableComponent):
             socket = self._sockets[event.sock]
             socket.clientuuid = clientuuid
             self._sockets[event.sock] = socket
-
 
             # ..and client lists
             # TODO: Rewrite and simplify this:
@@ -460,7 +459,11 @@ class ClientManager(ConfigurableComponent):
 
             self.fireEvent(userlogin(clientuuid, useruuid))
 
-            self.log("User configured:", signedinuser.__dict__, lvl=info)
+            self.log("User configured:",
+                     signedinuser.account.name,
+                     signedinuser.profile.uuid,
+                     signedinuser.clients,
+                     lvl=info)
 
         except Exception as e:
             self.log("Error (%s, %s) during auth grant: %s" % (
