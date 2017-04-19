@@ -17,15 +17,21 @@ from hfos.provisions.base import provisionList
 from hfos.database import objectmodels
 from hfos.logger import hfoslog
 
+from uuid import uuid4
+
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-Users = [
-]
+Users = [{
+    'name': 'System',
+    'uuid': str(uuid4()),
+    'roles': ['admin', 'system', 'crew']
+}]
 
 
 def provision():
     # TODO: Add a root user and make sure owner can access it later.
-    # Setting up details and asking for a password here is not very useful, since this process is usually run automated.
+    # Setting up details and asking for a password here is not very useful,
+    # since this process is usually run automated.
 
     provisionList(Users, objectmodels['user'], indexes=['name'], clear=False)
     hfoslog('Provisioning: Users: Done.', emitter="PROVISIONS")
