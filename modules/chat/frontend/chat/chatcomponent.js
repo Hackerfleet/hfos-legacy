@@ -23,7 +23,7 @@ class chatcomponent {
             self.messages = self.chat.messages;
         });
         console.log('Chat component started.');
-    };
+    }
 
     chatsend() {
         console.log('Transmitting current message.');
