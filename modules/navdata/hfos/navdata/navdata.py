@@ -245,9 +245,24 @@ class VesselManager(ConfigurableComponent):
     def __init__(self, *args):
         super(VesselManager, self).__init__('VESSEL', *args)
 
-        vesseluuid = objectmodels['systemconfig'].find_one(
-            {'active': True}).vesseluuid
-        vessel = objectmodels['vessel'].find_one({'uuid': vesseluuid})
+        self.vessel_mapview = None
+
+        self.log('Started')
+
+    def _setup(self):
+
+        sysconfig = objectmodels['systemconfig'].find_one(
+            {'active': True})
+
+        try:
+            vessel = objectmodels['vessel'].find_one({
+                'uuid': sysconfig.vesseluuid
+            })
+        except AttributeError:
+            self.log('No vessel configured in Systemconfig, stopping!',
+                     lvl=warn)
+            return
+
         mapview = None
 
         if hasattr(vessel, 'mapviewuuid'):
@@ -272,14 +287,15 @@ class VesselManager(ConfigurableComponent):
 
             vessel.save()
 
-        self.vesselmapview = mapview
-
-        self.log('Started')
+        self.vessel_mapview = mapview
 
     @handler('referenceframe', channel='navdata')
     def referenceframeupdate(self, event):
+        if self.vessel_mapview is None:
+            return
+
         self.log('Updating system vessel mapview coordinates', event,
-                 self.vesselmapview, lvl=verbose)
+                 self.vessel_mapview, lvl=verbose)
         self.log('Data:', event.data, lvl=events)
         frame = event.data['data']
         if 'GLL_lat' in frame and 'GLL_lon' in frame:
@@ -291,10 +307,10 @@ class VesselManager(ConfigurableComponent):
                 'zoom': 10,
                 'autoDiscover': False
             }
-            self.vesselmapview.coords = coords
-            self.vesselmapview.save()
+            self.vessel_mapview.coords = coords
+            self.vessel_mapview.save()
 
-            self.fireEvent(updatesubscriptions(uuid=self.vesselmapview.uuid,
+            self.fireEvent(updatesubscriptions(uuid=self.vessel_mapview.uuid,
                                                schema='mapview',
-                                               data=self.vesselmapview),
+                                               data=self.vessel_mapview),
                            'hfosweb')
