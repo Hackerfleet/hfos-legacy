@@ -118,6 +118,8 @@ See https://github.com/hackerfleet/hfos""",
     clientmanager=hfos.ui.clientmanager:ClientManager
     objectmanager=hfos.ui.objectmanager:ObjectManager
     schemamanager=hfos.ui.schemamanager:SchemaManager
+    configurator=hfos.ui.configurator:Configurator
+
 
     [hfos.schemata]
     systemconfig=hfos.schemata.system:Systemconfig

@@ -34,6 +34,7 @@ __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 warmongo.connect("hfos")
 
 schemastore = None
+configschemastore = {}
 objectmodels = None
 collections = None
 

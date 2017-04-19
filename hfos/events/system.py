@@ -139,7 +139,15 @@ class debugrequest(authorizedevent):
         hfoslog('CREATED.', lvl=critical, emitter="DEBUG-EVENT")
 
 
+# Configurator
+
+
+class configrequest(authorizedevent):
+    """A client requires a schema to validate data or display a form"""
+
+
 AuthorizedEvents = {
+    'configurator': configrequest,
     'debugger': debugrequest,
     'objectmanager': objectmanagerrequest,
     'profile': profilerequest,

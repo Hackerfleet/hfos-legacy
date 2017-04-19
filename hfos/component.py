@@ -20,7 +20,7 @@ Provisions
 
 """
 
-from hfos.schemata.component import ComponentBaseConfigSchema
+from hfos.schemata.component import ComponentBaseConfigSchema, ComponentConfigSchemaTemplate
 from hfos.logger import hfoslog, warn, critical, error, debug, verbose
 from circuits import Component
 from jsonschema import ValidationError
@@ -31,6 +31,8 @@ from uuid import uuid4
 from copy import deepcopy
 import inspect
 from sys import exc_info
+
+from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -61,21 +63,10 @@ class ConfigurableComponent(Component):
 
                     break
 
-        # self.configform = deepcopy(ComponentConfigForm)
         self.configschema = deepcopy(ComponentBaseConfigSchema)
-
-        # configprops = self.configprops
-        # configprops['default'] = {}
 
         self.configschema['schema']['properties'].update(self.configprops)
 
-        # self.configschema['schema']['properties']['settings'] = {
-        #    'type': 'object',
-        #    'id': '#client',
-        #    'name': self.uniquename,
-        #    'properties': self.configprops,
-        #    'default': {}
-        # }
         # self.log("[UNIQUECOMPONENT] Config Schema: ", self.configschema,
         #         lvl=critical)
         # pprint(self.configschema)
@@ -90,7 +81,6 @@ class ConfigurableComponent(Component):
         # self.log("Component model: ", lvl=critical)
         # pprint(self.componentmodel._schema)
 
-
         self._read_config()
         if not self.config:
             self.log("Creating initial default configuration.")
@@ -101,13 +91,21 @@ class ConfigurableComponent(Component):
                 self.log("Error during configuration reading: ", e, type(e),
                          exc=True)
 
+    def register(self, *args):
+        super(ConfigurableComponent, self).register(*args)
+        from hfos.database import configschemastore
+        #self.log('ADDING SCHEMA:')
+        #pprint(self.configschema)
+        configschemastore[self.name] = self.configschema
+
     def unregister(self):
         self.names.remove(self.uniquename)
         super(ConfigurableComponent, self).unregister()
 
     def _read_config(self):
         try:
-            self.config = self.componentmodel.find_one({'name': self.uniquename})
+            self.config = self.componentmodel.find_one(
+                {'name': self.uniquename})
         except ServerSelectionTimeoutError:
             self.log("No database access! Check if mongodb is running "
                      "correctly.", lvl=critical)
@@ -150,7 +148,7 @@ class ConfigurableComponent(Component):
 
             try:
                 self.config.name = self.uniquename
-            except (AttributeError, KeyError):
+            except (AttributeError, KeyError) as e:
                 self.log("Cannot set component name for configuration: ", e,
                          type(e), self.name, exc=True, lvl=critical)
 
@@ -177,7 +175,8 @@ class ConfigurableComponent(Component):
 
             try:
                 componentclass = self.config.componentclass
-                self.log("Componentclass set to: ", componentclass, lvl=verbose)
+                self.log("Componentclass set to: ", componentclass,
+                         lvl=verbose)
             except (AttributeError, KeyError):
                 self.log("Has no component class", lvl=verbose)
                 self.config.componentclass = self.name
@@ -186,7 +185,7 @@ class ConfigurableComponent(Component):
             self.log("Not setting invalid component configuration: ", e,
                      type(e), exc=True, lvl=error)
 
-        # self.log("Fields:", self.config._fields, lvl=verbose)
+            # self.log("Fields:", self.config._fields, lvl=verbose)
 
     def log(self, *args, **kwargs):
         func = inspect.currentframe().f_back.f_code
@@ -195,6 +194,7 @@ class ConfigurableComponent(Component):
         if 'exc' in kwargs and kwargs['exc'] is True:
             exc_type, exc_obj, exc_tb = exc_info()
             line_no = exc_tb.tb_lineno
+            print('EXCEPTION DATA:', line_no, exc_type, exc_obj, exc_tb)
         else:
             line_no = func.co_firstlineno
 
