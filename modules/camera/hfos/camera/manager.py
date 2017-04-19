@@ -80,8 +80,6 @@ class CameraManager(ConfigurableComponent):
             self.log("Timer error: ", e, type(e), lvl=error)
 
     def _snapshot(self):
-        self._framecount += 1
-
         try:
             for camid, cam in self._cameras.items():
                 if cam['uuid'] in self._subscribers:
@@ -105,11 +103,13 @@ class CameraManager(ConfigurableComponent):
                         self._broadcast(campacket, cam['uuid'])
                     else:
                         self.log("Failed to get an image.", success, cvresult)
+                    self._framecount += 1
+
+            if self._framecount > 0 and self._framecount % 100 == 0:
+                self.log("", self._framecount, " frames taken.", lvl=debug)
 
         except Exception as e:
             self.log("Error: ", e, type(e), lvl=error)
-        if self._framecount % 100 == 0:
-            self.log("", self._framecount, " frames taken.", lvl=debug)
 
     def toggleFilming(self):
         """Toggles the camera system recording state"""
