@@ -82,6 +82,7 @@ class NMEAParser(ConfigurableComponent):
     ports = serial_ports()
     configprops = {
         'connectiontype': {
+            'type': 'string',
             'enum': ['TCP', 'USB/Serial'],
             'title': 'Type of NMEA adaptor',
             'description': 'Determines how to get data from the bus.',
@@ -100,6 +101,7 @@ class NMEAParser(ConfigurableComponent):
             'default': 'localhost'
         },
         'serialfile': {
+            'type': 'string',
             'enum': ports + [''],
             'title': 'Serial port device',
             'description': 'File descriptor to access serial port',
