@@ -19,60 +19,59 @@ Provisions
 """
 
 from hfos.schemata.defaultform import editbuttons
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-LayerGroupSchema = {
-    'type': 'object',
-    'id': '#layergroup',
-    'name': 'layergroup',
-    'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Group ID',
-                 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
-                 'description': 'Name of Group'},
-        'owner': {'type': 'string', 'minLength': 36,
+LayerGroupSchema = base_object('layergroup',
+                               roles_read=['owner', 'admin', 'crew'],
+                               roles_write=['owner', 'admin', 'navigator'],
+                               roles_create=['admin', 'navigator'],
+                               roles_list=['owner', 'admin', 'crew']
+                               )
+
+LayerGroupSchema['properties'].update({
+    'owner': {'type': 'string', 'minLength': 36,
                   'title': "Owner's Unique ID", 'description': 'HIDDEN'},
-        'color': {'type': 'string', 'title': 'Group Color', 'format': 'color',
-                  'description': 'This group''s color indicator'},
-        'shared': {'type': 'boolean', 'title': 'Shared group',
-                   'description': 'Share group with the crew'},
-        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
-                  'description': 'Custom user notes'},
-        'layers': {
-            'type': 'array',
-            'items': {
-                'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
-                           'a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                           '12}$',
-                'type': 'string',
-                'title': 'Unique Layer ID'
-            }
+    'color': {'type': 'string', 'title': 'Group Color', 'format': 'color',
+              'description': 'This group''s color indicator'},
+    'shared': {'type': 'boolean', 'title': 'Shared group',
+               'description': 'Share group with the crew'},
+    'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
+              'description': 'Custom user notes'},
+    'layers': {
+        'type': 'array',
+        'items': {
+            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
+                       'a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
+                       '12}$',
+            'type': 'string',
+            'title': 'Unique Layer ID'
         }
     }
-}
+})
 
 LayerGroupForm = [
     'name',
     'notes',
     {
-         'key': 'layers',
-         'add': "Add layer",
-         'style': {
-             'add': "btn-success"
-         },
-         'items': [
-             {
-                 'key': 'layers[]',
-                 'type': 'strapselect',
-                 'placeholder': 'Select a Layer',
-                 'options': {
-                     "type": "layer",
-                     "asyncCallback": "$ctrl.getFormData",
-                     "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
-                 }
-             }
-         ]
+        'key': 'layers',
+        'add': "Add layer",
+        'style': {
+            'add': "btn-success"
+        },
+        'items': [
+            {
+                'key': 'layers[]',
+                'type': 'strapselect',
+                'placeholder': 'Select a Layer',
+                'options': {
+                    "type": "layer",
+                    "asyncCallback": "$ctrl.getFormData",
+                    "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
+                }
+            }
+        ]
     },
     editbuttons
 ]

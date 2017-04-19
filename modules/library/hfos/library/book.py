@@ -19,57 +19,49 @@ Provisions
 """
 
 from hfos.schemata.defaultform import editbuttons
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-BookSchema = {
-    'type': 'object',
-    'id': '#book',
-    'name': 'book',
-    'properties': {
-        'uuid': {'type': 'string', 'minLength': 36, 'title': 'Unique Book ID',
-                 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name',
-                 'description': 'Name of Book'},
-        'authors': {
-            'type': 'array',
-            'default': [],
-            'items': {'type': 'string', 'title': 'Authors',
-                      'description': 'Authors of Book'},
-            'minItems': 0
-        },
-        'publisher': {'type': 'string', 'title': 'Publisher',
-                      'description': 'Publisher of Book'},
-        'owneruuid': {'type': 'string', 'minLength': 36,
-                      'title': "Owner's Unique ID", 'description': 'HIDDEN'},
-        'language': {'type': 'string', 'title': 'Language',
-                     'description': 'Lanuage'},
-        'available': {'type': 'boolean', 'title': 'Available',
-                      'description': 'Eligible for lending', 'default': True},
-        'status': {'type': 'string', 'title': 'Status',
-                   'description': 'Last known status'},
-        'statuschange': {'type': 'string', 'format': 'datetimepicker',
-                         'title': 'Status date',
-                         'description': 'Latest status change date'},
-        'statusowner': {'type': 'string', 'minLength': 36,
-                        'title': 'Unique User ID',
-                        'description': 'Currently owning user'},
-        'tags': {'type': 'string', 'title': 'Tags',
-                 'description': 'Attached tags'},
-        'isbn': {'type': 'string', 'title': 'ISBN',
-                 'description': 'International Standard Book Number',
-                 'pattern': '^(97(8|9))?\d{9}(\d|X)$'},
-        'isbnalt': {'type': 'string', 'title': 'ISBN',
-                    'description': 'Alternative International Standard Book '
-                                   'Number',
-                    'pattern': '^(97(8|9))?\d{9}(\d|X)$'},
-        'year': {'type': 'number', 'title': 'Published',
-                 'description': 'Year of publishment'},
-        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
-                  'description': 'Entry notes'},
+BookSchema = base_object('bookschema')
 
-    }
-}
+BookSchema['properties'].update({
+    'authors': {
+        'type': 'array',
+        'default': [],
+        'items': {'type': 'string', 'title': 'Authors',
+                  'description': 'Authors of Book'},
+        'minItems': 0
+    },
+    'publisher': {'type': 'string', 'title': 'Publisher',
+                  'description': 'Publisher of Book'},
+    'language': {'type': 'string', 'title': 'Language',
+                 'description': 'Lanuage'},
+    'available': {'type': 'boolean', 'title': 'Available',
+                  'description': 'Eligible for lending', 'default': True},
+    'status': {'type': 'string', 'title': 'Status',
+               'description': 'Last known status'},
+    'statuschange': {'type': 'string', 'format': 'datetimepicker',
+                     'title': 'Status date',
+                     'description': 'Latest status change date'},
+    'statusowner': {'type': 'string', 'minLength': 36,
+                    'title': 'Unique User ID',
+                    'description': 'Currently owning user'},
+    'tags': {'type': 'string', 'title': 'Tags',
+             'description': 'Attached tags'},
+    'isbn': {'type': 'string', 'title': 'ISBN',
+             'description': 'International Standard Book Number',
+             'pattern': '^(97(8|9))?\d{9}(\d|X)$'},
+    'isbnalt': {'type': 'string', 'title': 'ISBN',
+                'description': 'Alternative International Standard Book '
+                               'Number',
+                'pattern': '^(97(8|9))?\d{9}(\d|X)$'},
+    'year': {'type': 'number', 'title': 'Published',
+             'description': 'Year of publishment'},
+    'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
+              'description': 'Entry notes'},
+
+})
 
 BookForm = [
     {

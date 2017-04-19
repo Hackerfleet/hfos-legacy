@@ -13,30 +13,23 @@ durations as well as conditions..
 :license: GPLv3 (See LICENSE)
 
 """
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-WateringRuleSchema = {
-    'type': 'object',
-    'id': '#',
-    'name': 'wateringrule',
-    'properties': {
-        'uuid': {'type': 'string', 'minLength': 36,
-                 'title': 'Unique WateringRule ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name',
-                 'description': 'Name of WateringRule'},
-        'status': {'type': 'bool', 'title': 'Status', 'description':
-            'If watering rule is active'},
-        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
-                  'description': 'Entry notes'},
-        'activationtime': {'type': 'string', 'description': 'Activation time '
-                                                            'of watering '
-                                                            'rule'},
-        'duration': {'type': 'number', 'description': 'Duration of pump '
-                                                      'activation'}
+WateringRuleSchema = base_object('wateringrule')
 
-    }
-}
+WateringRuleSchema['properties'].update({
+    'status': {'type': 'bool', 'title': 'Status', 'description':
+        'If watering rule is active'},
+    'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
+              'description': 'Entry notes'},
+    'activationtime': {'type': 'string', 'description': 'Activation time '
+                                                        'of watering '
+                                                        'rule'},
+    'duration': {'type': 'number', 'description': 'Duration of pump '
+                                                  'activation'}
+})
 
 WateringRuleForm = [
     {

@@ -15,36 +15,29 @@ durations as well as conditions..
 """
 
 from hfos.schemata.defaultform import savebutton
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-MeshNodeSchema = {
-    'type': 'object',
-    'id': '#meshnode',
-    'name': 'meshnode',
-    'properties': {
-        'uuid': {'type': 'string', 'minLength': 36,
-                 'title': 'Unique MeshNode ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name',
-                 'description': 'Name of MeshNode'},
-        'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
-                  'description': 'Entry notes'},
-        'hub': {'type': 'boolean', 'title': 'Hub node',
-                'description': 'This node has data about other nodes'},
-        'address': {
-            'type': 'string',
-            'format': 'ip-address',
-            'title': 'IP Address',
-            'description': 'Last known IP address of node'
-        },
-        'last': {
-            'type': 'string', 'format': 'datetimepicker',
-            'title': 'Last Seen',
-            'description': 'Last date and time, this node has been seen online'
-        }
+MeshNodeSchema = base_object('meshnode')
 
+MeshNodeSchema['properties'].update({
+    'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
+              'description': 'Entry notes'},
+    'hub': {'type': 'boolean', 'title': 'Hub node',
+            'description': 'This node has data about other nodes'},
+    'address': {
+        'type': 'string',
+        'format': 'ip-address',
+        'title': 'IP Address',
+        'description': 'Last known IP address of node'
+    },
+    'last': {
+        'type': 'string', 'format': 'datetimepicker',
+        'title': 'Last Seen',
+        'description': 'Last date and time, this node has been seen online'
     }
-}
+})
 
 MeshNodeForm = [
     {

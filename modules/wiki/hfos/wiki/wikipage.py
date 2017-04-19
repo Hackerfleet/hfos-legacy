@@ -14,45 +14,29 @@ WikiPage: WikiPage to store collaborative data
 
 from hfos.schemata.defaultform import defaultform, editbuttons
 from copy import deepcopy
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-WikiPageSchema = {
-    'id': '#wikipage',
-    'type': 'object',
-    'name': 'wikipage',
-    'properties': {
-        'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique WikiPage ID'
-        },
-        'owner': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique ID of owner'
-        },
-        'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
-                 'description': 'Page name (url slug)'},
-        'title': {'type': 'string', 'title': 'Page Title',
-                  'description': 'Short title'},
-        'html': {'type': 'string', 'format': 'html', 'title': 'Page content',
-                 'description': 'Content'},
-        # 'text': {'type': 'string', 'title': 'Raw text',
-        #          'description': 'Unrendered raw text'},
-        # 'history': {
-        #     'type': 'array',
-        #     'default': [],
-        #     'items': {
-        #         'type': 'string',
-        #         'title': 'Snapshot content',
-        #         'description': 'Snapshot data'
-        #     }
-        # }
-    }
-}
+WikiPageSchema = base_object('wikipage', roles_read=['crew'])
+
+WikiPageSchema['properties'].update({
+    'title': {'type': 'string', 'title': 'Page Title',
+              'description': 'Short title'},
+    'html': {'type': 'string', 'format': 'html', 'title': 'Page content',
+             'description': 'Content'},
+    # 'text': {'type': 'string', 'title': 'Raw text',
+    #          'description': 'Unrendered raw text'},
+    # 'history': {
+    #     'type': 'array',
+    #     'default': [],
+    #     'items': {
+    #         'type': 'string',
+    #         'title': 'Snapshot content',
+    #         'description': 'Snapshot data'
+    #     }
+    # }
+})
 
 WikiPageForm = [
     'name',

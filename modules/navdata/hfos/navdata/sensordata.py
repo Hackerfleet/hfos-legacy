@@ -11,22 +11,24 @@ SensorData:
 :license: GPLv3 (See LICENSE)
 
 """
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-SensorDataSchema = {
-    'id': '#sensorData',
-    'title': 'SensorData',
-    'type': 'object',
-    'name': 'sensordata',
-    'properties': {
-        'value': {'title': 'Value', 'description':
-            'Sensordata Value'},
-        'timestamp': {'type': 'number', 'title': 'Timestamp',
-                      'description': 'Log Message timestamp (\xc2Sec)'},
-        'type': {'type': 'string'}
+SensorDataSchema = base_object('sensorData', has_owner=False, has_uuid=False)
+
+SensorDataSchema['properties'].update({
+    'value': {
+        'title': 'Value', 'description': 'Sensordata Value'
+    },
+    'timestamp': {
+        'type': 'number', 'title': 'Timestamp',
+        'description': 'Log Message timestamp (microSec)'
+    },
+    'type': {
+        'type': 'string'
     }
-}
+})
 
 SensorDataForm = [
     {

@@ -13,73 +13,55 @@ Taskgrid: Taskgrid config to store gridster settings
 """
 
 from hfos.schemata.defaultform import *
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-TaskGridConfigSchema = {
-    'id': '#taskgridconfig',
-    'type': 'object',
-    'name': 'taskgridconfig',
-    'properties': {
-        'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique Taskgrid ID'
-        },
-        'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
-                 'description': 'Taskgrid name'},
-        'locked': {'type': 'boolean', 'title': 'Locked Taskgrid',
-                   'description': 'Determines whether the Taskgrid should '
-                                  'be locked against changes.'},
-        'shared': {'type': 'boolean', 'title': 'Shared Taskgrid',
-                   'description': 'Share Taskgrid with the crew'},
-        'description': {'type': 'string', 'format': 'html',
-                        'title': 'Taskgrid description',
-                        'description': 'Taskgrid description'},
-        'useruuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Associated Unique User ID'
-        },
-        'cards': {
-            'type': 'array',
-            'default': [],
-            'items': {
-                'type': 'object',
-                'id': '#Card',
-                'name': 'TaskGridCard',
-                'properties': {
-                    'taskgroup': {
-                        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                                   'type': 'string',
-                                           'title': 'Associated Unique Task '
-                                                    'Group ID'
-                    },
-                    'position': {
-                        'type': 'object',
-                        'properties': {
-                            'x': {'type': 'number'},
-                            'y': {'type': 'number'}
-                        }
-                    },
-                    'size': {
-                        'type': 'object',
-                        'properties': {
-                            'width': {'type': 'number'},
-                            'height': {'type': 'number'}
-                        }
-                    },
-                }
+TaskGridConfigSchema = base_object('taskgridconfig')
+
+TaskGridConfigSchema['properties'].update({
+    'locked': {'type': 'boolean', 'title': 'Locked Taskgrid',
+               'description': 'Determines whether the Taskgrid should '
+                              'be locked against changes.'},
+    'shared': {'type': 'boolean', 'title': 'Shared Taskgrid',
+               'description': 'Share Taskgrid with the crew'},
+    'description': {'type': 'string', 'format': 'html',
+                    'title': 'Taskgrid description',
+                    'description': 'Taskgrid description'},
+    'cards': {
+        'type': 'array',
+        'default': [],
+        'items': {
+            'type': 'object',
+            'id': '#Card',
+            'name': 'TaskGridCard',
+            'properties': {
+                'taskgroup': {
+                    'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
+                               '4}-['
+                               'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+                    'type': 'string',
+                    'title': 'Associated Unique Task '
+                             'Group ID'
+                },
+                'position': {
+                    'type': 'object',
+                    'properties': {
+                        'x': {'type': 'number'},
+                        'y': {'type': 'number'}
+                    }
+                },
+                'size': {
+                    'type': 'object',
+                    'properties': {
+                        'width': {'type': 'number'},
+                        'height': {'type': 'number'}
+                    }
+                },
             }
         }
-    },
-    "required": [
-        'uuid'
-    ]
-}
+    }
+})
 
 TaskGridConfigForm = [
     {

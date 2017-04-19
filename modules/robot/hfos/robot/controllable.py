@@ -13,27 +13,18 @@ Controllable: Patterns of remote control
 """
 
 from hfos.schemata.defaultform import defaultform
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-ControllableSchema = {
-    'id': '#controllable',
-    'type': 'object',
-    'name': 'controllable',
-    'properties': {
-        'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique Controllable ID'
-            },
-        'name': {'type': 'string'},
-        'description': {'type': 'string'},
-        'type': {'enum': ['analog', 'digital']},
-        'min': {'type': 'integer', 'default': 0},
-        'center': {'type': 'integer', 'default': 127},
-        'max': {'type': 'integer', 'default': 255},
-    }
-}
+ControllableSchema = base_object('controllable')
+
+ControllableSchema['properties'].update({
+    'description': {'type': 'string'},
+    'type': {'enum': ['analog', 'digital']},
+    'min': {'type': 'integer', 'default': 0},
+    'center': {'type': 'integer', 'default': 127},
+    'max': {'type': 'integer', 'default': 255},
+})
 
 Controllable = {'schema': ControllableSchema, 'form': defaultform}

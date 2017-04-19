@@ -19,30 +19,22 @@ Provisions
 """
 
 from hfos.schemata.defaultform import editbuttons
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-ProjectSchema = {
-    'type': 'object',
-    'id': '#project',
-    'name': 'project',
-    'properties': {
-        'uuid': {'type': 'string', 'minLength': 36,
-                 'title': 'Unique Project ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name',
-                 'description': 'Name of Project', 'unique': True},
-        'creatoruuid': {'type': 'string', 'title': 'Creator',
-                        'description': 'Creator of Project'},
-        'owneruuid': {'type': 'string', 'minLength': 36,
-                      'title': "Owner's Unique ID", 'description': 'HIDDEN'},
-        'priority': {'type': 'number', 'title': 'Priority',
-                     'description': '1 is Highest priority', 'minimum': 1},
-        'tags': {'type': 'string', 'title': 'Tags',
-                 'description': 'Attached tags'},
-        'notes': {'type': 'string', 'title': 'User notes',
-                  'description': 'Entry notes'}
-    }
-}
+ProjectSchema = base_object('project')
+
+ProjectSchema['properties'].update({
+    'creatoruuid': {'type': 'string', 'title': 'Creator',
+                    'description': 'Creator of Project'},
+    'priority': {'type': 'number', 'title': 'Priority',
+                 'description': '1 is Highest priority', 'minimum': 1},
+    'tags': {'type': 'string', 'title': 'Tags',
+             'description': 'Attached tags'},
+    'notes': {'type': 'string', 'title': 'User notes',
+              'description': 'Entry notes'}
+})
 
 ProjectForm = [
     {
@@ -54,7 +46,7 @@ ProjectForm = [
                 'htmlClass': 'col-xs-6',
                 'items': [
                     'name', {
-                        'key': 'owneruuid',
+                        'key': 'owner',
                         'type': 'strapselect',
                         'placeholder': 'Select an Owner',
                         'options': {

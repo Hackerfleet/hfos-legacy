@@ -34,10 +34,9 @@ class Authenticator(ConfigurableComponent):
 
     def __init__(self, *args):
         super(Authenticator, self).__init__('AUTH', *args)
-        #self.log(objectmodels['systemconfig'], lvl=error)
+        # self.log(objectmodels['systemconfig'], lvl=error)
 
         systemconfig = objectmodels['systemconfig'].find_one({'active': True})
-
 
         # TODO: Decouple systemconfig creation from authenticator
         try:
@@ -49,7 +48,6 @@ class Authenticator(ConfigurableComponent):
 
         self.salt = salt
         self.systemconfig = systemconfig
-
 
     def makehash(self, word):
         self.log("TYPE: ", type(word))
@@ -74,35 +72,34 @@ class Authenticator(ConfigurableComponent):
         # TODO: Refactor to simplify
 
         if event.auto:
-            self.log("Automatic login request:")
+            self.log("Verifying automatic login request")
 
-            e = None
             try:
                 clientconfig = objectmodels['client'].find_one({
                     'uuid': event.requestedclientuuid
                 })
-            except Exception as e:
+            except Exception:
                 clientconfig = None
 
             if clientconfig is None or clientconfig.autologin == False:
-                self.log("Autologin failed.", lvl=error)
+                self.log("Autologin failed:", event.requestedclientuuid,
+                         lvl=error)
                 return
 
-            # noinspection PySimplifyBooleanCheck
-            if clientconfig.autologin == True:
+            if clientconfig.autologin is True:
 
                 try:
                     useraccount = objectmodels['user'].find_one({
-                        'uuid': clientconfig.useruuid
+                        'uuid': clientconfig.owner
                     })
-                    self.log("Account: %s" % useraccount._fields, lvl=debug)
+                    self.log("Autologin for", useraccount.name, lvl=debug)
                 except Exception as e:
-                    self.log("No userobject due to error: ", e, type(e),
+                    self.log("No user object due to error: ", e, type(e),
                              lvl=error)
 
                 try:
                     userprofile = objectmodels['profile'].find_one({
-                        'uuid': str(useraccount.uuid)
+                        'owner': str(useraccount.uuid)
                     })
                     self.log("Profile: ", userprofile,
                              useraccount.uuid, lvl=debug)
@@ -115,7 +112,7 @@ class Authenticator(ConfigurableComponent):
                                        useraccount.uuid,
                                        event.sock),
                         "auth")
-                    self.log("Autologin successful!", lvl=error)
+                    self.log("Autologin successful!", lvl=warn)
                 except Exception as e:
                     self.log("No profile due to error: ", e, type(e),
                              lvl=error)
@@ -172,7 +169,7 @@ class Authenticator(ConfigurableComponent):
                     if clientconfig:
                         self.log("Checking client configuration permissions",
                                  lvl=debug)
-                        if clientconfig.useruuid != useraccount.uuid:
+                        if clientconfig.owner != useraccount.uuid:
                             clientconfig = None
                             self.log("Unauthorized client configuration "
                                      "requested",
@@ -186,20 +183,23 @@ class Authenticator(ConfigurableComponent):
                         self.log("Creating new default client configuration")
                         # Either no configuration was found or requested
                         # -> Create a new client configuration
+                        uuid = event.clientuuid if event.clientuuid is not \
+                                                   None else str(uuid4())
 
-                        clientconfig = objectmodels['client']()
-                        clientconfig.uuid = event.clientuuid
+                        clientconfig = objectmodels['client']({'uuid': uuid})
+
                         clientconfig.name = "New client"
                         clientconfig.description = "New client configuration " \
+                                                   "" \
                                                    "from " + useraccount.name
-                        clientconfig.useruuid = useraccount.uuid
+                        clientconfig.owner = useraccount.uuid
                         # TODO: Make sure the profile is only saved if the
                         # client could store it, too
                         clientconfig.save()
 
                     try:
                         userprofile = objectmodels['profile'].find_one(
-                            {'uuid': str(useraccount.uuid)})
+                            {'owner': str(useraccount.uuid)})
                         self.log("Profile: ", userprofile,
                                  useraccount.uuid, lvl=debug)
 
@@ -246,7 +246,8 @@ class Authenticator(ConfigurableComponent):
             return
         try:
             newprofile = objectmodels['profile']({
-                'uuid': str(newuser.uuid)
+                'uuid': str(uuid4()),
+                'owner': newuser.uuid
             })
             self.log("New profile uuid: ", newprofile.uuid,
                      lvl=verbose)
@@ -262,12 +263,14 @@ class Authenticator(ConfigurableComponent):
 
         try:
             # TODO: Clone or reference systemwide default configuration
-            newclientconfig = objectmodels['client']()
-            newclientconfig.uuid = event.clientuuid
+            uuid = event.clientuuid if event.clientuuid is not None else str(
+                uuid4())
+
+            newclientconfig = objectmodels['client']({'uuid': uuid})
             newclientconfig.name = "New client"
             newclientconfig.description = "New client configuration " \
                                           "from " + newuser.name
-            newclientconfig.useruuid = newuser.uuid
+            newclientconfig.owner = newuser.uuid
             newclientconfig.save()
         except Exception as e:
             self.log("Problem creating new clientconfig: ",

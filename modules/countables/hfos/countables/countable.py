@@ -14,24 +14,18 @@ Generic countable thing definition
 """
 
 from hfos.schemata.defaultform import editbuttons
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-CountableSchema = {
-    'type': 'object',
-    'id': '#',
-    'name': 'countable',
-    'properties': {
-        'uuid': {'type': 'string', 'minLength': 36,
-                 'title': 'Unique Countable ID', 'description': 'HIDDEN'},
-        'name': {'type': 'string', 'title': 'Name',
-                 'description': 'Name of Countable'},
+CountableSchema = base_object('countable')
+
+CountableSchema['properties'].update({
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
                   'description': 'Entry notes'},
         'amount': {'type': 'number', 'title': 'Amount counted', 'default': 0}
 
-    }
-}
+})
 
 CountableForm = [
     {

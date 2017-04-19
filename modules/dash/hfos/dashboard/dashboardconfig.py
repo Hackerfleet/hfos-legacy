@@ -13,79 +13,62 @@ Dashboard: Dashboard config to store gridster settings
 """
 
 from hfos.schemata.defaultform import *
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-DashboardSchema = {
-    'id': '#dashboardconfig',
-    'type': 'object',
-    'name': 'dashboardconfig',
-    'properties': {
-        'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique Dashboard ID'
-        },
-        'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
-                 'description': 'Dashboard name'},
-        'locked': {'type': 'boolean', 'title': 'Locked Dashboard',
-                   'description': 'Determines whether the Dashboard should '
-                                  'be locked against changes.'},
-        'refreshrate': {'title': 'Refreshrate', 'type': 'number',
-                        'description': 'General refresh rate of dashboard'},
-        'shared': {'type': 'boolean', 'title': 'Shared Dashboard',
-                   'description': 'Share Dashboard with the crew'},
-        'description': {'type': 'string', 'format': 'html',
-                        'title': 'Dashboard description',
-                        'description': 'Dashboard description'},
-        'useruuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Associated Unique User ID'
-        },
-        'cards': {
-            'type': 'array',
-            'default': [],
-            'items': {
-                'type': 'object',
-                'id': '#Card',
-                'name': 'DashboardCard',
-                'properties': {
-                    'widgettype': {
-                        'type': 'string',
-                        'enum': [
-                            'simplebarreadout',
-                            'historybarreadout',
-                            'digitalreadout',
-                            'simplecompass'
-                        ]
-                    },
-                    'valuetype': {'type': 'string'},
-                    'title': {'type': 'string'},
-                    'position': {
-                        'type': 'object',
-                        'properties': {
-                            'x': {'type': 'number'},
-                            'y': {'type': 'number'}
-                        }
-                    },
-                    'size': {
-                        'type': 'object',
-                        'properties': {
-                            'width': {'type': 'number'},
-                            'height': {'type': 'number'}
-                        }
-                    },
-                }
+DashboardSchema = base_object('dashboardconfig',
+                              roles_read=['crew'],
+                              roles_write=['crew'])
+
+DashboardSchema['properties'].update({
+    'locked': {'type': 'boolean', 'title': 'Locked Dashboard',
+               'description': 'Determines whether the Dashboard should '
+                              'be locked against changes.'},
+    'refreshrate': {'title': 'Refreshrate', 'type': 'number',
+                    'description': 'General refresh rate of dashboard'},
+    'shared': {'type': 'boolean', 'title': 'Shared Dashboard',
+               'description': 'Share Dashboard with the crew'},
+    'description': {'type': 'string', 'format': 'html',
+                    'title': 'Dashboard description',
+                    'description': 'Dashboard description'},
+    'cards': {
+        'type': 'array',
+        'default': [],
+        'items': {
+            'type': 'object',
+            'id': '#Card',
+            'name': 'DashboardCard',
+            'properties': {
+                'widgettype': {
+                    'type': 'string',
+                    'enum': [
+                        'simplebarreadout',
+                        'historybarreadout',
+                        'digitalreadout',
+                        'simplecompass'
+                    ]
+                },
+                'valuetype': {'type': 'string'},
+                'title': {'type': 'string'},
+                'position': {
+                    'type': 'object',
+                    'properties': {
+                        'x': {'type': 'number'},
+                        'y': {'type': 'number'}
+                    }
+                },
+                'size': {
+                    'type': 'object',
+                    'properties': {
+                        'width': {'type': 'number', 'default': 2},
+                        'height': {'type': 'number', 'default': 2}
+                    }
+                },
             }
         }
-    },
-    "required": [
-        'uuid'
-    ]
-}
+    }
+})
 
 DashboardForm = [
     {
@@ -111,7 +94,6 @@ DashboardForm = [
     {
         'key': 'cards',
         'add': "Add widget",
-        'startEmpty': True,
         'style': {
             'add': "btn-success"
         },
@@ -128,27 +110,11 @@ DashboardForm = [
                     "map": {'valueProperty': "name", 'nameProperty':
                         'name'}
                 }
-            },
-            {'type': 'section',
-             'htmlClass': 'row',
-             'items': [
-                 {
-                     'type': 'section',
-                     'htmlClass': 'col-xs-4',
-                     'items': [
-                         'cards[].position'
-                     ]
-                 },
-                 {
-                     'type': 'section',
-                     'htmlClass': 'col-xs-4',
-                     'items': [
-                         'cards[].size'
-                     ]
-                 }
-             ]
-             }
-        ]
+            }
+
+        ],
+        'startEmpty': True,
+
     },
     'description',
     editbuttons

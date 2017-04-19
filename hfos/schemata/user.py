@@ -15,32 +15,28 @@ User: Useraccount object
 
 """
 from hfos.schemata.defaultform import noform
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-UserSchema = {
-    'id': '#user',
-    'type': 'object',
-    'name': 'user',
-    'properties': {
-        'name': {'type': 'string'},
-        'passhash': {'type': 'string'},
-        'groups': {'type': 'array',
-                   'items': {
-                       'type': 'number'
-                   },
-                   },
-        'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique User ID'
-            }
+UserSchema = base_object('user', roles_list=['owner', 'admin', 'crew'])
+
+UserSchema['properties'].update({
+    'passhash': {
+        'type': 'string'
+    },
+    'roles': {
+        'type': 'array',
+        'items': {
+            'type': 'string'
+        },
+        'default': ['crew']
     }
-}
+
+})
 
 UserOptions = {
-    'hidden': ['passhash']
+    'hidden': ['passhash', 'roles']
 }
 
 User = {'schema': UserSchema, 'form': noform, 'options': UserOptions}

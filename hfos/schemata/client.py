@@ -12,6 +12,7 @@ Client: Clientprofile to store client specific settings
 
 """
 from hfos.schemata.defaultform import savebutton
+from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -40,82 +41,67 @@ ScreenRotationSchema = {
     }
 }
 
-ClientconfigSchema = {
-    'id': '#client',
-    'type': 'object',
-    'name': 'client',
-    'properties': {
-        'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique Client ID'
-        },
-        'name': {
-            'type': 'string', 'minLength': 1, 'title': 'Name',
-            'description': 'Client name'
-        },
-        'autologin': {
-            'type': 'boolean', 'title': 'Automatic login',
-            'description': 'Automatically logs in this client.'
-        },
-        'active': {
-            'type': 'boolean', 'title': 'Active client',
-            'description': 'Indicates whether client is currently '
-                           'active.'
-        },
-        'locked': {
-            'type': 'boolean', 'title': 'Locked client',
-            'description': 'Determines whether the client should be '
-                           'locked against changes.'
-        },
-        'infoscreen': {
-            'type': 'boolean', 'title': 'Infoscreen client',
-            'description': 'This client rotates set up infoscreens'
-        },
-        'currentview': {
-            'type': 'string', 'minLength': 1, 'title': 'Name',
-            'description': 'Client name'
-        },
-        'theme': {
-            'type': 'string', 'title': 'Client Theme',
-            'description': 'Theme used for user interface'
-        },
-        'description': {
-            'type': 'string', 'format': 'html',
-            'title': 'Client description',
-            'description': 'Client description'
-        },
-        'infoscreenrotations': {
-            'type': 'array',
-            'items': ScreenRotationSchema
-        },
-        'useruuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Associated Unique User ID'
-        },
-        'mapviewuuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Associated Unique Mapview ID'
-        },
-        'dashboarduuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Associated Unique Dashboard ID'
-        },
-        'taskgriduuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Associated Unique Task Grid ID'
-        },
-    }
-}
+ClientconfigSchema = base_object(
+    'client',
+    roles_list=['owner', 'admin', 'crew'],
+    roles_create=['crew'],
+)
+
+ClientconfigSchema['properties'].update({
+    'autologin': {
+        'type': 'boolean', 'title': 'Automatic login',
+        'description': 'Automatically logs in this client.'
+    },
+    'active': {
+        'type': 'boolean', 'title': 'Active client',
+        'description': 'Indicates whether client is currently '
+                       'active.'
+    },
+    'locked': {
+        'type': 'boolean', 'title': 'Locked client',
+        'description': 'Determines whether the client should be '
+                       'locked against changes.'
+    },
+    'infoscreen': {
+        'type': 'boolean', 'title': 'Infoscreen client',
+        'description': 'This client rotates set up infoscreens'
+    },
+    'currentview': {
+        'type': 'string', 'minLength': 1, 'title': 'Name',
+        'description': 'Client name'
+    },
+    'theme': {
+        'type': 'string', 'title': 'Client Theme',
+        'description': 'Theme used for user interface'
+    },
+    'description': {
+        'type': 'string', 'format': 'html',
+        'title': 'Client description',
+        'description': 'Client description'
+    },
+    'infoscreenrotations': {
+        'type': 'array',
+        'items': ScreenRotationSchema
+    },
+    'mapviewuuid': {
+        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+        'type': 'string',
+        'title': 'Associated Unique Mapview ID'
+    },
+    'dashboarduuid': {
+        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+        'type': 'string',
+        'title': 'Associated Unique Dashboard ID'
+    },
+    'taskgriduuid': {
+        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
+                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+        'type': 'string',
+        'title': 'Associated Unique Task Grid ID'
+    },
+})
 
 ClientconfigForm = [
     {

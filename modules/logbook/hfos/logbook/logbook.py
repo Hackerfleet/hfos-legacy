@@ -35,7 +35,7 @@ LogbookSchema = {
                  'description': 'Name of logbook entry'},
         'severity': {'type': 'string', 'enum': ['Info', 'Warning', 'Critical'],
                      'default': 'Info'},
-        'owneruuid': {'type': 'string', 'minLength': 36,
+        'owner': {'type': 'string', 'minLength': 36,
                       'title': "Owner's Unique ID", 'description': 'HIDDEN'},
         'time': {'type': 'string', 'format': 'datetimepicker',
                  'title': 'Event time',
