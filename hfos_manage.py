@@ -324,6 +324,24 @@ def list_users(args):
     hfoslog("Done!", emitter='MANAGE')
 
 
+def add_role(args):
+    if args.role is None:
+        hfoslog('Specify the role with --role')
+    if args.username is None:
+        hfoslog('Specify the username with --username')
+
+    from hfos import database
+
+    database.initialize(args.dbhost)
+
+    user = database.objectmodels['user'].find_one({'name': args.username})
+    if args.role not in user.roles:
+        user.roles.append(args.role)
+        user.save()
+    else:
+        hfoslog('User already has that role!', lvl=warn, emitter='MANAGE')
+
+
 def install_docs(args):
     check_root()
 
@@ -726,6 +744,8 @@ def main(args, parser):
         change_password(args)
     elif args.list_users:
         list_users(args)
+    elif args.add_role:
+        add_role(args)
     elif args.install_provisions:
         install_provisions(args)
     elif args.install_docs:
@@ -798,6 +818,9 @@ if __name__ == "__main__":
     parser.add_argument("--object",
                         help="Restrict actions to given object type",
                         type=str)
+    parser.add_argument("--role",
+                        help="Defines role for any role related operation",
+                        type=str)
     parser.add_argument("--dev", help="Use development location for frontend",
                         action="store_true", default=False)
 
@@ -805,6 +828,8 @@ if __name__ == "__main__":
                         action="store_true", default=False)
 
     parser.add_argument("-list-users", help="List all existing user accounts",
+                        action="store_true", default=False)
+    parser.add_argument("-add-role", help="Add a role to a user account",
                         action="store_true", default=False)
     parser.add_argument("-create-user", help="Create a new user",
                         action="store_true", default=False)
