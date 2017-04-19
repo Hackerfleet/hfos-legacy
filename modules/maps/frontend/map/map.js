@@ -85,8 +85,8 @@ class mapcomponent {
         this.center = {
             lat: 0,
             lng: 0,
-            zoom: 3,
-            autoDiscover: true
+            zoom: 4,
+            autoDiscover: false
         };
         
         this.vessel = {
