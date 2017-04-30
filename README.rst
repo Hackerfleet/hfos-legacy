@@ -14,10 +14,6 @@
     :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://badge.waffle.io/hackerfleet/hfos.svg?label=ready&title=Ready
-    :target: https://waffle.io/hackerfleet/hfos
-    :alt: Stories Ready
-
 
 HFOS - The Hackerfleet Operating System
 =======================================
@@ -33,7 +29,7 @@ we saw the potential for other 'classic' areas of collaboration and started exte
 it towards a more general application framework.
 
 A lot of the included modules are still Work in Progress, so help out, if you're interested
-in a powerful collaboration tool suite.
+in a powerful - cloud independent - collaboration tool suite.
 
 Modules
 =======
@@ -258,10 +254,8 @@ documentation formats.
 Docker-Install
 --------------
 
-(Currently outdated, until we overhauled the docker setup)
-
 There is a Docker image available. This is usually the quickest
-way to install HFOS:
+way to install HFOS, but it is only updated occasionally (for now):
 
 .. code-block:: bash
 
