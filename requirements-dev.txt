@@ -33,6 +33,7 @@ sphinxcontrib-nwdiag
 sphinxcontrib-seqdiag
 sphinxcontrib-blockdiag
 sphinxcontrib-spelling
+sphinx-click
 #sphinxcontrib-autojs
 pyenchant
 sphinx-git
