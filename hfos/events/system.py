@@ -18,9 +18,59 @@ from hfos.ui.clientobjects import User
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
+AuthorizedEvents = {}
+
+
+def get_user_events():
+    global AuthorizedEvents
+    return AuthorizedEvents
+
+
+def populate_user_events():
+    global AuthorizedEvents
+
+    def inheritors(klass):
+        subclasses = {}
+        subclasses_set = set()
+        work = [klass]
+        while work:
+            parent = work.pop()
+            for child in parent.__subclasses__():
+                if child not in subclasses_set:
+                    # pprint(child.__dict__)
+                    name = child.__module__ + "." + child.__name__
+                    if name.startswith('hfos'):
+
+                        subclasses_set.add(child)
+                        event = {
+                            'event': child,
+                            'name': name,
+                            'doc': child.__doc__,
+                            'args': []
+                        }
+
+                        if child.__module__ in subclasses:
+                            subclasses[child.__module__][
+                                child.__name__] = event
+                        else:
+                            subclasses[child.__module__] = {
+                                child.__name__: event
+                            }
+                    work.append(child)
+        return subclasses
+
+    AuthorizedEvents = inheritors(authorizedevent)
+
 
 class authorizedevent(Event):
     """Base class for events for logged in users."""
+
+    def __getattr__(self, name):
+        """For circuits handler decorator to enable module/event namespaces"""
+        if name == 'name':
+            return self.__module__ + '.' + self.__class__.__name__
+        else:
+            super(authorizedevent, self).__getattr__(name)
 
     def __init__(self, user, action, data, client, *args):
         """
@@ -36,11 +86,17 @@ class authorizedevent(Event):
 
         assert isinstance(user, User)
 
+        self.name = self.__module__ + '.' + self.__class__.__name__
         super(authorizedevent, self).__init__(*args)
         self.user = user
         self.action = action
         self.data = data
         self.client = client
+
+    @classmethod
+    def realname(cls):
+        # For circuits manager to enable module/event namespaces
+        return cls.__module__ + '.' + cls.__name__
 
 
 # Authenticator Events
@@ -58,57 +114,6 @@ class profilerequest(authorizedevent):
 
         hfoslog("Profile update request: ", self.__dict__,
                 lvl=events, emitter="PROFILE-EVENT")
-
-
-# Schemata requests
-
-class schemarequest(authorizedevent):
-    """A client requires a schema to validate data or display a form"""
-
-
-# Object Management
-
-class objectevent(Event):
-    """A unspecified objectevent"""
-
-    def __init__(self, uuid, schema, client, *args, **kwargs):
-        super(objectevent, self).__init__(*args, **kwargs)
-
-        self.uuid = uuid
-        self.schema = schema
-        self.client = client
-
-        hfoslog("Object event created: ", self.__doc__,
-                self.__dict__, lvl=events, emitter="OBJECT-EVENT")
-
-
-class objectchange(objectevent):
-    """A stored object has been successfully modified"""
-
-
-class objectcreation(objectevent):
-    """A new object has been successfully created"""
-
-
-class objectdeletion(objectevent):
-    """A stored object has been successfully deleted"""
-
-
-# Backend-side object change
-
-class updatesubscriptions(objectevent):
-    """A backend component needs to write changes to an object.
-    Clients that are subscribed should be notified etc.
-    """
-
-    def __init__(self, data, *args, **kwargs):
-        super(updatesubscriptions, self).__init__(*args, **kwargs)
-
-        self.data = data
-
-
-class objectmanagerrequest(authorizedevent):
-    """A client requires a schema to validate data or display a form"""
 
 
 # Frontend assembly events
@@ -137,19 +142,3 @@ class debugrequest(authorizedevent):
         super(debugrequest, self).__init__(*args)
 
         hfoslog('CREATED.', lvl=critical, emitter="DEBUG-EVENT")
-
-
-# Configurator
-
-
-class configrequest(authorizedevent):
-    """A client requires a schema to validate data or display a form"""
-
-
-AuthorizedEvents = {
-    'configurator': configrequest,
-    'debugger': debugrequest,
-    'objectmanager': objectmanagerrequest,
-    'profile': profilerequest,
-    'schema': schemarequest,
-}
