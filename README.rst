@@ -1,17 +1,17 @@
 .. image:: https://travis-ci.org/Hackerfleet/hfos.svg?branch=master
-    :target: https://travis-ci.org/Hackerfleet/hfos
+:target: https://travis-ci.org/Hackerfleet/hfos
     :alt: Build Status
 
 .. image:: https://landscape.io/github/Hackerfleet/hfos/master/landscape.svg?style=flat
-    :target: https://landscape.io/github/Hackerfleet/hfos/master
+:target: https://landscape.io/github/Hackerfleet/hfos/master
     :alt: Quality
 
 .. image:: https://coveralls.io/repos/Hackerfleet/hfos/badge.svg
-    :target: https://coveralls.io/r/Hackerfleet/hfos
+:target: https://coveralls.io/r/Hackerfleet/hfos
     :alt: Coverage
 
 .. image:: https://requires.io/github/Hackerfleet/hfos/requirements.svg?branch=master
-    :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
+:target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
 
@@ -179,7 +179,7 @@ need to install libgdal and its binaries:
 
     $ sudo apt-get install gdal-bin python-gdal
 
-Note, that it is necessary to install python-gdal not the python3 variant,
+Note, that it is necessary to install python-gdal 2.7 - not the python3 variant,
 as the scripts are not included in that.
 
 Backend
@@ -209,7 +209,7 @@ database:
     $ source venv/bin/activate
     $ pip install -Ur requirements.txt
     $ python setup.py develop
-    $ sudo venv/bin/python hfos_manage.py -install-all
+    $ sudo venv/bin/python hfos_manage.py install all
     $ python hfos_launcher.py
 
 If you want to develop (documentation) as well, you'll need to use the
