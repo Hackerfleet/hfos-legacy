@@ -1,0 +1,14 @@
+dist/*
+dist
+.eggs/*
+.eggs
+.idea/*
+.idea
+build/*
+build
+coverage/*
+coverage
+hfos.egg-info/*
+hfos.egg-info
+frontend/dist/*
+frontend/dist
