@@ -22,7 +22,8 @@ class send(Event):
         self.sendtype = sendtype
         self.raw = raw
 
-        hfoslog("[CM-EVENT] Send event generated:", uuid, packet, sendtype,
+        hfoslog("[CM-EVENT] Send event generated:", uuid, str(packet)[:50],
+                sendtype,
                 lvl=events)
 
 
