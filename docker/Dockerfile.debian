@@ -27,12 +27,13 @@ RUN apt-get update && \
         npm \
         nodejs-legacy \
         libfontconfig \
-	    build-essential \
-	    gdal-bin \
-	    python-gdal \
+        build-essential \
+        gdal-bin \
+        locales \
+        python-gdal \
         enchant \
         python3-virtualenv \
-	    python3-dev \
+        python3-dev \
         python3-pymongo \
         python3-bson-ext \
         python3-pip \
@@ -41,7 +42,14 @@ RUN apt-get update && \
         python3-setuptools \
         python3-setuptools-scm \
         python3-setuptools-git \
-        python3-serial
+        python3-serial \
+        python3-openssl
+
+
+RUN echo "C.UTF-8" > /etc/locale.gen
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+RUN locale-gen
 
 # Get a very recent mongodb
 
@@ -83,14 +91,16 @@ RUN npm install npm -g
 
 # Install HFOS
 
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-cert
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-var
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-modules
+RUN python3 -u hfos_manage.py install cert
+RUN python3 -u hfos_manage.py install var
+# Rest might need a running db
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install modules
 # Temporary hack, until we have provisioning obey dependencies again:
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-provisions -p system
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-provisions
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-docs
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py -install-frontend --dev
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions -p system
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions -p user
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install docs
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install frontend --dev
 
 #  Services
 
