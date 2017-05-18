@@ -10,7 +10,8 @@ Module: CameraManager
 """
 
 from uuid import uuid4
-from circuits import handler, Timer, Event
+from hfos.component import handler
+from circuits import Timer, Event
 from circuits.tools import tryimport
 import six
 from hfos.component import ConfigurableComponent
@@ -21,6 +22,7 @@ from hfos.logger import error, debug
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 opencv = tryimport("cv2")
+
 
 # Camera requests
 
@@ -58,9 +60,10 @@ class CameraManager(ConfigurableComponent):
                     self._cameras[cam] = camera
                     self.log("Found camera [", cam, "]: ", camera)
 
-            self.log("Starting timer")
-            self.timer = Timer(0.05, Event.create("rec"),
-                               persist=True).register(self)
+            if len(self._cameras) > 0:
+                self.log("Starting timer")
+                self.timer = Timer(0.05, Event.create("rec"),
+                                   persist=True).register(self)
 
             self.log("Found cameras: ", self._cameras, lvl=debug)
         else:
@@ -69,7 +72,6 @@ class CameraManager(ConfigurableComponent):
         AuthorizedEvents['camera'] = camerarequest
 
         self.log("Started")
-
 
     def rec(self):
         """Records a single snapshot"""
