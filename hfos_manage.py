@@ -21,18 +21,23 @@
 import os
 import sys
 import shutil
-import argparse
 import pwd
 import grp
+import click
+from click_didyoumean import DYMGroup
+from click_repl import repl
+from prompt_toolkit.history import FileHistory
 
 from distutils.dir_util import copy_tree
 from time import localtime
+from uuid import uuid4
 from collections import OrderedDict
 from dev.templates import write_template_file
 from hashlib import sha512
 from OpenSSL import crypto
 from socket import gethostname
 from pprint import pprint
+from pymongo.errors import DuplicateKeyError
 
 from hfos.ui.builder import install_frontend
 from hfos.logger import verbose, debug, warn, error, critical, verbosity, \
@@ -55,46 +60,45 @@ try:
 except NameError:
     unicode = str
 
-
-servicetemplate = 'hfos.service'
+service_template = 'hfos.service'
 
 paths = [
     'hfos',
-    'hfos/{pluginname}',
-    'hfos-frontend/{pluginname}/scripts/controllers',
-    'hfos-frontend/{pluginname}/views'
+    'hfos/{plugin_name}',
+    'hfos-frontend/{plugin_name}/scripts/controllers',
+    'hfos-frontend/{plugin_name}/views'
 ]
 
 templates = {
-    'setupfile': ('setup.py.template', 'setup.py'),
-    'packagefile': ('package.json.template', 'package.json'),
+    'setup_file': ('setup.py.template', 'setup.py'),
+    'package_file': ('package.json.template', 'package.json'),
     'component': (
-        'component.py.template', 'hfos/{pluginname}/{pluginname}.py'),
-    'moduleinit': ('init.py.template', 'hfos/__init__.py'),
-    'packageinit': ('init.py.template', 'hfos/{pluginname}/__init__.py'),
-    'schemata': ('schemata.py.template', 'hfos/{pluginname}/schemata.py'),
+        'component.py.template', 'hfos/{plugin_name}/{plugin_name}.py'),
+    'module_init': ('init.py.template', 'hfos/__init__.py'),
+    'package_init': ('init.py.template', 'hfos/{plugin_name}/__init__.py'),
+    'schemata': ('schemata.py.template', 'hfos/{plugin_name}/schemata.py'),
     'controller': ('controller.js.template',
-                   'hfos-frontend/{pluginname}/scripts/controllers/{'
-                   'pluginname}.js'),
+                   'hfos-frontend/{plugin_name}/scripts/controllers/{'
+                   'plugin_name}.js'),
     'view': (
         'view.html.template',
-        'hfos-frontend/{pluginname}/views/{pluginname}.html')
+        'hfos-frontend/{plugin_name}/views/{plugin_name}.html')
 }
 
 questions = OrderedDict({
-    'pluginname': 'plugin',
-    'authorname': u'author',
-    'authoremail': u'author@domain.tld',
+    'plugin_name': 'plugin',
+    'author_name': u'author',
+    'author_email': u'author@domain.tld',
     'description': u'Description',
-    'longdescription': u'Very long description, use \\n to get multilines.',
+    'long_description': u'Very long description, use \\n to get multilines.',
     'version': '0.0.1',
-    'githuburl': 'hackerfleet/example',
+    'github_url': 'hackerfleet/example',
     'license': 'GPLv3',
     'keywords': 'hfos example plugin'
 
 })
 
-infoheader = """The manage command guides you through setting up a new HFOS
+info_header = """The manage command guides you through setting up a new HFOS
 package.
 It provides basic setup. If you need dependencies or have other special
 needs, edit the resulting files by hand.
@@ -106,6 +110,8 @@ See hfos_manage --help for more details.
 
 
 def check_root():
+    """Check if current user has root permissions"""
+
     if os.geteuid() != 0:
         hfoslog("Need root access to install. Use sudo!", lvl=error)
         hfoslog("If you installed into a virtual environment, don't forget to "
@@ -117,28 +123,32 @@ def check_root():
 
 
 def augment_info(info):
-    info['descriptionheader'] = "=" * len(info['description'])
-    info['componentname'] = info['pluginname'].capitalize()
-    info['year'] = localtime().tm_year
-    info['licenselongtext'] = ''
+    """Fill out the template information"""
 
-    info['keywordlist'] = u""
+    info['description_header'] = "=" * len(info['description'])
+    info['component_name'] = info['plugin_name'].capitalize()
+    info['year'] = localtime().tm_year
+    info['license_longtext'] = ''
+
+    info['keyword_list'] = u""
     for keyword in info['keywords'].split(" "):
         print(keyword)
-        info['keywordlist'] += u"\'" + str(keyword) + u"\', "
-    print(info['keywordlist'])
-    if len(info['keywordlist']) > 0:
+        info['keyword_list'] += u"\'" + str(keyword) + u"\', "
+    print(info['keyword_list'])
+    if len(info['keywor_dlist']) > 0:
         # strip last comma
-        info['keywordlist'] = info['keywordlist'][:-2]
+        info['keyword_list'] = info['keyword_list'][:-2]
 
     return info
 
 
 def construct_module(info, target):
+    """Build a module from templates and user supplied information"""
+
     for path in paths:
-        realpath = os.path.abspath(os.path.join(target, path.format(**info)))
-        hfoslog("Making directory '%s'" % realpath, emitter='MANAGE')
-        os.makedirs(realpath)
+        real_path = os.path.abspath(os.path.join(target, path.format(**info)))
+        hfoslog("Making directory '%s'" % real_path, emitter='MANAGE')
+        os.makedirs(real_path)
 
     # pprint(info)
     for item in templates.values():
@@ -150,10 +160,12 @@ def construct_module(info, target):
         write_template_file(source, filename, info)
 
 
-def ask(question, default=None, datatype=str, showhint=False):
+def ask(question, default=None, data_type=str, show_hint=False):
+    """Interactively ask the user for data"""
+
     data = default
 
-    if datatype == bool:
+    if data_type == bool:
         data = None
         while data not in ('Y', 'J', 'N', '1', '0'):
             data = input(
@@ -164,9 +176,9 @@ def ask(question, default=None, datatype=str, showhint=False):
 
         return data in ('Y', 'J', '1')
 
-    elif datatype in (str, unicode):
-        if showhint:
-            msg = "%s? [%s] (%s): " % (question, default, datatype)
+    elif data_type in (str, unicode):
+        if show_hint:
+            msg = "%s? [%s] (%s): " % (question, default, data_type)
         else:
             msg = question
 
@@ -178,13 +190,15 @@ def ask(question, default=None, datatype=str, showhint=False):
     return data
 
 
-def askquestionnaire():
+def ask_questionnaire():
+    """Asks questions to fill out a HFOS plugin template"""
+
     answers = {}
-    print(infoheader)
+    print(info_header)
     pprint(questions.items())
 
     for question, default in questions.items():
-        response = ask(question, default, type(default), showhint=True)
+        response = ask(question, default, type(default), show_hint=True)
         if type(default) == unicode and type(response) != str:
             response = response.decode('utf-8')
         answers[question] = response
@@ -192,30 +206,9 @@ def askquestionnaire():
     return answers
 
 
-def create_module(args):
-    if os.path.exists(args.target):
-        if args.clear:
-            shutil.rmtree(args.target)
-        else:
-            hfoslog("Target exists! Use --clear to delete it first.",
-                    emitter='MANAGE')
-            sys.exit(2)
-
-    done = False
-    info = None
-
-    while not done:
-        info = askquestionnaire()
-        pprint(info)
-        done = ask('Is the above correct', default='y', datatype=bool)
-
-    augmentedinfo = augment_info(info)
-
-    hfoslog("Constructing module %(pluginname)s" % info, emitter='MANAGE')
-    construct_module(augmentedinfo, args.target)
-
-
 def ask_password():
+    """Securely and interactively ask for a password"""
+
     password = "Foo"
     password_trial = ""
 
@@ -228,31 +221,31 @@ def ask_password():
     return password
 
 
-def get_credentials(args):
+def get_credentials(username=None, password=None, dbhost=None):
+    """Obtain user credentials by arguments or asking the user"""
 
     # Database salt
-    from hfos import database
+    system_config = dbhost.objectmodels['systemconfig'].find_one({
+        'active': True
+    })
 
-    database.initialize(args.dbhost)
-    systemconfig = database.objectmodels['systemconfig'].find_one({'active':
-                                                                       True})
     try:
-        salt = systemconfig.salt.encode('ascii')
+        salt = system_config.salt.encode('ascii')
     except (KeyError, AttributeError):
         hfoslog('No systemconfig or it is without a salt! '
                 'Reinstall the system provisioning with'
                 'hfos_manage.py -install-provisions -p system')
         sys.exit(3)
 
-    if not args.username:
+    if username is None:
         username = ask("Please enter username: ")
     else:
-        username = args.username
+        username = username
 
-    if not args.password:
+    if password is None:
         password = ask_password()
     else:
-        password = args.password
+        password = password
 
     try:
         password = password.encode('utf-8')
@@ -265,84 +258,208 @@ def get_credentials(args):
     return username, passhash.hexdigest()
 
 
-def create_user(args):
-    username, passhash = get_credentials(args)
+@click.group(context_settings={'help_option_names': ['-h', '--help']},
+             cls=DYMGroup)
+@click.option('--quiet', default=False, help="Suppress all output",
+              is_flag=True)
+@click.option('--log', default=20, help='Log level to use (0-100)',
+              metavar='<number>')
+@click.pass_context
+def cli(ctx, quiet, log):
+    """HFOS Management Utility
+
+    This utility supports various operations to manage HFOS installations.
+    Most of the commands are grouped. To obtain more information about the
+    groups' available sub commands, try
+
+    hfos_manage group --help
+
+    To display details of a command, try
+
+    hfos_manage group command --help
+    """
+
+    ctx.obj['quiet'] = quiet
+    verbosity['console'] = log
+    verbosity['global'] = log
+
+
+@click.command(short_help='create starterkit module')
+@click.option('--clear', help='Clears already existing target',
+              default=False, is_flag=True)
+@click.option("--target", help="Create module in the given folder (uses ./ "
+                               "if omitted)", default=".", metavar='<folder>')
+def create_module(clear, target):
+    """Creates a new template HFOS plugin module"""
+
+    if os.path.exists(target):
+        if clear:
+            shutil.rmtree(target)
+        else:
+            hfoslog("Target exists! Use --clear to delete it first.",
+                    emitter='MANAGE')
+            sys.exit(2)
+
+    done = False
+    info = None
+
+    while not done:
+        info = ask_questionnaire()
+        pprint(info)
+        done = ask('Is the above correct', default='y', data_type=bool)
+
+    augmented_info = augment_info(info)
+
+    hfoslog("Constructing module %(plugin_name)s" % info, emitter='MANAGE')
+    construct_module(augmented_info, target)
+
+
+db_host_default = '127.0.0.1:27017'
+db_host_help = 'Define hostname for database server (default: ' + \
+               db_host_default + ')'
+db_host_metavar = '<ip:port>'
+
+
+@click.group(cls=DYMGroup)
+@click.option("--username", help="Username for user related operations",
+              default=None)
+@click.option("--password", help="Password for user related operations",
+              default=None)
+@click.option('--dbhost', default=db_host_default, help=db_host_help,
+              metavar=db_host_metavar)
+@click.pass_context
+def user(ctx, username, password, dbhost):
+    """User management operations (GROUP)"""
+
+    ctx.obj['username'] = username
+    ctx.obj['password'] = password
 
     from hfos import database
-    from uuid import uuid4
-    database.initialize(args.dbhost)
-
-    user = database.objectmodels['user']()
-
-    user.uuid = str(uuid4())
-    user.name = username
-    user.passhash = passhash
-    user.save()
-
-    hfoslog("Done!", emitter='MANAGE')
+    database.initialize(dbhost)
+    ctx.obj['db'] = database
 
 
-def delete_user(args):
-    if not args.username:
+cli.add_command(user)
+
+
+@user.command(short_help='create new user')
+@click.pass_context
+def create_user(ctx):
+    """Creates a new local user"""
+
+    username, passhash = get_credentials(ctx.obj['username'],
+                                         ctx.obj['password'],
+                                         ctx.obj['db'])
+
+    new_user = ctx.obj['db'].objectmodels['user']({'uuid': str(uuid4())})
+
+    new_user.name = username
+    new_user.passhash = passhash
+
+    # pprint(user._fields)
+    try:
+        new_user.save()
+        hfoslog("Done!", emitter='MANAGE')
+    except DuplicateKeyError:
+        hfoslog('User already exists', lvl=warn, emitter='MANAGE')
+
+
+@user.command(short_help='delete user')
+@click.pass_context
+def delete_user(ctx):
+    """Delete a local user"""
+
+    if ctx.obj['username'] is None:
         username = ask("Please enter username: ")
     else:
-        username = args.username
+        username = ctx.obj['username']
 
-    from hfos import database
-    database.initialize(args.dbhost)
-
-    user = database.objectmodels['user'].find_one({'name': username})
+    del_user = ctx.obj['db'].objectmodels['user'].find_one({'name': username})
     # TODO: Verify back if not --yes in args
-    user.delete()
+    del_user.delete()
 
     hfoslog("Done!", emitter='MANAGE')
 
 
-def change_password(args):
-    username, passhash = get_credentials(args)
+@user.command(short_help="change user's password")
+@click.pass_context
+def change_password(ctx):
+    """Change password of an existing user"""
 
-    from hfos import database
-    database.initialize(args.dbhost)
+    username, passhash = get_credentials(ctx.obj['username'],
+                                         ctx.obj['password'],
+                                         ctx.obj['db'])
 
-    user = database.objectmodels['user'].find_one({'name': username})
+    change_user = ctx.obj['db'].objectmodels['user'].find_one({
+        'name': username
+    })
+    if change_user is None:
+        hfoslog('No such user', lvl=warn, emitter='MANAGE')
+        return
 
-    user.passhash = passhash
-    user.save()
-
-    hfoslog("Done!", emitter='MANAGE')
-
-
-def list_users(args):
-    from hfos import database
-    database.initialize(args.dbhost)
-
-    users = database.objectmodels['user']
-
-    for user in users.find():
-        print(user.name, user.uuid)
+    change_user.passhash = passhash
+    change_user.save()
 
     hfoslog("Done!", emitter='MANAGE')
 
 
-def add_role(args):
-    if args.role is None:
+@user.command(short_help='list local users')
+@click.option('--search', help='Specify a term for searching', default=None,
+              metavar='<text>')
+@click.option('--uuid', help='Print user''s uuid as well',
+              default=False, is_flag=True)
+@click.pass_context
+def list_users(ctx, search, uuid):
+    """List all locally known users"""
+
+    users = ctx.obj['db'].objectmodels['user']
+
+    for found_user in users.find():
+        if not search or (search and search in found_user.name):
+            # TODO: Not 2.x compatible
+            print(found_user.name, end=' ' if uuid else '\n')
+            if uuid:
+                print(found_user.uuid)
+
+    hfoslog("Done!", emitter='MANAGE')
+
+
+@user.command(short_help='add role to user')
+@click.option('--role', help='Specifies the new role', metavar='<name>')
+@click.pass_context
+def add_role(ctx, role):
+    """Grant a role to an existing user"""
+
+    if role is None:
         hfoslog('Specify the role with --role')
-    if args.username is None:
+        return
+    if ctx.obj['username'] is None:
         hfoslog('Specify the username with --username')
+        return
 
-    from hfos import database
-
-    database.initialize(args.dbhost)
-
-    user = database.objectmodels['user'].find_one({'name': args.username})
-    if args.role not in user.roles:
-        user.roles.append(args.role)
-        user.save()
+    change_user = ctx.obj['db'].objectmodels['user'].find_one({
+        'name': ctx.obj['username']
+    })
+    if role not in change_user.roles:
+        change_user.roles.append(role)
+        change_user.save()
+        hfoslog('Done', emitter='MANAGE')
     else:
         hfoslog('User already has that role!', lvl=warn, emitter='MANAGE')
 
 
-def install_docs(args):
+@click.group(cls=DYMGroup)
+def install():
+    """Install various aspects of HFOS (GROUP)"""
+    pass
+
+
+@install.command(short_help='build and install docs')
+@click.option('--clear', help='Clears target documentation '
+                              'folders', default=False, is_flag=True)
+def docs(clear):
+    """Build and install documentation"""
+
     check_root()
 
     def make_docs():
@@ -381,7 +498,7 @@ def install_docs(args):
 
     if os.path.exists(target):
         hfoslog("Path already exists: " + target, emitter='MANAGE')
-        if args.clear:
+        if clear:
             hfoslog("Cleaning up " + target, emitter='MANAGE', lvl=warn)
             shutil.rmtree(target)
 
@@ -390,7 +507,14 @@ def install_docs(args):
     hfoslog("Done: Install Docs")
 
 
-def install_var(args):
+@install.command(short_help='create structures in /var')
+@click.option('--clear', help='Clears already existing cache '
+                              'directories', is_flag=True, default=False)
+@click.option('--clear-all', help='Clears all already existing '
+                                  'directories', is_flag=True, default=False)
+def var(clear, clear_all):
+    """Install variable data to /var/[lib,cache]/hfos"""
+
     check_root()
 
     hfoslog("Checking frontend library and cache directories",
@@ -413,7 +537,7 @@ def install_var(args):
     for item in target_paths:
         if os.path.exists(item):
             hfoslog("Path already exists: " + item, emitter='MANAGE')
-            if args.clear_all or (args.clear and 'cache' in item):
+            if clear_all or (clear and 'cache' in item):
                 hfoslog("Cleaning up: " + item, emitter='MANAGE', lvl=warn)
                 shutil.rmtree(item)
 
@@ -429,28 +553,37 @@ def install_var(args):
     hfoslog("Done: Install Var")
 
 
-def install_provisions(args):
+@install.command(short_help='install provisions')
+@click.option('--provision', '-p', help="Specify a provision (default=install "
+                                        "all)",
+              default=None, metavar='<name>')
+@click.option('--clear', help='Clears already existing collections (DANGER!)',
+              is_flag=True, default=False)
+@click.option('--overwrite', '-o', help='Overwrites existing provisions',
+              is_flag=True, default=False)
+@click.option('--dbhost', default=db_host_default, help=db_host_help)
+def provisions(provision, clear, overwrite, dbhost):
+    """Install default provisioning data"""
+
     hfoslog("Installing HFOS default provisions", emitter='MANAGE')
 
     # from hfos.logger import verbosity, events
     # verbosity['console'] = verbosity['global'] = events
-
-    from hfos.database import initialize
-
-    initialize(args.dbhost)
+    from hfos import database
+    database.initialize(dbhost)
 
     from hfos.provisions import provisionstore
 
-    if args.provision is not None and args.provision in provisionstore:
-        hfoslog("Provisioning ", args.provision, emitter="MANAGE")
-        provisionstore[args.provision]()
-    elif args.provision is None:
+    if provision is not None and provision in provisionstore:
+        hfoslog("Provisioning ", provision, emitter="MANAGE")
+        provisionstore[provision](overwrite=overwrite, clear=clear)
+    elif provision is None:
         for provision_name in provisionstore:
             hfoslog("Provisioning " + provision_name, emitter='MANAGE')
-            provisionstore[provision_name]()
+            provisionstore[provision_name](overwrite=overwrite, clear=clear)
     else:
-        hfoslog("Unknown provision: ", args.provision, "\nValid provisions "
-                                                       "are",
+        hfoslog("Unknown provision: ", provision, "\nValid provisions "
+                                                  "are",
                 list(provisionstore.keys()),
                 lvl=error,
                 emitter='MANAGE')
@@ -458,17 +591,10 @@ def install_provisions(args):
     hfoslog("Done: Install Provisions")
 
 
-def uninstall(args):
-    check_root()
+@install.command(short_help='install modules')
+def modules():
+    """Install the plugin modules"""
 
-    response = ask("This will delete all data of your HFOS installation! Type"
-                   "YES to continue:", default="N", showhint=False)
-    if response == 'YES':
-        shutil.rmtree('/var/lib/hfos')
-        shutil.rmtree('/var/cache/hfos')
-
-
-def install_modules(args):
     def install_module(module):
         try:
             setup = Popen(
@@ -487,7 +613,7 @@ def install_modules(args):
             return False
         return True
 
-    modules = [
+    installables = [
         # Poor man's dependency management, as long as the modules are
         # installed from local sources and they're not available on pypi,
         # which would handle real dependency management for us:
@@ -522,12 +648,12 @@ def install_modules(args):
     success = []
     failed = []
 
-    for module in modules:
-        hfoslog('Installing module ', module, emitter='MANAGE')
-        if install_module(module):
-            success.append(module)
+    for installable in installables:
+        hfoslog('Installing module ', installable, emitter='MANAGE')
+        if install_module(installable):
+            success.append(installable)
         else:
-            failed.append(module)
+            failed.append(installable)
 
     hfoslog('Installed modules: ', success, emitter='MANAGE')
     if len(failed) > 0:
@@ -535,7 +661,10 @@ def install_modules(args):
     hfoslog('Done: Install Modules', emitter='MANAGE')
 
 
-def install_service(args):
+@install.command(short_help='install systemd service')
+def service():
+    """Install systemd service configuration"""
+
     check_root()
 
     hfoslog("Installing systemd service", emitter="MANAGE")
@@ -550,7 +679,7 @@ def install_service(args):
         'executable': executable
     }
 
-    write_template_file(os.path.join('dev/templates', servicetemplate),
+    write_template_file(os.path.join('dev/templates', service_template),
                         '/etc/systemd/system/hfos.service',
                         definitions)
 
@@ -563,7 +692,10 @@ def install_service(args):
     hfoslog("Done: Install Service", emitter="MANAGE")
 
 
-def install_user(args):
+@install.command(short_help='create system user')
+def system_user():
+    """Install HFOS system user (hfos.hfos)"""
+
     check_root()
 
     Popen([
@@ -581,7 +713,12 @@ def install_user(args):
     hfoslog("Done: Setup User")
 
 
-def install_cert(args, selfsigned=True):
+@install.command(short_help='install ssl certificate')
+@click.option('--selfsigned', help="Use a self-signed certificate",
+              default=True, is_flag=True)
+def cert(selfsigned):
+    """Install a local SSL certificate"""
+
     check_root()
 
     if selfsigned:
@@ -606,37 +743,43 @@ def install_cert(args, selfsigned=True):
             k.generate_key(crypto.TYPE_RSA, 1024)
 
             if os.path.exists(cert_file):
-                cert = open(cert_file, "r").read()
-                old_cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert)
-                serial = old_cert.get_serial_number() + 1
+                try:
+                    certificate = open(cert_file, "r").read()
+                    old_cert = crypto.load_certificate(crypto.FILETYPE_PEM,
+                                                       certificate)
+                    serial = old_cert.get_serial_number() + 1
+                except (crypto.Error, OSError) as e:
+                    hfoslog('Could not read old certificate to increment '
+                            'serial:', type(e), e, exc=True, lvl=warn)
+                    serial = 1
             else:
                 serial = 1
 
-            # create a self-signed cert
-            cert = crypto.X509()
-            cert.get_subject().C = "DE"
-            cert.get_subject().ST = "Berlin"
-            cert.get_subject().L = "Berlin"
-            cert.get_subject().O = "Hackerfleet"
-            cert.get_subject().OU = "Hackerfleet"
-            cert.get_subject().CN = gethostname()
-            cert.set_serial_number(serial)
-            cert.gmtime_adj_notBefore(0)
-            cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
-            cert.set_issuer(cert.get_subject())
-            cert.set_pubkey(k)
-            cert.sign(k, 'sha512')
+            # create a self-signed certificate
+            certificate = crypto.X509()
+            certificate.get_subject().C = "DE"
+            certificate.get_subject().ST = "Berlin"
+            certificate.get_subject().L = "Berlin"
+            certificate.get_subject().O = "Hackerfleet"
+            certificate.get_subject().OU = "Hackerfleet"
+            certificate.get_subject().CN = gethostname()
+            certificate.set_serial_number(serial)
+            certificate.gmtime_adj_notBefore(0)
+            certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
+            certificate.set_issuer(certificate.get_subject())
+            certificate.set_pubkey(k)
+            certificate.sign(k, 'sha512')
 
             open(key_file, "wt").write(str(
                 crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
                 encoding="ASCII"))
 
             open(cert_file, "wt").write(str(
-                crypto.dump_certificate(crypto.FILETYPE_PEM, cert),
+                crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
                 encoding="ASCII"))
 
             open(combined_file, "wt").write(str(
-                crypto.dump_certificate(crypto.FILETYPE_PEM, cert),
+                crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
                 encoding="ASCII") + str(
                 crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
                 encoding="ASCII"))
@@ -651,33 +794,92 @@ def install_cert(args, selfsigned=True):
                 'there is no way to enter a separate key.', lvl=error)
 
 
-def install_all(args):
+@install.command(short_help='build and install frontend')
+@click.option('--dev', help="Use frontend development (./frontend) location",
+              default=False, is_flag=True)
+@click.option('--rebuild', help="Rebuild frontend before installation",
+              default=False, is_flag=True)
+def frontend(dev, rebuild):
+    """Build and install frontend"""
+
+    install_frontend(forcerebuild=rebuild, development=dev)
+
+
+@install.command('all', short_help='install everything')
+@click.option('--clear', help='Clears already existing cache '
+                              'directories', is_flag=True, default=False)
+@click.pass_context
+def install_all(ctx, clear):
+    """Default-Install everything installable
+
+    \b
+    This includes
+    * System user (hfos.hfos)
+    * Self signed certificate
+    * Variable data locations (/var/lib/hfos and /var/cache/hfos)
+    * All the official modules in this repository
+    * Default module provisioning data
+    * Documentation
+    * systemd service descriptor
+
+    It also builds and installs the HTML5 frontend."""
+
     check_root()
 
-    install_user(args)
-    install_cert(args)
+    system_user()
+    cert(selfsigned=True)
 
-    install_var(args)
-    install_modules(args)
+    var(clear=clear, clear_all=clear)
+    modules()
 
-    install_provisions(args)
-    install_docs(args)
+    provisions(provision=None, dbhost=db_host_default)
+    docs(clear=clear)
 
-    install_frontend(args, forcerebuild=True)
+    frontend(dev=False, rebuild=True)
 
-    install_service(args)
+    service()
 
 
-def find_field(args, by_type=False):
+cli.add_command(install)
+
+
+@click.command(short_help='remove stuff in /var')
+def uninstall():
+    """Uninstall data and resource locations"""
+
+    check_root()
+
+    response = ask("This will delete all data of your HFOS installation! Type"
+                   "YES to continue:", default="N", show_hint=False)
+    if response == 'YES':
+        shutil.rmtree('/var/lib/hfos')
+        shutil.rmtree('/var/cache/hfos')
+
+
+cli.add_command(uninstall)
+
+
+@click.command(short_help='find in object model fields')
+@click.option("--search", help="Argument to search for in object model "
+                               "fields",
+              default=False, metavar='<text>')
+@click.option("--by-type", help="Find all fields by type",
+              default=False, is_flag=True)
+@click.option('--dbhost', default=db_host_default, help=db_host_help,
+              metavar=db_host_metavar)
+@click.option('--obj', default=None, help="Search in specified object "
+                                          "model", metavar='<name>')
+def find_field(search, by_type, dbhost, obj):
+    """Find fields in registered data models."""
+
     # TODO: Fix this to work recursively on all possible subschemes
-    if args.search is not None:
-        search = args.search
+    if search is not None:
+        search = search
     else:
         search = ask("Enter search term")
 
     from hfos import database
-
-    database.initialize(args.dbhost)
+    database.initialize(dbhost)
 
     def find(schema, search, by_type, result=[], key=""):
         fields = schema['properties']
@@ -714,16 +916,16 @@ def find_field(args, by_type=False):
 
         return result
 
-    if args.object:
-        schema = database.objectmodels[args.object]._schema
+    if obj is not None:
+        schema = database.objectmodels[obj]._schema
         result = find(schema, search, by_type, [], key="top")
         if result:
             # hfoslog(args.object, result)
-            print(args.object)
+            print(obj)
             pprint(result)
     else:
-        for model, obj in database.objectmodels.items():
-            schema = obj._schema
+        for model, thing in database.objectmodels.items():
+            schema = thing._schema
 
             result = find(schema, search, by_type, [], key="top")
             if result:
@@ -732,160 +934,18 @@ def find_field(args, by_type=False):
                 pprint(result)
 
 
-def main(args, parser):
-    # TODO: This can be done better. Re-find out how and change.
-    if args.create_module:
-        create_module(args)
-    elif args.create_user:
-        create_user(args)
-    elif args.delete_user:
-        delete_user(args)
-    elif args.change_password:
-        change_password(args)
-    elif args.list_users:
-        list_users(args)
-    elif args.add_role:
-        add_role(args)
-    elif args.install_provisions:
-        install_provisions(args)
-    elif args.install_docs:
-        install_docs(args)
-    elif args.install_var:
-        install_var(args)
-    elif args.install_frontend:
-        install_frontend(args, forcerebuild=True, development=args.dev)
-    elif args.install_modules:
-        install_modules(args)
-    elif args.install_service:
-        install_service(args)
-    elif args.install_user:
-        install_user(args)
-    elif args.install_cert_self:
-        install_cert(args)
-    elif args.install_all:
-        install_all(args)
-    elif args.uninstall:
-        uninstall(args)
-    elif args.find_field:
-        find_field(args)
-    elif args.find_field_type:
-        find_field(args, by_type=True)
-    else:
-        parser.print_help()
+cli.add_command(find_field)
 
 
-if __name__ == "__main__":
-    # TODO: See if there's a nicer method to build a command interface than
-    # argparser. I think there was some sleek lib to do that.
-    parser = argparse.ArgumentParser()
+@cli.command(short_help='Start interactive management shell')
+def shell():
+    prompt_kwargs = {
+        'history': FileHistory('/tmp/.hfos-manage.history'),
+    }
+    print("""HFOS - Management Tool Interactive Prompt
 
-    # TODO: Make use of these two flags where appropriate and bail out with err
-    # if they were specified where it is not possible to adhere to them
-    parser.add_argument("--quiet", "-q", help="Quiet operation to suppress "
-                                              "all output",
-                        action="store_true", default=False)
-    parser.add_argument("--log", help="Define log level (0-100)",
-                        type=int, default=20)
-    parser.add_argument("--yes", "-y", help="Assume yes on any yes/no "
-                                            "questions",
-                        action="store_true", default=False)
-    parser.add_argument("--target",
-                        help="Create module in the given folder (uses ./ if "
-                             "omitted)",
-                        action="store",
-                        default=".")
-    parser.add_argument("--provision",
-                        "-p",
-                        help="Install only given provision data",
-                        action="store",
-                        default=None)
-    # TODO: Clarify these, make their functions more obvious
-    parser.add_argument("--clear", help="Clear target path if it exists",
-                        action="store_true", default=False)
-    parser.add_argument("--clear-all", help="Clear all target paths if they "
-                                            "exist, not only caches",
-                        action="store_true", default=False)
-    parser.add_argument("--username", help="Username for user related "
-                                           "operations", default=None)
-    parser.add_argument("--password", help="Password for user related "
-                                           "operations", default=None)
-    parser.add_argument("--dbhost", help="Define hostname for database server",
-                        type=str, default='127.0.0.1:27017')
+Type -h for help, tab completion is available, hit Ctrl-D to quit.""")
+    repl(click.get_current_context(), prompt_kwargs=prompt_kwargs)
 
-    parser.add_argument("--search",
-                        help="Define search term for searches",
-                        type=str)
-    parser.add_argument("--object",
-                        help="Restrict actions to given object type",
-                        type=str)
-    parser.add_argument("--role",
-                        help="Defines role for any role related operation",
-                        type=str)
-    parser.add_argument("--dev", help="Use development location for frontend",
-                        action="store_true", default=False)
-
-    parser.add_argument("-create-module", help="Create a new module",
-                        action="store_true", default=False)
-
-    parser.add_argument("-list-users", help="List all existing user accounts",
-                        action="store_true", default=False)
-    parser.add_argument("-add-role", help="Add a role to a user account",
-                        action="store_true", default=False)
-    parser.add_argument("-create-user", help="Create a new user",
-                        action="store_true", default=False)
-    parser.add_argument("-delete-user", help="Delete an existing user account",
-                        action="store_true", default=False)
-    parser.add_argument("-change-password",
-                        help="Change password of existing user",
-                        action="store_true", default=False)
-    parser.add_argument("-install-var",
-                        help="Install variable data locations",
-                        action="store_true", default=False)
-    parser.add_argument("-install-cert-self",
-                        help="Generate and install self signed ssl "
-                             "certificate",
-                        action="store_true", default=False)
-    parser.add_argument("-install-docs",
-                        help="Install documentation",
-                        action="store_true", default=False)
-    parser.add_argument("-install-provisions",
-                        help="Install system data provisions",
-                        action="store_true", default=False)
-    parser.add_argument("-install-frontend",
-                        help="Install HFOS frontend",
-                        action="store_true", default=False)
-    parser.add_argument("-install-modules",
-                        help="Install all supplied Hackerfleet modules",
-                        action="store_true",
-                        default=False)
-    parser.add_argument("-install-service",
-                        help="Install systemd service definition",
-                        action="store_true",
-                        default=False)
-    parser.add_argument("-install-user",
-                        help="Install system user",
-                        action="store_true",
-                        default=False)
-    parser.add_argument("-install-all",
-                        help="Install all necessary things",
-                        action="store_true",
-                        default=False)
-    parser.add_argument("-uninstall",
-                        help="Delete installed things and clean up",
-                        action="store_true",
-                        default=False)
-    parser.add_argument("-find-field",
-                        help="Find a field in the models",
-                        action="store_true",
-                        default=False)
-    parser.add_argument("-find-field-type",
-                        help="Find all fields by type",
-                        action="store_true",
-                        default=False)
-
-    args = parser.parse_args()
-
-    verbosity['console'] = args.log
-    verbosity['global'] = args.log
-
-    main(args, parser)
+if __name__ == '__main__':
+    cli(obj={})
