@@ -2,19 +2,19 @@
 
 /**
  * @ngdoc function
- * @name hfosFrontendApp.controller:{{componentname}}Controller
+ * @name hfosFrontendApp.controller:{{component_name}}Controller
  * @description
- * # {{componentname}}Controller
- * Controller of the hfosFrontendApp {{pluginname}} module
+ * # {{component_name}}Controller
+ * Controller of the hfosFrontendApp {{plugin_name}} module
  */
 angular.module('hfosFrontendApp')
-    .controller('{{componentname}}Controller', function ($scope, ObjectProxy) {
+    .controller('{{component_name}}Controller', function ($scope, ObjectProxy) {
         $scope.variable = 'Hello World!';
 
     })
     .config(function ($routeProvider) {
         $routeProvider
-            .when('/{{pluginname}}', {
-                templateUrl: '{{pluginname}}/views/{{pluginname}}.html'
+            .when('/{{plugin_name}}', {
+                templateUrl: '{{plugin_name}}/views/{{plugin_name}}.html'
             });
     });

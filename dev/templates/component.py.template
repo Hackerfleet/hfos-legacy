@@ -4,14 +4,14 @@
 """
 
 {{description}}
-{{descriptionheader}}
+{{description_header}}
 
 Contains
 --------
 
-{{longdescription}}
+{{long_description}}
 
-:copyright: (C) {{year}} {{authorname}} <{{authoremail}}>
+:copyright: (C) {{year}} {{author_name}} <{{author_email}}>
 :license: {{license}}
 
 """
@@ -19,18 +19,18 @@ Contains
 from hfos.component import ConfigurableComponent
 from hfos.logger import warn, critical, error, debug, verbose
 
-__author__ = "{{authorname}} <{{authoremail}}>"
+__author__ = "{{author_name}} <{{author_email}}>"
 
 
-class {{componentname}}Component(ConfigurableComponent):
+class {{component_name}}Component(ConfigurableComponent):
     configprops = {
         'setting': {'type': 'string', 'title': 'Some Setting',
                     'description': 'Some string setting.', 'default': 'DefaultValue'},
     }
 
     def __init__(self, *args, **kwargs):
-        super({{componentname}}
-        Component, self).__init__("{{pluginname}}", *args, **kwargs)
+        super({{component_name}}
+        Component, self).__init__("{{plugin_name}}", *args, **kwargs)
 
-        self.log("{{componentname}} started.")
+        self.log("{{component_name}} started.")
         # self.log(self.config)

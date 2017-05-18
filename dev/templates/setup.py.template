@@ -2,31 +2,31 @@
 # -*- coding: UTF-8 -*-
 
 # {{description}}
-# {{descriptionheader}}
-# Copyright (C) {{year}}, {{authorname}} <{{authoremail}}>.
+# {{description_header}}
+# Copyright (C) {{year}}, {{author_name}} <{{author_email}}>.
 #
-{{licenselongtext}}
+{{license_longtext}}
 
 from setuptools import setup, find_packages
 
-setup(name="hfos-{{pluginname}}",
+setup(name="hfos-{{plugin_name}}",
       version="{{version}}",
       description="HFOS module: {{description}}",
-      author="{{authorname}}",
-      author_email="{{authoremail}}",
-      url="https://github.com/{{githuburl}}/",
+      author="{{author_name}}",
+      author_email="{{author_email}}",
+      url="https://github.com/{{github_url}}/",
       license="{{license}}",
       packages=find_packages(),
-      long_description="""{{longdescription}}""",
+      long_description="""{{long_description}}""",
       keywords=[
-          {{keywordlist}}
+          {{keyword_list}}
       ],
       dependency_links=[],
       install_requires=['hfos==1.1.0'],
       entry_points="""[hfos.components]
-          {{componentname}}=hfos.{{pluginname}}.{{pluginname}}:{{componentname}}Component
+          {{component_name}}=hfos.{{plugin_name}}.{{plugin_name}}:{{component_name}}Component
 [hfos.schemata]
-    {{componentname}}Schema=hfos.{{pluginname}}.schemata:{{componentname}}Schema
+    {{component_name}}Schema=hfos.{{plugin_name}}.schemata:{{component_name}}Schema
 """,
       test_suite="tests.main.main",
       )

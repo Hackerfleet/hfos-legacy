@@ -1,5 +1,5 @@
 {
-  "name": "hfos-{{pluginname}}",
+  "name": "hfos-{{plugin_name}}",
   "version": "{{version}}",
   "description": "HFOS - {{description}}",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/{{githuburl}}.git"
+    "url": "https://github.com/{{github_url}}.git"
   },
   "keywords": [
-    {{keywordlist}}
+    {{keyword_list}}
   ],
-  "author": "{{authorname}}",
+  "author": "{{author_name}}",
   "license": "{{license}}",
   "bugs": {
-    "url": "https://github.com/{{githuburl}}/issues"
+    "url": "https://github.com/{{github_url}}/issues"
   }
 }
