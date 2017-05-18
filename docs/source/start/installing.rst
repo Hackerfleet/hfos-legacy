@@ -52,3 +52,14 @@ To install on Windows, you'll need to install these packages first:
  * MongoDB https://www.mongodb.org/downloads#production
  * pymongo
  * numpy
+
+Platform specific
+-----------------
+
+There are some collected instructions for various hardware platforms:
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   platforms/*
