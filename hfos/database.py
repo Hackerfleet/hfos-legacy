@@ -69,9 +69,11 @@ def clear_all():
 def _build_schemastore_new():
     available = {}
 
-    for schema_entrypoint in iter_entry_points(group='hfos.schemata', name=None):
+    for schema_entrypoint in iter_entry_points(group='hfos.schemata',
+                                               name=None):
         try:
-            hfoslog("Schemata found: ", schema_entrypoint.name, lvl=debug, emitter='DB')
+            hfoslog("Schemata found: ", schema_entrypoint.name, lvl=verbose,
+                    emitter='DB')
 
             available[schema_entrypoint.name] = schema_entrypoint.load()
         except (ImportError, DistributionNotFound) as e:
@@ -79,7 +81,7 @@ def _build_schemastore_new():
                     schema_entrypoint.name, exc=True, lvl=warn,
                     emitter='SCHEMATA')
 
-    hfoslog("Found schemata: ", available.keys(), lvl=debug,
+    hfoslog("Found schemata: ", sorted(available.keys()), lvl=debug,
             emitter='SCHEMATA')
     # pprint(available)
 
@@ -102,7 +104,8 @@ def _build_model_factories(store):
         try:
             result[schemaname] = warmongo.model_factory(schema)
         except Exception as e:
-            hfoslog("Could not create factory for schema ", e, type(e), schemaname, schema,
+            hfoslog("Could not create factory for schema ", e, type(e),
+                    schemaname, schema,
                     lvl=critical, emitter='DB')
 
     return result
@@ -138,10 +141,12 @@ def initialize(address='127.0.0.1:27017'):
     global objectmodels
     global collections
 
-    hfoslog("Testing database availability to ", address, lvl=debug, emitter='DB')
+    hfoslog("Testing database availability to ", address, lvl=debug,
+            emitter='DB')
 
     try:
-        client = pymongo.MongoClient(host=address.split(":")[0], port=int(address.split(":")[1]) if ":" in address else 27017)
+        client = pymongo.MongoClient(host=address.split(":")[0], port=int(
+            address.split(":")[1]) if ":" in address else 27017)
         db = client['hfos']
         hfoslog("Database: ", db.command('buildinfo'), lvl=debug, emitter='DB')
     except Exception as e:
@@ -161,7 +166,7 @@ def test_schemata():
 
     for schemaname in schemastore.keys():
         objects[schemaname] = warmongo.model_factory(
-                schemastore[schemaname]['schema'])
+            schemastore[schemaname]['schema'])
         try:
             testobject = objects[schemaname]()
             testobject.validate()
