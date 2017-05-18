@@ -110,7 +110,7 @@ class LogbookCtrl {
                 console.log('Analyzing thing: ', entry);
                 var calItem = {
                     title: entry.name + ': ' + entry.title,
-                    url: '#/editor/logbookentry/' + entry.uuid,
+                    url: '#!/editor/logbookentry/' + entry.uuid,
                     startsAt: new Date(Date.parse(entry.starttime)),
                     endsAt: new Date(Date.parse(entry.starttime + 1)),
                     color: '#ff0000',
