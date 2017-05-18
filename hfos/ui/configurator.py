@@ -9,7 +9,7 @@ Module: Configurator
 """
 
 from hfos.events.client import send
-from hfos.component import ConfigurableComponent
+from hfos.component import ConfigurableComponent, authorizedevent, handler
 from hfos.schemata.component import ComponentConfigSchemaTemplate as Schema
 from hfos.database import configschemastore, ValidationError, objectmodels
 from hfos.logger import error, warn, verbose, hilight
@@ -18,6 +18,18 @@ from warmongo import model_factory
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 from pprint import pprint
+
+
+class list(authorizedevent):
+    """A client requires a schema to validate data or display a form"""
+
+
+class get(authorizedevent):
+    """A client requires a schema to validate data or display a form"""
+
+
+class put(authorizedevent):
+    """A client requires a schema to validate data or display a form"""
 
 
 class Configurator(ConfigurableComponent):
@@ -32,8 +44,24 @@ class Configurator(ConfigurableComponent):
     def __init__(self, *args):
         super(Configurator, self).__init__('CONF', *args)
 
-    def configrequest(self, event):
-        """Handles configuration requests.
+    def _check_permission(self, event):
+        user = objectmodels['user'].find_one({'uuid': event.user.uuid})
+
+        if 'admin' not in user.roles:
+            self.log('Missing permission to configure components',
+                     lvl=warn)
+            response = {
+                'component': 'hfos.ui.configurator',
+                'action': 'error',
+                'data': 'insufficient permission'
+            }
+            self.fireEvent(send(event.client.uuid, response))
+            return False
+        return True
+
+    @handler(list)
+    def list(self, event):
+        """Processes configuration list requests
 
         :param event: ConfigRequest with actions
         * Get
@@ -42,93 +70,82 @@ class Configurator(ConfigurableComponent):
         """
 
         try:
-            user = objectmodels['user'].find_one({'uuid': event.user.uuid})
 
-            if 'admin' not in user.roles:
-                self.log('Missing permission to configure components',
-                         lvl=warn)
-                response = {'component': 'configurator',
-                            'action': 'Error',
-                            'data': 'Perm'
-                            }
-                self.fireEvent(send(event.client.uuid, response))
-                return
-
-            if event.action == "List":
-                self.log("Component list request from",
-                         event.user, lvl=verbose)
-
-                componentlist = model_factory(Schema).find({})
-                data = []
-                for comp in componentlist:
-                    data.append({
-                        'name': comp.name,
-                        'uuid': comp.uuid,
-                        'class': comp.componentclass,
-                        'active': comp.active
-                    })
-
-                data = sorted(data, key=lambda x: x['name'])
-
-                response = {'component': 'configurator',
-                            'action': 'List',
-                            'data': data
-                            }
-                self.fireEvent(send(event.client.uuid, response))
-                return
-
-            elif event.action == "Put":
-                self.log("Configuration put request ",
-                         event.user)
-
-                try:
-                    component = model_factory(Schema).find_one({
-                        'uuid': event.data['uuid']
-                    })
-
-                    component.update(event.data)
-                    component.save()
-
-                    response = {
-                        'component': 'configurator',
-                        'action': 'Put',
-                        'data': True
-                    }
-                    self.log('Updated component configuration:',
-                             component.name)
-                except (KeyError, ValueError, ValidationError) as e:
-                    response = {'component': 'configurator',
-                                'action': 'Put',
-                                'data': False
-                                }
-                    self.log('Storing component configuration failed: ',
-                             type(e), e, exc=True, lvl=error)
-
-                self.fireEvent(send(event.client.uuid, response))
-                return
-
-            try:
-                comp = event.data['uuid']
-            except KeyError:
-                comp = None
-
-            if not comp:
-                self.log('Invalid request without schema or component',
-                         lvl=error)
-                return
-
-            if event.action == "Get":
-                self.log("Config data request for ", event.data, "from",
-                         event.user)
-
-                component = model_factory(Schema).find_one({
-                    'uuid': comp
+            componentlist = model_factory(Schema).find({})
+            data = []
+            for comp in componentlist:
+                data.append({
+                    'name': comp.name,
+                    'uuid': comp.uuid,
+                    'class': comp.componentclass,
+                    'active': comp.active
                 })
-                response = {'component': 'configurator',
-                            'action': 'Get',
-                            'data': component.serializablefields()
-                            }
-                self.fireEvent(send(event.client.uuid, response))
 
+            data = sorted(data, key=lambda x: x['name'])
+
+            response = {
+                'component': 'hfos.ui.configurator',
+                'action': 'list',
+                'data': data
+            }
+            self.fireEvent(send(event.client.uuid, response))
+            return
         except Exception as e:
-            self.log("Overall error: ", e, type(e), lvl=error, exc=True)
+            self.log("List error: ", e, type(e), lvl=error, exc=True)
+
+    @handler(put)
+    def put(self, event):
+        self.log("Configuration put request ",
+                 event.user)
+
+        try:
+            component = model_factory(Schema).find_one({
+                'uuid': event.data['uuid']
+            })
+
+            component.update(event.data)
+            component.save()
+
+            response = {
+                'component': 'hfos.ui.configurator',
+                'action': 'put',
+                'data': True
+            }
+            self.log('Updated component configuration:',
+                     component.name)
+        except (KeyError, ValueError, ValidationError) as e:
+            response = {
+                'component': 'hfos.ui.configurator',
+                'action': 'put',
+                'data': False
+            }
+            self.log('Storing component configuration failed: ',
+                     type(e), e, exc=True, lvl=error)
+
+        self.fireEvent(send(event.client.uuid, response))
+        return
+
+    @handler(get)
+    def get(self, event):
+        try:
+            comp = event.data['uuid']
+        except KeyError:
+            comp = None
+
+        if not comp:
+            self.log('Invalid get request without schema or component',
+                     lvl=error)
+            return
+
+        self.log("Config data get  request for ", event.data, "from",
+                 event.user)
+
+        component = model_factory(Schema).find_one({
+            'uuid': comp
+        })
+        response = {
+            'component': 'hfos.ui.configurator',
+            'action': 'get',
+            'data': component.serializablefields()
+        }
+        self.fireEvent(send(event.client.uuid, response))
