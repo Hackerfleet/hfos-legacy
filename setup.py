@@ -104,11 +104,15 @@ See https://github.com/hackerfleet/hfos""",
                         'pymongo>=3.2',
                         'jsonschema>=2.6.0',
                         'pystache>=0.5.4',
+                        'click>=6.7.0',
                         'six'
                         ],
       data_files=datafiles,
       entry_points=
-      """[hfos.base]
+      """[console_scripts]
+    hfos_launcher=hfos.launcher:launch
+    hfos_manage=hfos_manage:cli
+    [hfos.base]
     debugger=hfos.debugger:HFDebugger
     cli=hfos.debugger:CLI
     logger=hfos.debugger:Logger
