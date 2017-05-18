@@ -42,6 +42,7 @@ off = 100
 """
 
 from circuits.core import Event
+import pprint
 # from circuits import Component, handler
 # from uuid import uuid4
 # import json
@@ -271,7 +272,10 @@ def hfoslog(*what, **kwargs):
 
     for thing in what:
         content += " "
-        content += str(thing)
+        if kwargs.get('pretty', False):
+            content += pprint.pformat(thing)
+        else:
+            content += str(thing)
 
     msg += content
 
