@@ -8,14 +8,29 @@
             <div id="mapsidebar" class="aside-body bs-sidebar" style="float:right;">
                 <uib-tabset active="active">
                     <uib-tab index="0" heading="Layers">
-                        <ul class="layer-overview">
-                            <li ng-repeat="(name, layers) in $ctrl.layers">
-                                <h4>{{name == 'baselayers' && 'Base ' || 'Overlay '}} Layers</h4>
-                                <ul class="layer-list">
-                                    <li ng-repeat="(uuid, layer) in $ctrl.layers[name]">
-                                        <!-- {{layer}} -->
-
-                                        <a ng-click="$ctrl.switchLayer(name, uuid)">
+                        <div id="layer_selector">
+                            <h4>Layers</h4>
+                            <div id="current_zoom">
+                                <label>Current zoom</label>
+                                <slider class="layer_zoom"
+                                        ng-model="$ctrl.center.zoom"
+                                        min="0"
+                                        max="18"
+                                        handle="custom"
+                                ></slider>
+                            </div>
+                            <ul class="layer-overview">
+                                <li ng-repeat="(name, layers) in $ctrl.layers">
+                                    <h4>{{name == 'baselayers' && 'Base ' || 'Overlay '}} Layers</h4>
+                                    <ul class="layer-list">
+                                        <li ng-repeat="(uuid, layer) in $ctrl.layers[name]">
+                                            <!-- {{layer}} -->
+                                            <span class="layer-expander fa" ng-class="
+                                               {'fa-chevron-down': $ctrl.layer_flags[uuid].expanded,
+                                                'fa-chevron-right': !$ctrl.layer_flags[uuid].expanded}"
+                                                  ng-click="$ctrl.layer_flags[uuid].expanded = !$ctrl.layer_flags[uuid].expanded">
+                                            </span>
+                                            <a ng-click="$ctrl.switchLayer(name, uuid)">
                                             <span class="layer-toggle fa"
                                                   ng-class="
                                                   {'fa-square-o': name == 'overlays' && !$ctrl.leafletlayers[name].hasOwnProperty(uuid),
@@ -23,26 +38,66 @@
                                                    'fa-circle-o': name == 'baselayers' && !$ctrl.leafletlayers[name].hasOwnProperty(uuid),
                                                    'fa-dot-circle-o': name == 'baselayers' && $ctrl.leafletlayers[name].hasOwnProperty(uuid)
                                                    }"></span>
-                                            <span ng-bind="layer.name"></span>
-                                        </a>
-                                        <div class="pull-right">
-                                            <a href="#/editor/layer/{{layer.uuid}}/edit"><span class="fa fa-pencil"></span></a>
-                                            <a href="#/editor/layer/{{layer.uuid}}/copy"><span
-                                                    class="fa fa-copy"></span></a>
-                                        </div>
-                                        <slider ng-show="name == 'overlays'"
-                                                ng-model="layer.layerOptions.opacity"
-                                                tooltip="hide"
-                                                step="0.1"
-                                                min="0"
-                                                max="1">
-                                        </slider>
+                                                <span ng-bind="layer.name"></span>
+                                            </a>
+                                            <div class="pull-right">
+                                                <a href="#!/editor/layer/{{layer.uuid}}/edit"><span
+                                                        class="fa fa-pencil"></span></a>
+                                                <a href="#!/editor/layer/{{layer.uuid}}/copy"><span
+                                                        class="fa fa-copy"></span></a>
+                                            </div>
+                                            <div ng-hide="!$ctrl.layer_flags[uuid].expanded"
+                                                 ng-animate="'fade'">
+                                                <label ng-show="name == 'overlays'">Opacity</label>
+                                                <slider class="layer_opacity_level"
+                                                        ng-show="name == 'overlays'"
+                                                        ng-model="layer.layerOptions.opacity"
+                                                        handle="custom"
+                                                        tooltip="hide"
+                                                        step="0.1"
+                                                        min="0"
+                                                        max="1">
+                                                </slider>
+                                                <label>Available zoom levels</label>
+                                                <slider class="layer_zoom_levels"
+                                                        ng-model="$ctrl.layer_flags[uuid].zoom"
+                                                        ng-disabled="true"
+                                                        range="true"
+                                                        min="0"
+                                                        handle="custom"
+                                                        max="18">
+                                                </slider>
+                                            </div>
 
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
 
+                        <div id="layergroup_selector">
+                            <h4>Layergroups</h4>
+                            <ul class="layer-overview">
+                                <li ng-repeat="layergroup in $ctrl.layergroups">
+                                    <!-- {{layer}} -->
+
+                                    <a ng-click="$ctrl.switchLayergroup(layergroup.uuid)">
+                                    <span class="layer-toggle fa"
+                                          ng-class="
+                                          {'fa-circle-o': $ctrl.layergroup != layergroup.uuid,
+                                           'fa-dot-circle-o': $ctrl.layergroup == layergroup.uuid
+                                           }"></span>
+                                        <span ng-bind="layergroup.name"></span>
+                                    </a>
+                                    <div class="pull-right">
+                                        <a href="#!/editor/layergroup/{{layergroup.uuid}}/edit"><span
+                                                class="fa fa-pencil"></span></a>
+                                        <a href="#!/editor/layergroup/{{layergroup.uuid}}/copy"><span
+                                                class="fa fa-copy"></span></a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </uib-tab>
 
                     <uib-tab index="1" heading="Mapviews">
@@ -57,42 +112,30 @@
                                     <span ng-bind="mapview.name"></span>
                                 </a>
                                 <div class="pull-right">
-                                    <a href="#/editor/mapview/{{mapview.uuid}}/edit"><span class="fa fa-pencil"></span></a>
-                                    <a href="#/editor/mapview/{{mapview.uuid}}/copy"><span
+                                    <a href="#!/editor/mapview/{{mapview.uuid}}/edit"><span class="fa fa-pencil"></span></a>
+                                    <a href="#!/editor/mapview/{{mapview.uuid}}/copy"><span
                                             class="fa fa-copy"></span></a>
                                 </div>
                             </li>
                         </ul>
                     </uib-tab>
-                    <uib-tab index="2" heading="Vessels" disable="true">
-                    </uib-tab>
-                    <uib-tab index="3" heading="Geo Objects">
+                    <uib-tab index="2" heading="Geo Objects">
                         <ul>
                             <li ng-repeat="(name, geoobject) in $ctrl.geoobjects">
                                 <a ng-click="$ctrl.switchGeoobject(geoobject.uuid)"><span
                                         ng-bind="geoobject.name != null ? geoobject.name : 'Untitled Object'"></span></a>
                                 <div class="pull-right">
-                                    <a href="#/editor/geoobject/{{geoobject.uuid}}/edit"><span
+                                    <a href="#!/editor/geoobject/{{geoobject.uuid}}/edit"><span
                                             class="fa fa-pencil"></span></a>
-                                    <a href="#/editor/geoobject/{{geoobject.uuid}}/copy"><span
+                                    <a href="#!/editor/geoobject/{{geoobject.uuid}}/copy"><span
                                             class="fa fa-copy"></span></a>
                                 </div>
 
                             </li>
                         </ul>
                     </uib-tab>
-
-
-                    <!--                    <uib-tab index="$index + 1" ng-repeat="tab in tabs" heading="{{tab.title}}" disable="tab.disabled">
-                                            {{tab.content}}
-                                        </uib-tab>
-                                        <uib-tab index="3" select="alertMe()">
-                                            <uib-tab-heading>
-                                                <i class="glyphicon glyphicon-bell"></i> Alert!
-                                            </uib-tab-heading>
-                                            I've got an HTML heading, and a select callback. Pretty cool!
-                                        </uib-tab>
-                    -->
+                    <uib-tab index="3" heading="Vessels" disable="true">
+                    </uib-tab>
                 </uib-tabset>
 
             </div>
