@@ -37,7 +37,6 @@ class NavDataService {
         this.vessel = null;
         this.vesseluuid = '';
 
-        // this.sock = $websocket('ws://' + host + ':' + port + '/websocket');
         console.log('[NAV] NavDataService constructed');
 
         var self = this;
