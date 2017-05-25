@@ -197,7 +197,8 @@ class NMEAParser(ConfigurableComponent):
             for sentence in sentences:
                 if sentence[0] == '!':
                     # This is an AIS sentence or something else
-                    self.log("Not yet implemented: AIS Sentence received.")
+                    self.log("Not yet implemented: AIS Sentence received:",
+                             sentence[:6])
                 else:
                     parsed_data = parse(sentence)
                     nmeadata.append(parsed_data)
@@ -325,7 +326,7 @@ class NMEAPlayback(ConfigurableComponent):
         self.log("Playback component started with", self.config.delay,
                  "seconds interval.")
 
-        if self.config.logfile != '':
+        if self.config.logfile != '' and self.config.active:
             with open(self.config.logfile, 'r') as logfile:
                 self.logdata = logfile.readlines()
             self.length = len(self.logdata)
@@ -337,7 +338,7 @@ class NMEAPlayback(ConfigurableComponent):
             Timer(self.config.delay / 1000.0, Event.create('nmeaplayback'),
                   self.channel, persist=True).register(self)
         else:
-            self.log("No logfile specified.", lvl=warn)
+            self.log("No logfile specified and/or deactivated.", lvl=warn)
 
     def nmeaplayback(self, *args):
         self.log("Playback time", lvl=verbose)
