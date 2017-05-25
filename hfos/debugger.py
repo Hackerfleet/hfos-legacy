@@ -92,7 +92,7 @@ class HFDebugger(ConfigurableComponent):
             self.log("\n".join(s), lvl=critical)
 
             alert = {
-                'component': 'alert',
+                'component': 'hfos.alert.manager',
                 'action': 'danger',
                 'data': {
                     'message': "\n".join(s),
