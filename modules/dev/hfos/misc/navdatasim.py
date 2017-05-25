@@ -13,14 +13,17 @@ from hfos.navdata.events import sensordata
 
 from hfos.component import ConfigurableComponent
 from hfos.logger import error, warn, verbose, hilight
-from circuits import Timer, Event, handler
+from circuits import Timer, Event
+from hfos.component import handler
 from time import time
 from random import randint
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
+
 class generatenavdata(Event):
     pass
+
 
 class NavdataSim(ConfigurableComponent):
     """
@@ -36,8 +39,11 @@ class NavdataSim(ConfigurableComponent):
     def __init__(self, *args):
         super(NavdataSim, self).__init__("NAVSIM", *args)
 
-        self.log("Started, channel:", self.channel)
-        Timer(3, generatenavdata(), persist=True).register(self)
+        if self.config.active is True:
+            self.log("Started, channel:", self.channel)
+            Timer(3, generatenavdata(), persist=True).register(self)
+        else:
+            self.log("Disabled.")
 
     @handler('generatenavdata')
     def generatenavdata(self, *args):
