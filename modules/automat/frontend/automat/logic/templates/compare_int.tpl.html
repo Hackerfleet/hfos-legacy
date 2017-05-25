@@ -1,0 +1,38 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div ng-controller="automat-compare_int as ctrl">
+    <div class="form-group">
+        <label for="function">Function</label>
+        <select id="function" class="form-control input-sm" ng-model="ctrl.function" ng-change="ctrl.update()">
+            <option value="bigger">></option>
+            <option value="lower"><</option>
+            <option value="equals">=</option>
+            <option value="bigger_equals">>=</option>
+            <option value="lower_equals"><=</option>
+        </select>
+        <label for="value">Value</label>
+        <input id="value" type="number" class="form-control input-sm" ng-model="ctrl.argument" ng-change="ctrl.update()"/>
+    </div>
+</div>

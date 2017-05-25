@@ -24,6 +24,10 @@
 
 <div class="well">
     <h1>Automat</h1>
+    <span id="debug">
+            <input type="checkbox" ng-model="$ctrl.debug"/>
+            <span>Debug</span>
+    </span>
 
     <table class="table table-hover">
         <tr>
@@ -32,17 +36,61 @@
             <th>Outgoing Event</th>
             <th>Active</th>
         </tr>
-        <tr ng-repeat="rule in $ctrl.rules">
-            <td>{{rule.eventname}}</td>
+        <tr ng-repeat="(uuid, rule) in $ctrl.rules">
             <td>
-                {{rule.logic.argument}}
-                {{rule.logic.value}}
+                <form class="form-inline">
+                    <select class="form-control input-sm" ng-model="rule.input.event.source">
+                        <option ng-repeat="(key, value) in $ctrl.events" value="{{key}}">{{key}}</option>
+                    </select>
+                    <select class="form-control input-sm" ng-model="rule.input.event.name">
+                        <option ng-repeat="(key, value) in $ctrl.events[rule.input.event.source]" value="{{key}}">{{key}}</option>
+                    </select>
+                </form>
             </td>
             <td>
-                {{rule.output.eventname}}
+                <div ng-repeat="condition in rule.input.logic">
+                    <div class="pull-right"><i class="fa fa-minus" ng-click="$ctrl.removeCondition($index, uuid)"></i></div>
+                    <form class="form-inline">
+                        Do
+                        <strong>
+                            <select class="form-control input-sm" ng-model="condition.tool">
+                                <option ng-repeat="(key, value) in $ctrl.tools" value="{{key}}">{{value}}</option>
+                            </select>
+                        </strong>
+                        on <strong>{{condition.field}}</strong>:
+
+                        <div ng-automat-tool="condition.tool" function="condition.function"
+                             argument="condition.argument"></div>
+                    </form>
+                </div>
+
+                <i class="fa fa-plus" ng-click="$ctrl.addCondition(uuid)"></i>
             </td>
-            <td><i class="fa" ng-class="{'fa-square-o':!rule.enabled,'fa-check-square-o':rule.enabled}"></i></td>
+            <td>
+                <form class="form-inline">
+                    <select class="form-control input-sm" ng-model="rule.output.event.destination">
+                        <option ng-repeat="(key, value) in $ctrl.events" value="{{key}}">{{key}}</option>
+                    </select>
+                    <select class="form-control input-sm" ng-model="rule.output.event.name">
+                        <option ng-repeat="(key, value) in $ctrl.events[rule.output.event.destination]" value="{{key}}">{{key}}</option>
+                    </select>
+                </form>
+            </td>
+            <td>
+                <i class="fa" ng-class="{'fa-square-o':!rule.enabled,'fa-check-square-o':rule.enabled}"
+                   ng-click="rule.enabled = !rule.enabled"></i>
+                <i class="fa fa-minus" ng-click="$ctrl.removeRule(uuid)"></i>
+            </td>
         </tr>
-        <tr></tr>
     </table>
+    <div class="centered">
+        <i class="fa fa-plus" ng-click="$ctrl.addRule()"></i>
+    </div>
+
+    <div ng-show="$ctrl.debug">
+        <hr>
+        <span>Model:
+            <pre>{{$ctrl.rules | json}}</pre>
+        </span>
+    </div>
 </div>

@@ -22,23 +22,29 @@
  * """
  */
 
-import './automat/automat.scss';
+'use strict';
 
-import angular from 'angular';
-import uirouter from 'angular-ui-router';
+class automatcompare_int {
+    constructor($scope) {
+        this.scope = $scope;
+        /*this.value = this.scope.$parent.value;
+        this.function = this.scope.$parent.function;*/
+        console.log('[AT-CI] compare_int loaded, controller scope:', this, $scope);
+        this.argument = $scope.$parent.argument;
+        this.function = $scope.$parent.function;
+        
+        console.log('[AT-CI] Scope:', $scope);
 
-import { routing } from './automat.config.js';
+        var self = this;
+    }
+    
+    update() {
+        console.log('[AT-CI] Changed values:', this.argument, this.function, this.scope);
+        this.scope.$parent.argument = this.argument;
+        this.scope.$parent.function = this.function;
+    }
+}
 
-import automatcomponent from './automat/automat';
-import template from './automat/automat.tpl.html';
-import automattoolcontroller from './automat/logic/directives/dynamiccontroller';
+automatcompare_int.$inject = ['$scope', 'socket', '$interval'];
 
-import comparecontroller from './automat/logic/controllers/compare_int';
-
-export default angular
-    .module('main.app.automat', [uirouter])
-    .config(routing)
-    .component('automat', {controller: automatcomponent, template: template})
-    .controller('automat-compare_int', comparecontroller)
-    .directive('ngAutomatTool', automattoolcontroller)
-    .name;
+export default automatcompare_int;
