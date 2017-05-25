@@ -25,7 +25,8 @@ __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 # Basic Tag definitions
 
-TagSchema = base_object('tag')
+TagSchema = base_object('tag', all_roles='crew')
+
 TagSchema['properties'].update({
     'color': {'type': 'string', 'format': 'color', 'title': 'Color of tag',
               'description': 'Background color of tag'},

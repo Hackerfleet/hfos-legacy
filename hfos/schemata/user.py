@@ -19,7 +19,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-UserSchema = base_object('user', roles_list=['owner', 'admin', 'crew'])
+UserSchema = base_object('user', roles_list=['crew'])
 
 UserSchema['properties'].update({
     'passhash': {

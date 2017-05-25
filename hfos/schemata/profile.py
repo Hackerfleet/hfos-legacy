@@ -17,7 +17,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-ProfileSchema = base_object('profile')
+ProfileSchema = base_object('profile', roles_create='crew')
 
 ProfileSchema['properties'].update({
     'name': {'type': 'string', 'title': 'Name',
