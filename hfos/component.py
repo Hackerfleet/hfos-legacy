@@ -19,6 +19,8 @@ Provisions
 :license: GPLv3 (See LICENSE)
 
 """
+from circuits.web.controllers import Controller
+
 from hfos.events.system import authorizedevent
 from hfos.schemata.component import ComponentBaseConfigSchema, \
     ComponentConfigSchemaTemplate
@@ -100,8 +102,9 @@ def handler(*names, **kwargs):
             f.handler = False
             return f
 
-        if len(names) > 0 and inspect.isclass(names[0]) and issubclass(names[\
-                0], authorizedevent):
+        if len(names) > 0 and inspect.isclass(names[0]) and issubclass(names[ \
+                                                                               0],
+                                                                       authorizedevent):
             f.names = (str(names[0].realname()),)
         else:
             f.names = names
@@ -123,13 +126,12 @@ def handler(*names, **kwargs):
     return wrapper
 
 
-class ConfigurableComponent(Component):
+class ConfigurableMeta():
     names = []
     configprops = {}
 
     def __init__(self, uniquename=None, *args, **kwargs):
-
-        super(ConfigurableComponent, self).__init__(*args, **kwargs)
+        super(ConfigurableMeta, self).__init__(*args, **kwargs)
 
         self.uniquename = ""
 
@@ -176,15 +178,9 @@ class ConfigurableComponent(Component):
             except ValidationError as e:
                 self.log("Error during configuration reading: ", e, type(e),
                          exc=True)
-        #
-        # for func in inspect.getmembers(self, predicate=inspect.ismethod):
-        #
-        #     if func[0].startswith('request_'):
-        #         self.log('REQUEST FOUND. ADDING TO AUTHORIZED EVENTS',
-        #                  lvl=hilight)
 
     def register(self, *args):
-        super(ConfigurableComponent, self).register(*args)
+        super(ConfigurableMeta, self).register(*args)
         from hfos.database import configschemastore
         # self.log('ADDING SCHEMA:')
         # pprint(self.configschema)
@@ -192,7 +188,7 @@ class ConfigurableComponent(Component):
 
     def unregister(self):
         self.names.remove(self.uniquename)
-        super(ConfigurableComponent, self).unregister()
+        super(ConfigurableMeta, self).unregister()
 
     def _read_config(self):
         try:
@@ -286,7 +282,7 @@ class ConfigurableComponent(Component):
         if 'exc' in kwargs and kwargs['exc'] is True:
             exc_type, exc_obj, exc_tb = exc_info()
             line_no = exc_tb.tb_lineno
-            #print('EXCEPTION DATA:', line_no, exc_type, exc_obj, exc_tb)
+            # print('EXCEPTION DATA:', line_no, exc_type, exc_obj, exc_tb)
             args += traceback.extract_tb(exc_tb),
         else:
             line_no = func.co_firstlineno
@@ -297,6 +293,20 @@ class ConfigurableComponent(Component):
             line_no
         )
         hfoslog(sourceloc=sourceloc, emitter=self.uniquename, *args, **kwargs)
+
+
+class ConfigurableController(ConfigurableMeta, Controller):
+
+    def __init__(self, uniquename=None, *args, **kwargs):
+        ConfigurableMeta.__init__(self, uniquename)
+        Controller.__init__(self, *args, **kwargs)
+
+
+class ConfigurableComponent(ConfigurableMeta, Component):
+
+    def __init__(self, uniquename=None, *args, **kwargs):
+        ConfigurableMeta.__init__(self, uniquename)
+        Component.__init__(self, *args, **kwargs)
 
 
 class ExampleComponent(ConfigurableComponent):
