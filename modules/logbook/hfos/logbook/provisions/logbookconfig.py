@@ -26,10 +26,9 @@ Logbooks = [
         'description': 'Default blank logbook',
         'shared': True,
         'locked': False,
-        'cards': []
     }
 ]
 
-def provision():
-    provisionList(Logbooks, objectmodels['logbookconfig'])
+def provision(**kwargs):
+    provisionList(Logbooks, objectmodels['logbookconfig'], **kwargs)
     hfoslog('[PROV] Provisioning: Logbooks: Done.')
