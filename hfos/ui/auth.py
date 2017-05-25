@@ -12,7 +12,7 @@ Authentication (and later Authorization) system
 
 from uuid import uuid4
 
-from circuits import handler
+from hfos.component import handler
 from hfos.events.client import authentication, send
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels, makesalt
@@ -50,8 +50,6 @@ class Authenticator(ConfigurableComponent):
         self.systemconfig = systemconfig
 
     def makehash(self, word):
-        self.log("TYPE: ", type(word))
-
         try:
             password = word.encode('utf-8')
         except UnicodeDecodeError:
