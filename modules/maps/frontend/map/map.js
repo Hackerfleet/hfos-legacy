@@ -47,16 +47,48 @@ class mapcomponent {
         
         this.mapviews = null;
         this.geoobjects = null;
+        this.layergroups = {};
         
         this.baseLayer = null;
         
+        this.layergroup = null;
         this.drawnLayer = '';
         this.map = '';
-    
+        
         let self = this;
         
         this.leafletlayers = {
-            overlays: {
+            overlays: {},
+            baselayers: {}
+        };
+        
+        this.geojson = {};
+        
+        this.layer_flags = {};
+        
+        this.layers = {
+            baselayers: {
+                osm: {
+                    name: 'OpenStreetMap',
+                    type: 'xyz',
+                    // url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+                    url: this.host + 'tilecache/a.tile.osm.org/{z}/{x}/{y}.png',
+                    layerOptions: {
+                        //subdomains: ['a', 'b', 'c'],
+                        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                        continuousWorld: false,
+                        minZoom: 3
+                    }
+                }
+            },
+            overlays: {}
+        };
+        
+        this.clearLayers = function () {
+            self.layers.baselayers = {};
+            self.layers.overlays = {};
+            self.leafletlayers.baselayers = {};
+            self.leafletlayers.overlays = {
                 draw: {
                     name: 'draw',
                     type: 'group',
@@ -65,9 +97,10 @@ class mapcomponent {
                         showOnSelector: false
                     }
                 }
-            },
-            baselayers: {}
+            };
         };
+        
+        this.clearLayers();
         
         this.host = 'http';
         if (socket.protocol === 'wss') {
@@ -108,19 +141,19 @@ class mapcomponent {
         
         this.terminator = null;
         this.grid = null;
-    
+        
         this.mapsidebar = $aside({scope: this.scope, template: sidebar, backdrop: false, show: false});
-    
+        
         this.showSidebar = function (event) {
             console.log('[MAP] Opening sidebar: ', self.mapsidebar);
-        
+            
             self.mapsidebar.$promise.then(function () {
                 console.log("[MAP] Sidebar:", self.mapsidebar);
                 self.mapsidebar.show();
             });
         };
-    
-    
+        
+        
         this.copyCoordinates = function (e) {
             console.log(e);
             self.clipboard.copyText(e.latlng);
@@ -139,7 +172,7 @@ class mapcomponent {
         };
         
         this.openOSMiD = function (e) {
-            var url = 'http://www.openstreetmap.org/edit?editor=id#map=', //52_17_28_N_5_32_32_E';
+            let url = 'http://www.openstreetmap.org/edit?editor=id#map=', //52_17_28_N_5_32_32_E';
                 lat = e.latlng.lat,
                 lng = e.latlng.lng;
             
@@ -150,12 +183,12 @@ class mapcomponent {
         };
         
         this.openGeohack = function (e) {
-            var url = 'https://tools.wmflabs.org/geohack/geohack.php?params=', //52_17_28_N_5_32_32_E';
+            let url = 'https://tools.wmflabs.org/geohack/geohack.php?params=', //52_17_28_N_5_32_32_E';
                 lat = e.latlng.lat,
                 lng = e.latlng.lng;
             
             function getDegrees(angle) {
-                var degrees = Math.floor(angle),
+                let degrees = Math.floor(angle),
                     minutes = Math.floor(60 * (angle - degrees)),
                     seconds = Math.floor(3600 * (angle - degrees) - 60 * minutes);
                 degrees = Math.abs(degrees);
@@ -209,26 +242,6 @@ class mapcomponent {
             }
         };
         
-        this.geojson = {};
-        
-        this.layers = {
-            baselayers: {
-                osm: {
-                    name: 'OpenStreetMap',
-                    type: 'xyz',
-                    // url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-                    url: this.host + 'tilecache/a.tile.osm.org/{z}/{x}/{y}.png',
-                    layerOptions: {
-                        //subdomains: ['a', 'b', 'c'],
-                        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-                        continuousWorld: false,
-                        minZoom: 3
-                    }
-                }
-            },
-            overlays: {}
-        };
-        
         this.events = {
             map: {
                 enable: ['moveend', 'dblclick', 'mousemove'],
@@ -236,67 +249,42 @@ class mapcomponent {
             }
         };
         
-        this.scope.$on('OP.Get', function (event, objuuid, obj, schema) {
-            console.log('[MAP] Object:', obj, schema);
-            if (objuuid === self.mapviewuuid) {
-                self.updateMapview(objuuid);
-                self.clearLayers();
-            } else if (schema === 'geoobject') {
-                console.log('I think this is relevant: ', obj);
-                
-                var myLayer = L.geoJson().addTo(self.map);
-                console.log('This strange thing:', myLayer);
-                myLayer.addData(obj.geojson);
-            } else if (schema === 'layergroup') {
-                console.log('Layergroup received:', obj);
-                
-                self.clearLayers();
-                
-                if (typeof obj.layers !== 'undefined') {
-                    for (var layer of obj.layers) {
-                        self.op.getObject('layer', layer);
-                    }
-                }
-            } else if (schema === 'layer') {
-                console.log('Received layer object: ', obj);
-                self.addLayer(objuuid);
-                self.renderLayerMenu();
-            }
-        });
-        
-        this.clearLayers = function () {
-            self.layers.baselayers = {};
-            self.layers.overlays = {};
-        };
-        
         this.addLayer = function (uuid) {
-            var layer = self.op.objects[uuid];
+            let layer = self.op.objects[uuid];
             if (layer.layerOptions.minZoom == null || layer.layerOptions.maxZoom == null) {
                 layer.layerOptions.minZoom = 0;
-                layer.layerOptions.maxZoom = 17;
+                layer.layerOptions.maxZoom = 18;
             }
             layer.url = layer.url.replace('http://hfoshost/', self.host);
             
-            console.log('Adding layer:', layer);
+            console.log('[MAP] Adding layer:', layer);
             if (layer.baselayer === true) {
                 self.layers.baselayers[layer.uuid] = layer;
+                if (_.isEmpty(self.leafletlayers.baselayers)) {
+                    self.switchLayer('baselayers', layer.uuid);
+                }
             } else {
                 self.layers.overlays[layer.uuid] = layer;
+            }
+            self.layer_flags[layer.uuid] = {
+                expanded: false,
+                zoom: [layer.layerOptions.minZoom, layer.layerOptions.maxZoom]
             }
         };
         
         this.removeLayer = function (uuid) {
-            var layer = self.op.objects[uuid];
-            console.log('Removing layer:', layer);
+            let layer = self.op.objects[uuid];
+            console.log('[MAP] Removing layer:', layer);
             if (layer.baselayer === true) {
                 self.layers.baselayers.delete(uuid);
             } else {
                 self.layers.overlays.delete(uuid);
             }
+            self.layer_flags.delete(uuid);
         };
         
         this.toggleLayer = function (state, uuid) {
-            console.log('Oh, you selected layer:', state, uuid);
+            console.log('[MAP] Oh, you selected layer:', state, uuid);
             if (state === true) {
                 self.addLayer(uuid);
             } else {
@@ -313,28 +301,31 @@ class mapcomponent {
                 this.leafletlayers.baselayers[uuid] = this.layers.baselayers[uuid];
             } else {
                 console.log('[MAP] Switching overlay: ', uuid);
-                var overlays = this.leafletlayers.overlays;
+                let overlays = this.leafletlayers.overlays;
                 if (overlays.hasOwnProperty(uuid)) {
                     delete overlays[uuid];
                 } else {
-                    var layer = this.layers.overlays[uuid];
+                    let layer = this.layers.overlays[uuid];
                     layer.visible = true;
                     console.log('[MAP] New overlay:', layer);
                     overlays[uuid] = layer;
                 }
             }
-            console.log('LAYERS:', self.leafletlayers);
+            console.log('[MAP] LAYERS:', self.leafletlayers);
         };
         
         
         this.switchLayergroup = function (uuid) {
-            console.log('Switching to new layergroup: ', uuid);
+            console.log('[MAP] Switching to new layergroup: ', uuid);
             self.op.getObject('layergroup', uuid);
+            self.layergroup = uuid;
+            self.clearLayers();
         };
         
         this.switchMapview = function (uuid) {
-            console.log('Switching to new mapview: ', uuid);
+            console.log('[MAP] Switching to new mapview: ', uuid);
             self.mapviewuuid = uuid;
+            self.layergroup = false;
             self.op.getObject('mapview', uuid);
         };
         
@@ -345,46 +336,67 @@ class mapcomponent {
         this.getLayergroups = function () {
             console.log('[MAP] Checking layergroups:', self.mapview);
             if (typeof self.mapview.layergroups !== 'undefined') {
-                
-                for (var group of self.mapview.layergroups) {
+                self.layergroup = self.mapview.layergroups[0];
+                for (let group of self.mapview.layergroups) {
                     self.op.getObject('layergroup', group);
                 }
             }
         };
         
+        this.scope.$on('OP.Get', function (event, objuuid, obj, schema) {
+            console.log('[MAP] Object:', obj, schema);
+            if (objuuid === self.mapviewuuid) {
+                self.updateMapview(objuuid);
+                self.clearLayers();
+            } else if (schema === 'geoobject') {
+                console.log('[MAP] Geoobject received: ', obj);
+                
+                let myLayer = L.geoJson().addTo(self.map);
+                console.log('[MAP] Resulting Layer:', myLayer);
+                myLayer.addData(obj.geojson);
+            } else if (schema === 'layergroup') {
+                console.log('[MAP] Layergroup received:', obj);
+                if (self.layergroup == obj.uuid) {
+                    console.log('[MAP] Activating layergroup ', obj.uuid);
+                    self.clearLayers();
+                    
+                    if (typeof obj.layers !== 'undefined') {
+                        for (let layer of obj.layers) {
+                            self.op.getObject('layer', layer);
+                        }
+                    }
+                } else {
+                    console.log('[MAP] Not active, storing');
+                    self.layergroups[obj.uuid] = obj;
+                }
+                
+            } else if (schema === 'layer') {
+                console.log('[MAP] Received layer object: ', obj);
+                self.addLayer(objuuid);
+            }
+        });
+        
         this.scope.$on('OP.ListUpdate', function (event, schema) {
             if (schema === 'geoobject') {
-                var list = self.op.lists.geoobject;
+                let list = self.op.lists.geoobject;
                 
-                console.log('Map received a list of geoobjects: ', schema, list);
+                console.log('[MAP] Map received a list of geoobjects: ', schema, list);
                 self.geoobjects = list;
                 
-                /*for (var item of list) {
-                 console.log('Item:', item);
-                 console.log('Layer:', self.drawnLayer);
+                /*for (let item of list) {
+                 console.log('[MAP] Item:', item);
+                 console.log('[MAP] Layer:', self.drawnLayer);
                  
                  
-                 var myLayer = L.geoJson().addTo(self.map);
-                 console.log('This strange thing:', myLayer);
+                 let myLayer = L.geoJson().addTo(self.map);
+                 console.log('[MAP] This strange thing:', myLayer);
                  myLayer.addData(item.geojson);
                  
                  //self.drawnLayer.addData(item.geojson);
                  }*/
             }
             if (schema === 'layergroup') {
-                var grouplist = self.op.lists.layergroup;
-                var layermenu = [];
-                for (var group of grouplist) {
-                    layermenu.push({
-                        type: 'func',
-                        name: group.uuid,
-                        text: group.name,
-                        callback: self.switchLayergroup,
-                        args: group.uuid
-                    });
-                }
-                self.menu.removeMenu('Layergroups');
-                self.menu.addMenu('Layergroups', layermenu);
+                self.layergroups = self.op.lists.layergroup;
             }
             if (schema === 'mapview') {
                 self.mapviews = self.op.lists.mapview;
@@ -399,10 +411,10 @@ class mapcomponent {
         });
         
         this.syncToMapview = function () {
-            console.log('MAPVIEWUUID: ', self.mapviewuuid);
+            console.log('[MAP] MAPVIEWUUID: ', self.mapviewuuid);
             if (self.mapviewuuid !== null) {
                 self.mapview.coords = self.center;
-                console.log('Sync to MV: ', self.mapview);
+                console.log('[MAP] Sync to MV: ', self.mapview);
                 if (self.sync) {
                     self.op.putObject('mapview', self.mapview);
                 }
@@ -413,9 +425,9 @@ class mapcomponent {
             if (objuuid === self.mapviewuuid) {
                 console.log('[MAP] Received associated mapview.');
                 self.mapview = self.op.objects[objuuid];
-                if (self.followlayers === true) {
-                    self.getLayergroups();
-                }
+                //if (self.followlayers === true || self.layergroup == false) {
+                self.getLayergroups();
+                //}
             }
         };
         
@@ -423,12 +435,12 @@ class mapcomponent {
             if (self.mapviewuuid !== null) {
                 self.center = self.mapview.coords;
                 self.scope.$apply();
-                console.log('Sync from MV: ', self.center);
+                console.log('[MAP] Sync from MV: ', self.center);
             }
         };
         
         this.getGeoobjects = function () {
-            console.log('Getting geoobjects');
+            console.log('[MAP] Getting geoobjects');
             self.op.getList('geoobject', {'owner': self.user.useruuid}, ['geojson']);
         };
         
@@ -473,15 +485,15 @@ class mapcomponent {
         this.unsubscribe = function () {
             self.op.unsubscribeObject(self.mapviewuuid, 'mapview');
         };
-    
-        var mapEvents = self.events.map.enable;
         
-        var handleEvent = function (event) {
+        let mapEvents = self.events.map.enable;
+        
+        let handleEvent = function (event) {
             if (self.user.signedin === true) {
-                //console.log('Map Event:', event);
+                //console.log('[MAP] Map Event:', event);
                 if (event.name === 'leafletDirectiveMap.moveend') {
                     if (self.sync) {
-                        console.log('Synchronizing map');
+                        console.log('[MAP] Synchronizing map');
                         self.syncToMapview();
                     }
                 } else if (event.name === 'leafletDirectiveMap.dblclick') {
@@ -495,15 +507,15 @@ class mapcomponent {
             }
         };
         
-        for (var k of mapEvents) {
-            var eventName = 'leafletDirectiveMap.' + k;
+        for (let k of mapEvents) {
+            let eventName = 'leafletDirectiveMap.' + k;
             this.scope.$on(eventName, function (event) {
                 handleEvent(event);
             });
         }
         
         leafletData.getMap().then(function (map) {
-            console.log('Setting up initial map settings.');
+            console.log('[MAP] Setting up initial map settings.');
             self.map = map;
             
             map.on('click', function (e) {
@@ -514,7 +526,7 @@ class mapcomponent {
             //map.panTo({lat: 52.513, lon: 13.41998});
             
             //if (self.deviceinfo.type !== 'mobile') {
-            //    var Zoomslider = new L.Control.Zoomslider().addTo(map);
+            //    let Zoomslider = new L.Control.Zoomslider().addTo(map);
             //    $('.leaflet-control-zoom').css('visibility', 'hidden');
             //}
             
@@ -537,7 +549,7 @@ class mapcomponent {
             }).addTo(map);
             //self.grid = L.grid({redraw: 'moveend'}).addTo(map);
             
-            //var PanControl = L.control.pan().addTo(map);
+            //let PanControl = L.control.pan().addTo(map);
             self.courseplot = L.polyline([], {color: 'red'}).addTo(map);
             
             self.toggledraw = L.easyButton({
@@ -654,21 +666,21 @@ class mapcomponent {
             self.toggledash.addTo(map);
             
             leafletData.getLayers().then(function (baselayers) {
-                var drawnItems = baselayers.overlays.draw;
+                let drawnItems = baselayers.overlays.draw;
                 self.drawnLayer = drawnItems;
-                console.log('The basedrawlayer looks like this:', drawnItems);
+                console.log('[MAP] The basedrawlayer looks like this:', drawnItems);
                 map.on('draw:created', function (e) {
-                    var layer = e.layer;
-                    console.log('Map drawing created:', e, ' layer:', layer);
+                    let layer = e.layer;
+                    console.log('[MAP] Map drawing created:', e, ' layer:', layer);
                     drawnItems.addLayer(layer);
                     
-                    var geojson = layer.toGeoJSON();
+                    let geojson = layer.toGeoJSON();
                     
                     console.log(geojson);
                     
                     self.geojson = geojson;
                     
-                    var geoobject = {
+                    let geoobject = {
                         uuid: 'create',
                         owner: self.user.useruuid,
                         geojson: geojson
@@ -688,7 +700,7 @@ class mapcomponent {
                         this._icon.style[L.DomUtil.TRANSFORM] += ' rotate(' + this.options.angle + 'deg)';
                     } else if (L.Browser.ie) {
                         // fallback for IE6, IE7, IE8
-                        var rad = this.options.angle * L.LatLng.DEG_TO_RAD,
+                        let rad = this.options.angle * L.LatLng.DEG_TO_RAD,
                             costheta = Math.cos(rad),
                             sintheta = Math.sin(rad);
                         this._icon.style.filter += ' progid:DXImageTransform.Microsoft.Matrix(sizingMethod=\'auto expand\', M11=' +
@@ -701,7 +713,7 @@ class mapcomponent {
                 return new L.RotatedMarker(pos, options);
             };
             
-            var Icons = {
+            let Icons = {
                 Vessel: L.icon({
                     iconUrl: '/assets/images/icons/vessel.png',
                     //shadowUrl: 'leaf-shadow.png',
@@ -734,13 +746,13 @@ class mapcomponent {
                 })
             };
             
-            var VesselMarker = L.rotatedMarker(self.vessel.coords, {icon: Icons.Vessel}).addTo(map);
+            let VesselMarker = L.rotatedMarker(self.vessel.coords, {icon: Icons.Vessel}).addTo(map);
             
             function update_show_vessels() {
-                console.log('Toggling Show Vessels');
+                console.log('[MAP] Toggling Show Vessels');
                 
                 if (self.togglevesseldisplay.state === 'off') {
-                    for (var vessel of self.vessels) {
+                    for (let vessel of self.vessels) {
                         if (vessel.marker !== false) {
                             map.removeLayer(vessel.marker);
                         }
@@ -753,10 +765,10 @@ class mapcomponent {
             }
             
             function update_show_radiorange() {
-                console.log('Toggling Show Radiorange');
+                console.log('[MAP] Toggling Show Radiorange');
                 
                 if (self.toggleradiorange.state === 'off') {
-                    for (var vessel of self.vessels) {
+                    for (let vessel of self.vessels) {
                         
                         if (vessel.rangedisplay !== false) {
                             self.map.removeLayer(vessel.rangedisplay);
@@ -826,14 +838,14 @@ class mapcomponent {
             
             function UpdateVessels() {
                 if (self.togglevesseldisplay.state === 'low' || self.togglevesseldisplay.state === 'high') {
-                    for (var vessel of self.vessels) {
-                        var icon;
+                    for (let vessel of self.vessels) {
+                        let icon;
                         
-                        //console.log('OSDMVESSELDISPLAY: ', type, name, ':',speed, '@', coords);
+                        //console.log('[MAP] OSDMVESSELDISPLAY: ', type, name, ':',speed, '@', coords);
                         
                         if (self.toggleradiorange.state === 'on') {
                             if (vessel.rangedisplay === false) {
-                                var circle = L.circle(vessel.coords, vessel.radiorange, {
+                                let circle = L.circle(vessel.coords, vessel.radiorange, {
                                     color: '#6494BF',
                                     fillColor: '#4385BF',
                                     fillOpacity: 0.4
@@ -844,23 +856,23 @@ class mapcomponent {
                         
                         if (vessel.type === 'vessel') {
                             if (vessel.speed > 0) {
-                                var dist = vessel.speed * (5 / 60);
+                                let dist = vessel.speed * (5 / 60);
                                 
-                                /* var target = [0,0];
+                                /* let target = [0,0];
                                  target[0] = Math.asin( Math.sin(coords[0])*Math.cos(d/R) + Math.cos(coords[0])*Math.sin(d/R)*Math.cos(course) );
                                  target[1] = coords[1] + Math.atan2(Math.sin(course)*Math.sin(d/R)*Math.cos(coords[0]), Math.cos(d/R)-Math.sin(coords[0])*Math.sin(target
                                  */
                                 
-                                var lat1 = Geo.parseDMS(vessel.coords[0]);
-                                var lon1 = Geo.parseDMS(vessel.coords[1]);
-                                var brng = Geo.parseDMS(vessel.course);
+                                let lat1 = Geo.parseDMS(vessel.coords[0]);
+                                let lon1 = Geo.parseDMS(vessel.coords[1]);
+                                let brng = Geo.parseDMS(vessel.course);
                                 
                                 // calculate destination point, final bearing
-                                var p1 = LatLon(lat1, lon1);
-                                var p2 = p1.destinationPoint(brng, dist);
-                                var brngFinal = p1.finalBearingTo(p2);
+                                let p1 = LatLon(lat1, lon1);
+                                let p2 = p1.destinationPoint(brng, dist);
+                                let brngFinal = p1.finalBearingTo(p2);
                                 
-                                //console.log('OSDMVESSELDISPLAY-ARROW: Distance travelled in 5 min:', dist, 'Coords: ', p1, ' Coords in 5 min:', p2, ' Final Bearing:',
+                                //console.log('[MAP] OSDMVESSELDISPLAY-ARROW: Distance travelled in 5 min:', dist, 'Coords: ', p1, ' Coords in 5 min:', p2, ' Final Bearing:',
                                 if (vessel.plot === false) {
                                     vessel.plot = L.polyline([p1, p2], {color: 'red'}).addTo(map);
                                 } else {
@@ -895,11 +907,11 @@ class mapcomponent {
             
             
             function UpdateMapMarker() {
-                console.log('Getting current Vessel position');
+                console.log('[MAP] Getting current Vessel position');
                 
                 Coords = response.coords;
                 Course = response.course;
-                console.log('Coords: ' + Coords + ' Course:' + Course);
+                console.log('[MAP] Coords: ' + Coords + ' Course:' + Course);
                 
                 courseplot.addLatLng(Coords);
                 plotted = courseplot.getLatLngs();
@@ -914,7 +926,7 @@ class mapcomponent {
                 
                 if ($('#cb_show_radiorange').is(':checked')) {
                     if (RangeDisplay == false) {
-                        var circle = L.circle(Coords, Radiorange, {
+                        let circle = L.circle(Coords, Radiorange, {
                             color: '#67BF64',
                             fillColor: '#67BF64',
                             fillOpacity: 0.4
@@ -926,11 +938,11 @@ class mapcomponent {
         });
         
         this.scope.$on('Profile.Update', function () {
-            console.log('Profile update - fetching map data');
+            console.log('[MAP] Profile update - fetching map data');
             self.requestMapData();
         });
         if (this.user.signedin === true) {
-            console.log('Logged in - fetching map data');
+            console.log('[MAP] Logged in - fetching map data');
             this.requestMapData();
         }
         
