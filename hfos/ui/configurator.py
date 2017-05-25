@@ -50,12 +50,7 @@ class Configurator(ConfigurableComponent):
         if 'admin' not in user.roles:
             self.log('Missing permission to configure components',
                      lvl=warn)
-            response = {
-                'component': 'hfos.ui.configurator',
-                'action': 'error',
-                'data': 'insufficient permission'
-            }
-            self.fireEvent(send(event.client.uuid, response))
+
             return False
         return True
 
@@ -99,6 +94,9 @@ class Configurator(ConfigurableComponent):
                  event.user)
 
         try:
+            if self._check_permission(event) is False:
+                raise PermissionError
+
             component = model_factory(Schema).find_one({
                 'uuid': event.data['uuid']
             })
@@ -113,7 +111,7 @@ class Configurator(ConfigurableComponent):
             }
             self.log('Updated component configuration:',
                      component.name)
-        except (KeyError, ValueError, ValidationError) as e:
+        except (KeyError, ValueError, ValidationError, PermissionError) as e:
             response = {
                 'component': 'hfos.ui.configurator',
                 'action': 'put',
