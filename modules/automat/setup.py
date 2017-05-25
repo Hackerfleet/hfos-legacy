@@ -42,11 +42,11 @@ This software package is a plugin module for HFOS and requires the hfos-navdata 
       ],
       entry_points=
       """[hfos.components]
-    automat=hfos.automat.automatwatcher:Automatwatcher
+    automat=hfos.automat.manager:Manager
     [hfos.schemata]
-    automatconfig=hfos.automat.automatconfig:AutomatConfig
+    automatrule=hfos.automat.automatrule:AutomatRule
     [hfos.provisions]
-    automatconfig=hfos.automat.provisions.automatconfig:provision
+    automatrule=hfos.automat.provisions.automatrule:provision
     """,
       test_suite="tests.main.main",
       )
