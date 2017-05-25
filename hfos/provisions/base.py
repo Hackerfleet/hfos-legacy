@@ -14,24 +14,37 @@ Basic functionality around provisioning.
 """
 
 from jsonschema import ValidationError
-from hfos.logger import hfoslog, warn, debug, error
+from hfos.logger import hfoslog, debug, verbose, warn, error
 from hfos.database import objectmodels
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
+system_user = None
+
 
 def provisionList(items, dbobject, overwrite=False, clear=False,
-                  indexes=None):
+                  indices=None):
     """Provisions a list of items according to their schema
+
     :param items: A list of provisionable items.
     :param dbobject: A warmongo database object
+    :param overwrite: Causes existing items to be overwritten
+    :param clear: Clears the collection first (Danger!)
+    :param indices: Creates indices for the given fields
+    :return:
     """
 
-    systemuser = objectmodels['user'].find_one({'name': 'System'})
-    try:
-        hfoslog('System user uuid: ', systemuser.uuid)
-    except AttributeError:
-        hfoslog('No system user found.')
+    def get_system_user():
+        global system_user
+
+        if system_user is None:
+            system_user = objectmodels['user'].find_one({'name': 'System'})
+            try:
+                hfoslog('System user uuid: ', system_user.uuid, lvl=verbose)
+            except AttributeError:
+                hfoslog('No system user found.')
+
+        return system_user
 
     # TODO: Do not check this on specific objects but on the model (i.e. once)
     def needs_owner(obj):
@@ -50,49 +63,50 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
 
     col_name = dbobject.collection_name()
 
-    if clear:
+    if clear is True:
         hfoslog("Clearing collection for", col_name, lvl=warn,
                 emitter='PROVISIONS')
         db.drop_collection(col_name)
     counter = 0
 
     for no, item in enumerate(items):
-        newobject = None
-        itemuuid = item['uuid']
-        hfoslog("Validating object (%i/%i):" % (no + 1, len(items)), itemuuid,
+        new_object = None
+        item_uuid = item['uuid']
+        hfoslog("Validating object (%i/%i):" % (no + 1, len(items)), item_uuid,
                 emitter='PROVISIONS', lvl=debug)
 
-        if dbobject.count({'uuid': itemuuid}) > 0:
-            if not overwrite:
+        if dbobject.count({'uuid': item_uuid}) > 0:
+            hfoslog('Object already present', lvl=warn)
+            if overwrite is False:
                 hfoslog("Not updating item", item, lvl=warn,
                         emitter='PROVISIONS')
             else:
-                hfoslog("Overwriting item: ", itemuuid, lvl=warn)
-                newobject = dbobject.find_one({'uuid': itemuuid})
-                newobject._fields.update(item)
+                hfoslog("Overwriting item: ", item_uuid, lvl=warn)
+                new_object = dbobject.find_one({'uuid': item_uuid})
+                new_object._fields.update(item)
         else:
-            newobject = dbobject(item)
+            new_object = dbobject(item)
 
-        if newobject is not None:
+        if new_object is not None:
             try:
-                if needs_owner(newobject):
-                    if not hasattr(newobject, 'owner'):
-                        hfoslog('Adding system owner to object.', lvl=warn)
-                        newobject.owner = systemuser.uuid
+                if needs_owner(new_object):
+                    if not hasattr(new_object, 'owner'):
+                        hfoslog('Adding system owner to object.', lvl=verbose)
+                        new_object.owner = get_system_user().uuid
             except Exception as e:
                 hfoslog('Error during ownership test:', e, type(e),
                         exc=True, lvl=error)
             try:
-                newobject.validate()
-                newobject.save()
+                new_object.validate()
+                new_object.save()
                 counter += 1
             except ValidationError as e:
                 raise ValidationError(
-                    "Could not provision object: " + str(itemuuid), e)
+                    "Could not provision object: " + str(item_uuid), e)
 
-    if indexes is not None:
+    if indices is not None:
         col = db[col_name]
-        for item in indexes:
+        for item in indices:
             col.ensure_index([(item, pymongo.TEXT)], unique=True)
 
             # for index in col.list_indexes():
