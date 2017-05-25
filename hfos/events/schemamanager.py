@@ -18,7 +18,7 @@ __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 # Schema client services
 
-class config(authorizedevent):
+class configuration(authorizedevent):
     """A client requires a schema to validate data or display a form"""
 
 
