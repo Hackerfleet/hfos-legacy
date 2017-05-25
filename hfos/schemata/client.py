@@ -11,7 +11,7 @@ Client: Clientprofile to store client specific settings
 :license: GPLv3 (See LICENSE)
 
 """
-from hfos.schemata.defaultform import savebutton
+from hfos.schemata.defaultform import savebutton, lookup_field
 from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
@@ -43,7 +43,7 @@ ScreenRotationSchema = {
 
 ClientconfigSchema = base_object(
     'client',
-    roles_list=['owner', 'admin', 'crew'],
+    roles_list=['crew'],
     roles_create=['crew'],
 )
 
@@ -125,34 +125,16 @@ ClientconfigForm = [
         ]
     },
     {
-        'key': 'dashboarduuid',
-        'type': 'strapselect',
-        'placeholder': 'Select a Dashboard',
-        'options': {
-            "type": "dashboardconfig",
-            "asyncCallback": "$ctrl.getFormData",
-            "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
-        }
-    },
-    {
-        'key': 'taskgriduuid',
-        'type': 'strapselect',
-        'placeholder': 'Select a Taskgrid Configuration',
-        'options': {
-            "type": "taskgridconfig",
-            "asyncCallback": "$ctrl.getFormData",
-            "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
-        }
-    },
-    {
-        'key': 'mapviewuuid',
-        'type': 'strapselect',
-        'placeholder': 'Select a MapView',
-        'options': {
-            "type": "mapview",
-            "asyncCallback": "$ctrl.getFormData",
-            "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
-        }
+        'type': 'section',
+        'htmlClass': 'row',
+        'items': [
+            lookup_field('taskgriduuid', 'taskgridconfig',
+                         html_class='col-xs-4'),
+            lookup_field('dashboarduuid', 'dashboardconfig',
+                         html_class='col-xs-4'),
+            lookup_field('mapviewuuid', 'mapview',
+                         html_class='col-xs-4'),
+        ]
     },
     {
         'key': 'infoscreenrotations',
