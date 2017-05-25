@@ -11,9 +11,9 @@ ZMQ connectors
 """
 import random
 
-from circuits import Timer, Event, handler, Worker, task
+from circuits import Timer, Worker, task
 from hfos.database import objectmodels
-from hfos.component import ConfigurableComponent
+from hfos.component import ConfigurableComponent, handler
 from hfos.logger import hfoslog, hilight, error, warn
 from time import time
 import threading
@@ -28,12 +28,12 @@ __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 PORT = 9000
 
-ZMQHELLO=1
+ZMQHELLO = 1
+
 
 class ZMQHandle(threading.Thread):
-
     def __init__(self, callback, sendcallback, peers, uuid):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, daemon=True)
         hfoslog("RUNNING!", lvl=hilight)
 
         self.loop = ioloop.IOLoop.instance()
@@ -53,7 +53,7 @@ class ZMQHandle(threading.Thread):
         self.sockets[uuid].send_string(msg)
 
     def stop(self):
-        print("STOPPING"*5)
+        print("STOPPING" * 5)
         self.running = False
         self.loop.stop()
         self._stop.set()
@@ -94,7 +94,7 @@ class ZMQHandle(threading.Thread):
         hfoslog("ZMQ Dealer peer:", hoststring)
         p = self.ctx.socket(zmq.DEALER)
         p.connect(hoststring)
-        p.send_string('HELLO:'+self.uuid)
+        p.send_string('HELLO:' + self.uuid)
         self.sockets[uuid] = p
 
     def run(self):
@@ -102,7 +102,7 @@ class ZMQHandle(threading.Thread):
         s = self.ctx.socket(zmq.ROUTER)
 
         s.bind("tcp://*:" + str(PORT))
-        #s.setsockopt(zmq.SUBSCRIBE, b'')
+        # s.setsockopt(zmq.SUBSCRIBE, b'')
         stream = zmqstream.ZMQStream(s, self.loop)
         stream.on_recv(self.cb)
         print(s.getsockopt(zmq.LAST_ENDPOINT))
@@ -112,11 +112,10 @@ class ZMQHandle(threading.Thread):
 
         hfoslog("ENTERING THREAD LOOP", lvl=hilight)
         self.loop.start()
-        #from time import sleep
-        #while self.running:
+        # from time import sleep
+        # while self.running:
         #    sleep(0.1)
         hfoslog("EXITING THREAD RUN", lvl=hilight)
-
 
 
 class ZMQMesh(ConfigurableComponent):
@@ -134,7 +133,7 @@ class ZMQMesh(ConfigurableComponent):
         self.nodes = []
         self.hubs = []
 
-        #self.interface = 'enp6s0'
+        # self.interface = 'enp6s0'
         self.bcast = None
 
         self.uuid = None
@@ -144,18 +143,18 @@ class ZMQMesh(ConfigurableComponent):
         self._getSystemData()
         self.connectednodes = []
 
-        #inet = ifaddresses(self.interface)[AF_INET]
-        #addr = inet[0]['addr']
-        #masked = addr.rsplit('.', 1)[0]
+        # inet = ifaddresses(self.interface)[AF_INET]
+        # addr = inet[0]['addr']
+        # masked = addr.rsplit('.', 1)[0]
 
         self.log('STARTED, RUNNING LOOP', lvl=hilight)
         self.send = None
-        #result = yield self.call(task(handle, self.recv), 'zmqworkers')
+        # result = yield self.call(task(handle, self.recv), 'zmqworkers')
         self.handler = ZMQHandle(self.recv, self.setcallback, self.hubs,
                                  self.uuid)
         self.handler.start()
 
-        #self.send('Foobar', "2647d353-46c7-4ec7-a73d-9255da9162ef")
+        # self.send('Foobar', "2647d353-46c7-4ec7-a73d-9255da9162ef")
 
     def _getSystemData(self):
         systemconfig = objectmodels['systemconfig'].find_one({'active': True})
@@ -183,7 +182,7 @@ class ZMQMesh(ConfigurableComponent):
         self.send()
 
     def recv(self, event):
-        self.log('WHOA!!!'*10, lvl=hilight)
+        self.log('WHOA!!!' * 10, lvl=hilight)
         if event['state'] == ZMQHELLO:
             self.log('New Node appeared')
             uuid = event['uuid']
@@ -199,9 +198,9 @@ class ZMQMesh(ConfigurableComponent):
         # stream.send_multipart(msg)
         self.log(event, lvl=hilight)
 
-        #self.log('WHOA: ', " ".join(event), event.__dict__)
+        # self.log('WHOA: ', " ".join(event), event.__dict__)
 
-    #def send(self):
+    # def send(self):
     #    self.log('Sending data')
     #    msg = random.randint(0, 100)
     #    self.bcast.send_string("%s: %i" % (self.uniquename, msg))
