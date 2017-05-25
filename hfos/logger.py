@@ -305,6 +305,8 @@ def hfoslog(*what, **kwargs):
             print(output.encode("utf-8"))
             hfoslog("Bad encoding encountered on previous message:", e,
                     lvl=error)
+        except BlockingIOError:
+            hfoslog("Too long log line encountered:", output[:20], lvl=error)
     if lvl >= verbosity['system'] and root and output:
         root.fire(logevent(now, lvl, emitter, callee, content), "logger")
 
