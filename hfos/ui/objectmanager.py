@@ -17,8 +17,7 @@ from hfos.events.objectmanager import objectcreation, objectchange, \
     unsubscribe
 from hfos.events.client import send
 from hfos.component import handler, ConfigurableComponent
-from hfos.database import objectmodels, collections, ValidationError, \
-    schemastore
+from hfos.database import objectmodels, ValidationError, schemastore
 from hfos.logger import verbose, debug, error, warn, critical, hilight
 
 from pprint import pprint
@@ -45,8 +44,7 @@ class ObjectManager(ConfigurableComponent):
         self.log("Started")
 
     def _check_permissions(self, subject, action, obj):
-        self.log('Roles of user:', subject.account.roles, lvl=debug)
-
+        self.log('Roles of user:', subject.account.roles, lvl=verbose)
         if 'owner' in obj.perms[action]:
             try:
                 if subject.uuid == obj.owner:
@@ -64,8 +62,14 @@ class ObjectManager(ConfigurableComponent):
         self.log('Access denied', lvl=verbose)
         return False
 
+    def _check_create_permission(self, subject, schema):
+        for role in subject.account.roles:
+            if role in schemastore[schema]['schema']['roles_create']:
+                return True
+        return False
+
     def _cancel_by_permission(self, schema, data, client):
-        self.log('No permission:', schema, data, client.account.name,
+        self.log('No permission:', schema, data, client.useruuid,
                  lvl=error)
 
         msg = {
@@ -98,7 +102,7 @@ class ObjectManager(ConfigurableComponent):
                      thing,
                      lvl=warn)
             result = {
-                'component': 'objectmanager',
+                'component': 'hfos.events.objectmanager',
                 'action': "noschema",
                 'data': thing
             }
@@ -119,16 +123,12 @@ class ObjectManager(ConfigurableComponent):
         return object_filter
 
     def _get_args(self, event):
-        try:
-            data = event.data
-            schema = self._get_schema(event)
-            user = event.user
-            client = event.client
+        data = event.data
+        schema = self._get_schema(event)
+        user = event.user
+        client = event.client
 
-            return data, schema, user, client
-        except AttributeError:
-            self.log('Malformed request: ', exc=True, lvl=warn)
-            return
+        return data, schema, user, client
 
     def _respond(self, notification, result, event):
         if notification:
@@ -149,7 +149,11 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(get)
     def get(self, event):
-        data, schema, user, client = self._get_args(event)
+        try:
+            data, schema, user, client = self._get_args(event)
+        except AttributeError:
+            self.log('Malformed request: ', exc=True, lvl=warn)
+            return
 
         object_filter = self._get_filter(event)
 
@@ -188,9 +192,13 @@ class ObjectManager(ConfigurableComponent):
                 storage_object = objectmodels[schema](
                     {'uuid': str(uuid4())})
 
-                if "owner" in schemastore[schema]['schema']['properties']:
-                    storage_object.owner = event.user.uuid
-                    self.log("Attached initial owner's id: ", event.user.uuid)
+                if not self._check_create_permission(user, schema):
+                    self._cancel_by_permission(schema, data, event.client)
+                    return
+
+            if "owner" in schemastore[schema]['schema']['properties']:
+                storage_object.owner = event.user.uuid
+                self.log("Attached initial owner's id: ", event.user.uuid)
             else:
                 self.log("Object not found and not willing to create.",
                          lvl=warn)
@@ -215,12 +223,7 @@ class ObjectManager(ConfigurableComponent):
                 storage_object._fields.pop(field, None)
 
             if do_subscribe and uuid != "":
-                self.log('Updating subscriptions', lvl=debug)
-                if uuid in self.subscriptions:
-                    if event.client.uuid not in self.subscriptions[uuid]:
-                        self.subscriptions[uuid].append(event.client.uuid)
-                else:
-                    self.subscriptions[uuid] = [event.client.uuid]
+                self._add_subscription(uuid, event)
 
             result = {
                 'component': 'hfos.events.objectmanager',
@@ -232,7 +235,11 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(search)
     def search(self, event):
-        data, schema, user, client = self._get_args(event)
+        try:
+            data, schema, user, client = self._get_args(event)
+        except AttributeError:
+            self._cancel_by_error(event)
+            return
 
         # object_filter['$text'] = {'$search': str(data['search'])}
         if 'fulltext' in data:
@@ -257,7 +264,7 @@ class ObjectManager(ConfigurableComponent):
 
         object_list = []
 
-        if collections[schema].count() > WARNSIZE:
+        if objectmodels[schema].count() > WARNSIZE:
             self.log("Getting a very long list of items for ", schema,
                      lvl=warn)
 
@@ -267,12 +274,13 @@ class ObjectManager(ConfigurableComponent):
         self.log("object_filter: ", object_filter, ' Schema: ', schema,
                  "Fields: ", fields,
                  lvl=verbose)
-        # for item in collections[schema].find(object_filter):
-        for item in collections[schema].find(object_filter):
+
+        for item in objectmodels[schema].find(object_filter):
+            if not self._check_permissions(user, 'list', item):
+                continue
             self.log("Search found item: ", item, lvl=verbose)
+
             try:
-                # TODO: Fix bug in warmongo that needs this workaround:
-                item = objectmodels[schema](item)
                 list_item = {'uuid': item.uuid}
                 if fields in ('*', ['*']):
                     item_fields = item.serializablefields()
@@ -293,7 +301,7 @@ class ObjectManager(ConfigurableComponent):
                     object_list.append(list_item)
             except Exception as e:
                 self.log("Faulty object or field: ", e, type(e),
-                         item._fields, fields, lvl=error)
+                         item._fields, fields, lvl=error, exc=True)
         # self.log("Generated object search list: ", object_list)
 
         result = {
@@ -310,7 +318,12 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(list)
     def objectlist(self, event):
-        data, schema, user, client = self._get_args(event)
+        try:
+            data, schema, user, client = self._get_args(event)
+        except AttributeError:
+            self._cancel_by_error(event)
+            return
+
         object_filter = self._get_filter(event)
         self.log('Object list for', schema, 'requested from',
                  user.account.name, lvl=debug)
@@ -331,6 +344,8 @@ class ObjectManager(ConfigurableComponent):
 
         for item in objectmodels[schema].find(object_filter):
             try:
+                if not self._check_permissions(user, 'list', item):
+                    continue
                 if fields in ('*', ['*']):
                     item_fields = item.serializablefields()
                     for field in hidden:
@@ -367,7 +382,11 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(change)
     def change(self, event):
-        data, schema, user, client = self._get_args(event)
+        try:
+            data, schema, user, client = self._get_args(event)
+        except AttributeError:
+            self._cancel_by_error(event)
+            return
 
         try:
             uuid = data['uuid']
@@ -413,7 +432,11 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(put)
     def put(self, event):
-        data, schema, user, client = self._get_args(event)
+        try:
+            data, schema, user, client = self._get_args(event)
+        except AttributeError:
+            self._cancel_by_error(event)
+            return
 
         try:
             clientobject = data['obj']
@@ -429,13 +452,24 @@ class ObjectManager(ConfigurableComponent):
                 clientobject['uuid'] = str(uuid4())
                 clientobject['owner'] = user.uuid
                 storage_object = objectmodels[schema](clientobject)
+                if not self._check_create_permission(user, schema):
+                    self._cancel_by_permission(schema, data, client)
+                    return
 
             if storage_object:
+                if not self._check_permissions(user, 'write', storage_object):
+                    self._cancel_by_permission(schema, data, client)
+                    return
+
                 self.log("Updating object:", storage_object._fields, lvl=debug)
                 storage_object.update(clientobject)
 
             else:
                 storage_object = objectmodels[schema](clientobject)
+                if not self._check_permissions(user, 'write', storage_object):
+                    self._cancel_by_permission(schema, data, client)
+                    return
+
                 self.log("Storing object:", storage_object._fields, lvl=debug)
                 try:
                     storage_object.validate()
@@ -453,7 +487,8 @@ class ObjectManager(ConfigurableComponent):
                 notification = objectcreation(storage_object.uuid, schema,
                                               client)
             else:
-                notification = objectchange(storage_object.uuid, schema, client)
+                notification = objectchange(storage_object.uuid, schema,
+                                            client)
 
             self._update_subscribers(storage_object)
 
@@ -471,7 +506,11 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(delete)
     def delete(self, event):
-        data, schema, user, client = self._get_args(event)
+        try:
+            data, schema, user, client = self._get_args(event)
+        except AttributeError:
+            self._cancel_by_error(event)
+            return
 
         if True:  # try:
             uuid = data['uuid']
@@ -518,22 +557,24 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(subscribe)
     def subscribe(self, event):
-        uuid = event.data
 
-        if uuid in self.subscriptions:
-            if event.client.uuid not in self.subscriptions[uuid]:
-                self.subscriptions[uuid].append(event.client.uuid)
-        else:
-            self.subscriptions[uuid] = [event.client.uuid]
-
+        self._add_subscription(event.uuid, event)
         result = {
             'component': 'hfos.events.objectmanager',
             'action': 'subscribe',
             'data': {
-                'uuid': uuid, 'success': True
+                'uuid': event.uuid, 'success': True
             }
         }
         self._respond(None, result, event)
+
+    def _add_subscription(self, uuid, event):
+        self.log('Adding subscription for', uuid, event.user, lvl=debug)
+        if uuid in self.subscriptions:
+            if event.client.uuid not in self.subscriptions[uuid]:
+                self.subscriptions[uuid][event.client.uuid] = event.user
+        else:
+            self.subscriptions[uuid] = {event.client.uuid: event.user}
 
     @handler(unsubscribe)
     def unsubscribe(self, event):
@@ -570,17 +611,25 @@ class ObjectManager(ConfigurableComponent):
             self.log("Error during subscription update: ", type(e), e,
                      exc=True)
 
-    def _update_subscribers(self, updateobject):
+    def _update_subscribers(self, update_object):
         # Notify frontend subscribers
 
         self.log('Notifying subscribers about update.', lvl=debug)
-        if updateobject.uuid in self.subscriptions:
+        if update_object.uuid in self.subscriptions:
             update = {
                 'component': 'hfos.events.objectmanager',
                 'action': 'update',
-                'data': updateobject.serializablefields()
+                'data': update_object.serializablefields()
             }
 
-            for recipient in self.subscriptions[updateobject.uuid]:
-                self.log('Notifying subscriber: ', recipient, lvl=verbose)
-                self.fireEvent(send(recipient, update))
+            #pprint(self.subscriptions)
+
+            for client, recipient in self.subscriptions[
+                update_object.uuid].items():
+                if not self._check_permissions(recipient, 'read',
+                                               update_object):
+                    continue
+
+                self.log('Notifying subscriber: ', client, recipient,
+                         lvl=verbose)
+                self.fireEvent(send(client, update))
