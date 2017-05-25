@@ -74,7 +74,7 @@ readonlyform = [
 noform = []
 
 
-def lookup_field(key, lookup_type, placeholder=None, html_class="",
+def lookup_field(key, lookup_type, placeholder=None, html_class="div",
                  select_type="strapselect", mapping="uuid"):
     if placeholder is None:
         placeholder = "Select a " + lookup_type
