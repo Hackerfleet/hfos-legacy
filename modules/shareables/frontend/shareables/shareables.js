@@ -17,13 +17,13 @@ class SharingCtrl {
         
         console.log('Hello, i am a shareables controller!');
         
-        var now = new Date();
+        let now = new Date();
         
         this.op.getList('shareable', {'reservations': {'$elemMatch': {'endtime': {'$gt': now}}}}, ['*']);
         
         this.shareables = [];
     
-        var self = this;
+        let self = this;
         this.op.searchItems('shareable').then(function(result) {
             console.log('[SHAREABLES] Got the list of shareables:', result, self.reservationlookup);
             self.reservationlookup = result.data;
@@ -38,21 +38,21 @@ class SharingCtrl {
         this.calendarDate = new Date();
         this.calendarTitle = 'Shareables for %NAME';
         
-        var editaction = {
+        let editaction = {
             label: '<i class=\'glyphicon glyphicon-pencil\'></i>',
             onClick: function (args) {
                 alert.add('success', 'Edited', args.calendarEvent, 5);
             }
         };
         
-        var delaction = {
+        let delaction = {
             label: '<i class=\'glyphicon glyphicon-remove\'></i>',
             onClick: function (args) {
                 alert.add('success', 'Deleted', args.calendarEvent, 5);
             }
         };
         
-        var actions = [editaction, delaction];
+        let actions = [editaction, delaction];
         
         const eventcolor = {
             primary: 'lightgray',
@@ -117,14 +117,14 @@ class SharingCtrl {
         };
         
         this.updateTimetable = function () {
-            for (var shareable of self.shareables) {
+            for (let shareable of self.shareables) {
                 console.log('Analyzing thing: ', shareable);
                 
-                for (var res of shareable.reservations) {
+                for (let res of shareable.reservations) {
                     console.log('It has a reservation: ', res);
-                    var calItem = {
+                    let calItem = {
                         title: shareable.name + ': ' + res.title,
-                        url: '#/editor/shareable/' + shareable.uuid,
+                        url: '#!/editor/shareable/' + shareable.uuid,
                         startsAt: new Date(Date.parse(res.starttime)),
                         endsAt: new Date(Date.parse(res.endtime)),
                         color: '#ff0000',
@@ -159,8 +159,8 @@ class SharingCtrl {
     }
     
     reserve() {
-        var reservation = {
-            component: 'shareable',
+        let reservation = {
+            component: 'hfos.shareable.shareablewatcher',
             action: 'reserve',
             data: {
                 uuid: this.reservationtarget,
