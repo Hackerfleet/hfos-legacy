@@ -65,13 +65,6 @@ def populate_user_events():
 class authorizedevent(Event):
     """Base class for events for logged in users."""
 
-    def __getattr__(self, name):
-        """For circuits handler decorator to enable module/event namespaces"""
-        if name == 'name':
-            return self.__module__ + '.' + self.__class__.__name__
-        else:
-            super(authorizedevent, self).__getattr__(name)
-
     def __init__(self, user, action, data, client, *args):
         """
         Sets up an authorized event.
@@ -92,6 +85,7 @@ class authorizedevent(Event):
         self.action = action
         self.data = data
         self.client = client
+        hfoslog('AuthorizedEvent created:', self.name, lvl=events)
 
     @classmethod
     def realname(cls):
