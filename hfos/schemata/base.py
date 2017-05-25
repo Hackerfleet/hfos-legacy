@@ -25,23 +25,29 @@ def base_object(name,
                 roles_write=None,
                 roles_read=None,
                 roles_list=None,
-                roles_create=None):
+                roles_create=None,
+                all_roles=None):
 
-    if roles_write is None:
-        roles_write = ['admin']
-        if has_owner:
-            roles_write.append('owner')
-    if roles_read is None:
-        roles_read = ['admin']
-        if has_owner:
-            roles_read.append('owner')
-    if roles_list is None:
-        roles_list = ['admin']
-        if has_owner:
-            roles_list.append('owner')
-    if roles_create is None:
-        roles_create = ['admin']
-        
+    if all_roles:
+        roles_create = ['admin', all_roles]
+        roles_write = ['admin', all_roles]
+        roles_read = ['admin', all_roles]
+        roles_list = ['admin', all_roles]
+    else:
+        if roles_write is None:
+            roles_write = ['admin']
+        if roles_read is None:
+            roles_read = ['admin']
+        if roles_list is None:
+            roles_list = ['admin']
+        if roles_create is None:
+            roles_create = ['admin']
+
+    if has_owner:
+        roles_write.append('owner')
+        roles_read.append('owner')
+        roles_list.append('owner')
+
     base_schema = {
         'id': '#' + name,
         'type': 'object',
