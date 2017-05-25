@@ -13,18 +13,21 @@ Coordinates clients communicating via websocket
 
 import datetime
 import json
+from pprint import pprint
+
 import random
 from uuid import uuid4
 from base64 import b64decode
 
-from circuits import handler
+from hfos.component import handler
 from circuits.net.events import write
-from hfos.events.system import AuthorizedEvents
+from hfos.events.system import get_user_events
 from hfos.events.client import authenticationrequest, send, clientdisconnect, \
     userlogin
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
-from hfos.logger import error, warn, critical, debug, info, network, verbose
+from hfos.logger import error, warn, critical, debug, info, network, \
+    verbose, hilight
 from hfos.ui.clientobjects import Socket, Client, User
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
@@ -162,7 +165,7 @@ class ClientManager(ConfigurableComponent):
                     uuid = userobject.uuid
 
                 self.log("Broadcasting to all of users clients: '%s': '%s" % (
-                    uuid, event.packet), lvl=network)
+                    uuid, event.packet[:20]), lvl=network)
                 if uuid not in self._users:
                     self.log("User not connected!", event, lvl=critical)
                     return
@@ -172,7 +175,7 @@ class ClientManager(ConfigurableComponent):
                     sock = self._clients[clientuuid].sock
 
                     if not event.raw:
-                        self.log("Sending json to client", jsonpacket,
+                        self.log("Sending json to client", jsonpacket[:50],
                                  lvl=network)
 
                         self.fireEvent(write(sock, jsonpacket), "wsserver")
@@ -181,7 +184,7 @@ class ClientManager(ConfigurableComponent):
                         self.fireEvent(write(sock, event.packet), "wsserver")
             else:  # only to client
                 self.log("Sending to user's client: '%s': '%s'" % (
-                    event.uuid, jsonpacket), lvl=network)
+                    event.uuid, jsonpacket[:20]), lvl=network)
                 if event.uuid not in self._clients:
                     self.log("Unknown client!", event.uuid, lvl=critical)
                     self.log("Clients:", self._clients, lvl=debug)
@@ -192,7 +195,7 @@ class ClientManager(ConfigurableComponent):
                     self.fireEvent(write(sock, jsonpacket), "wsserver")
                 else:
                     self.log("Sending raw data to client", lvl=network)
-                    self.fireEvent(write(sock, event.packet), "wsserver")
+                    self.fireEvent(write(sock, event.packet[:20]), "wsserver")
 
         except Exception as e:
             self.log("Exception during sending: %s (%s)" % (e, type(e)),
@@ -244,20 +247,24 @@ class ClientManager(ConfigurableComponent):
         try:
             if component == "debugger":
                 self.log(component, action, data, user, client, lvl=info)
+            AuthorizedEvents = get_user_events()
+            #pprint(AuthorizedEvents)
+
             if not user and component in AuthorizedEvents.keys():
                 self.log("Unknown client tried to do an authenticated "
                          "operation: %s",
                          component, action, data, user)
                 return
-            event = AuthorizedEvents[component]
-            # hfoslog(event, lvl=critical)
+
+            event = AuthorizedEvents[component][action]['event']
+
             self.log("Firing authorized event: ", component, action,
                      str(data)[:20], lvl=network)
             # self.log("", (user, action, data, client), lvl=critical)
             self.fireEvent(event(user, action, data, client))
         except Exception as e:
             self.log("Critical error during authorized event handling:", e,
-                     type(e), lvl=critical)
+                     type(e), lvl=critical, exc=True)
 
     def _handleAuthenticationEvents(self, requestdata, requestaction,
                                     clientuuid, sock):
@@ -384,7 +391,7 @@ class ClientManager(ConfigurableComponent):
         """Links the client to the granted account and profile,
         then notifies the client"""
         try:
-            self.log("Authorization has been granted by DB check: %s" %
+            self.log("Authorization has been granted by DB check:",
                      event.username)
 
             account, profile, clientconfig = event.userdata
@@ -394,7 +401,7 @@ class ClientManager(ConfigurableComponent):
             clientuuid = clientconfig.uuid
 
             if clientuuid != originatingclientuuid:
-                self.log("Mutating client uuid to request id: ",
+                self.log("Mutating client uuid to request id:",
                          clientuuid, lvl=network)
             # Assign client to user
             if useruuid in self._users:
@@ -414,8 +421,9 @@ class ClientManager(ConfigurableComponent):
                 # which could be remedied by duplicating the configuration
             else:
                 signedinuser.clients.append(clientuuid)
-                self.log("Active client registered to user ", clientuuid,
-                         useruuid, lvl=info)
+                self.log("Active client (", clientuuid, ") registered to "
+                                                        "user", useruuid,
+                         lvl=info)
 
             # Update socket..
             socket = self._sockets[event.sock]
@@ -459,9 +467,9 @@ class ClientManager(ConfigurableComponent):
 
             self.fireEvent(userlogin(clientuuid, useruuid))
 
-            self.log("User configured:",
-                     signedinuser.account.name,
-                     signedinuser.profile.uuid,
+            self.log("User configured: Name",
+                     signedinuser.account.name, "Profile",
+                     signedinuser.profile.uuid, "Clients",
                      signedinuser.clients,
                      lvl=info)
 
