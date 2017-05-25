@@ -16,13 +16,15 @@ import six
 import errno
 from circuits import Worker, task
 from circuits.web.tools import serve_file
-from circuits.web.controllers import Controller
-from hfos.logger import hfoslog, error, verbose, warn
+from hfos.component import ConfigurableController
+from hfos.logger import error, verbose, warn
 
 if six.PY2:
     from urllib import unquote, urlopen
 else:
+    # noinspection PyCompatibility
     from urllib.request import urlopen  # NOQA
+    # noinspection PyCompatibility
     from urllib.parse import unquote  # NOQA
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
@@ -64,90 +66,88 @@ class UrlError(Exception):
     pass
 
 
-class MaptileService(Controller):
+class MaptileService(ConfigurableController):
     """
     Threaded, disk-caching tile delivery component
     """
-    # channel = "web"
 
     configprops = {}
 
-    def __init__(self, defaulttile=None, **kwargs):
+    def __init__(self, tile_path='/var/cache/hfos', default_tile=None,
+                 **kwargs):
         """
 
-        :param path: Webserver path to offer cache on
-        :param tilepath: Caching directory structure target path
-        :param defaulttile: Used, when no tile can be cached
+        :param tile_path: Caching directory structure target path
+        :param default_tile: Used, when no tile can be cached
         :param kwargs:
         """
-        super(MaptileService, self).__init__(**kwargs)
+        super(MaptileService, self).__init__('MTS', **kwargs)
         self.worker = Worker(process=False, workers=2,
                              channel="tcworkers").register(self)
 
-        self.cachepath = "/var/cache/hfos"
-        self.defaulttile = defaulttile
-        self._tilelist = []
+        self.cache_path = tile_path
+        self.default_tile = default_tile
+        self._tiles = []
 
-    def _splitCacheURL(self, url, urltype):
+    def _split_cache_url(self, url, url_type):
         try:
-            # hfoslog('SPLITTING: ', url)
-            url = url[len('/' + urltype):].lstrip('/')
+            # self.log('SPLITTING: ', url)
+            url = url[len('/' + url_type):].lstrip('/')
             url = unquote(url)
 
-            # hfoslog('SPLITDONE:', url)
+            # self.log('SPLITDONE:', url)
 
             if '..' in url:  # Does this need more safety checks?
-                hfoslog("Fishy url with parent path: ", url, lvl=error,
-                        emitter="MTS")
+                self.log("Fishy url with parent path: ", url, lvl=error)
                 raise UrlError
 
-            spliturl = url.split("/")
+            split_url = url.split("/")
             service = "/".join(
-                spliturl[0:-3])  # get all but the coords as service
-            # hfoslog('SERVICE:', service)
+                split_url[0:-3])  # get all but the coords as service
+            # self.log('SERVICE:', service)
 
-            x = spliturl[-3]
-            y = spliturl[-2]
-            z = spliturl[-1].split('.')[0]
+            x = split_url[-3]
+            y = split_url[-2]
+            z = split_url[-1].split('.')[0]
 
-            filename = os.path.join(self.cachepath, urltype, service, x,
+            filename = os.path.join(self.cache_path, url_type, service, x,
                                     y) + "/" + z + ".png"
-            realurl = "http://" + service + "/" + x + "/" + y + "/" + z + \
-                      ".png"
+            real_url = "http://%s/%s/%s/%s.png" % (service, x, y, z)
         except Exception as e:
-            hfoslog("ERROR (%s) in URL: %s" % (e, url), emitter="MTS")
+            self.log("ERROR (%s) in URL: %s" % (e, url), exc=True)
             raise UrlError
 
-        return filename, realurl
+        return filename, real_url
 
     def rastertiles(self, event, *args, **kwargs):
         request, response = event.args[:2]
         try:
-            filename, url = self._splitCacheURL(request.path, 'rastertiles')
+            filename, url = self._split_cache_url(request.path, 'rastertiles')
         except UrlError as e:
-            hfoslog('Rastertile cache url error:', e, exc=True, lvl=warn)
+            self.log('Rastertile cache url error:', e, exc=True, lvl=warn)
             return
 
-        # hfoslog("RASTER QUERY:", filename, lvl=error)
+        # self.log("RASTER QUERY:", filename, lvl=error)
         if os.path.exists(filename):
             return serve_file(request, response, filename)
         else:
-            hfoslog('Non-existing raster tile request:', filename, lvl=verbose)
+            self.log('Non-existing raster tile request:', filename,
+                     lvl=verbose)
 
     def tilecache(self, event, *args, **kwargs):
         """Checks and caches a requested tile to disk, then delivers it to
         client"""
         request, response = event.args[:2]
         try:
-            filename, url = self._splitCacheURL(request.path, 'tilecache')
+            filename, url = self._split_cache_url(request.path, 'tilecache')
         except UrlError:
             return
 
-        # hfoslog('CACHE QUERY:', filename, url)
+        # self.log('CACHE QUERY:', filename, url)
 
         # Do we have the tile already?
         if os.path.isfile(filename):
-            hfoslog("Tile exists in cache", emitter="MTS", lvl=verbose)
+            self.log("Tile exists in cache", lvl=verbose)
             # Don't set cookies for static content
             response.cookie.clear()
             try:
@@ -156,62 +156,56 @@ class MaptileService(Controller):
                 event.stop()
         else:
             # We will have to get it first.
-            hfoslog("Tile not cached yet. Tile data: ", filename, url,
-                    emitter="MTS", lvl=verbose)
-            if url in self._tilelist:
-                hfoslog("Getting a tile for the second time?!", lvl=error,
-                        emitter="MTS")
+            self.log("Tile not cached yet. Tile data: ", filename, url,
+                     lvl=verbose)
+            if url in self._tiles:
+                self.log("Getting a tile for the second time?!", lvl=error)
             else:
-                self._tilelist += url
+                self._tiles += url
             try:
                 tile, log = yield self.call(task(get_tile, url), "tcworkers")
                 if log:
-                    hfoslog("Thread error: ", log, emitter="MTS", lvl=error)
+                    self.log("Thread error: ", log, lvl=error)
             except Exception as e:
-                hfoslog("[MTS]", e, type(e))
+                self.log("[MTS]", e, type(e))
                 tile = None
 
-            tilepath = os.path.dirname(filename)
+            tile_path = os.path.dirname(filename)
 
             if tile:
                 try:
-                    os.makedirs(tilepath)
+                    os.makedirs(tile_path)
                 except OSError as e:
                     if e.errno != errno.EEXIST:
-                        hfoslog("Couldn't create path: %s (%s)" % (e, type(e)),
-                                exc=True, emitter="MTS")
+                        self.log(
+                            "Couldn't create path: %s (%s)" % (e, type(e)))
 
-                hfoslog("Caching tile.", lvl=verbose, emitter="MTS")
+                self.log("Caching tile.", lvl=verbose)
                 try:
-                    with open(filename, "wb") as tilefile:
+                    with open(filename, "wb") as tile_file:
                         try:
-                            tilefile.write(bytes(tile))
+                            tile_file.write(bytes(tile))
                         except Exception as e:
-                            hfoslog("Writing error: %s" % str([type(e), e]),
-                                    emitter="MTS")
+                            self.log("Writing error: %s" % str([type(e), e]))
 
                 except Exception as e:
-                    hfoslog("Open error: %s" % str([type(e), e]),
-                            emitter="MTS")
+                    self.log("Open error: %s" % str([type(e), e]))
                     return
                 finally:
                     event.stop()
 
                 try:
-                    hfoslog("Delivering tile.", lvl=verbose, emitter="MTS")
+                    self.log("Delivering tile.", lvl=verbose)
                     yield serve_file(request, response, filename)
                 except Exception as e:
-                    hfoslog("Couldn't deliver tile: ", e, lvl=error,
-                            emitter="MTS")
+                    self.log("Couldn't deliver tile: ", e, lvl=error)
                     event.stop()
-                hfoslog("Tile stored and delivered.", lvl=verbose,
-                        emitter="MTS")
+                self.log("Tile stored and delivered.", lvl=verbose)
             else:
-                hfoslog("Got no tile, serving defaulttile: %s" % url,
-                        emitter="MTS")
-                if self.defaulttile:
+                self.log("Got no tile, serving default tile: %s" % url)
+                if self.default_tile:
                     try:
-                        yield serve_file(request, response, self.defaulttile)
+                        yield serve_file(request, response, self.default_tile)
                     finally:
                         event.stop()
                 else:
