@@ -23,7 +23,8 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
 # from circuits.app.daemon import Daemon
-from circuits import handler, reprhandler, Event
+from hfos.component import handler
+from circuits import reprhandler, Event
 
 from hfos.ui.builder import install_frontend
 # from hfos.schemata.component import ComponentBaseConfigSchema
@@ -31,14 +32,15 @@ from hfos.database import initialize  # , schemastore
 from hfos.component import ConfigurableComponent
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
     setup_root, verbosity, hilight, set_logfile
+from hfos.events.system import populate_user_events
 
-import argparse
+import click
 import sys
 import pwd
 import grp
 import os
 
-# from pprint import pprint
+from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
@@ -104,13 +106,13 @@ class Core(ConfigurableComponent):
         super(Core, self).__init__("CORE", args, **kwargs)
         self.log("Starting system (channel ", self.channel, ")")
 
-        self.insecure = args.insecure
-        self.quiet = args.quiet
-        self.development = args.dev
+        self.insecure = args['insecure']
+        self.quiet = args['quiet']
+        self.development = args['dev']
 
-        self.host = args.host
-        self.port = args.port
-        self.certificate = certificate = args.certificate
+        self.host = args['host']
+        self.port = args['port']
+        self.certificate = certificate = args['cert']
 
         if certificate:
             if not os.path.exists(certificate):
@@ -131,7 +133,11 @@ class Core(ConfigurableComponent):
 
         self.component_blacklist = [  # 'camera',
             'logger',
-            # 'debugger'
+            'debugger',
+            'recorder',
+            'playback',
+            'sensors',
+            'navdatasim'
             # 'ldap',
             # 'navdata',
             # 'nmeaparser',
@@ -212,7 +218,7 @@ class Core(ConfigurableComponent):
         # They are also used in the manage tool to instantiate the
         # component frontend bits.
 
-        hfoslog("Updating components")
+        self.log("Updating components")
         components = {}
 
         if True:  # try:
@@ -232,11 +238,11 @@ class Core(ConfigurableComponent):
                         location = entry_point.dist.location
                         loaded = entry_point.load()
 
-                        hfoslog("Entry point: ", entry_point,
-                                name,
-                                entry_point.resolve(), lvl=verbose)
+                        self.log("Entry point: ", entry_point,
+                                 name,
+                                 entry_point.resolve(), lvl=verbose)
 
-                        hfoslog("Loaded: ", loaded, lvl=verbose)
+                        self.log("Loaded: ", loaded, lvl=verbose)
                         comp = {
                             'location': location,
                             'version': str(entry_point.dist.parsed_version),
@@ -246,16 +252,16 @@ class Core(ConfigurableComponent):
                         components[name] = comp
                         self.loadable_components[name] = loaded
 
-                        hfoslog("Loaded component:", comp, lvl=verbose)
+                        self.log("Loaded component:", comp, lvl=verbose)
 
                     except Exception as e:
-                        hfoslog("Could not inspect entrypoint: ", e,
-                                type(e), entry_point, iterator, lvl=error,
-                                exc=True)
+                        self.log("Could not inspect entrypoint: ", e,
+                                 type(e), entry_point, iterator, lvl=error,
+                                 exc=True)
 
                         # for name in components.keys():
                         #     try:
-                        #         hfoslog(self.loadable_components[name])
+                        #         self.log(self.loadable_components[name])
                         #         configobject = {
                         #             'type': 'object',
                         #             'properties':
@@ -266,30 +272,30 @@ class Core(ConfigurableComponent):
                         #             'settings'][
                         #             'oneOf'].append(configobject)
                         #     except (KeyError, AttributeError) as e:
-                        #         hfoslog('Problematic configuration
+                        #         self.log('Problematic configuration
                         # properties in '
                         #                  'component ', name, exc=True)
                         #
                         # schemastore['component'] = ComponentBaseConfigSchema
 
         # except Exception as e:
-        #    hfoslog("Error: ", e, type(e), lvl=error, exc=True)
+        #    self.log("Error: ", e, type(e), lvl=error, exc=True)
         #    return
 
-        hfoslog("Checking component frontend bits in ", self.frontendroot,
-                lvl=verbose)
+        self.log("Checking component frontend bits in ", self.frontendroot,
+                 lvl=verbose)
 
         # pprint(self.config._fields)
         diff = set(components) ^ set(self.config.components)
         if diff or forcecopy and self.config.frontendenabled:
-            hfoslog("Old component configuration differs:", diff, lvl=debug)
-            hfoslog(self.config.components, components, lvl=verbose)
+            self.log("Old component configuration differs:", diff, lvl=debug)
+            self.log(self.config.components, components, lvl=verbose)
             self.config.components = components
         else:
-            hfoslog("No component configuration change. Proceeding.")
+            self.log("No component configuration change. Proceeding.")
 
         if forcereload:
-            hfoslog("Restarting all components.", lvl=warn)
+            self.log("Restarting all components.", lvl=warn)
             self._instantiate_components(clear=True)
 
     def _start_frontend(self, restart=False):
@@ -319,7 +325,7 @@ class Core(ConfigurableComponent):
 
         running = set(self.loadable_components.keys()).difference(
             self.component_blacklist)
-        self.log('Starting components: ', running)
+        self.log('Starting components: ', sorted(running))
         for name, componentdata in self.loadable_components.items():
             if name in self.component_blacklist:
                 continue
@@ -339,6 +345,12 @@ class Core(ConfigurableComponent):
         """Sets up the application after startup."""
         self.log("Running.")
         self.log("Started event origin: ", component, lvl=verbose)
+        populate_user_events()
+
+        from hfos.events.system import AuthorizedEvents
+        self.log(len(AuthorizedEvents), "authorized events:",
+                 list(AuthorizedEvents.keys()), lvl=hilight)
+        pprint(AuthorizedEvents)
 
         self._instantiate_components()
         self._start_frontend()
@@ -352,7 +364,7 @@ def construct_graph(args):
 
     setup_root(app)
 
-    if args.debug:
+    if args['debug']:
         from circuits import Debugger
         hfoslog("Starting circuits debugger", lvl=warn, emitter='GRAPH')
         dbg = Debugger().register(app)
@@ -360,79 +372,63 @@ def construct_graph(args):
 
     hfoslog("Beginning graph assembly.", emitter='GRAPH')
 
-    if args.drawgraph:
+    if args['drawgraph']:
         from circuits.tools import graph
 
         graph(app)
 
-    if args.opengui:
+    if args['opengui']:
         import webbrowser
 
-        webbrowser.open("http://%s:%i/" % (args.host, args.port))
+        webbrowser.open("http://%s:%i/" % (args['host'], args['port']))
 
     hfoslog("Graph assembly done.", emitter='GRAPH')
 
     return app
 
 
-def launch(run=True):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--port", help="Define port for server",
-                        type=int, default=80)
-    parser.add_argument("--host", help="Define hostname for server",
-                        type=str, default='0.0.0.0')
-    parser.add_argument("--certificate",
-                        "--cert", '-c',
-                        help="Certificate file path",
-                        type=str, default=None)
-    parser.add_argument("--dbhost", help="Define hostname for database server",
-                        type=str, default='127.0.0.1:27017')
-    parser.add_argument("--profile", help="Enable profiler",
-                        action="store_true")
-    parser.add_argument("--opengui", help="Launch webbrowser for GUI "
-                                          "inspection after startup",
-                        action="store_true")
-    parser.add_argument("--drawgraph", help="Draw a snapshot of the "
-                                            "component graph "
-                                            "after construction",
-                        action="store_true")
-    parser.add_argument("--quiet", "-q", help="Suppress console output",
-                        action="store_true")
-    parser.add_argument("--log", help="Define console log level (0-100)",
-                        type=int, default=20)
-    parser.add_argument("--logfileverbosity",
-                        help="Define file log level (0-100)",
-                        type=int, default=20)
-    parser.add_argument("--logfile", help="Logfile path",
-                        default='/tmp/hfos.log')
-    parser.add_argument("--dolog", help="Write to logfile",
-                        action="store_true")
-    parser.add_argument("--debug", help="Run circuits debugger",
-                        action="store_true")
-
-    parser.add_argument("--dev", help="Run development server",
-                        action="store_true")
-
-    parser.add_argument("--insecure", help="Keep privileges - INSECURE",
-                        action="store_true")
-
-    args = parser.parse_args()
-    # pprint(args)
-
-    verbosity['console'] = args.log if not args.quiet else 100
-    verbosity['global'] = min(args.log, args.logfileverbosity)
-    verbosity['file'] = args.logfileverbosity if args.dolog else 100
-    set_logfile(args.logfile)
+@click.command()
+@click.option("-p", "--port", help="Define port for server", type=int,
+              default=80)
+@click.option("--host", help="Define hostname for server", type=str,
+              default='0.0.0.0')
+@click.option("--certificate", "--cert", '-c', help="Certificate file path",
+              type=str, default=None)
+@click.option("--dbhost", help="Define hostname for database server",
+              type=str, default='127.0.0.1:27017')
+@click.option("--profile", help="Enable profiler", is_flag=True)
+@click.option("--opengui", help="Launch webbrowser for GUI inspection after "
+                                "startup", is_flag=True)
+@click.option("--drawgraph", help="Draw a snapshot of the component graph "
+                                  "after construction", is_flag=True)
+@click.option("--quiet", "-q", help="Suppress console output", is_flag=True)
+@click.option("--log", help="Define console log level (0-100)", type=int,
+              default=20)
+@click.option("--logfileverbosity", help="Define file log level (0-100)",
+              type=int, default=20)
+@click.option("--logfile", help="Logfile path",
+              default='/tmp/hfos.log')
+@click.option("--dolog", help="Write to logfile", is_flag=True)
+@click.option("--debug", help="Run circuits debugger", is_flag=True)
+@click.option("--dev", help="Run development server", is_flag=True)
+@click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
+@click.option("--norun", help="Only assemble system, do not run", is_flag=True)
+def launch(run=True, **args):
+    verbosity['console'] = args['log'] if not args['quiet'] else 100
+    verbosity['global'] = min(args['log'], args['logfileverbosity'])
+    verbosity['file'] = args['logfileverbosity'] if args['dolog'] else 100
+    set_logfile(args['logfile'])
+    print(args['dev'])
 
     hfoslog("Running with Python", sys.version.replace("\n", ""),
             sys.platform, lvl=debug, emitter='CORE')
     hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
 
     hfoslog("Initializing database access", emitter='CORE')
-    initialize(args.dbhost)
+    initialize(args['dbhost'])
 
     server = construct_graph(args)
-    if run:
+    if run and not args['norun']:
         server.run()
 
     return server
