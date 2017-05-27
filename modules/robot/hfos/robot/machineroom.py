@@ -13,48 +13,27 @@ NeoCortex board.
 
 """
 
-from random import randint
-import sys, glob
+import sys
+
 import six
-from circuits import handler, Event
-from circuits.io.events import write
 from circuits.io import Serial
+from circuits.io.events import write
+from random import randint
+
+import glob
 from hfos.component import ConfigurableComponent
+from hfos.component import handler
 from hfos.logger import hfoslog, critical, debug, warn
 
 try:
     import serial
 except ImportError:
     serial = None
-    hfoslog("No serialport found. Serial bus remote control devices will be "
+    hfoslog("No serial port found. Serial bus remote control devices will be "
             "unavailable, install requirements.txt!",
             lvl=critical, emitter="MR")
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
-
-class machineroomevent(Event):
-    """
-
-    :param value:
-    :param args:
-    """
-
-    def __init__(self, value, *args):
-        super(machineroomevent, self).__init__(*args)
-        self.controlvalue = value
-
-
-class machine(machineroomevent):
-    """Skipper wants us to change the engine speed/direction"""
-
-
-class pump(machineroomevent):
-    """Skipper wants us to turn on/off the coolant pump"""
-
-
-class rudder(machineroomevent):
-    """Skipper wants us to change the rudder angle"""
 
 
 def serial_ports():
@@ -91,7 +70,13 @@ def serial_ports():
 
 class Machineroom(ConfigurableComponent):
     """
-    Handles schemata requests from clients.
+    Enables simple robotic control by translating high level events to
+    servo control commands and transmitting them to a connected controller
+    device.
+
+    This prototype has built-in low level language support for the MS 0x00
+    controller but can be easily adapted for other hardware servo/engine
+    controllers.
     """
 
     channel = "machineroom"
@@ -133,11 +118,11 @@ class Machineroom(ConfigurableComponent):
         super(Machineroom, self).__init__('MR', *args, **kwargs)
         self.log("Machineroom starting")
 
-        self._rudderchannel = 1
-        self._machinechannel = 1
-        self._pumpchannel = 3  # TODO: Make this a dedicated singleton call?
+        self._rudder_channel = 1
+        self._machine_channel = 2
+        self._pump_channel = 3  # TODO: Make this a dedicated singleton call?
         #  e.g. pumpon/pumpoff.. not so generic
-        self._serialopen = False
+        self._serial_open = False
 
         if self.config.serialfile != '':
             try:
@@ -153,8 +138,8 @@ class Machineroom(ConfigurableComponent):
 
         self.log("Running")
 
-    def _sendcommand(self, command):
-        if not self._serialopen:
+    def _send_command(self, command):
+        if not self._serial_open:
             self.log("Cannot transmit, serial port not available!", lvl=warn)
             return
 
@@ -170,48 +155,48 @@ class Machineroom(ConfigurableComponent):
 
         :param args:
         """
-        self._serialopen = True
+        self._serial_open = True
 
         self.log("Opened: ", args, lvl=debug)
-        self._sendcommand(b'l,1')  # Saying hello, shortly
+        self._send_command(b'l,1')  # Saying hello, shortly
         self.log("Turning off engine, pump and neutralizing rudder")
-        self._sendcommand(b'v')
-        self._handleServo(self._machinechannel, 0)
-        self._handleServo(self._rudderchannel, 127)
-        self._setDigitalPin(self._pumpchannel, 0)
-        # self._sendcommand(b'h')
-        self._sendcommand(b'l,0')
-        self._sendcommand(b'm,HFOS Control')
+        self._send_command(b'v')
+        self._handle_servo(self._machine_channel, 0)
+        self._handle_servo(self._rudder_channel, 127)
+        self._set_digital_pin(self._pump_channel, 0)
+        # self._send_command(b'h')
+        self._send_command(b'l,0')
+        self._send_command(b'm,HFOS Control')
 
-    def _handleServo(self, channel, value):
+    def _handle_servo(self, channel, value):
         """
 
         :param channel:
         :param value:
         """
-        self._sendcommand(
+        self._send_command(
             self.servo + self.sep + bytes([channel]) + self.sep + bytes(
                 [value]))
 
-    def _setDigitalPin(self, pin, value):
+    def _set_digital_pin(self, pin, value):
         """
 
         :param pin:
         :param value:
         """
         mode = 255 if value >= 127 else 0
-        self._sendcommand(
+        self._send_command(
             self.pin + self.sep + bytes([pin]) + self.sep + bytes([mode]))
 
-    @handler("remotecontrolupdate")
-    def on_remotecontrolupdate(self, event):
+    @handler("control_update")
+    def on_control_update(self, event):
         """
         A remote control update request containing control data that has to be
         analysed according to the selected controller configuration.
 
-        :param event: RemotecontrolUpdate
+        :param event: machine_update
         """
-        self.log("Control updaterequest: ", event.controldata, lvl=critical)
+        self.log("Control update request: ", event.controldata, lvl=critical)
 
     @handler("machine")
     def on_machinerequest(self, event):
@@ -221,7 +206,7 @@ class Machineroom(ConfigurableComponent):
         :param event:
         """
         self.log("Updating new machine power: ", event.controlvalue)
-        self._handleServo(self._machinechannel, event.controlvalue)
+        self._handle_servo(self._machine_channel, event.controlvalue)
 
     @handler("rudder")
     def on_rudderrequest(self, event):
@@ -231,7 +216,7 @@ class Machineroom(ConfigurableComponent):
         :param event:
         """
         self.log("Updating new rudder angle: ", event.controlvalue)
-        self._handleServo(self._rudderchannel, event.controlvalue)
+        self._handle_servo(self._rudder_channel, event.controlvalue)
 
     @handler("pump")
     def on_pumprequest(self, event):
@@ -241,7 +226,7 @@ class Machineroom(ConfigurableComponent):
         :param event:
         """
         self.log("Updating pump status: ", event.controlvalue)
-        self._setDigitalPin(self._pumpchannel, event.controlvalue)
+        self._set_digital_pin(self._pump_channel, event.controlvalue)
 
     @handler("read", channel="port")
     def read(self, *args):
@@ -260,4 +245,4 @@ class Machineroom(ConfigurableComponent):
         """
         # TODO: Delete me
         self.log("Pinging")
-        self._handleServo(self._rudderchannel, randint(0, 255))
+        self._handle_servo(self._rudder_channel, randint(0, 255))

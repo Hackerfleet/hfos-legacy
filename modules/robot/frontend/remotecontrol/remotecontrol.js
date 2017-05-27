@@ -18,7 +18,7 @@ class remotecontrolcomponent {
         this.status = 'Not connected';
         this.controldata = {};
 
-        var self = this;
+        let self = this;
 
         function getcontroldata() {
             self.op.getList('controllable', {}, '*');
@@ -27,7 +27,7 @@ class remotecontrolcomponent {
 
 
         this.scope.$on('Profile.Update', getcontroldata);
-        this.scope.$on('$destroy', function (e) {
+        this.scope.$on('$destroy', function () {
             this.timeout.cancel(scangamepads);
         });
 
@@ -36,15 +36,14 @@ class remotecontrolcomponent {
         }
 
         function handle_response(msg) {
-            if (msg.action === 'takeControl') {
+            if (msg.action === 'control_request') {
                 self.controlling = msg.data === true;
                 console.log('Toggled remote control to ', self.controlling);
-                self.scope
-            } else if ((msg.action === 'list')) {
-                console.log('GRC:', msg.data);
-                self.controldata = msg.data;
+            } else if (msg.action === 'control_release') {
+                self.controlling = msg.data !== true;
+                console.log('Toggled remote control to ', self.controlling);
             } else {
-                console.log('Weird message received for remotectrl: ', msg);
+                console.log('Unexpected message received from rcmanager: ', msg);
             }
             /*} else if (msg.component === 'camera') {
              if (msg.action === 'list') {
@@ -54,13 +53,11 @@ class remotecontrolcomponent {
              }*/
         }
 
+        this.socket.listen('hfos.robot.rcmanager', handle_response);
 
-        // TODO: Move to service
-        this.socket.listen('remotectrl', handle_response);
-
-        var haveEvents = 'ongamepadconnected' in window;
-        var controllers = {};
-        var rAF = window.requestAnimationFrame ||
+        let haveEvents = 'ongamepadconnected' in window;
+        let controllers = {};
+        let rAF = window.requestAnimationFrame ||
             window.mozRequestAnimationFrame ||
             window.webkitRequestAnimationFrame;
 
@@ -72,19 +69,19 @@ class remotecontrolcomponent {
         function addgamepad(gamepad) {
             controllers[gamepad.index] = gamepad;
 
-            var d = document.createElement('div');
+            let d = document.createElement('div');
             d.setAttribute('id', 'controller' + gamepad.index);
 
-            var t = document.createElement('span');
-            var lb = document.createTextNode('gamepad: ' + gamepad.id);
+            let t = document.createElement('span');
+            let lb = document.createTextNode('gamepad: ' + gamepad.id);
             t.appendChild(lb);
 
             d.appendChild(t);
 
-            var b = document.createElement('div');
+            let b = document.createElement('div');
             b.className = 'buttons';
-            for (var i = 0; i < gamepad.buttons.length; i++) {
-                var e = document.createElement('span');
+            for (let i = 0; i < gamepad.buttons.length; i++) {
+                let e = document.createElement('span');
                 e.className = 'button';
                 //e.id = 'b' + i;
                 e.innerHTML = i;
@@ -93,11 +90,11 @@ class remotecontrolcomponent {
 
             d.appendChild(b);
 
-            var a = document.createElement('div');
+            let a = document.createElement('div');
             a.className = 'axes';
 
-            for (var j = 0; j < gamepad.axes.length; j++) {
-                var p = document.createElement('progress');
+            for (let j = 0; j < gamepad.axes.length; j++) {
+                let p = document.createElement('progress');
                 p.className = 'axis';
                 //p.id = 'a' + i;
                 p.setAttribute('max', '2');
@@ -109,7 +106,7 @@ class remotecontrolcomponent {
             d.appendChild(a);
 
             // See https://github.com/luser/gamepadtest/blob/master/index.html
-            var start = document.getElementById('start');
+            let start = document.getElementById('start');
             if (start) {
                 start.style.display = 'none';
             }
@@ -125,7 +122,7 @@ class remotecontrolcomponent {
         }
 
         function removegamepad(gamepad) {
-            var d = document.getElementById('controller' + gamepad.index);
+            let d = document.getElementById('controller' + gamepad.index);
             document.body.removeChild(d);
             delete controllers[gamepad.index];
         }
@@ -135,25 +132,25 @@ class remotecontrolcomponent {
                 scangamepads();
             }
 
-            var i = 0;
-            var j;
+            let i;
+            let j;
 
             for (j in controllers) {
-                var controller = controllers[j];
+                let controller = controllers[j];
 
-                var d = document.getElementById('controller' + j);
-                var buttons = d.getElementsByClassName('button');
+                let d = document.getElementById('controller' + j);
+                let buttons = d.getElementsByClassName('button');
 
                 for (i = 0; i < controller.buttons.length; i++) {
-                    var b = buttons[i];
-                    var val = controller.buttons[i];
-                    var pressed = val === 1.0;
+                    let b = buttons[i];
+                    let val = controller.buttons[i];
+                    let pressed = val === 1.0;
                     if (typeof(val) === 'object') {
                         pressed = val.pressed;
                         val = val.value;
                     }
 
-                    var pct = Math.round(val * 100) + '%';
+                    let pct = Math.round(val * 100) + '%';
                     b.style.backgroundSize = pct + ' ' + pct;
 
                     if (pressed) {
@@ -163,14 +160,14 @@ class remotecontrolcomponent {
                     }
                 }
 
-                var axes = d.getElementsByClassName('axis');
+                let axes = d.getElementsByClassName('axis');
                 for (i = 0; i < controller.axes.length; i++) {
-                    var a = axes[i];
+                    let a = axes[i];
                     a.innerHTML = i + ': ' + controller.axes[i].toFixed(4);
                     a.setAttribute('value', controller.axes[i] + 1);
                 }
 
-                var c = document.getElementById('controllers');
+                let c = document.getElementById('controllers');
                 c.appendChild(d);
             }
 
@@ -182,10 +179,10 @@ class remotecontrolcomponent {
                 console.log('Setting up initial axes');
                 return true;
             } else {
-                var margin = 0.23;
-                var oldaxes = self.axes;
+                let margin = 0.23;
+                let oldaxes = self.axes;
 
-                for (var i = 0; i < self.axes.length; i++) {
+                for (let i = 0; i < self.axes.length; i++) {
                     if ((oldaxes[i] > newaxes[i] + margin) || (oldaxes[i] < newaxes[i] - margin)) {
                         return true;
                     }
@@ -195,8 +192,8 @@ class remotecontrolcomponent {
         }
 
         function scangamepads() {
-            var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
-            for (var i = 0; i < gamepads.length; i++) {
+            let gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
+            for (let i = 0; i < gamepads.length; i++) {
                 if (gamepads[i]) {
                     if (gamepads[i].index in controllers) {
                         controllers[gamepads[i].index] = gamepads[i];
@@ -206,11 +203,11 @@ class remotecontrolcomponent {
                 }
             }
             if (self.controlling === true) {
-                var newaxes = gamepads[self.activeGamepad].axes;
+                let newaxes = gamepads[self.activeGamepad].axes;
                 if (checkAxes(newaxes) === true) {
                     console.log('Updating axes: ', newaxes);
                     self.axes = newaxes;
-                    self.socket.send({'component': 'remotectrl', 'action': 'controlData', 'data': newaxes});
+                    self.socket.send({component: 'hfos.robot.rcmanager', action: 'data', data: newaxes});
                 }
             }
         }
@@ -230,9 +227,9 @@ class remotecontrolcomponent {
     toggleControl() {
         console.log('Toggling remote control');
         if (this.controlActive === true) {
-            this.socket.send({'component': 'remotectrl', 'action': 'takeControl', 'data': ''});
+            this.socket.send({component: 'hfos.robot.rcmanager', action: 'control_request', data: ''});
         } else {
-            this.socket.send({'component': 'remotectrl', 'action': 'leaveControl', 'data': ''});
+            this.socket.send({component: 'hfos.robot.rcmanager', action: 'control_release', data: ''});
         }
     }
 }

@@ -12,25 +12,15 @@ Geospatial Data Abstraction Library support for HFOS.
 
 """
 
-import socket
 import os
-import six
 
 from uuid import uuid4
-from circuits import Worker, task
-from circuits.web.tools import serve_file
-from circuits.web.controllers import Controller
-from hfos.component import ConfigurableComponent
-from hfos.events.system import AuthorizedEvents, authorizedevent
+# from circuits import Worker, task
+from hfos.component import ConfigurableComponent, handler
+from hfos.events.system import authorizedevent
 from hfos.events.client import send
 from hfos.database import objectmodels
-from hfos.logger import hfoslog, error, verbose, warn, hilight, events
-
-if six.PY2:
-    from urllib import unquote, urlopen
-else:
-    from urllib.request import urlopen  # NOQA
-    from urllib.parse import unquote  # NOQA
+from hfos.logger import error, verbose, warn, hilight
 
 try:
     from subprocess import Popen
@@ -53,21 +43,11 @@ class UrlError(Exception):
 
 
 class mapimport(authorizedevent):
-    def __init__(self, *args):
-        super(mapimport, self).__init__(*args)
-        hfoslog('mapimporterrequest generated:', args, emitter='mapimporter',
-                lvl=events)
+    """Uploads a GDAL map file for conversion"""
 
 
-class maprescan(authorizedevent):
-    def __init__(self, *args):
-        super(maprescan, self).__init__(*args)
-        hfoslog('maprescanrequest generated:', args, emitter='mapimporter',
-                lvl=events)
-
-
-AuthorizedEvents['mapimport'] = mapimport
-AuthorizedEvents['maprescan'] = maprescan
+class rescan(authorizedevent):
+    """Triggers a rescan of the GDAL map folder"""
 
 
 class GDAL(ConfigurableComponent):
@@ -147,6 +127,7 @@ class GDAL(ConfigurableComponent):
         result = self._runcommand(command)
         self.log('Result (Tiler): ', result, lvl=hilight)
 
+    @handler(mapimport)
     def mapimport(self, event):
         self.log('Map import request!', lvl=hilight)
 
@@ -171,37 +152,38 @@ class GDAL(ConfigurableComponent):
         newlayer = self._register_map(name.rstrip('.KAP'), event.client)
 
         notification = {
-            'component': 'alert',
+            'component': 'hfos.alert.manager',
             'action': 'success',
-            'data': 'New rasterchart rendered: <a href="#/editor/layer/' +
+            'data': 'New rasterchart rendered: <a href="#!/editor/layer/' +
                     str(newlayer.uuid) + '/edit">' + newlayer.name + '</a>'
         }
         self.fireEvent(send(event.client.uuid, notification))
 
-    def maprescan(self, event):
+    @handler(rescan)
+    def rescan(self, event):
         self.log('Rescanning gdal map folder for new maps')
 
-        f = []
+        charts = []
         for (dirpath, dirnames, filenames) in os.walk(self.tilepath):
-            f.extend(dirnames)
+            charts.extend(dirnames)
             break
 
-        self.log('Found folders:', f, lvl=hilight)
+        self.log('Found folders:', charts, lvl=hilight)
 
         count = 0
 
-        for map in f:
-            if os.path.exists(os.path.join(self.tilepath, map,
+        for chart in charts:
+            if os.path.exists(os.path.join(self.tilepath, chart,
                                            'tilemapresource.xml')):
-                self.log('Raster chart found')
-                layer = objectmodels['layer'].find_one({'path': map})
+                self.log('Raster chart found:', chart)
+                layer = objectmodels['layer'].find_one({'path': chart})
                 if layer is not None:
                     self.log('Layer exists: ', layer.uuid, layer.name)
                 else:
-                    self._register_map(map, event.client)
+                    self._register_map(chart, event.client)
                     count += 1
             else:
-                self.log('Invalid raster tilecache found: ', map, lvl=warn)
+                self.log('Invalid raster tilecache found: ', chart, lvl=warn)
 
         if count > 0:
             data = 'Found and added %i new rasterchart' % count
@@ -212,7 +194,7 @@ class GDAL(ConfigurableComponent):
             data = 'No new rastercharts added.'
 
         notification = {
-            'component': 'alert',
+            'component': 'hfos.alert.manager',
             'action': 'warning' if count == 0 else 'success',
             'data': data
         }
@@ -220,8 +202,7 @@ class GDAL(ConfigurableComponent):
 
     def _register_map(self, name, client):
         self.log('Storing new GDAL layer ', name, lvl=verbose)
-        layer = objectmodels['layer']()
-        layer.uuid = str(uuid4())
+        layer = objectmodels['layer']({'uuid': str(uuid4())})
         layer.name = name
         layer.path = name
         layer.owner = client.useruuid

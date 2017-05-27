@@ -39,7 +39,7 @@ This software package is a plugin module for HFOS.
       dependency_links=[],
       install_requires=['hfos>=1.1.0'],
       entry_points="""[hfos.components]
-    shareablewatcher=hfos.shareables.shareablewatcher:ShareableWatcher
+    shareables=hfos.shareables.manager:Manager
     [hfos.schemata]
     shareable=hfos.shareables.shareable:Shareable
     """,

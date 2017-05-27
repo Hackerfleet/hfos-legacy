@@ -78,7 +78,7 @@ class Dashboard {
         
         this.handleNavdata = function (msg) {
             console.log('DASHBOARD HANDLING NAVDATA');
-            if (msg.action === 'list') {
+            if (msg.action === 'sensed') {
                 console.log('[DASH] Got a navdata list:', msg.data);
                 if ('sensed' in msg.data) {
                     console.log('[DASH] Updating sensed list.');
@@ -88,12 +88,12 @@ class Dashboard {
             }
         };
         
-        self.socket.listen('navdata', self.handleNavdata);
+        self.socket.listen('hfos.navdata.sensors', self.handleNavdata);
         
         this.stopSubscriptions = function () {
             console.log('[DASH] Finally destroying all subscriptions');
             self.stopObserved();
-            self.socket.unlisten('navdata', self.handleNavdata);
+            self.socket.unlisten('hfos.navdata.sensors', self.handleNavdata);
         };
         
         this.statechange = self.rootscope.$on('$stateChangeStart',
@@ -103,8 +103,6 @@ class Dashboard {
                     self.stopSubscriptions();
                 }
             });
-        
-        
         
         this.switchDashboard = function (uuid) {
             self.dashboarduuid = uuid;
@@ -191,7 +189,7 @@ class Dashboard {
         if (this.observed.length > 0) {
             console.log('[DASH] Stopping current navdata subscriptions');
             var request = {
-                component: 'navdata',
+                component: 'hfos.navdata.sensors',
                 action: 'unsubscribe',
                 data: this.observed
             };
@@ -214,7 +212,7 @@ class Dashboard {
         }
         console.log(this.observed);
         var request = {
-            component: 'navdata',
+            component: 'hfos.navdata.sensors',
             action: 'subscribe',
             data: this.observed
         };
@@ -239,9 +237,8 @@ class Dashboard {
         console.log('[DASH] Switching tab to ', tabname);
         if (tabname === 'sensed') {
             var req = {
-                component: 'navdata',
-                action: 'list',
-                data: 'sensed'
+                component: 'hfos.navdata.sensors',
+                action: 'sensed'
             };
             
             console.log('[DASH] Requesting sensed list.');

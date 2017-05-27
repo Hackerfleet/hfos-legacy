@@ -19,10 +19,10 @@ class chatservice {
         this.blinkstate = 0;
         this.blinker = false;
 
-        var self = this;
+        let self = this;
     
         this.blinkfunc = function() {
-            var state = self.blinkstate;
+            let state = self.blinkstate;
             console.log('Blinkstate:', state);
         
             if (state === 0) {
@@ -42,12 +42,12 @@ class chatservice {
             }
         };
         
-        socket.listen('chat', function (msg) {
+        socket.listen('hfos.chat.host', function (msg) {
             console.log('Incoming chat data: ', msg);
             self.messages.push(msg.data);
             self.rootscope.$broadcast('Chat.Message');
             $timeout(function() {
-                  var scroller = document.getElementById("chatdisplay");
+                  let scroller = document.getElementById("chatdisplay");
                   scroller.scrollTop = scroller.scrollHeight;
                 }, 250, false);
             //if($scope.chat.open === false) {
@@ -63,7 +63,7 @@ class chatservice {
     
     send(msg) {
         console.log('Transmitting chat message:', msg);
-        this.socket.send({'component': 'chat', 'action': 'say', 'data': msg});
+        this.socket.send({component: 'hfos.chat.host', action: 'say', data: msg});
     }
     
 

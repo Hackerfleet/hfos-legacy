@@ -49,7 +49,7 @@ def transmit(action, data):
     result = waiter.wait()
     packet = result.packet
 
-    assert packet['component'] == 'objectmanager'
+    assert packet['component'] == 'hfos.events.objectmanager'
     return packet
 
 

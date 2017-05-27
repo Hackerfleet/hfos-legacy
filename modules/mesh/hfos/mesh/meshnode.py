@@ -64,15 +64,8 @@ MeshNodeForm = [
     {
         'key': 'Toggle',
         'type': 'button',
-        'onClick': 'formAction("mesh", "toggle", model.uuid)',
+        'onClick': 'formAction("hfos.mesh.zmqmesh", "toggle", model.uuid)',
         'title': 'Toggle MeshNode'
-    },
-    {
-        'key': 'Suspend',
-        'type': 'button',
-        'condition': 'model.status',
-        'onClick': 'formAction("mesh", "suspend", model.uuid)',
-        'title': 'Suspend the rule for the next time'
     },
     savebutton
 ]

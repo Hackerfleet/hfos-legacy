@@ -59,7 +59,7 @@ def test_schemarequest_all():
     packet = get_schemata()
 
     assert packet['action'] == 'All'
-    assert packet['component'] == 'schema'
+    assert packet['component'] == 'hfos.events.schemamanager'
     assert type(packet['data']) == dict
 
 
@@ -81,6 +81,6 @@ def test_schemarequest_get():
     packet = get_schemata(request="systemconfig")
 
     assert packet['action'] == 'Get'
-    assert packet['component'] == 'schema'
+    assert packet['component'] == 'hfos.events.schemamanager'
     assert type(packet['data']) == dict
     assert packet['data'] == schemastore['systemconfig']

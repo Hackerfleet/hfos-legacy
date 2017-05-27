@@ -40,7 +40,7 @@ This software package is a plugin module for HFOS.
           'hfos>=1.1.0'
       ],
       entry_points="""[hfos.components]
-    countablewatcher=hfos.countables.countablewatcher:CountableWatcher
+    countablewatcher=hfos.countables.counter:Counter
 [hfos.schemata]
     countable=hfos.countables.countable:Countable
     """,

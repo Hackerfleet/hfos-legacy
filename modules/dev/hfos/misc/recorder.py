@@ -10,7 +10,7 @@ A controllable event recorder utility component
 
 """
 
-from circuits import handler
+from hfos.component import handler
 from hfos.component import ConfigurableComponent
 from hfos.events.system import authorizedevent
 from hfos.logger import hilight  # , error, warn

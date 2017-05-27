@@ -24,15 +24,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-# UI events
-
-
-class navdatarequest(authorizedevent):
-    def __init__(self, *args):
-        super(navdatarequest, self).__init__(*args)
-        hfoslog('Navdatarequest created:', args, emitter='NAVDATA', lvl=events)
-
-
 
 # Internal Navigation Events
 
@@ -62,5 +53,3 @@ class referenceframe(Event):
         self.data = data
         hfoslog("[NAVDATA-EVENT] Reference frame generated: ", data,
                 lvl=events)
-
-

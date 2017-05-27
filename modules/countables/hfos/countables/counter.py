@@ -9,27 +9,22 @@ Module: Countables
 
 """
 
-from hfos.component import ConfigurableComponent
+from hfos.component import ConfigurableComponent, handler
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, error, warn, critical, events
-from hfos.events.system import authorizedevent, AuthorizedEvents
+from hfos.events.system import authorizedevent
 from pprint import pprint
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
-class countrequest(authorizedevent):
-    def __init__(self, *args):
-        super(countrequest, self).__init__(*args)
-        hfoslog('Counterrequest generated:', args, emitter='COUNTER',
-                lvl=events)
+class increment(authorizedevent):
+    """Increments the counter of a countable object"""
 
 
-AuthorizedEvents['countablewatcher'] = countrequest
-
-
-class CountableWatcher(ConfigurableComponent):
+class Counter(ConfigurableComponent):
     """
+    Watches for incrementation requests.
     """
     channel = "hfosweb"
 
@@ -43,11 +38,12 @@ class CountableWatcher(ConfigurableComponent):
         :param args:
         """
 
-        super(CountableWatcher, self).__init__("COUNT", *args)
+        super(Counter, self).__init__("COUNT", *args)
 
         self.log("Started")
 
-    def countrequest(self, event):
+    @handler(increment)
+    def increment(self, event):
         self.log(event.user.account.name, "counted another object!",
                  event.data)
         countable = objectmodels['countable'].find_one({'uuid': event.data})

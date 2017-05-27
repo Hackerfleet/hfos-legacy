@@ -11,36 +11,35 @@ Chat manager
 
 """
 
-from hfos.component import ConfigurableComponent
-from hfos.logger import error, warn, critical
-from hfos.events.system import AuthorizedEvents, authorizedevent
-from circuits import Event
+from hfos.robot.events import control_update
+
+from hfos.component import ConfigurableComponent, authorizedevent, handler
 from hfos.events.client import send
+from hfos.logger import warn, critical
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
-# Remote Control requests
-
-class remotecontrolrequest(authorizedevent):
-    """A client wants to remote control a servo"""
 
 
 # Remote Control events
 
-class remotecontrolupdate(Event):
+class control_request(authorizedevent):
     """A client wants to remote control a servo"""
 
-    def __init__(self, controldata, *args):
-        super(remotecontrolupdate, self).__init__(*args)
-        self.controldata = controldata
 
+class control_release(authorizedevent):
+    """A client wants to remote control a servo"""
+
+
+class data(authorizedevent):
+    """A client wants to remote control a servo"""
 
 
 class RemoteControlManager(ConfigurableComponent):
     """
-    Remote Control manager
+    Robotics remote control manager
 
     Handles
+    * authority of controlling clients
     * incoming remote control messages
     """
 
@@ -50,9 +49,7 @@ class RemoteControlManager(ConfigurableComponent):
     def __init__(self, *args):
         super(RemoteControlManager, self).__init__("RCM", *args)
 
-        self.remotecontroller = None
-
-        AuthorizedEvents['remotectrl'] = remotecontrolrequest
+        self.remote_controller = None
 
         self.log("Started")
 
@@ -63,59 +60,63 @@ class RemoteControlManager(ConfigurableComponent):
         """
 
         try:
-            if event.clientuuid == self.remotecontroller:
+            if event.clientuuid == self.remote_controller:
                 self.log("Remote controller disconnected!", lvl=critical)
-                self.remotecontroller = None
+                self.remote_controller = None
         except Exception as e:
             self.log("Strange thing while client disconnected", e, type(e))
 
-    def remotecontrolrequest(self, event):
-        """Remote control event handler for incoming events
-        :param event: RemoteControlRequest with action being one of
-            ['takeControl', 'leaveControl', 'controlData']
-        """
+    @handler(control_request)
+    def control_request(self, event):
+        username = event.user.account.name
+        client_name = event.client.name
+        client_uuid = event.client.uuid
 
-        self.log("Event: '%s'" % event.__dict__)
-        try:
-            action = event.action
-            data = event.data
-            username = event.user.account.name
-            clientname = event.client.name
-            clientuuid = event.client.uuid
+        self.log("Client wants to remote control: ", username,
+                 client_name, lvl=warn)
+        if not self.remote_controller:
+            self.log("Success!")
+            self.remote_controller = client_uuid
+            self.fireEvent(send(client_uuid, {
+                'component': 'hfos.robot.rcmanager',
+                'action': 'control_request',
+                'data': True
+            }))
+        else:
+            self.log("No, we're already being remote controlled!")
+            self.fireEvent(send(client_uuid, {
+                'component': 'hfos.robot.rcmanager',
+                'action': 'control_request',
+                'data': False
+            }))
 
-            if action == "takeControl":
-                self.log("Client wants to remote control: ", username,
-                         clientname, lvl=warn)
-                if not self.remotecontroller:
-                    self.log("Success!")
-                    self.remotecontroller = clientuuid
-                    self.fireEvent(send(clientuuid, {'component': 'remotectrl',
-                                                     'action': 'takeControl',
-                                                     'data': True}))
-                else:
-                    self.log("No, we're already being remote controlled!")
-                    self.fireEvent(
-                        send(clientuuid, {'component': 'remotectrl',
-                                          'action': 'takeControl',
-                                          'data': False}))
-                return
-            elif action == "leaveControl":
-                if self.remotecontroller == event.client.uuid:
-                    self.log("Client leaves control!", username, clientname,
-                             lvl=warn)
-                    self.remotecontroller = None
-                    self.fireEvent(
-                        send(clientuuid, {'component': 'remotectrl',
-                                          'action': 'takeControl',
-                                          'data': False}))
-                return
-            elif action == "controlData":
-                self.log("Control data received: ", data)
-                if event.client.uuid == self.remotecontroller:
-                    self.log("Valid data, handing on to machineroom.")
-                    self.fireEvent(remotecontrolupdate(data), "machineroom")
-                else:
-                    self.log("Invalid control data update request!", lvl=warn)
+        return
 
-        except Exception as e:
-            self.log("Error: '%s' %s" % (e, type(e)), lvl=error, exc=True)
+    @handler(control_release)
+    def control_release(self, event):
+        username = event.user.account.name
+        client_name = event.client.name
+        client_uuid = event.client.uuid
+
+        if self.remote_controller == event.client.uuid:
+            self.log("Client leaves control!", username, client_name,
+                     lvl=warn)
+            # TODO: Switch to a possible fallback controller
+            self.remote_controller = None
+            self.fireEvent(send(client_uuid, {
+                'component': 'hfos.robot.rcmanager',
+                'action': 'control_release',
+                'data': True
+            }))
+        return
+
+    @handler(data)
+    def data(self, event):
+        control_data = event.data
+
+        self.log("Control data received: ", control_data)
+        if event.client.uuid == self.remote_controller:
+            self.log("Valid data, handing on to machineroom.")
+            self.fireEvent(control_update(control_data), "machineroom")
+        else:
+            self.log("Invalid control data update request!", lvl=warn)

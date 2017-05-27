@@ -28,7 +28,7 @@ class importercomponent {
         
         var file = document.getElementById('filename').files[0];
         console.log('file: ', file);
-        this.socket.sendFile(file, 'mapimport', 'upload');
+        this.socket.sendFile(file, 'hfos.map.gdal', 'mapimport');
         
     }
     
@@ -36,7 +36,7 @@ class importercomponent {
         console.log('Triggering rastertile path rescan.');
     
         this.socket.send({
-            component: 'maprescan',
+            component: 'hfos.map.gdal',
             action:'rescan'
         });
     

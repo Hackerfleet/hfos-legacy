@@ -48,8 +48,8 @@ class countablescomponent {
 
     count(uuid) {
         let packet = {
-            component: 'countablewatcher',
-            action: 'count',
+            component: 'hfos.countables.counter',
+            action: 'increment',
             data: uuid
         };
 
