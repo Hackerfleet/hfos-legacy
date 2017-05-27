@@ -165,7 +165,7 @@ class ClientManager(ConfigurableComponent):
                     uuid = userobject.uuid
 
                 self.log("Broadcasting to all of users clients: '%s': '%s" % (
-                    uuid, event.packet[:20]), lvl=network)
+                    uuid, str(event.packet)[:20]), lvl=network)
                 if uuid not in self._users:
                     self.log("User not connected!", event, lvl=critical)
                     return
@@ -199,7 +199,7 @@ class ClientManager(ConfigurableComponent):
 
         except Exception as e:
             self.log("Exception during sending: %s (%s)" % (e, type(e)),
-                     lvl=critical)
+                     lvl=critical, exc=True)
 
     def broadcast(self, event):
         """Broadcasts an event either to all users or clients, depending on
