@@ -73,6 +73,13 @@ def serial_ports():
             pass
     return result
 
+def get_file_title_map(ports):
+    title_map = {}
+    for port in ports:
+        title_map[port] = port
+
+    return title_map
+
 
 class NMEAParser(ConfigurableComponent):
     """
@@ -82,14 +89,25 @@ class NMEAParser(ConfigurableComponent):
     ports = serial_ports()
     configprops = {
         'connectiontype': {
-            'type': 'string',
-            'enum': ['TCP', 'USB/Serial'],
-            'title': 'Type of NMEA adaptor',
-            'description': 'Determines how to get data from the bus.',
-            'default': 'USB/Serial'
+           'type': 'string',
+           'enum': ['TCP', 'USB/Serial'],
+           'title': 'Type of NMEA adaptor',
+           'description': 'Determines how to get data from the bus.',
+           'default': 'USB/Serial',
+            # TODO: Find out what causes this to be required (Form throws
+            # undecipherable errors without this)
+            # Same problem with the serialfile, below
+           'x-schema-form': {
+               'type': 'select',
+               'htmlClass': 'div',
+               'titleMap': {
+                   'TCP': 'TCP',
+                   'USB/Serial': 'USB/Serial'
+               }
+           }
         },
         'port': {
-            'type': 'integer',
+            'type': 'number',
             'title': 'TCP Port',
             'description': 'Port to connect to',
             'default': 2222
@@ -106,7 +124,12 @@ class NMEAParser(ConfigurableComponent):
             'title': 'Serial port device',
             'description': 'File descriptor to access serial port',
             'default': ports[0] if len(ports) > 0 else '',
-            'allowadditional': True
+            'allowadditional': True,
+            'x-schema-form': {
+                'type': 'select',
+                'htmlClass': 'div',
+                'titleMap': get_file_title_map(ports)
+            }
         },
     }
 
