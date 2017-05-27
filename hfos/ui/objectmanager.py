@@ -441,14 +441,16 @@ class ObjectManager(ConfigurableComponent):
         try:
             clientobject = data['obj']
             uuid = clientobject['uuid']
-        except KeyError:
-            self.log("Put request with missing arguments!", data, lvl=critical)
+        except KeyError as e:
+            self.log("Put request with missing arguments!", e, data,
+                     lvl=critical)
             return
 
         try:
             if uuid != 'create':
                 storage_object = objectmodels[schema].find_one({'uuid': uuid})
-            else:
+            if uuid == 'create' or \
+                            objectmodels[schema].count({'uuid': uuid}) == 0:
                 clientobject['uuid'] = str(uuid4())
                 clientobject['owner'] = user.uuid
                 storage_object = objectmodels[schema](clientobject)
@@ -622,7 +624,7 @@ class ObjectManager(ConfigurableComponent):
                 'data': update_object.serializablefields()
             }
 
-            #pprint(self.subscriptions)
+            # pprint(self.subscriptions)
 
             for client, recipient in self.subscriptions[
                 update_object.uuid].items():
