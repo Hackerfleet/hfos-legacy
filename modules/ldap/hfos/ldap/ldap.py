@@ -53,8 +53,13 @@ class LDAPAdaptor(ConfigurableComponent):
                    'description': 'CN to bind (e.g. cn=password,ou=bind,'
                                   'dc=example,dc=org)',
                    'default': 'cn=password,ou=bind,dc=example,dc=org'},
-        'BINDPW': {'type': 'string', 'title': 'Bind Password',
-                   'description': 'Bind password', 'default': ''},
+        'BINDPW': {
+            'type': 'string', 'title': 'Bind Password',
+            'description': 'Bind password', 'default': '',
+            'x-schema-form': {
+                'type': 'password'
+            }
+        },
         'PINFIELD': {'type': 'string', 'title': 'Pin field',
                      'description': 'Pin Field in LDAP',
                      'default': 'pinfield'},
@@ -118,7 +123,8 @@ class LDAPAdaptor(ConfigurableComponent):
             username = user[self.config.UIDFIELD]
             if self.pincheck(user[self.config.PINFIELD], pin):
                 self.log(datetime.now(),
-                         'Valid combination for user "%s". Opening lock' % username)
+                         'Valid combination for user "%s". Opening lock' %
+                         username)
                 return True
         except Exception as e:
             self.log(datetime.now(), 'Invalid user/pin:', uid,
