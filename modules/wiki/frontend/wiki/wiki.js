@@ -25,7 +25,7 @@ class wikicomponent {
         
         this.selectedtemplate = "empty";
         
-        var self = this;
+        let self = this;
         console.log('WIKI RUNNING');
         
         this.getData = function () {
@@ -64,12 +64,12 @@ class wikicomponent {
             // TODO: Extend this to make it work with external links and handle link titles
             
             // Untitled links:
-            var links = /\[([\w-]*)\]/g;
-            self.html = self.html.replace(links, '<a href="#/wiki/$1">$1</a>');
+            let links = /\[([\w-]*)\]/g;
+            self.html = self.html.replace(links, '<a href="#!/wiki/$1">$1</a>');
             
             // Titled links:
             links = /\[([\w-]*)\|([0-9a-z A-Z]*)\]/g;
-            self.html = self.html.replace(links, '<a href="#/wiki/$1">$2</a>');
+            self.html = self.html.replace(links, '<a href="#!/wiki/$1">$2</a>');
         };
         
         this.$scope.$on('OP.Get', function (ev, uuid, obj, schema) {
@@ -80,10 +80,10 @@ class wikicomponent {
                     if (typeof obj.title !== 'undefined' && obj.title.startsWith('#redirect')) {
                         console.log('[WIKI] Redirect hit, fetching new page.');
                         
-                        self.note = 'Redirected from <a href="#/editor/wikipage/' +
+                        self.note = 'Redirected from <a href="#!/editor/wikipage/' +
                             obj.uuid + '/edit">' +
                             obj.name + '</a>';
-                        var newslug = obj.title.split('#redirect ')[1];
+                        let newslug = obj.title.split('#redirect ')[1];
                         self.pagename = newslug;
                         self.getData();
                     } else {

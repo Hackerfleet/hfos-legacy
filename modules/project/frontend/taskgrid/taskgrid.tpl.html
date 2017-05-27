@@ -3,13 +3,13 @@
         <ul class="nav nav-pills" role="tablist">
             <!-- <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>-->
             <!--<li><a role="tab" ng-click="$ctrl.opentab('tasklist')" data-toggle="tab">Task List</a></li>-->
-            <li><a role="button" href="#/editor/taskgridconfig/{{$ctrl.taskgridconfiguuid}}/edit">
+            <li><a role="button" href="#!/editor/taskgridconfig/{{$ctrl.taskgridconfiguuid}}/edit">
                 <i class="fa fa-gear"></i></a>
             </li>
-            <li><a role="button" href="#/editor/taskgroup//create"><i class="fa fa-plus" aria-hidden="true"></i>
+            <li><a role="button" href="#!/editor/taskgroup//create"><i class="fa fa-plus" aria-hidden="true"></i>
                 Taskgroup</a>
             </li>
-            <li><a role="button" href="#/editor/task//create"><i class="fa fa-plus" aria-hidden="true"></i>
+            <li><a role="button" href="#!/editor/task//create"><i class="fa fa-plus" aria-hidden="true"></i>
                 Task</a>
             </li>
             <li class="pull-right">
@@ -40,7 +40,7 @@
                         <div class="taskBoxOverlay" ng-show="$ctrl.lockState"></div>
                         <div class="taskHeader">
                             <h3>{{$ctrl.taskgroups[item.taskgroup].name }}
-                                <a class="pull-right" href="#/editor/taskgroup/{{item.taskgroup}}/edit">
+                                <a class="pull-right" href="#!/editor/taskgroup/{{item.taskgroup}}/edit">
                                     <span class="fa fa-edit"></span>
                                 </a>
                             </h3>
@@ -62,7 +62,7 @@
                                         title="{{$ctrl.tags[tag.uuid].name}}"
                                         ng-style="{background: $ctrl.tags[tag.uuid].color}"></li>
                                 </ul>
-                                <a href="#/editor/task/{{task.uuid}}/edit">{{task.name}}</a>
+                                <a href="#!/editor/task/{{task.uuid}}/edit">{{task.name}}</a>
                                 <span class="taskShowDesc pull-right fa"
                                       ng-show="task.notes.length > 0"
                                       ng-click="task.showDescription = !task.showDescription"

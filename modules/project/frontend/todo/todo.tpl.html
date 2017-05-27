@@ -1,7 +1,7 @@
 <div class="well">
     <div class="taskgrid-nav navbar">
         <ul class="nav nav-pills" role="tablist">
-            <li><a role="button" href="#/editor/task//create"><i class="fa fa-plus" aria-hidden="true"></i>
+            <li><a role="button" href="#!/editor/task//create"><i class="fa fa-plus" aria-hidden="true"></i>
                 Task</a>
             </li>
             <li class="pull-right">
@@ -41,7 +41,7 @@
                         </span>
                     </div>
                     <div class="todoTask">
-                        <a href="#/editor/task/{{uuid}}/edit">{{task.name}}</a>
+                        <a href="#!/editor/task/{{uuid}}/edit">{{task.name}}</a>
                         <span class="taskShowDesc pull-right fa"
                               ng-show="task.notes.length > 0"
                               ng-click="task.showDescription = !task.showDescription"

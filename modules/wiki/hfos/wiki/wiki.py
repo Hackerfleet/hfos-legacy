@@ -12,7 +12,7 @@ Wiki manager
 
 from uuid import uuid4
 from hfos.component import ConfigurableComponent
-from hfos.logger import hfoslog, error, warn
+from hfos.logger import error, warn
 from hfos.events.client import send
 from hfos.database import ValidationError, objectmodels
 import pymongo
@@ -76,6 +76,6 @@ class Wiki(ConfigurableComponent):
                 title = item.title
             except AttributeError:
                 title = item.name
-            index.html += '<li><a href="#/wiki/' + item.name + '">' + \
+            index.html += '<li><a href="#!/wiki/' + item.name + '">' + \
                           title + '</a></li>'
         index.save()
