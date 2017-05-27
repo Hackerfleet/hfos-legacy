@@ -22,7 +22,6 @@ class BusRepeater(ConfigurableComponent):
     The BusRepeater component receives new raw sensor data and
     repeats it over configurable tcp/udp/other means.
 
-
     """
     channel = "bus_repeater"
 
@@ -33,20 +32,20 @@ class BusRepeater(ConfigurableComponent):
             'description': 'Transmit NMEA data to these endpoints via UDP',
             'items': {
                 'type': 'string',
-                'title': 'Recipient'
+                'title': 'Recipient IP Address'
             },
             'default': []
         },
         'tcp_enabled': {
             'type': 'boolean',
             'default': False,
-            'title': 'Enabled',
+            'title': 'TCP',
             'description': 'Check to enable TCP server'
         },
         'udp_enabled': {
             'type': 'boolean',
             'default': False,
-            'title': 'Enabled',
+            'title': 'UDP',
             'description': 'Check to enable UDP transmission'
         },
         'tcp_port': {

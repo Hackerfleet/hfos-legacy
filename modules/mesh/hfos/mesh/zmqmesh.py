@@ -120,7 +120,7 @@ class ZMQHandle(threading.Thread):
 
 class ZMQMesh(ConfigurableComponent):
     """
-    Empty hull component to store settings etc.
+    Provides secure mesh based connectivity for HFOS nodes.
     """
 
     configprops = {}

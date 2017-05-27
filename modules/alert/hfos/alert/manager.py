@@ -23,11 +23,11 @@ class alert(authorizedevent):
 
 class Manager(ConfigurableComponent):
     """
-    AlertManager manager
+    Alert manager
 
     Handles
-    * incoming AlertManager messages
-    * AlertManager broadcasts
+    * incoming alert messages
+    * alert broadcasts
     """
 
     channel = "hfosweb"

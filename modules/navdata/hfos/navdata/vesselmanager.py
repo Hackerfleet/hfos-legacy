@@ -25,6 +25,9 @@ __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class VesselManager(ConfigurableComponent):
+    """
+    Tracks vessels for navigational and other purposes.
+    """
     channel = "navdata"
     configprops = {}
 
