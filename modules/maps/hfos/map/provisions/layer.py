@@ -106,7 +106,8 @@ layers = [
         "url": "http://hfoshost/tilecache/tiles.openseamap.org/seamark/{z}/{"
                "x}/{y}.png",
         "layerOptions": {
-            "attribution": "&copy; OpenSeaMap contributors"
+            "attribution": "&copy; OpenSeaMap contributors",
+            "minZoom": 7
         },
         "type": "xyz"
     },
@@ -119,7 +120,8 @@ layers = [
         "url": "http://hfoshost/tilecache/tiles.openseamap.org/seamark/{z}/{"
                "x}/{y}.png",
         "layerOptions": {
-            "attribution": "&copy; OpenSeaMap contributors"
+            "attribution": "&copy; OpenSeaMap contributors",
+            "minZoom": 7
         },
         "type": "xyz"
     },
@@ -235,8 +237,8 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
 ]
 
 
-def provision():
-    provisionList(layers, objectmodels['layer'], overwrite=False, clear=False)
+def provision(**kwargs):
+    provisionList(layers, objectmodels['layer'], **kwargs)
     hfoslog('Provisioning: Layers: Done.', emitter='PROVISIONS')
 
 

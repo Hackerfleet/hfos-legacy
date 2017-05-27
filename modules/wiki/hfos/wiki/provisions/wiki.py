@@ -32,7 +32,7 @@ WikiPages = [
         'title': '#redirect Index',
         'html': 'There is no homepage by default, so this page redirects to '
                 'the Index. To change that, just'
-                '<a href="#/editor/wikipage/1c3a2ea5-64e3-4043-ad0a'
+                '<a href="#!/editor/wikipage/1c3a2ea5-64e3-4043-ad0a'
                 '-fe0a01f6fa1e/edit">edit this page and change the title</a>.'
     }
 ]
@@ -57,13 +57,13 @@ WikiTemplates = [
 ]
 
 
-def provisionPages():
-    provisionList(WikiPages, objectmodels['wikipage'])
+def provisionPages(**kwargs):
+    provisionList(WikiPages, objectmodels['wikipage'], **kwargs)
     hfoslog('WikiPages: Done.', emitter='PROVISIONING')
 
 
-def provisionTemplates():
-    provisionList(WikiTemplates, objectmodels['wikitemplate'])
+def provisionTemplates(**kwargs):
+    provisionList(WikiTemplates, objectmodels['wikitemplate'], **kwargs)
     hfoslog('WikiTemplates: Done.', emitter='PROVISIONING')
 
 

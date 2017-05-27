@@ -98,7 +98,7 @@ def getSensorData(fields, sentences):
     return sensordata
 
 
-def provision():
+def provision(**kwargs):
     sentences = {}
     sentences.update(getNMEASentences())
     sentences.update(getProprietarySentences())
@@ -134,6 +134,6 @@ def provision():
         # for name, typeitems in datatypes.items():
         #    print('%s has %i elements' % (name, len(typeitems)))
 
-    provisionList(provisionitems, objectmodels['sensordatatype'], clear=True)
+    provisionList(provisionitems, objectmodels['sensordatatype'], **kwargs)
     hfoslog('Provisioning: Sensordatatypes: Done.', emitter='PROVISIONS')
 

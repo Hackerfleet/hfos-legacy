@@ -58,8 +58,8 @@ Controllers = [
 ]
 
 
-def provision():
-    provisionList(Controllers, controllerobject)
+def provision(**kwargs):
+    provisionList(Controllers, controllerobject, **kwargs)
     hfoslog('[PROV] Provisioning: Controllers: Done.')
 
 

@@ -80,8 +80,8 @@ Controllables = [
 ]
 
 
-def provision():
-    provisionList(Controllables, controllableobject)
+def provision(**kwargs):
+    provisionList(Controllables, controllableobject, **kwargs)
     hfoslog('[PROV] Provisioning: Controllables: Done.')
 
 

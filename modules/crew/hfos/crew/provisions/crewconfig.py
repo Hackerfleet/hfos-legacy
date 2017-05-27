@@ -29,6 +29,6 @@ CrewConfig = [
     }
 ]
 
-def provision():
-    provisionList(CrewConfig, objectmodels['crewconfig'])
+def provision(**kwargs):
+    provisionList(CrewConfig, objectmodels['crewconfig'], **kwargs)
     hfoslog('[PROV] Provisioning: Crewconfigs: Done.')

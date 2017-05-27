@@ -23,8 +23,8 @@ Projects = [
 ]
 
 
-def provision():
-    provisionList(Projects, projectobject, indexes=['name'], clear=True)
+def provision(**kwargs):
+    provisionList(Projects, projectobject, indices=['name'], **kwargs)
     hfoslog('[PROV] Provisioning: Project: Done.')
 
 

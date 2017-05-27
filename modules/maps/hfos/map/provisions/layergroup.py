@@ -65,9 +65,8 @@ layergroups = [
 ]
 
 
-def provision():
-    provisionList(layergroups, objectmodels['layergroup'], overwrite=False,
-                  clear=False)
+def provision(**kwargs):
+    provisionList(layergroups, objectmodels['layergroup'], **kwargs)
     hfoslog('Provisioning: Layergroups: Done.', emitter='PROVISIONS')
 
 

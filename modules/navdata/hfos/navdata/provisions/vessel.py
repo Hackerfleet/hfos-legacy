@@ -9,9 +9,9 @@ systemvessel = {
 }
 
 
-def provision():
+def provision(**kwargs):
     # TODO: Handle the case with an already existing vessel (See also system-provision)
-    provisionList([systemvessel], objectmodels['vessel'])
+    provisionList([systemvessel], objectmodels['vessel'], **kwargs)
 
     sysconfig = objectmodels['systemconfig'].find_one({'active': True})
     hfoslog('Adapting system config for default vessel:', sysconfig)

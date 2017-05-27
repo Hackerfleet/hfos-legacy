@@ -31,9 +31,8 @@ meshnodes = [
 ]
 
 
-def provision():
-    provisionList(meshnodes, objectmodels['meshnode'], overwrite=True,
-                  clear=False)
+def provision(**kwargs):
+    provisionList(meshnodes, objectmodels['meshnode'], **kwargs)
     hfoslog('Provisioning: Meshnodes: Done.', emitter='PROVISIONS')
 
 
