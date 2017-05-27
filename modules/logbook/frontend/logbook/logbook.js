@@ -16,14 +16,14 @@ class LogbookCtrl {
         
         console.log('Hello, i am a logbook view controller!');
         
-        var now = new Date();
+        let now = new Date();
         
         this.op.getList('logbookentry', {}, ['*']);
         
         this.shareables = [];
         this.reservationlookup = {};
         
-        var self = this;
+        let self = this;
         
         this.foobar = 1;
         
@@ -31,21 +31,21 @@ class LogbookCtrl {
         this.calendarDate = new Date();
         this.calendarTitle = 'Logbook entries for %NAME';
         
-        var editaction = {
+        let editaction = {
             label: '<i class=\'glyphicon glyphicon-pencil\'></i>',
             onClick: function (args) {
                 alert.add('success', 'Edited', args.calendarEvent, 5);
             }
         };
         
-        var delaction = {
+        let delaction = {
             label: '<i class=\'glyphicon glyphicon-remove\'></i>',
             onClick: function (args) {
                 alert.add('success', 'Deleted', args.calendarEvent, 5);
             }
         };
         
-        var actions = [editaction, delaction];
+        let actions = [editaction, delaction];
         
         const eventcolor = {
             primary: 'red',
@@ -106,9 +106,9 @@ class LogbookCtrl {
         };
         
         this.updateTimetable = function () {
-            for (var entry of self.entries) {
+            for (let entry of self.entries) {
                 console.log('Analyzing thing: ', entry);
-                var calItem = {
+                let calItem = {
                     title: entry.name + ': ' + entry.title,
                     url: '#!/editor/logbookentry/' + entry.uuid,
                     startsAt: new Date(Date.parse(entry.starttime)),

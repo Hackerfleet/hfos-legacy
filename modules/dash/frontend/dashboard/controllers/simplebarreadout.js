@@ -1,6 +1,6 @@
 'use strict';
 
-var humanizeDuration = require('humanize-duration');
+let humanizeDuration = require('humanize-duration');
 
 class SimpleBarReadout {
     constructor($scope, socket, interval) {
@@ -19,10 +19,10 @@ class SimpleBarReadout {
 
         console.log('[DASH-SBR] SimpleBarReadout loaded, observing:', this.valuetype);
 
-        var self = this;
+        let self = this;
 
         this.updateAge = function() {
-            var seconds = new Date() / 1000;
+            let seconds = new Date() / 1000;
             if (self.age === 0) {
                 self.agehumanized = 'Unknown';
             } else {
@@ -33,7 +33,7 @@ class SimpleBarReadout {
         this.handleNavdata = function (msg) {
             //console.log('[DASH-SBR] NAVDATA: ', msg, self.valuetype);
             if (msg.data.type === self.valuetype) {
-                var data = msg.data;
+                let data = msg.data;
 
                 self.value = data.value;
                 self.max = Math.max(self.value, self.max);

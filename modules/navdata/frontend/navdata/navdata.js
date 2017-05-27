@@ -39,7 +39,7 @@ class NavDataService {
 
         console.log('[NAV] NavDataService constructed');
 
-        var self = this;
+        let self = this;
 
 
         this.updateConfig = function() {

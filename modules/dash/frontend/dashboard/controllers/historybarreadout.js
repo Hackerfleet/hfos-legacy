@@ -24,7 +24,7 @@
 
 'use strict';
 
-var humanizeDuration = require('humanize-duration');
+let humanizeDuration = require('humanize-duration');
 
 class HistoryBarReadout {
     constructor($scope, socket, interval) {
@@ -45,10 +45,10 @@ class HistoryBarReadout {
 
         console.log('[DASH-HBR] HistoryBarReadout loaded, observing:', this.valuetype);
 
-        var self = this;
+        let self = this;
 
         this.updateAge = function() {
-            var seconds = new Date() / 1000;
+            let seconds = new Date() / 1000;
             if (self.age === 0) {
                 self.agehumanized = 'Unknown';
             } else {
@@ -59,13 +59,13 @@ class HistoryBarReadout {
         this.handleNavdata = function (msg) {
             //console.log('[DASH-HBR] NAVDATA: ', msg, self.valuetype);
             if (msg.data.type === self.valuetype) {
-                var data = msg.data;
+                let data = msg.data;
 
                 self.value = data.value;
                 self.max = Math.max(self.value, self.max);
                 self.scalevalue = (data.value / self.max) * 100;
                 
-                var scaleprop =  String(self.scalevalue) + '%';
+                let scaleprop =  String(self.scalevalue) + '%';
                 
                 if (self.history.length > 10) {
                     self.history.shift();

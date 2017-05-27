@@ -26,9 +26,9 @@
 
 'use strict';
 
-var d3 = require('d3');
+let d3 = require('d3');
 
-var humanizeDuration = require('humanize-duration');
+let humanizeDuration = require('humanize-duration');
 
 class SimpleCompass {
     constructor($scope, socket, interval, element) {
@@ -49,7 +49,7 @@ class SimpleCompass {
         this.width = 350;
         this.height = 350;
         
-        var rawSvg = element.find('svg');
+        let rawSvg = element.find('svg');
         this.svg = d3.select(rawSvg[0])
             .attr("width", this.width)
             .attr("height", this.height)
@@ -61,10 +61,10 @@ class SimpleCompass {
         
         console.log('[DASH-SC] d3 element: ', this.svg);
         
-        var self = this;
+        let self = this;
         
         this.updateAge = function () {
-            var seconds = new Date() / 1000;
+            let seconds = new Date() / 1000;
             if (self.age === 0) {
                 self.agehumanized = 'Unknown';
             } else {
@@ -75,9 +75,9 @@ class SimpleCompass {
         this.handleNavdata = function (msg) {
             //console.log('[DASH-SC] NAVDATA: ', msg, self.valuetype);
             if (msg.data.type === self.valuetype) {
-                var data = msg.data;
+                let data = msg.data;
                 
-                var angle = data.value * (Math.PI / 180);
+                let angle = data.value * (Math.PI / 180);
                 console.log('[DASH-SC] Updating SimpleCompass: ', data.value, angle);
                 self.value = data.value;
                 self.age = data.timestamp;
@@ -100,10 +100,10 @@ class SimpleCompass {
             // TODO: Remove the right element via angular's component element, not via jquery
             $(".angleSweep").remove();
             
-            var angle = ((2 * Math.PI - realangle) + Math.PI / 2) % (2 * Math.PI);
+            let angle = ((2 * Math.PI - realangle) + Math.PI / 2) % (2 * Math.PI);
             self.lastAngle = angle;
             
-            var svg = self.svg,
+            let svg = self.svg,
                 width = 2,
                 cos = Math.cos(angle),
                 sin = Math.sin(angle),
@@ -134,7 +134,7 @@ class SimpleCompass {
         };
         
         this.Compass = function () {
-            var svg = self.svg;
+            let svg = self.svg;
             
             //Axes and arrows
             svg.append("line")
@@ -175,7 +175,7 @@ class SimpleCompass {
             
             
             function drawAngleMark(realangle) {
-                var angle = ((2 * Math.PI - realangle) + (Math.PI / 2)) % (2 * Math.PI),
+                let angle = ((2 * Math.PI - realangle) + (Math.PI / 2)) % (2 * Math.PI),
                     length = 30,
                     cos = Math.cos(angle),
                     sin = Math.sin(angle),
@@ -222,7 +222,7 @@ class SimpleCompass {
             function scaleMarks() {
                 $('.angleMark').remove();
                 
-                for (var i = 0; i < 360; i = i + 15) {
+                for (let i = 0; i < 360; i = i + 15) {
                     drawAngleMark(i * (Math.PI / 180));
                 }
             }

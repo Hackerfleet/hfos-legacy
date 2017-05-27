@@ -16,7 +16,7 @@ class chatcomponent {
         this.input = '';
         this.messages = chat.messages;
 
-        var self = this;
+        let self = this;
 
         this.scope.$on('Chat.Message', function () {
             console.log('Chat controller received new message: ');

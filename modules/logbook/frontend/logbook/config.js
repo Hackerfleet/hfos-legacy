@@ -16,7 +16,7 @@ class LogbookConfigCtrl {
                 {'shared': true}]
         }, ['name', 'description']);
 
-        var self = this;
+        let self = this;
 
         this.rootscope.$on('OP.ListUpdate', function (ev, schema) {
             console.log('[LOGBOOKCONFIG] List update:', schema);
@@ -31,7 +31,7 @@ class LogbookConfigCtrl {
 
     selectLogbook(uuid) {
         console.log('[LOGBOOKCONFIG] Updating logbook selection');
-        var origconf = this.user.clientconfig;
+        let origconf = this.user.clientconfig;
         console.log(origconf);
         origconf.logbookuuid = uuid;
         this.user.updateclientconfig(origconf);

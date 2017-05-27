@@ -31,7 +31,7 @@ class meshcomponent {
         this.state = $state;
         this.rootscope = $rootScope;
 
-        var self = this;
+        let self = this;
     }
 }
 

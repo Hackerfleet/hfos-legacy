@@ -1,6 +1,6 @@
 'use strict';
 
-var humanizeDuration = require('humanize-duration');
+let humanizeDuration = require('humanize-duration');
 
 import configcomponent from './config';
 import configtemplate from './config.tpl.html';
@@ -74,7 +74,7 @@ class Dashboard {
         
         this.op.getObject('dashboardconfig', this.dashboarduuid);
         
-        var self = this;
+        let self = this;
         
         this.handleNavdata = function (msg) {
             console.log('DASHBOARD HANDLING NAVDATA');
@@ -139,9 +139,9 @@ class Dashboard {
         
         this.scope.$on('OP.ListUpdate', function (event, schema) {
             if (schema === 'dashboardconfig') {
-                var dashboardlist = self.op.lists.dashboardconfig;
-                var dashboardmenu = [];
-                for (var dashboard of dashboardlist) {
+                let dashboardlist = self.op.lists.dashboardconfig,
+                    dashboardmenu = [];
+                for (let dashboard of dashboardlist) {
                     dashboardmenu.push({
                         type: 'func',
                         name: dashboard.uuid,
@@ -157,7 +157,7 @@ class Dashboard {
         
         this.storeMenuConfig = function () {
             console.log('[MENU] Pushing menu to profile:', menu);
-            for (var card of self.dashboard.cards) {
+            for (let card of self.dashboard.cards) {
                 delete card['$$hashKey'];
             }
             self.op.putObject('dashboardconfig', self.dashboard);
@@ -188,7 +188,7 @@ class Dashboard {
     stopObserved() {
         if (this.observed.length > 0) {
             console.log('[DASH] Stopping current navdata subscriptions');
-            var request = {
+            let request = {
                 component: 'hfos.navdata.sensors',
                 action: 'unsubscribe',
                 data: this.observed
@@ -203,7 +203,7 @@ class Dashboard {
         this.stopObserved();
         console.log('[DASH] Updating observed values from ', this.dashboard.cards);
         this.observed = [];
-        for (var card of this.dashboard.cards) {
+        for (let card of this.dashboard.cards) {
             console.log('[DASH] Inspecting card:', this.observed, card.valuetype, this.observed.indexOf(card.valuetype));
             if (this.observed.indexOf(card.valuetype) == -1) {
                 console.log('[DASH] Adding: ', card.valuetype);
@@ -211,7 +211,7 @@ class Dashboard {
             }
         }
         console.log(this.observed);
-        var request = {
+        let request = {
             component: 'hfos.navdata.sensors',
             action: 'subscribe',
             data: this.observed
@@ -236,7 +236,7 @@ class Dashboard {
     opentab(tabname) {
         console.log('[DASH] Switching tab to ', tabname);
         if (tabname === 'sensed') {
-            var req = {
+            let req = {
                 component: 'hfos.navdata.sensors',
                 action: 'sensed'
             };
@@ -249,10 +249,10 @@ class Dashboard {
     }
     
     toggleDashboardItem(key) {
-        var card;
+        let card;
         if (this.observed.indexOf(key) >= 0) {
             console.log('[DASH] Removing ', key, ' from dashboard.');
-            for (var item of this.dashboard.cards) {
+            for (let item of this.dashboard.cards) {
                 if (item.valuetype === key) {
                     this.dashboard.cards.pop(item);
                 }

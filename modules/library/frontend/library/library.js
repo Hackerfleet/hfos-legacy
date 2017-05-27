@@ -11,7 +11,7 @@ class librarycomponent {
 
         this.searching = false;
 
-        var self = this;
+        let self = this;
 
         this.searchByISBN = function () {
             self.searching = true;

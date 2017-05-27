@@ -26,7 +26,7 @@ class importercomponent {
     upload() {
         console.log('Uploading new map file.');
         
-        var file = document.getElementById('filename').files[0];
+        let file = document.getElementById('filename').files[0];
         console.log('file: ', file);
         this.socket.sendFile(file, 'hfos.map.gdal', 'mapimport');
         

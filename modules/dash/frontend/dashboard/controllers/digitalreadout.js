@@ -1,6 +1,6 @@
 'use strict';
 
-var humanizeDuration = require('humanize-duration');
+let humanizeDuration = require('humanize-duration');
 
 class DigitalReadout {
     constructor($scope, socket, interval) {
@@ -14,10 +14,10 @@ class DigitalReadout {
 
         console.log('[DASH-DR] Digitalreadout loaded, observing:', this.valuetype);
 
-        var self = this;
+        let self = this;
 
         this.updateAge = function() {
-            var seconds = new Date() / 1000;
+            let seconds = new Date() / 1000;
             if (self.age === 0) {
                 self.agehumanized = 'Unknown';
             } else {
@@ -28,7 +28,7 @@ class DigitalReadout {
         this.handleNavdata = function (msg) {
             //console.log('[DASH-DR] NAVDATA: ', msg, self.valuetype);
             if (msg.data.type === self.valuetype) {
-                var data = msg.data;
+                let data = msg.data;
 
                 //console.log('[DASH-DR] Updating Digitalreadout: ', data, data.value, data.type);
                 self.value = data.value;

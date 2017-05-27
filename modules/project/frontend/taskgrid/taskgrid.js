@@ -47,7 +47,7 @@ class taskgridcomponent {
             }
         };
         
-        var self = this;
+        let self = this;
         
         this.switchtaskgridconfig = function (uuid) {
             self.taskgridconfiguuid = uuid;
@@ -57,7 +57,7 @@ class taskgridcomponent {
         this.storeTaskGridConfig = function () {
             console.log('[TASKGRID] Pushing taskgridconfig');
             
-            for (var card of self.taskgridconfig.cards) {
+            for (let card of self.taskgridconfig.cards) {
                 delete card['$$hashKey'];
             }
             self.op.putObject('taskgridconfig', self.taskgridconfig);

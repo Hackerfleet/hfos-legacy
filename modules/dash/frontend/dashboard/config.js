@@ -16,7 +16,7 @@ class DashboardConfigCtrl {
                 {'shared': true}]
         }, ['name', 'description']);
 
-        var self = this;
+        let self = this;
 
         this.listener = this.rootscope.$on('OP.ListUpdate', function (ev, schema) {
             console.log('[DASHBOARDCONFIG] List update:', schema);
@@ -33,7 +33,7 @@ class DashboardConfigCtrl {
 
     selectDashboard(uuid) {
         console.log('[DASHBOARDCONFIG] Updating dashboard selection');
-        var origconf = this.user.clientconfig;
+        let origconf = this.user.clientconfig;
         console.log(origconf);
         origconf.dashboarduuid = uuid;
         this.user.updateclientconfig(origconf);

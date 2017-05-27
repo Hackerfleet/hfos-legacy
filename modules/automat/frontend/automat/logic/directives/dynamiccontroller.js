@@ -30,13 +30,13 @@ const widgettypes = ['compare_int']; //, 'find'];
 
 const widgettemplates = {};
 
-for (var item of widgettypes) {
+for (let item of widgettypes) {
     widgettemplates[item] = require('../templates/' + item + '.tpl.html');
 }
 
 console.log('[NGAT] Dynamic widgets:', widgettemplates);
 
-var automattoolcontroller = function ($compile, $http, $parse) {
+let automattoolcontroller = function ($compile, $http, $parse) {
     console.log('[NGDC] Init.');
     return {
         restrict: 'A',

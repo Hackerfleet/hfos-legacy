@@ -35,7 +35,7 @@ class automatcompare_int {
         
         console.log('[AT-CI] Scope:', $scope);
 
-        var self = this;
+        let self = this;
     }
     
     update() {
