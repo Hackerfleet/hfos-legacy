@@ -206,6 +206,9 @@ class MaptileService(ConfigurableController):
                 if self.default_tile:
                     try:
                         yield serve_file(request, response, self.default_tile)
+                    except Exception as e:
+                        self.log('Cannot deliver default tile:', e, type(e),
+                                 exc=True, lvl=error)
                     finally:
                         event.stop()
                 else:
