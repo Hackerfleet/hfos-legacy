@@ -17,9 +17,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-DashboardSchema = base_object('dashboardconfig',
-                              roles_read=['crew'],
-                              roles_write=['crew'])
+DashboardSchema = base_object('dashboardconfig', all_roles='crew')
 
 DashboardSchema['properties'].update({
     'locked': {'type': 'boolean', 'title': 'Locked Dashboard',

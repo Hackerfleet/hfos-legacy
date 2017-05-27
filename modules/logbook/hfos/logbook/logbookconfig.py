@@ -17,7 +17,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-LogbookSchema = base_object('logbookconfig')
+LogbookSchema = base_object('logbookconfig', all_roles='crew')
 
 LogbookSchema['properties'].update({
     'locked': {

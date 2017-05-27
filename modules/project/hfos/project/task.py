@@ -24,7 +24,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-TaskSchema = base_object('task')
+TaskSchema = base_object('task', all_roles='crew')
 
 TaskSchema['properties'].update({
     'project': {

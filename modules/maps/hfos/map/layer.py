@@ -24,24 +24,16 @@ from hfos.schemata.base import base_object
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 LayerSchema = base_object('layer',
-                          roles_read=['owner', 'admin', 'crew'],
-                          roles_write=['owner', 'admin', 'navigator'],
-                          roles_create=['admin', 'navigator'],
-                          roles_list=['owner', 'admin', 'crew']
+                          roles_read=['crew'],
+                          roles_write=['navigator'],
+                          roles_create=['navigator'],
+                          roles_list=['crew']
                           )
 
 LayerSchema['properties'].update({
-    'owner': {
-        'type': 'string', 'minLength': 36,
-        'title': "Owner's Unique ID", 'description': 'HIDDEN'
-    },
     'color': {
         'type': 'string', 'title': 'View Color', 'format': 'color',
         'description': 'This views color indicator'
-    },
-    'shared': {
-        'type': 'boolean', 'title': 'Shared view',
-        'description': 'Share view with the crew', 'default': True
     },
     'notes': {
         'type': 'string', 'format': 'html', 'title': 'User notes',

@@ -24,10 +24,10 @@ from hfos.schemata.base import base_object
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 LayerGroupSchema = base_object('layergroup',
-                               roles_read=['owner', 'admin', 'crew'],
-                               roles_write=['owner', 'admin', 'navigator'],
-                               roles_create=['admin', 'navigator'],
-                               roles_list=['owner', 'admin', 'crew']
+                               roles_read=['crew'],
+                               roles_write=['navigator'],
+                               roles_create=['navigator'],
+                               roles_list=['crew']
                                )
 
 LayerGroupSchema['properties'].update({

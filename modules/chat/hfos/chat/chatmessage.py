@@ -17,7 +17,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-ChatMessageSchema = base_object('chatmessage')
+ChatMessageSchema = base_object('chatmessage', all_roles='crew')
 
 ChatMessageSchema['properties'].update({
     'timestamp': {'type': 'string', 'title': 'Timestamp',

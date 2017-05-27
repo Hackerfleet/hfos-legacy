@@ -23,7 +23,7 @@ from hfos.schemata.defaultform import editbuttons
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-ShareableSchema = base_object('shareable')
+ShareableSchema = base_object('shareable', all_roles='crew')
 
 ShareableSchema['properties'].update({
     'creatoruuid': {'type': 'string', 'title': 'Creator',

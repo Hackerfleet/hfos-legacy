@@ -23,7 +23,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-GeoObjectSchema = base_object('geoobject')
+GeoObjectSchema = base_object('geoobject', all_roles='crew')
 
 GeoObjectSchema['properties'].update({
     'layer': {
@@ -32,8 +32,16 @@ GeoObjectSchema['properties'].update({
         'type': 'string',
         'title': 'Unique GeoObject Layer ID'
     },
-    'color': {'type': 'string', 'title': 'GeoObject Color', 'format': 'color',
-              'description': 'This GeoObject color indicator'},
+    'color': {'type': 'string', 'title': 'Background Color',
+              # 'format': 'color',
+              'description': 'GeoObject background color indicator',
+              'default': '#4384BF'},
+    'iconcolor': {'type': 'string', 'title': 'Icon Color',
+                  # 'format': 'color',
+                  'description': 'GeoObject icon color indicator', 'default':
+                      'white'},
+    'icon': {'type': 'string', 'title': 'Icon',
+             'description': 'Custom user icon', 'default': 'flag'},
     'shared': {'type': 'boolean', 'title': 'Shared GeoObject',
                'description': 'Share GeoObject with the crew'},
     'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',

@@ -23,7 +23,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-ProjectSchema = base_object('project')
+ProjectSchema = base_object('project', all_roles='crew')
 
 ProjectSchema['properties'].update({
     'creatoruuid': {'type': 'string', 'title': 'Creator',

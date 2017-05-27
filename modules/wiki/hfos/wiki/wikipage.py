@@ -18,7 +18,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-WikiPageSchema = base_object('wikipage', roles_read=['crew'])
+WikiPageSchema = base_object('wikipage', all_roles='crew')
 
 WikiPageSchema['properties'].update({
     'title': {'type': 'string', 'title': 'Page Title',

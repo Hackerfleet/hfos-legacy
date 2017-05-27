@@ -17,7 +17,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-TaskGridConfigSchema = base_object('taskgridconfig')
+TaskGridConfigSchema = base_object('taskgridconfig', all_roles='crew')
 
 TaskGridConfigSchema['properties'].update({
     'locked': {'type': 'boolean', 'title': 'Locked Taskgrid',
