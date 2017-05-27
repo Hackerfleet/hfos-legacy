@@ -17,7 +17,9 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-SensorDataTypeSchema = base_object('sensordatatype', has_owner=False)
+SensorDataTypeSchema = base_object('sensordatatype',
+                                   has_owner=False,
+                                   all_roles='crew')
 
 SensorDataTypeSchema['properties'].update({
     'sentence': {'type': 'string', 'title': 'Sentence',

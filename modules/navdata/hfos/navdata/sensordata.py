@@ -15,7 +15,10 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-SensorDataSchema = base_object('sensorData', has_owner=False, has_uuid=False)
+SensorDataSchema = base_object('sensorData',
+                               has_owner=False,
+                               has_uuid=False,
+                               all_roles='crew')
 
 SensorDataSchema['properties'].update({
     'value': {
