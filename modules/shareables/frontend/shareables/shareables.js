@@ -160,7 +160,7 @@ class SharingCtrl {
     
     reserve() {
         let reservation = {
-            component: 'hfos.shareable.shareablewatcher',
+            component: 'hfos.shareables.manager',
             action: 'reserve',
             data: {
                 uuid: this.reservationtarget,
