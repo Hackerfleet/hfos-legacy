@@ -20,6 +20,12 @@ import leafleteasybutton from 'leaflet-easybutton';
 import zoomslider from 'leaflet.zoomslider';
 import contextmenu from 'leaflet-contextmenu';
 
+import 'Leaflet.vector-markers/dist/leaflet-vector-markers.css';
+
+import vectormarkers from 'Leaflet.vector-markers/dist/leaflet-vector-markers';
+
+import default_marker from 'leaflet/dist/images/marker-icon.png';
+
 // import 'Leaflet.Grid/L.Grid.css';
 // import leafletgrid from 'Leaflet.Grid/L.Grid';
 
@@ -32,7 +38,7 @@ import 'leaflet.zoomslider/src/L.Control.Zoomslider.css';
 
 class mapcomponent {
     
-    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert, clipboard, navdata, $compile, $aside) {
+    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert, clipboard, navdata, $compile, $aside, uuid) {
         this.scope = scope;
         this.leaflet = leafletData;
         this.op = objectproxy;
@@ -44,6 +50,7 @@ class mapcomponent {
         this.alert = alert;
         this.clipboard = clipboard;
         this.navdata = navdata;
+        this.uuid = uuid;
         
         this.mapviews = null;
         this.geoobjects = null;
@@ -134,8 +141,26 @@ class mapcomponent {
         
         this.vessels = [];
         
+        //L.VectorMarkers.Icon.prototype.options.prefix = 'fa';
+        
+        let DefaultMarker = L.VectorMarkers.icon;
+        
         this.controls = {
-            draw: {},
+            draw: {
+                position: 'top-right',
+                draw: {
+                    marker: {
+                        icon: new DefaultMarker({
+                            icon: 'flag',
+                            iconColor: 'white',
+                            markerColor: '#4384BF'
+                        })
+                    }
+                },
+                /*edit: {
+                    featureGroup:
+                }*/
+            },
             scale: {}
         };
         
@@ -353,7 +378,18 @@ class mapcomponent {
                 
                 let myLayer = L.geoJson().addTo(self.map);
                 console.log('[MAP] Resulting Layer:', myLayer);
-                myLayer.addData(obj.geojson);
+                if (obj.geojson.geometry.type == 'Point') {
+                    let marker_icon = new DefaultMarker({
+                        icon: obj.icon,
+                        iconColor: obj.iconcolor,
+                        markerColor: obj.color
+                    });
+                    let pos = obj.geojson.geometry.coordinates;
+                    let marker = L.marker([pos[1], pos[0]], {icon: marker_icon}).addTo(self.map);
+                    self.addContextMenu(marker, obj.uuid);
+                } else {
+                    myLayer.addData(obj.geojson);
+                }
             } else if (schema === 'layergroup') {
                 console.log('[MAP] Layergroup received:', obj);
                 if (self.layergroup == obj.uuid) {
@@ -561,7 +597,6 @@ class mapcomponent {
                         self.drawing = true;
                         $('.leaflet-draw').show();
                         control.state('enabled');
-                        $('#btn_toggledraw').attr('background', 'hotpink');
                     }
                 }, {
                     stateName: 'enabled',
@@ -570,7 +605,6 @@ class mapcomponent {
                         self.drawing = false;
                         $('.leaflet-draw').hide();
                         control.state('disabled');
-                        $('#btn_toggledraw').attr('background', 'white');
                     }
                 }],
                 title: 'Toggle editing of GeoObjects'
@@ -664,6 +698,17 @@ class mapcomponent {
             self.togglefollow.addTo(map);
             self.togglesync.addTo(map);
             self.toggledash.addTo(map);
+    
+    
+            self.addContextMenu = function(layer, uuid) {
+                console.log('[MAP] Adding context menu to geoobject');
+                layer.on('click', function(e) {
+                    L.popup().setContent('<h2>Marker</h2>' +
+                        '<div><a href="#!/editor/geoobject/'+uuid+'/edit">Edit Object</a></div>')
+                        .setLatLng(e.latlng)
+                        .openOn(map);
+                });
+            };
             
             leafletData.getLayers().then(function (baselayers) {
                 let drawnItems = baselayers.overlays.draw;
@@ -671,7 +716,9 @@ class mapcomponent {
                 console.log('[MAP] The basedrawlayer looks like this:', drawnItems);
                 map.on('draw:created', function (e) {
                     let layer = e.layer;
+                    let uuid = self.uuid.v4();
                     console.log('[MAP] Map drawing created:', e, ' layer:', layer);
+                    self.addContextMenu(layer, uuid);
                     drawnItems.addLayer(layer);
                     
                     let geojson = layer.toGeoJSON();
@@ -681,8 +728,8 @@ class mapcomponent {
                     self.geojson = geojson;
                     
                     let geoobject = {
-                        uuid: 'create',
-                        owner: self.user.useruuid,
+                        uuid: uuid,
+                        //owner: self.user.useruuid,
                         geojson: geojson
                     };
                     self.op.putObject('geoobject', geoobject);
@@ -955,6 +1002,6 @@ class mapcomponent {
     
 }
 
-mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard', 'navdata', '$compile', '$aside'];
+mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard', 'navdata', '$compile', '$aside', 'uuid'];
 
 export default mapcomponent;
