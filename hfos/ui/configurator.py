@@ -34,7 +34,7 @@ class put(authorizedevent):
 
 class Configurator(ConfigurableComponent):
     """
-    Handles schemata requests from clients.
+    Provides a common configuration interface for all HFOS components.
     """
 
     channel = "hfosweb"
