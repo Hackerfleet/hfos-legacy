@@ -18,7 +18,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-CountableSchema = base_object('countable')
+CountableSchema = base_object('countable', all_roles='crew')
 
 CountableSchema['properties'].update({
         'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
@@ -52,7 +52,7 @@ CountableForm = [
     {
         'key': 'count',
         'type': 'button',
-        'onClick': '$ctrl.formAction("countablewatcher", "count", '
+        'onClick': '$ctrl.formAction("hfos.countables.counter", "increment", '
                    '$ctrl.model.uuid)',
         'title': '+1'
     },

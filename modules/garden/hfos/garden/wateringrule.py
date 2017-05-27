@@ -17,7 +17,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-WateringRuleSchema = base_object('wateringrule')
+WateringRuleSchema = base_object('wateringrule', all_roles='crew')
 
 WateringRuleSchema['properties'].update({
     'status': {'type': 'bool', 'title': 'Status', 'description':
@@ -57,14 +57,14 @@ WateringRuleForm = [
     {
         'key': 'Toggle',
         'type': 'button',
-        'onClick': 'formAction("garden", "toggle", model.uuid)',
+        'onClick': 'formAction("hfos.garden", "toggle", model.uuid)',
         'title': 'Toggle WateringRule'
     },
     {
         'key': 'Suspend',
         'type': 'button',
         'condition': 'model.status',
-        'onClick': 'formAction("garden", "suspend", model.uuid)',
+        'onClick': 'formAction("hfos.garden", "suspend", model.uuid)',
         'title': 'Suspend the rule for the next time'
     },
     {

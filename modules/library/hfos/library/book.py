@@ -23,7 +23,7 @@ from hfos.schemata.base import base_object
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-BookSchema = base_object('bookschema')
+BookSchema = base_object('bookschema', all_roles='crew')
 
 BookSchema['properties'].update({
     'authors': {
@@ -115,21 +115,24 @@ BookForm = [
         'key': 'Lend',
         'type': 'button',
         'condition': 'model.available == true',
-        'onClick': '$ctrl.formAction("library", "lend", $ctrl.model.uuid)',
+        'onClick': '$ctrl.formAction("hfos.library.manager",'
+                   '"book_lend", $ctrl.model.uuid)',
         'title': 'Lend Book'
     },
     {
         'key': 'Return',
         'type': 'button',
         'condition': 'model.available != true',
-        'onClick': '$ctrl.formAction("library", "return", $ctrl.model.uuid)',
+        'onClick': '$ctrl.formAction("hfos.library.manager", '
+                   '"book_return", $ctrl.model.uuid)',
         'title': 'Return Book'
     },
     {
         'key': 'augment',
         'type': 'button',
         'condition': 'model.isbn',
-        'onClick': '$ctrl.formAction("library", "augment", $ctrl.model.uuid)',
+        'onClick': '$ctrl.formAction("hfos.library.manager", '
+                   '"book_augment", $ctrl.model.uuid)',
         'title': 'Augment Book from ISBN database'
     },
     editbuttons
