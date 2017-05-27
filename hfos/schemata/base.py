@@ -81,7 +81,10 @@ def base_object(name,
                         }
                     }
                 },
-                'default': {}
+                'default': {},
+                'x-schema-form': {
+                    'condition': "false"
+                }
             },
             'name': {
                 'type': 'string'
@@ -96,6 +99,9 @@ def base_object(name,
                            'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                 'type': 'string',
                 'title': 'Unique ' + name + ' ID',
+                'x-schema-form': {
+                    'condition': "false"
+                }
             }
         })
         base_schema['required'] = ["uuid"]
@@ -106,7 +112,10 @@ def base_object(name,
                 'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
                            'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
                 'type': 'string',
-                'title': 'Unique Owner ID'
+                'title': 'Unique Owner ID',
+                'x-schema-form': {
+                    'condition': "false"
+                }
             }
         })
         # TODO: Schema should allow specification of non-local owners as well

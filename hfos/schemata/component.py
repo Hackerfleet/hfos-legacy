@@ -8,25 +8,38 @@ ComponentConfigSchemaTemplate = {
             'type': 'string',
             'minLength': 36,
             'title': 'Unique Component ID',
-            'description': 'HIDDEN'
+            'description': 'HIDDEN',
+            'readonly': True,
+            'x-schema-form': {
+                'condition': "false"
+            }
         },
         'name': {
             'type': 'string',
             'title': 'Name',
             'description': 'Name of '
                            'Component',
-            'default': 'NONAME'
+            'default': 'NONAME',
+            'readonly': True
         },
         'creator': {
             'type': 'string',
             'title': 'Creator',
-            'description': 'Creator of Component'
+            'description': 'Creator of Component',
+            'readonly': True,
+            'x-schema-form': {
+                'condition': "false"
+            }
         },
         'owner': {
             'type': 'string',
             'minLength': 36,
             'title': "Owner's Unique ID",
-            'description': 'HIDDEN'
+            'description': 'HIDDEN',
+            'readonly': True,
+            'x-schema-form': {
+                'condition': "false"
+            }
         },
         'color': {
             'type': 'string',  # 'format': 'color',
@@ -36,8 +49,13 @@ ComponentConfigSchemaTemplate = {
         'notes': {
             'type': 'string',
             'format': 'html',
-            'title': 'User notes',
-            'description': 'Descriptive Component notes'
+            'title': 'Description',
+            'description': 'Descriptive Component notes',
+            'readonly': True,
+            'x-schema-form': {
+                'type': 'textarea',
+                'fieldHtmlClass': 'textlabel'
+            }
         },
         'active': {
             'type': 'boolean',
@@ -47,7 +65,8 @@ ComponentConfigSchemaTemplate = {
         'componentclass': {
             'type': 'string',
             'title': 'Component class',
-            'description': 'Type of component'
+            'description': 'Type of component',
+            'readonly': True
         },
     }
 }
