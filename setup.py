@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 # HFOS - Hackerfleet Operating System
 # ===================================
-# Copyright (C) 2011-2015 riot <riot@c-base.org> and others.
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
 
 from setuptools import setup
 import os
@@ -69,6 +72,7 @@ def add_datafiles(*paths):
         else:
             manifest.write('global-exclude ' + part + '/*\n')
 
+
 add_datafiles('frontend', 'docs')
 
 setup(name="hfos",
@@ -108,8 +112,7 @@ See https://github.com/hackerfleet/hfos""",
                         'six'
                         ],
       data_files=datafiles,
-      entry_points=
-      """[console_scripts]
+      entry_points="""[console_scripts]
     hfos_launcher=hfos.launcher:launch
     hfos_manage=hfos_manage:cli
     [hfos.base]

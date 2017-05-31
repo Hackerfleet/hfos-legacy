@@ -3,7 +3,7 @@
 
 # HFOS - Hackerfleet Operating System
 # ===================================
-# Copyright (C) 2011-2016 riot <riot@c-base.org> and others.
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
 
 """
 Module: Logger
@@ -36,8 +39,6 @@ error = 40
 critical = 50
 off = 100
 
-:copyright: (C) 2011-2016 riot@c-base.org
-:license: GPLv3 (See LICENSE)
 
 """
 
@@ -52,6 +53,7 @@ import time
 import sys
 import inspect
 import six
+
 # import os
 
 root = None
@@ -105,9 +107,11 @@ LiveLog = []
 
 start = time.time()
 
+
 def set_logfile(path):
     global logfile
     logfile = path
+
 
 class logevent(Event):
     """
@@ -234,7 +238,7 @@ def hfoslog(*what, **kwargs):
     if verbosity['global'] <= debug:
         # Automatically log the current function details.
 
-        if not 'sourceloc' in kwargs:
+        if 'sourceloc' not in kwargs:
 
             # Get the previous frame in the stack, otherwise it would
             # be this function

@@ -1,11 +1,32 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
 """
 
 
 Module NMEA
 ===========
 
-:copyright: (C) 2011-2016 riot@c-base.org
-:license: GPLv3 (See LICENSE)
 
 """
 
@@ -21,9 +42,9 @@ from hfos.component import ConfigurableComponent
 from hfos.database import ValidationError
 from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
 from hfos.navdata.events import sensordata
+
 # from pprint import pprint
 
-__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 try:
     from pynmea2 import parse
@@ -73,6 +94,7 @@ def serial_ports():
             pass
     return result
 
+
 def get_file_title_map(ports):
     title_map = {}
     for port in ports:
@@ -89,22 +111,22 @@ class NMEAParser(ConfigurableComponent):
     ports = serial_ports()
     configprops = {
         'connectiontype': {
-           'type': 'string',
-           'enum': ['TCP', 'USB/Serial'],
-           'title': 'Type of NMEA adaptor',
-           'description': 'Determines how to get data from the bus.',
-           'default': 'USB/Serial',
+            'type': 'string',
+            'enum': ['TCP', 'USB/Serial'],
+            'title': 'Type of NMEA adaptor',
+            'description': 'Determines how to get data from the bus.',
+            'default': 'USB/Serial',
             # TODO: Find out what causes this to be required (Form throws
             # undecipherable errors without this)
             # Same problem with the serialfile, below
-           'x-schema-form': {
-               'type': 'select',
-               'htmlClass': 'div',
-               'titleMap': {
-                   'TCP': 'TCP',
-                   'USB/Serial': 'USB/Serial'
-               }
-           }
+            'x-schema-form': {
+                'type': 'select',
+                'htmlClass': 'div',
+                'titleMap': {
+                    'TCP': 'TCP',
+                    'USB/Serial': 'USB/Serial'
+                }
+            }
         },
         'port': {
             'type': 'number',
@@ -261,7 +283,6 @@ class NMEAParser(ConfigurableComponent):
 
                         # data.update(rawdata)
                         # hfoslog(data, lvl=critical)
-
 
                         # if type(sentence) in [types.GGA, types.GLL,
                         # types.GSV, types.MWD]:

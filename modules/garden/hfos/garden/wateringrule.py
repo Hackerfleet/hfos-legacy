@@ -1,3 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
 """
 
 Schema: WateringRule
@@ -9,24 +32,28 @@ Contains
 WateringRule reference entry for the garden to set up pump start times and
 durations as well as conditions..
 
-:copyright: (C) 2011-2016 riot@c-base.org
-:license: GPLv3 (See LICENSE)
 
 """
 from hfos.schemata.base import base_object
 
-__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
 WateringRuleSchema = base_object('wateringrule', all_roles='crew')
 
 WateringRuleSchema['properties'].update({
-    'status': {'type': 'bool', 'title': 'Status', 'description':
-        'If watering rule is active'},
-    'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
-              'description': 'Entry notes'},
-    'activationtime': {'type': 'string', 'description': 'Activation time '
-                                                        'of watering '
-                                                        'rule'},
+    'status': {
+        'type': 'bool',
+        'title': 'Status',
+        'description': 'If watering rule is active'
+    },
+    'notes': {
+        'type': 'string',
+        'format': 'html',
+        'title': 'User notes',
+        'description': 'Entry notes'
+    },
+    'activationtime': {
+        'type': 'string',
+        'description': 'Activation time of watering rule'
+    },
     'duration': {'type': 'number', 'description': 'Duration of pump '
                                                   'activation'}
 })

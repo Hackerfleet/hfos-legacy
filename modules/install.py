@@ -1,3 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
 import argparse
 from subprocess import Popen, PIPE
 import sys
@@ -62,7 +85,6 @@ def gui():
 
     class PluginSelector(urwid.ListBox):
         def __init__(self):
-
             self.SFLW = None
             self.body = None
 
@@ -90,10 +112,12 @@ def gui():
         def __init__(self):
             self.body = None
 
-            self.header = urwid.Text(('title', u" HFOS Modules "), align='center')
-            self.headermap = urwid.AttrMap(self.header, 'streak')
-            self.footer = urwid.Text(('banner', u" Select plugins to install! "),
+            self.header = urwid.Text(('title', u" HFOS Modules "),
                                      align='center')
+            self.headermap = urwid.AttrMap(self.header, 'streak')
+            self.footer = urwid.Text(
+                ('banner', u" Select plugins to install! "),
+                align='center')
             self.footermap = urwid.AttrWrap(self.footer, 'streak')
 
             self.allbutton = urwid.Button(u"Select All", self.on_all_button)
@@ -106,7 +130,8 @@ def gui():
             self.developrbutton = urwid.RadioButton(self.radiogroup, 'Develop')
             self.installrbutton = urwid.RadioButton(self.radiogroup, 'Install')
 
-            self.modepile = urwid.Pile([self.developrbutton, self.installrbutton])
+            self.modepile = urwid.Pile(
+                [self.developrbutton, self.installrbutton])
 
             self.buttons = [
                 blank,
@@ -139,7 +164,8 @@ def gui():
             urwid.Frame.__init__(self, body=self.filler, header=self.headermap,
                                  footer=self.footermap)
 
-            self.loop = urwid.MainLoop(self, palette, unhandled_input=exit_on_q)
+            self.loop = urwid.MainLoop(self, palette,
+                                       unhandled_input=exit_on_q)
             self.loop.run()
 
         def on_all_button(self):
@@ -195,7 +221,8 @@ def gui():
 
             log = {}
 
-            mode = "install" if self.installrbutton.state is True else "develop"
+            mode = "install" if self.installrbutton.state is True else \
+                "develop"
 
             for plugin in plugins:
                 self.footer.set_text(('banner',
@@ -210,7 +237,8 @@ def gui():
                 log[plugin] = pluginlog
 
                 # self.installPlugin(plugin)
-                installinfo.set_text((u"Installing package 'hfos-%s'" % plugin))
+                installinfo.set_text(
+                    (u"Installing package 'hfos-%s'" % plugin))
                 done += 1
                 installprogressbar.set_completion(done)
                 self.loop.draw_screen()
@@ -283,6 +311,7 @@ def main():
     elif urwid is None:
         print("No GUI available. Maybe install python3-urwid to use this or"
               "use install --all to just install everything")
+
 
 if __name__ == "__main__":
     main()

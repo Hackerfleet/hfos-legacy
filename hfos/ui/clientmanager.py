@@ -1,3 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
 """
 
 
@@ -6,8 +29,6 @@ Module clientmanager
 
 Coordinates clients communicating via websocket
 
-:copyright: (C) 2011-2016 riot@c-base.org
-:license: GPLv3 (See LICENSE)
 
 """
 
@@ -29,8 +50,6 @@ from hfos.database import objectmodels
 from hfos.logger import error, warn, critical, debug, info, network, \
     verbose, hilight
 from hfos.ui.clientobjects import Socket, Client, User
-
-__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 class ComplexEncoder(json.JSONEncoder):
@@ -152,11 +171,13 @@ class ClientManager(ConfigurableComponent):
                 # make sense instead of looking this up all the time.
 
                 if event.uuid is None:
-                    userobject = objectmodels['user'].find_one({'name':
-                                                                    event.username})
+                    userobject = objectmodels['user'].find_one({
+                        'name': event.username
+                    })
                 else:
-                    userobject = objectmodels['user'].find_one(
-                        {'uuid': event.uuid})
+                    userobject = objectmodels['user'].find_one({
+                        'uuid': event.uuid
+                    })
 
                 if userobject is None:
                     self.log("No user by that name known.", lvl=warn)
@@ -248,7 +269,7 @@ class ClientManager(ConfigurableComponent):
             if component == "debugger":
                 self.log(component, action, data, user, client, lvl=info)
             AuthorizedEvents = get_user_events()
-            #pprint(AuthorizedEvents)
+            # pprint(AuthorizedEvents)
 
             if not user and component in AuthorizedEvents.keys():
                 self.log("Unknown client tried to do an authenticated "
@@ -448,8 +469,10 @@ class ClientManager(ConfigurableComponent):
                           "data": account.serializablefields()}
             self.log("Transmitting Authorization to client", authpacket,
                      lvl=network)
-            self.fireEvent(write(event.sock, json.dumps(authpacket)),
-                           "wsserver")
+            self.fireEvent(
+                write(event.sock, json.dumps(authpacket)),
+                "wsserver"
+            )
 
             profilepacket = {"component": "profile", "action": "get",
                              "data": profile.serializablefields()}

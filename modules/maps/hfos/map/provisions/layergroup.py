@@ -1,3 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
 """
 
 Provisioning: Layergroups
@@ -8,16 +31,12 @@ Contains
 
 Predefined groups of layers.
 
-:copyright: (C) 2011-2016 riot@c-base.org
-:license: GPLv3 (See LICENSE)
 
 """
 
 from hfos.provisions.base import provisionList
 from hfos.database import objectmodels
 from hfos.logger import hfoslog
-
-__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 layergroups = [
     {
@@ -46,8 +65,10 @@ layergroups = [
         "shared": True,
         "notes": "ESRI Satellite and Open Sea Map",
         "layers": [
-            '582d2ef3-759e-49f7-81ab-8dbe224d618a',  # ESRI Satellite World Imagery Base
-            '19e5704e-68a2-435e-9f21-ac389973cc7a',  # ESRI Satellite Hill Shade Base
+            '582d2ef3-759e-49f7-81ab-8dbe224d618a',
+            # ESRI Satellite World Imagery Base
+            '19e5704e-68a2-435e-9f21-ac389973cc7a',
+            # ESRI Satellite Hill Shade Base
             '3a4cceaa-3e8b-4f65-85ee-2ff9f6de6a71',  # Openstreetmap Overlay
             '2bedb0d2-be9f-479c-9516-256cd5a0baae',  # OpenSeaMap Overlay
         ]

@@ -947,5 +947,6 @@ def shell():
 Type -h for help, tab completion is available, hit Ctrl-D to quit.""")
     repl(click.get_current_context(), prompt_kwargs=prompt_kwargs)
 
+
 if __name__ == '__main__':
     cli(obj={})

@@ -1,3 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
 """
 
 Configurable Component
@@ -15,8 +38,6 @@ See also
 
 Provisions
 
-:copyright: (C) 2011-2016 riot@c-base.org
-:license: GPLv3 (See LICENSE)
 
 """
 from circuits.web.controllers import Controller
@@ -37,8 +58,6 @@ import traceback
 from sys import exc_info
 
 from pprint import pprint
-
-__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
 def handler(*names, **kwargs):
@@ -102,9 +121,8 @@ def handler(*names, **kwargs):
             f.handler = False
             return f
 
-        if len(names) > 0 and inspect.isclass(names[0]) and issubclass(names[ \
-                                                                               0],
-                                                                       authorizedevent):
+        if len(names) > 0 and inspect.isclass(names[0]) and \
+                issubclass(names[0], authorizedevent):
             f.names = (str(names[0].realname()),)
         else:
             f.names = names
@@ -296,14 +314,12 @@ class ConfigurableMeta():
 
 
 class ConfigurableController(ConfigurableMeta, Controller):
-
     def __init__(self, uniquename=None, *args, **kwargs):
         ConfigurableMeta.__init__(self, uniquename)
         Controller.__init__(self, *args, **kwargs)
 
 
 class ConfigurableComponent(ConfigurableMeta, Component):
-
     def __init__(self, uniquename=None, *args, **kwargs):
         ConfigurableMeta.__init__(self, uniquename)
         Component.__init__(self, *args, **kwargs)

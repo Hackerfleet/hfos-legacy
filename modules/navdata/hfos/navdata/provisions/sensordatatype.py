@@ -1,3 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
 from hfos.logger import hfoslog
 from hfos.provisions.base import provisionList
 from hfos.database import objectmodels
@@ -7,6 +30,7 @@ from pynmea2.nmea import NMEASentenceType, ProprietarySentence
 from decimal import Decimal
 from uuid import uuid4
 from pprint import pprint
+
 
 # TODO: This needs to be independent of the datasource.
 # We should not expect only NMEA0183 sentences but should also make sure
@@ -24,8 +48,8 @@ def getSentencesFromModule(module):
 
         obj = getSentence(sentence, module)
         if type(obj) in (NMEASentenceType, ProprietarySentence):
-            #print(sentence, type(obj))
-            #pprint(obj)
+            # print(sentence, type(obj))
+            # pprint(obj)
             doc = obj.__doc__
             if doc is None:
                 doc = 'UNDOCUMENTED'
@@ -60,13 +84,14 @@ def getFields(sentences):
 
     return fields
 
+
 def getSensorData(fields, sentences):
     sensordata = {}
     for sentype in fields:
         sen, doc = sentences[sentype]
-        #print(sen, doc)
+        # print(sen, doc)
         for field in sen.fields:
-            #print(sen, doc, field[1])
+            # print(sen, doc, field[1])
 
             if len(field) == 3:
 
@@ -136,4 +161,3 @@ def provision(**kwargs):
 
     provisionList(provisionitems, objectmodels['sensordatatype'], **kwargs)
     hfoslog('Provisioning: Sensordatatypes: Done.', emitter='PROVISIONS')
-
