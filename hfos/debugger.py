@@ -36,12 +36,12 @@ import json
 from uuid import uuid4
 
 from circuits.core.events import Event
-from circuits.core.handlers import reprhandler, handler
+from circuits.core.handlers import reprhandler
 from circuits.io import stdin
 from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
-    logtailrequest
+    logtailrequest, debugrequest
 from hfos.events.client import send
-from hfos.component import ConfigurableComponent
+from hfos.component import ConfigurableComponent, handler
 from hfos.database import objectmodels
 from hfos.logger import hfoslog, critical, warn
 
@@ -126,6 +126,7 @@ class HFDebugger(ConfigurableComponent):
             self.log("Exception during exception handling: ", e, type(e),
                      lvl=critical)
 
+    @handler(debugrequest)
     def debugrequest(self, event):
         try:
             self.log("Event: ", event.__dict__, lvl=critical)
