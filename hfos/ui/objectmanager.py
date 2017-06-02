@@ -64,6 +64,7 @@ class ObjectManager(ConfigurableComponent):
 
     def _check_permissions(self, subject, action, obj):
         self.log('Roles of user:', subject.account.roles, lvl=verbose)
+
         if 'owner' in obj.perms[action]:
             try:
                 if subject.uuid == obj.owner:
@@ -93,18 +94,18 @@ class ObjectManager(ConfigurableComponent):
 
         msg = {
             'component': 'hfos.events.objectmanager',
-            'action': 'Fail',
-            'data': (False, 'No permission.', data)
+            'action': 'fail',
+            'data': (False, 'No permission', data)
         }
         self.fire(send(client.uuid, msg))
 
-    def _cancel_by_error(self, event):
-        self.log('Malformed request!', lvl=error)
+    def _cancel_by_error(self, event, reason="malformed"):
+        self.log('Bad request:', reason, lvl=error)
 
         msg = {
             'component': 'hfos.events.objectmanager',
-            'action': 'Fail',
-            'data': 'MALFORMED'
+            'action': 'fail',
+            'data': reason
         }
         self.fire(send(event.client.uuid, msg))
 
@@ -171,7 +172,7 @@ class ObjectManager(ConfigurableComponent):
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
-            self.log('Malformed request: ', exc=True, lvl=warn)
+            self._cancel_by_error(event)
             return
 
         object_filter = self._get_filter(event)
@@ -201,33 +202,7 @@ class ObjectManager(ConfigurableComponent):
         storage_object = objectmodels[schema].find_one(object_filter)
 
         if not storage_object:
-            if uuid.upper == "CREATE":
-                # TODO: Fix this, a request for an existing object is a
-                # request for an existing object, a creation request is
-                # not.
-
-                self.log("Object not found, creating: ", data)
-
-                storage_object = objectmodels[schema](
-                    {'uuid': str(uuid4())})
-
-                if not self._check_create_permission(user, schema):
-                    self._cancel_by_permission(schema, data, event.client)
-                    return
-
-            if "owner" in schemastore[schema]['schema']['properties']:
-                storage_object.owner = event.user.uuid
-                self.log("Attached initial owner's id: ", event.user.uuid)
-            else:
-                self.log("Object not found and not willing to create.",
-                         lvl=warn)
-                result = {
-                    'component': 'hfos.events.objectmanager',
-                    'action': 'noobject',
-                    'data': {
-                        'schema': schema,
-                    }
-                }
+            self._cancel_by_error(event, 'unavailable')
 
         if storage_object:
             self.log(storage_object.perms, lvl=debug)
@@ -473,7 +448,9 @@ class ObjectManager(ConfigurableComponent):
             if uuid == 'create' or model.count({
                 'uuid': uuid
             }) == 0:
-                clientobject['uuid'] = str(uuid4())
+                if uuid == 'create':
+                    uuid = str(uuid4())
+                clientobject['uuid'] = uuid
                 clientobject['owner'] = user.uuid
                 storage_object = model(clientobject)
                 if not self._check_create_permission(user, schema):
@@ -540,8 +517,13 @@ class ObjectManager(ConfigurableComponent):
             uuid = data['uuid']
 
             if schema in objectmodels.keys():
-                self.log("Looking for object to be deleted.", lvl=debug)
+                self.log("Looking for object to be deleted:", uuid, lvl=debug)
                 storage_object = objectmodels[schema].find_one({'uuid': uuid})
+
+                if not storage_object:
+                    self._cancel_by_error(event, 'not found')
+                    return
+
                 self.log("Found object.", lvl=debug)
 
                 if not self._check_permissions(user, 'write', storage_object):
@@ -581,13 +563,14 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(subscribe)
     def subscribe(self, event):
+        uuid = event.data
 
-        self._add_subscription(event.uuid, event)
+        self._add_subscription(uuid, event)
         result = {
             'component': 'hfos.events.objectmanager',
             'action': 'subscribe',
             'data': {
-                'uuid': event.uuid, 'success': True
+                'uuid': uuid, 'success': True
             }
         }
         self._respond(None, result, event)
@@ -606,7 +589,7 @@ class ObjectManager(ConfigurableComponent):
         uuid = event.data
 
         if uuid in self.subscriptions:
-            self.subscriptions[uuid].remove(event.client.uuid)
+            self.subscriptions[uuid].pop(event.client.uuid)
 
             if len(self.subscriptions[uuid]) == 0:
                 del (self.subscriptions[uuid])
