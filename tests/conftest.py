@@ -1,4 +1,25 @@
-"""py.test config"""
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
 
 import pytest
 
@@ -11,9 +32,17 @@ from collections import deque
 from circuits.core.manager import TIMEOUT
 from circuits import handler, BaseComponent, Debugger, Manager
 
+from hfos.component import ConfigurableComponent, ComponentConfigSchemaTemplate
+from warmongo import model_factory
+
+
+class TestComponent(ConfigurableComponent):
+    configprops = {
+        'test': {'type': 'string'}
+    }
+
 
 class Watcher(BaseComponent):
-
     def init(self):
         self._lock = threading.Lock()
         self.events = deque()
@@ -59,8 +88,7 @@ def call_event(manager, event, *channels):
 
 
 class WaitEvent(object):
-
-    def __init__(self, manager, name, channel=None, timeout=6.0):
+    def __init__(self, manager, name, channel=None, timeout=1.0):
         if channel is None:
             channel = getattr(manager, "channel", None)
 
@@ -135,8 +163,23 @@ def watcher(request, manager):
     return watcher
 
 
+def clean_test_components():
+    print("Removing test components...")
+    for item in model_factory(ComponentConfigSchemaTemplate).find({
+        'componentclass': 'TestComponent'
+    }):
+        item.delete()
+
+
+@pytest.hookimpl()
+def pytest_unconfigure(config):
+    clean_test_components()
+
+
 def pytest_namespace():
     return dict((
+        ("TestComponent", TestComponent),
+        ("clean_test_components", clean_test_components),
         ("WaitEvent", WaitEvent),
         ("wait_for", wait_for),
         ("call_event", call_event),
