@@ -61,7 +61,7 @@ class SchemaManager(ConfigurableComponent):
     @handler(all)
     def all(self, event):
         self.log("Schemarequest for all schemata from",
-                 event.user.account.name)
+                 event.user)
         response = {
             'component': 'hfos.events.schemamanager',
             'action': 'all',
@@ -72,7 +72,7 @@ class SchemaManager(ConfigurableComponent):
     @handler(get)
     def get(self, event):
         self.log("Schemarequest for", event.data, "from",
-                 event.user.account.name)
+                 event.user)
         if event.data in schemastore:
             response = {
                 'component': 'hfos.events.schemamanager',
