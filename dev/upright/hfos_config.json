@@ -1,0 +1,12 @@
+{
+    "copyright_begin": 2011,
+    "copyright_end": false,
+    "author_email": "riot@c-base.org",
+    "author_name": "Heiko 'riot' Weinen",
+    "license": "GPLv3",
+    "program_name": "HFOS",
+    "program_description": "",
+    "maintainer_email": "riot@c-base.org",
+    "repository": "https://github.com/hackerfleet/hfos",
+    "maintainer_name": "Heiko 'riot' Weinen"
+}
