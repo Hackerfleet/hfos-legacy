@@ -64,9 +64,9 @@ class Configurator(ConfigurableComponent):
         super(Configurator, self).__init__('CONF', *args)
 
     def _check_permission(self, event):
-        user = objectmodels['user'].find_one({'uuid': event.user.uuid})
+        account = event.user.account
 
-        if 'admin' not in user.roles:
+        if 'admin' not in account.roles:
             self.log('Missing permission to configure components',
                      lvl=warn)
 
@@ -144,6 +144,18 @@ class Configurator(ConfigurableComponent):
 
     @handler(get)
     def get(self, event):
+        if self._check_permission(event) is False:
+            response = {
+                'component': 'hfos.ui.configurator',
+                'action': 'get',
+                'data': False
+            }
+            self.log('No permission to access configuration', event.user,
+                     lvl=warn)
+
+            self.fireEvent(send(event.client.uuid, response))
+            return
+
         try:
             comp = event.data['uuid']
         except KeyError:
