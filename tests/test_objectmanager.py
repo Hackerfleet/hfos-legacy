@@ -1,3 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2017 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
 """
 Hackerfleet Operating System - Backend
 
@@ -5,46 +28,69 @@ Test HFOS Launcher
 ==================
 
 
-:copyright: (C) 2011-2016 riot@c-base.org
-:license: GPLv3 (See LICENSE)
 
 """
 
-from hfos.database import schemastore, objectmodels
+from hfos.database import objectmodels
 
 from hfos.ui.clientobjects import User, Client
 from circuits import Manager
 import pytest
 from uuid import uuid4
 from hfos.ui.objectmanager import ObjectManager
-from hfos.events.system import objectmanagerrequest
+from hfos.events.objectmanager import objectchange, objectcreation, \
+    objectdeletion, objectevent, updatesubscriptions, change, get, delete, \
+    put, list, search, subscribe, unsubscribe
+from hfos.events.client import send
 
 from pprint import pprint
 
-__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
-
 m = Manager()
-sm = ObjectManager().register(m)
+om = ObjectManager()
+om.register(m)
 
-useruuid = uuid4()
-clientuuid = uuid4()
+useruuid = str(uuid4())
+clientuuid = str(uuid4())
+
+
+class AccountMock():
+    def __init__(self):
+        self.name = 'TEST'
+        self.roles = ['admin']
+
+
+class ProfileMock():
+    def __init__(self):
+        self.name = 'TEST'
 
 
 def test_instantiate():
     """Tests correct instantiation"""
 
-    assert type(sm) == ObjectManager
+    assert type(om) == ObjectManager
 
 
-def transmit(action, data):
-    user = User(None, None, useruuid)
+def transmit(action, data, account=AccountMock()):
+    profile = ProfileMock()
+    user = User(account, profile, useruuid)
     client = Client(None, None, clientuuid, useruuid)
 
     m.start()
 
-    waiter = pytest.WaitEvent(m, 'send', "hfosweb")
+    events = {
+        'put': put,
+        'get': get,
+        'delete': delete,
+        'change': change,
+        'list': list,
+        'search': search,
+        'subscribe': subscribe,
+        'unsubscribe': unsubscribe
+    }
 
-    m.fire(objectmanagerrequest(user, action, data, client), "hfosweb")
+    waiter = pytest.WaitEvent(m, "send", "hfosweb")
+
+    m.fire(events[action](user, action, data, client), "hfosweb")
 
     result = waiter.wait()
     packet = result.packet
@@ -130,7 +176,19 @@ def test_get_object_invalid():
         'uuid': 'BERTRAM'
     })
 
-    assert packet['action'] == 'noobject'
+    assert packet['action'] == 'fail'
+    assert packet['data'] == 'unavailable'
+
+
+def test_get_schema_invalid():
+    """Tests if an error is returned when a not existing object is requested"""
+
+    packet = transmit('get', {
+        'uuid': 'BERTRAM'
+    })
+
+    assert packet['action'] == 'noschema'
+    assert packet['data'] is None
 
 
 def test_get_object():
@@ -152,6 +210,37 @@ def test_get_object():
     obj = packet['data']
 
     assert obj['uuid'] == system_config_uuid
+
+
+def test_get_permission_error():
+    """Tests if a systemconfig cannot be retrieved if the user has
+    insufficient roles assigned"""
+
+    system_configs = transmit('list', {
+        'schema': 'systemconfig'
+    })['data']['list']
+    system_config_uuid = system_configs[0]['uuid']
+
+    account = AccountMock()
+    account.roles.remove('admin')
+
+    packet = transmit('get', {
+        'schema': 'systemconfig',
+        'uuid': system_config_uuid
+    }, account)
+
+    assert packet['action'] == 'fail'
+    assert 'data' in packet
+
+    data = packet['data']
+
+    assert data[0] is False
+    assert data[1] == 'No permission'
+    assert type(data[2]) == dict
+
+    query = packet['data'][2]
+    assert query['schema'] == 'systemconfig'
+    assert query['uuid'] == system_config_uuid
 
 
 def test_list_filtered():
@@ -203,15 +292,76 @@ def test_unsubscribe():
 
 
 def test_put_new():
-    obj = objectmodels['systemconfig']()
+    uuid = str(uuid4())
+    obj = objectmodels['systemconfig']({'uuid': uuid})
     obj.active = False
-    obj.uuid = str(uuid4())
     obj.name = 'TEST SYSTEMCONFIG'
 
     packet = transmit('put', {
         'schema': 'systemconfig',
         'obj': obj.serializablefields(),
-        'uuid': 'create'
+        'uuid': uuid
     })
 
     assert packet['data'][0]
+
+
+def test_put_new_permission_error():
+    uuid = str(uuid4())
+    obj = objectmodels['systemconfig']({'uuid': uuid})
+    obj.active = False
+    obj.name = 'TEST SYSTEMCONFIG'
+
+    account = AccountMock()
+    account.roles.remove('admin')
+
+    packet = transmit('put', {
+        'schema': 'systemconfig',
+        'obj': obj.serializablefields(),
+        'uuid': uuid
+    }, account)
+
+    assert packet['action'] == 'fail'
+    assert 'data' in packet
+
+    data = packet['data']
+
+    assert data[0] is False
+    assert data[1] == 'No permission'
+    assert type(data[2]) == dict
+
+
+def test_delete():
+    uuid = str(uuid4())
+
+    obj = objectmodels['systemconfig']({'uuid': uuid})
+    obj.active = False
+    obj.name = 'TEST SYSTEMCONFIG'
+
+    packet = transmit('put', {
+        'schema': 'systemconfig',
+        'obj': obj.serializablefields(),
+        'uuid': uuid
+    })
+
+    assert packet['action'] == 'put'
+    assert packet['data'][0] is True
+
+    packet = transmit('delete', {
+        'schema': 'systemconfig',
+        'uuid': uuid
+    })
+
+    assert packet['data'][0] is True
+    assert packet['data'][1] == 'systemconfig'
+    assert packet['data'][2] == uuid
+
+
+def test_delete_invalid_object():
+    packet = transmit('delete', {
+        'schema': 'systemconfig',
+        'uuid': 'FOOBAR'
+    })
+
+    assert packet['action'] == 'fail'
+    assert packet['data'] == 'not found'
