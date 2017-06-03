@@ -155,8 +155,8 @@ class Core(ConfigurableComponent):
             'debugger',
             'recorder',
             'playback',
-            'sensors',
-            'navdatasim'
+            #'sensors',
+            #'navdatasim'
             # 'ldap',
             # 'navdata',
             # 'nmeaparser',
@@ -369,7 +369,6 @@ class Core(ConfigurableComponent):
         from hfos.events.system import AuthorizedEvents
         self.log(len(AuthorizedEvents), "authorized events:",
                  list(AuthorizedEvents.keys()), lvl=hilight)
-        pprint(AuthorizedEvents)
 
         self._instantiate_components()
         self._start_frontend()
