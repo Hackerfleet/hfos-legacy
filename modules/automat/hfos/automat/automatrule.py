@@ -23,12 +23,12 @@ __license__ = "GPLv3"
 
 """
 Schema: Automatrule
-=====================
+===================
 
 Contains
 --------
 
-Automat: Structure to store automat configurations
+AutomatRule: Structure to store automat rule configurations
 
 
 """
@@ -49,17 +49,20 @@ AutomatRuleSchema['properties'].update({
                     'destination': {
                         'type': 'string',
                         'title': 'Destination',
-                        'description': 'Destination of output event'
+                        'description': 'Destination of output event',
+                        'default': ''
                     },
                     'name': {
                         'type': 'string',
                         'title': 'Event name',
-                        'description': 'Name of output event'
+                        'description': 'Name of output event',
+                        'default': ''
                     }
                 }
             },
             'data': {
-                'type': 'string'
+                'type': 'object',
+                'default': {}
             }
         }
     },
@@ -72,17 +75,20 @@ AutomatRuleSchema['properties'].update({
                     'source': {
                         'type': 'string',
                         'title': 'Source',
-                        'description': 'Source of input event'
+                        'description': 'Source of input event',
+                        'default': ''
                     },
                     'name': {
                         'type': 'string',
                         'title': 'Event name',
-                        'description': 'Name of input event'
+                        'description': 'Name of input event',
+                        'default': ''
                     }
                 }
             },
             'logic': {
                 'type': 'array',
+                'default': [],
                 'items': {
                     'type': 'object',
                     'properties': {
@@ -102,9 +108,18 @@ AutomatRuleSchema['properties'].update({
                             'description': 'Function of tool'
                         },
                         'argument': {
-                            'type': 'string',
-                            'title': 'Argument',
-                            'description': 'Argument for tool'
+                            'oneOf': [
+                                {
+                                    'type': 'string',
+                                    'title': 'Argument',
+                                    'description': 'Text Argument for tool'
+                                },
+                                {
+                                    'type': 'integer',
+                                    'title': 'Argument',
+                                    'description': 'Integer Argument for tool'
+                                }
+                            ]
                         }
                     }
                 }
@@ -114,7 +129,8 @@ AutomatRuleSchema['properties'].update({
     'enabled': {
         'type': 'boolean',
         'title': 'Enabled',
-        'description': 'Is Rule enabled?'
+        'description': 'Is Rule enabled?',
+        'default': False
     }
 })
 
