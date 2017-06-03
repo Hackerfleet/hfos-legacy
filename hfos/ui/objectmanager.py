@@ -503,7 +503,7 @@ class ObjectManager(ConfigurableComponent):
 
         except Exception as e:
             self.log("Error during object storage:", e, type(e), data,
-                     lvl=error, exc=True)
+                     lvl=error, exc=True, pretty=True)
 
     @handler(delete)
     def delete(self, event):
