@@ -23,13 +23,13 @@ __license__ = "GPLv3"
 
 """
 
-Provisioning: Automats
-========================
+Provisioning: Automat rules
+===========================
 
 Contains
 --------
 
-Automats for ships
+Predefined automation rules
 
 
 """
@@ -39,13 +39,13 @@ from hfos.database import objectmodels
 from hfos.logger import hfoslog
 
 Automata = [
-    {
-        'name': 'Default',
-        'uuid': '7df83542-c1c1-4c70-b754-51174a53453a',
-        'description': 'Default blank automat',
-        'shared': True,
-        'locked': False
-    }
+    # {
+    #     'name': 'Default',
+    #     'uuid': '7df83542-c1c1-4c70-b754-51174a53453a',
+    #     'description': 'Default blank automat',
+    #     'shared': True,
+    #     'locked': False
+    # }
 ]
 
 
