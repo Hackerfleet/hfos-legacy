@@ -110,7 +110,7 @@ class userlogin(Event):
 
 
 class authenticationrequest(Event):
-    """A client wants to authenticated a connection"""
+    """A client wants to authenticate a client connection"""
 
     def __init__(self, username, password, clientuuid, requestedclientuuid,
                  sock, auto, *args):
