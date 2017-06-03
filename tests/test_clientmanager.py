@@ -33,6 +33,11 @@ Test HFOS Launcher
 
 from hfos.ui.clientobjects import User, Client
 from circuits import Manager
+from circuits.web.websockets.client import WebSocketClient
+from circuits.web.websockets.dispatcher import WebSocketsDispatcher
+from circuits.web.servers import TCPServer
+from circuits.net.events import write, read
+from json import loads, dumps
 import pytest
 from uuid import uuid4
 from hfos.ui.clientmanager import ClientManager
@@ -41,6 +46,7 @@ from hfos.events.client import authenticationrequest
 from pprint import pprint
 
 m = Manager()
+
 cm = ClientManager()
 cm.register(m)
 
@@ -51,14 +57,74 @@ def test_instantiate():
     assert type(cm) == ClientManager
 
 
-def transmit(event):
-    m.start()
+def transmit(event_in, channel_in, event_out, channel_out):
+    waiter = pytest.WaitEvent(m, event_in, channel_in)
 
-    waiter = pytest.WaitEvent(m, 'send', "hfosweb")
-
-    m.fire(event, "hfosweb")
+    m.fire(event_out, channel_out)
 
     result = waiter.wait()
-    packet = result.packet
 
-    return packet
+    return result
+
+
+def test_auth_request():
+    m.start()
+
+    data = {
+        'component': 'auth',
+        'action': 'login',
+        'data': {
+            'username': 'foo',
+            'password': 'bar'
+        }
+    }
+
+    event = read(None, dumps(data))
+
+    result = transmit('authenticationrequest', 'auth', event, 'wsserver')
+
+    assert result.username == 'foo'
+    assert result.password == 'bar'
+
+
+def test_auto_auth_request():
+    m.start()
+
+    client_config_uuid = str(uuid4())
+
+    data = {
+        'component': 'auth',
+        'action': 'autologin',
+        'data': {
+            'uuid': client_config_uuid
+
+        }
+    }
+
+    event = read(None, dumps(data))
+
+    result = transmit('authenticationrequest', 'auth', event, 'wsserver')
+
+    pprint(result.__dict__)
+    assert result.auto is True
+    assert result.requestedclientuuid['uuid'] == client_config_uuid
+
+
+def test_auth_logout():
+    return
+    m.start()
+
+    client_uuid = str(uuid4())
+
+    data = {
+        'component': 'auth',
+        'action': 'logout',
+        'data': {}
+    }
+
+    event = read(None, dumps(data))
+
+    result = transmit('clientdisconnect', 'hfosweb', event, 'wsserver')
+
+    assert result.clientuuid == client_uuid
+
