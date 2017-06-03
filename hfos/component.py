@@ -144,13 +144,11 @@ def handler(*names, **kwargs):
     return wrapper
 
 
-class ConfigurableMeta():
+class ConfigurableMeta(object):
     names = []
     configprops = {}
 
     def __init__(self, uniquename=None, *args, **kwargs):
-        super(ConfigurableMeta, self).__init__(*args, **kwargs)
-
         self.uniquename = ""
 
         if uniquename:
