@@ -40,7 +40,7 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=[
-          'hfos>=1.1.0',
+          'hfos>=1.2.0',
           'hfos-protocols==0.0.1',
           'pyzmq==16.0.2'
       ],

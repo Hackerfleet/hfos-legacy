@@ -40,7 +40,7 @@ A modern, opensource approach to camera management.
 This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
-      install_requires=['hfos>=1.1.0'],
+      install_requires=['hfos>=1.2.0'],
       entry_points="""[hfos.components]
     camera=hfos.camera.manager:Manager
 [hfos.schemata]

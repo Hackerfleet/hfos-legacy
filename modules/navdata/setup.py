@@ -42,7 +42,7 @@ A navigational-data handling module.
 This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
-      install_requires=['hfos>=1.1.0'],
+      install_requires=['hfos>=1.2.0'],
       entry_points="""[hfos.components]
     sensors=hfos.navdata.sensors:Sensors
     vesselmanager=hfos.navdata.vesselmanager:VesselManager

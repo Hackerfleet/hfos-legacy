@@ -46,7 +46,7 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=[
-          'hfos>=1.1.0',
+          'hfos>=1.2.0',
           'paho-mqtt==1.2',
           'netifaces==0.10.5'
       ],

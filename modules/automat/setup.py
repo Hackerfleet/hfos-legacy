@@ -42,7 +42,7 @@ hfos-navdata package.
       dependency_links=[
       ],
       install_requires=[
-          'hfos>=1.1.0',
+          'hfos>=1.2.0',
       ],
       entry_points="""[hfos.components]
     automat=hfos.automat.manager:Manager

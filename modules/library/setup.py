@@ -39,7 +39,7 @@ A modern, opensource approach to library management.
 This software package is a plugin module for HFOS.
 """,
       install_requires=[
-          'hfos>=1.1.0',
+          'hfos>=1.2.0',
           'isbntools>=4.3.3',
           'isbnlib>=3.6.6'
       ],

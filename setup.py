@@ -77,7 +77,7 @@ add_datafiles('frontend', 'docs')
 
 setup(name="hfos",
       description="hfos",
-      version="1.1.0",
+      version="1.2.0",
       author="Hackerfleet Community",
       author_email="riot@c-base.org",
       maintainer="Hackerfleet Community",

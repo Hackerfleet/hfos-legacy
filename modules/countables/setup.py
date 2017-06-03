@@ -40,7 +40,7 @@ This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
       install_requires=[
-          'hfos>=1.1.0'
+          'hfos>=1.2.0'
       ],
       entry_points="""[hfos.components]
     countablewatcher=hfos.countables.counter:Counter
