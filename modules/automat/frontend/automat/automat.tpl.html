@@ -24,10 +24,16 @@
 
 <div class="well">
     <h1>Automat</h1>
-    <span id="debug">
-            <input type="checkbox" ng-model="$ctrl.debug"/>
-            <span>Debug</span>
-    </span>
+    <div class="editor-buttons-top" ng-show="$ctrl.rules != null">
+        <span id="debug">
+                <input type="checkbox" ng-model="$ctrl.debug"/>
+                <span>Debug</span>
+        </span>
+        <button class="btn btn-success"
+                ng-disabled="!$ctrl.modified"
+                ng-click="$ctrl.storeRules()"><i class="fa fa-check"></i>Store
+        </button>
+    </div>
 
     <table class="table table-hover">
         <tr>
@@ -86,7 +92,12 @@
     <div class="centered">
         <i class="fa fa-plus" ng-click="$ctrl.addRule()"></i>
     </div>
-
+    <div class="pull-right editor-buttons" ng-show="$ctrl.rules != null">
+        <button class="btn btn-success"
+                ng-disabled="!$ctrl.modified"
+                ng-click="$ctrl.storeRules()"><i class="fa fa-check"></i>Store
+        </button>
+    </div>
     <div ng-show="$ctrl.debug">
         <hr>
         <span>Model:

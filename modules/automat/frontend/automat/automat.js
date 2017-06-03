@@ -32,8 +32,10 @@
  * Controller of the hfosFrontendApp
  */
 class AutomatCtrl {
-    constructor($scope, $compile, ObjectProxy, moment, alert, uuid, user, socket) {
+    constructor($scope, $compile, ObjectProxy, alert, uuid, user, socket) {
         this.scope = $scope;
+        this.compile = $compile;
+        this.op = ObjectProxy;
         this.uuid = uuid;
         this.user = user;
         this.socket = socket;
@@ -132,6 +134,10 @@ class AutomatCtrl {
             self.socket.send({
                 component: 'hfos.automat.manager',
                 action: 'get_events',
+            });
+            self.op.searchItems('automatrule', '', '*').then(function(rules) {
+                console.log('[AUTOMAT] Got the rules:', rules.data);
+                for (let rule of rules.data) self.rules[rule.uuid] = rule
             })
         };
         
@@ -141,6 +147,10 @@ class AutomatCtrl {
             self.requestAutomatData();
         });
         
+        this.rulewatch = this.scope.$watch('$ctrl.rules', function(oldVal, newVal) {
+            if (newVal !== oldVal) self.modified = true;
+        }, true);
+        
         if (this.user.signedin === true) {
             this.requestAutomatData();
         }
@@ -148,6 +158,7 @@ class AutomatCtrl {
         this.scope.$on('$destroy', function () {
             console.log('[AUTOMAT] Destroying controller');
             self.socket.unlisten('hfos.automat.manager', self.handleAutomatData);
+            self.rulewatch();
         })
     }
     
@@ -158,21 +169,43 @@ class AutomatCtrl {
     
     addRule() {
         console.log('[AUTO] Pushing another rule');
+        console.log(this.rules);
         let rule = this.emptyrule();
         rule.uuid = this.uuid.v4();
         this.rules[rule.uuid] = rule;
+        console.log(this.rules);
     }
     
     addCondition(uuid) {
         let condition = this.emptyCondition();
+        if (this.rules[uuid].input == null) this.rules[uuid].input = {
+            logic: [],
+            event: {
+                name: '',
+                source: ''
+            }
+        };
         this.rules[uuid].input.logic.push(condition);
     }
     
     removeCondition(index, uuid) {
         this.rules[uuid].input.logic.splice(index, 1);
     }
+    
+    storeRules() {
+        for (let uuid of Object.keys(this.rules)) {
+            let rule = this.rules[uuid];
+            
+            delete rule['$$hashKey'];
+            for (let logic of rule.input.logic) { delete logic['$$hashKey'] }
+
+            console.log('[AUTOMAT] Storing rule ', rule);
+            this.op.putObject('automatrule', rule);
+        }
+        this.modified = false;
+    }
 }
 
-AutomatCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'moment', 'alert', 'uuid', 'user', 'socket'];
+AutomatCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'alert', 'uuid', 'user', 'socket'];
 
 export default AutomatCtrl;
