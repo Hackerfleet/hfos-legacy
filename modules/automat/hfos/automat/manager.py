@@ -32,12 +32,15 @@ Module: AutomatWatcher
 
 from hfos.component import ConfigurableComponent, authorizedevent, handler
 from hfos.events.client import send
-from circuits import Event
+from hfos.events.objectmanager import objectcreation, objectchange, \
+    objectdeletion
+from circuits import Event, Timer
 from hfos.logger import warn, error, critical, hilight
 from copy import deepcopy
+import json
+from hfos.database import objectmodels
 
 
-# from hfos.database import objectmodels
 # from datetime import datetime
 # from hfos.events.system import updatesubscriptions, send
 
@@ -49,9 +52,9 @@ class store_rule(authorizedevent):
 class get_events(authorizedevent):
     """Requests a list of automatable events"""
 
-    def __init__(self, *args, **kwargs):
-        super(get_events, self).__init__(*args, **kwargs)
-        print('AUTOMAT EVENT GENERATED')
+
+class rule_reload(Event):
+    pass
 
 
 class rule_triggered(Event):
@@ -83,12 +86,29 @@ class Manager(ConfigurableComponent):
         super(Manager, self).__init__("AUTOMAT", *args)
 
         self.authorized_events = None
+        self.rules = {}
+        self.updating = False
 
         self.log("Started")
 
-    @handler(store_rule)
-    def store_rule(self, event):
-        print("TESTER CALLED!")
+    @handler("objectcreation")
+    def objectcreation(self, event):
+        self.on_rule_change(event)
+
+    @handler("objectdeletion")
+    def objectdeletion(self, event):
+        self.on_rule_change(event)
+
+    @handler("objectchange")
+    def objectchange(self, event):
+        self.on_rule_change(event)
+
+    def on_rule_change(self, event):
+        if event.schema == 'automatrule':
+            self.log('Storage of automat rule requested, updating rules')
+            if not self.updating:
+                Timer(2, rule_reload(), persist=False).register(self)
+                self.updating = True
 
     @handler(get_events)
     def get_events(self, event):
@@ -99,9 +119,6 @@ class Manager(ConfigurableComponent):
         for source in events:
             for value in events[source].values():
                 del (value['event'])
-
-        from pprint import pprint
-        pprint(events)
 
         packet = {
             'component': 'hfos.automat.manager',
@@ -114,7 +131,66 @@ class Manager(ConfigurableComponent):
         from hfos.events.system import AuthorizedEvents
         self.authorized_events = AuthorizedEvents
         self.log('Automat Started, event sources:', AuthorizedEvents.keys())
+        self._load_rules()
 
-    def objectcreation(self, event):
-        if event.schema in ('automatentry', 'automatconfig'):
-            self.log("Automat related item was modified: ", event)
+    @handler("rule_reload")
+    def _load_rules(self):
+        for rule in objectmodels['automatrule'].find({'enabled': True}):
+            name = rule.input['event']['source'] + '.' + rule.input[
+                'event']['name']
+            self.rules[name] = rule
+
+        self.updating = False
+        self.log('%i Automat rules activated' % len(self.rules))
+
+    def _react(self, rule):
+        output = rule.output
+
+        args = json.loads(output.data)
+        dest = output['event']['destination']
+        name = output['event']['name']
+        event = self.authorized_events[dest][name]['event'](**args)
+
+        self.log('Firing automated event:', event.__dict__)
+        self.fireEvent(event, 'hfosweb')
+
+    def _compare_int(self, arg, data, func):
+        if func == 'equals':
+            if data == arg:
+                return True
+        elif func == 'lower':
+            if data < arg:
+                return True
+        elif func == 'lower_equals':
+            if data <= arg:
+                return True
+        elif func == 'bigger_equals':
+            if data >= arg:
+                return True
+        elif func == 'bigger':
+            if data > arg:
+                return True
+        return False
+
+    @handler(channel="*")
+    def eventhandler(self, event, *args, **kwargs):
+        if event.name in self.rules:
+            self.log('Input rule triggered!', lvl=hilight)
+            logic = self.rules[event.name].input['logic']
+
+            try:
+                for rule in logic:
+                    arg = rule['argument']
+                    func = rule['function']
+                    tool = rule['tool']
+                    field = rule['field']
+
+                    data = getattr(event, field)
+
+                    if tool == 'compare_int':
+                        data = int(data)
+                        arg = int(arg)
+                        if self._compare_int(arg, data, func):
+                            self._react(rule)
+            except Exception as e:
+                self.log('Automat broke down:', e, type(e), exc=True)
