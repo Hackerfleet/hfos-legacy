@@ -38,6 +38,12 @@ from warmongo import model_factory
 
 from pprint import pprint
 
+try:
+    PermissionError
+except NameError:
+    class PermissionError(Exception):
+        pass
+
 
 class list(authorizedevent):
     """A client requires a schema to validate data or display a form"""
