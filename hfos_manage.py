@@ -236,7 +236,7 @@ def get_credentials(username=None, password=None, dbhost=None):
     except (KeyError, AttributeError):
         hfoslog('No systemconfig or it is without a salt! '
                 'Reinstall the system provisioning with'
-                'hfos_manage.py -install-provisions -p system')
+                'hfos_manage.py install provisions -p system')
         sys.exit(3)
 
     if username is None:
