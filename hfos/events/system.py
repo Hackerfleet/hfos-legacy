@@ -78,7 +78,12 @@ def populate_user_events():
                     work.append(child)
         return subclasses
 
+    # TODO: Change event system again, to catch authorized (i.e. "user") as
+    # well as normal events, so they can be processed by Automat
+
+    # NormalEvents = inheritors(Event)
     AuthorizedEvents = inheritors(authorizedevent)
+    # AuthorizedEvents.update(NormalEvents)
 
 
 class authorizedevent(Event):
