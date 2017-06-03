@@ -1,17 +1,17 @@
 .. image:: https://travis-ci.org/Hackerfleet/hfos.svg?branch=master
-:target: https://travis-ci.org/Hackerfleet/hfos
+    :target: https://travis-ci.org/Hackerfleet/hfos
     :alt: Build Status
 
 .. image:: https://landscape.io/github/Hackerfleet/hfos/master/landscape.svg?style=flat
-:target: https://landscape.io/github/Hackerfleet/hfos/master
+    :target: https://landscape.io/github/Hackerfleet/hfos/master
     :alt: Quality
 
 .. image:: https://coveralls.io/repos/Hackerfleet/hfos/badge.svg
-:target: https://coveralls.io/r/Hackerfleet/hfos
+    :target: https://coveralls.io/r/Hackerfleet/hfos
     :alt: Coverage
 
 .. image:: https://requires.io/github/Hackerfleet/hfos/requirements.svg?branch=master
-:target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
+    :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
 
@@ -46,6 +46,7 @@ ping riot@c-base.org, to get it added to the list.
   Name           Description
 ============== ==============================================================
 sails          Web UI, compatible with all modern browsers
+automat        Automation for non programmers
 alert          User alerting and notification system
 camera         Camera support
 chat           Integrated chat
@@ -235,7 +236,7 @@ run these commands:
 
 .. code-block:: bash
 
-    $ sudo ./venv/bin/python hfos_manage.py -install-doc
+    $ sudo ./venv/bin/python hfos_manage.py install docs
 
 This installs all necessary documentation tools and copies the files to the
 expected HFOS web data folder.
