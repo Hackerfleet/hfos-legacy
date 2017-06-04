@@ -59,7 +59,9 @@ class mapcomponent {
         this.baseLayer = null;
         
         this.layergroup = null;
-        this.drawnLayer = '';
+        this.drawnLayer = new L.FeatureGroup();
+        this.drawnLayer.addLayer(new L.marker([50,50]));
+        this.objectlayers = {};
         this.map = '';
         
         let self = this;
@@ -147,7 +149,6 @@ class mapcomponent {
         
         this.controls = {
             draw: {
-                position: 'top-right',
                 draw: {
                     marker: {
                         icon: new DefaultMarker({
@@ -157,9 +158,9 @@ class mapcomponent {
                         })
                     }
                 },
-                /*edit: {
-                    featureGroup:
-                }*/
+                edit: {
+                    featureGroup: self.drawnLayer
+                }
             },
             scale: {}
         };
@@ -272,6 +273,12 @@ class mapcomponent {
                 enable: ['moveend', 'dblclick', 'mousemove'],
                 logic: 'emit'
             }
+        };
+        
+        this.editObject = function(uuid) {
+            console.log('Editing layer:', uuid);
+            let layer = this.objectlayers[uuid];
+            this.drawnLayer.addLayer(layer);
         };
         
         this.addLayer = function (uuid) {
@@ -388,8 +395,12 @@ class mapcomponent {
                     let marker = L.marker([pos[1], pos[0]], {icon: marker_icon}).addTo(self.map);
                     self.addContextMenu(marker, obj.uuid);
                 } else {
+                    self.addContextMenu(myLayer, obj.uuid);
                     myLayer.addData(obj.geojson);
                 }
+                self.drawnLayer.addLayer(myLayer);
+                console.log('DRAWN LAYERS:', self.drawnLayer);
+                self.objectlayers[obj.uuid] = myLayer;
             } else if (schema === 'layergroup') {
                 console.log('[MAP] Layergroup received:', obj);
                 if (self.layergroup == obj.uuid) {
@@ -587,6 +598,8 @@ class mapcomponent {
             
             //let PanControl = L.control.pan().addTo(map);
             self.courseplot = L.polyline([], {color: 'red'}).addTo(map);
+    
+            map.addLayer(self.drawnLayer);
             
             self.toggledraw = L.easyButton({
                 id: 'btn_toggledraw',
@@ -703,8 +716,10 @@ class mapcomponent {
             self.addContextMenu = function(layer, uuid) {
                 console.log('[MAP] Adding context menu to geoobject');
                 layer.on('click', function(e) {
+                    self.editObject(uuid);
+                    // TODO: This is not angular-compatible - no access to this or other controllers
                     L.popup().setContent('<h2>Marker</h2>' +
-                        '<div><a href="#!/editor/geoobject/'+uuid+'/edit">Edit Object</a></div>')
+                        '<div><a href="#!/editor/geoobject/'+uuid+'/edit">Edit Object in Editor</a></div>')
                         .setLatLng(e.latlng)
                         .openOn(map);
                 });
