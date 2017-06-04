@@ -32,8 +32,9 @@ Module: Shareables
 
 from hfos.component import ConfigurableComponent, handler
 from hfos.database import objectmodels
-from hfos.logger import hilight, error
+from hfos.logger import debug, error
 from hfos.events.system import authorizedevent
+from hfos.events.client import send
 
 # from pprint import pprint
 
@@ -90,7 +91,7 @@ class Manager(ConfigurableComponent):
                 }
             })
 
-            self.log('Any early reservation:', early, lvl=hilight)
+            self.log('Any early reservation:', early, lvl=debug)
 
             late = shareable_model.find_one({
                 'uuid': uuid,
@@ -102,7 +103,7 @@ class Manager(ConfigurableComponent):
                 }
             })
 
-            self.log('Any late reservation:', late, lvl=hilight)
+            self.log('Any late reservation:', late, lvl=debug)
 
             if not late and not early:
                 reservation = {
@@ -115,9 +116,20 @@ class Manager(ConfigurableComponent):
                 }
                 shareable.reservations.append(reservation)
                 shareable.save()
-                self.log('Successfully stored reservation!', lvl=hilight)
+                self.log('Successfully stored reservation!')
+                response = {
+                    'component': 'hfos.shareables.manager',
+                    'action': 'reserve',
+                    'data': True
+                }
             else:
                 self.log('Not able to store reservation due to '
-                         'overlapping reservations.', lvl=error)
+                         'overlapping reservations.')
+                response = {
+                    'component': 'hfos.shareables.manager',
+                    'action': 'reserve',
+                    'data': False
+                }
+            self.fireEvent(send(event.client.uuid, response))
         except Exception as e:
             self.log('Unknown failure:', e, type(e), exc=True)

@@ -13,13 +13,10 @@ class SharingCtrl {
         this.compile = $compile;
         this.moment = moment;
         this.op = ObjectProxy;
+        this.alert = alert;
         this.socket = socket;
         
-        console.log('Hello, i am a shareables controller!');
-        
         let now = new Date();
-        
-        this.op.getList('shareable', {'reservations': {'$elemMatch': {'endtime': {'$gt': now}}}}, ['*']);
         
         this.shareables = [];
     
@@ -27,6 +24,7 @@ class SharingCtrl {
         this.op.searchItems('shareable').then(function(result) {
             console.log('[SHAREABLES] Got the list of shareables:', result, self.reservationlookup);
             self.reservationlookup = result.data;
+            self.reservationtarget = self.reservationlookup[0]['uuid'];
         });
     
         this.reservationtarget = '';
@@ -56,37 +54,10 @@ class SharingCtrl {
         
         const eventcolor = {
             primary: 'lightgray',
-            secondary: 'darkgray/'
+            secondary: 'darkgray'
         };
         
-        this.events = []; /*
-            {
-                title: 'An event',
-                color: eventcolor,
-                startsAt: this.moment().startOf('week').subtract(2, 'days').add(8, 'hours').toDate(),
-                endsAt: this.moment().startOf('week').add(1, 'week').add(9, 'hours').toDate(),
-                draggable: true,
-                resizable: true,
-                actions: actions
-            }, {
-                title: '<i class="glyphicon glyphicon-asterisk"></i> <span class="text-primary">Another event</span>, with a <i>html</i> title',
-                color: eventcolor,
-                startsAt: this.moment().subtract(1, 'day').toDate(),
-                endsAt: this.moment().add(5, 'days').toDate(),
-                draggable: true,
-                resizable: true,
-                actions: actions
-            }, {
-                title: 'This is a really long event title that occurs on every year',
-                color: eventcolor,
-                startsAt: this.moment().startOf('day').add(7, 'hours').toDate(),
-                endsAt: this.moment().startOf('day').add(19, 'hours').toDate(),
-                recursOn: 'year',
-                draggable: true,
-                resizable: true,
-                actions: actions
-            }
-        ];*/
+        this.events = [];
         
         this.isCellOpen = true;
         
@@ -116,7 +87,14 @@ class SharingCtrl {
             event[field] = !event[field];
         };
         
+        this.getReservations = function() {
+            this.op.getList('shareable', {'reservations': {'$elemMatch': {'endtime': {'$gt': now}}}}, ['*']);
+        };
+        
+        this.getReservations();
+        
         this.updateTimetable = function () {
+            self.events = [];
             for (let shareable of self.shareables) {
                 console.log('Analyzing thing: ', shareable);
                 
@@ -147,7 +125,16 @@ class SharingCtrl {
                 self.updateTimetable();
             }
         });
-        
+        this.socket.listen("hfos.shareables.manager", function(msg) {
+             if (msg.action == 'reserve') {
+                 if (msg.data == true) {
+                     self.alert.add('success', 'Reserved', 'Your reservation has been accepted.', 10);
+                     self.getReservations();
+                 } else {
+                     self.alert.add('danger', 'Blocked', 'The shareable is already reserved during that time.', 10);
+                 }
+             }
+        });
         this.eventRender = function (event, element, view) {
             console.log("HALLO: ", event, element, view);
             element.attr({
