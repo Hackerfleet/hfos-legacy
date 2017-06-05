@@ -31,12 +31,13 @@ Test HFOS Launcher
 
 """
 
-from hfos.database import objectmodels
 
-from hfos.ui.clientobjects import User, Client
 from circuits import Manager
 import pytest
 from uuid import uuid4
+
+from hfos.database import objectmodels
+from hfos.ui.clientobjects import User, Client
 from hfos.ui.objectmanager import ObjectManager
 from hfos.events.objectmanager import objectchange, objectcreation, \
     objectdeletion, objectevent, updatesubscriptions, change, get, delete, \
@@ -51,6 +52,13 @@ om.register(m)
 
 useruuid = str(uuid4())
 clientuuid = str(uuid4())
+
+systemconfig_model = objectmodels['systemconfig']
+test_config = systemconfig_model({
+    'uuid': str(uuid4()),
+    'active': True
+})
+test_config.save()
 
 
 class AccountMock():

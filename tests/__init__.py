@@ -23,4 +23,4 @@ __license__ = "GPLv3"
 
 from hfos.database import initialize
 
-initialize()
+initialize(database_name='hfos-test')
