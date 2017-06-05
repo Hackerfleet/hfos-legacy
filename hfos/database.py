@@ -50,8 +50,6 @@ from pkg_resources import iter_entry_points, DistributionNotFound
 from pprint import pprint
 from random import choice
 
-warmongo.connect("hfos")
-
 schemastore = None
 configschemastore = {}
 objectmodels = None
@@ -155,7 +153,7 @@ def _build_collections(store):
     return result
 
 
-def initialize(address='127.0.0.1:27017'):
+def initialize(address='127.0.0.1:27017', database_name='hfos'):
     global schemastore
     global objectmodels
     global collections
@@ -166,7 +164,7 @@ def initialize(address='127.0.0.1:27017'):
     try:
         client = pymongo.MongoClient(host=address.split(":")[0], port=int(
             address.split(":")[1]) if ":" in address else 27017)
-        db = client['hfos']
+        db = client[database_name]
         hfoslog("Database: ", db.command('buildinfo'), lvl=debug, emitter='DB')
     except Exception as e:
         hfoslog("No database available! Check if you have mongodb > 3.0 "
@@ -174,6 +172,8 @@ def initialize(address='127.0.0.1:27017'):
                 "of localhost. (Error: %s) -> EXIT" % e, lvl=critical,
                 emitter='DB')
         sys.exit(5)
+
+    warmongo.connect(database_name)
 
     schemastore = _build_schemastore_new()
     objectmodels = _build_model_factories(schemastore)
