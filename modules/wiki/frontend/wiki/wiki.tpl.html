@@ -1,36 +1,41 @@
 <div class="container">
     <div class="well">
         <h4><a href="#!/wiki/Home">Wiki:</a> <a href="#!/wiki/{{$ctrl.pagename}}">{{$ctrl.title}}</a></h4>
+        <div>
+            <a ng-click="isExpanded = !isExpanded">
+                <i class="fa" ng-class="{'fa-chevron-right': !isExpanded, 'fa-chevron-down': isExpanded}"></i>
+                <small ng-hide="!isExpanded">Details</small>
+            </a>
 
-        <small>
-            <span class="small">
-                <span>Slug: <a href="#!/wiki/{{$ctrl.pagename}}">{{$ctrl.pagename}}</a></span>
-                <span ng-hide="$ctrl.note == ''">Note: <span ng-bind-html="$ctrl.note"></span></span>
-            </span>
+            <div uib-collapse="!isExpanded">
+                <span class="small">
+                    <span>Slug: <a href="#!/wiki/{{$ctrl.pagename}}">{{$ctrl.pagename}}</a></span>
+                    <span ng-hide="$ctrl.note == ''">Note: <span ng-bind-html="$ctrl.note"></span></span>
+                </span>
+                <div>
+                    <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.editpage()"
+                            ng-hide="$ctrl.pageuuid == ''">Edit
+                    </button>
+                    <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.edithere = !$ctrl.edithere"
+                            ng-hide="$ctrl.pageuuid == ''">Edit here
+                    </button>
 
-            <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.editpage()"
-                    ng-hide="$ctrl.pageuuid == ''">Edit
-            </button>
-            <button class="btn btn-default btn-xs" type="button" ng-click="$ctrl.edithere = !$ctrl.edithere"
-                    ng-hide="$ctrl.pageuuid == ''">Edit here
-            </button>
+                    <button class="btn btn-default btn-xs" type="button"
+                            ng-click="$ctrl.createPage()">Create from template:
+                    </button>
 
-            <button class="btn btn-default btn-xs" type="button"
-                    ng-click="$ctrl.createPage()">Create from template:
-            </button>
-
-            <select ng-model="$ctrl.selectedtemplate">
-                <option selected="true" value="empty">Empty page</option>
-                <option ng-repeat="template in $ctrl.templates" value="{{template.uuid}}">
+                    <select ng-model="$ctrl.selectedtemplate">
+                        <option selected="true" value="empty">Empty page</option>
+                        <option ng-repeat="template in $ctrl.templates" value="{{template.uuid}}">
                         <span>
                             <span class="fa" ng-class="template.icon"></span>
                             {{template.name}}
                         </span>
-                </option>
-            </select>
-
-        </small>
-
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
         <div ng-bind-html="$ctrl.html"></div>
     </div>
     <div class="well" ng-show="$ctrl.edithere">

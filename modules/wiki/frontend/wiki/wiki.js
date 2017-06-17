@@ -16,6 +16,7 @@ class wikicomponent {
         }
         
         this.pageuuid = "";
+        this.isCollapsed = true;
         
         this.title = '';
         this.html = '';
