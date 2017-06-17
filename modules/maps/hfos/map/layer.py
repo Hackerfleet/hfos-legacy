@@ -79,6 +79,10 @@ LayerSchema['properties'].update({
         'type': 'string', 'title': 'Filesystem location of layer',
         'description': 'HIDDEN'
     },
+    'created': {
+        'type': 'string', 'format': 'datetimepicker',
+        'title': 'Chart creation time',
+    },
     'layerOptions': {
         'type': 'object',
         'id': '#layeroptions',
@@ -214,10 +218,19 @@ LayerSchema['properties'].update({
                                'is needed.'
             },
             'bounds': {
-                'type': 'string',
+                'type': 'array',
                 'description': 'When this option is set, the TileLayer '
                                'only loads tiles that are in the given '
-                               'geographical bounds.'
+                               'geographical bounds.',
+                'items': {
+                    'type': 'array',
+                    'maxItems': 2,
+                    'items': {
+                        'type': 'number',
+                        'maxItems': 2,
+                        'minItems': 2,
+                    }
+                }
             }
         }
     }

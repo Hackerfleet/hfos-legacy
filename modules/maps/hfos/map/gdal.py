@@ -42,6 +42,8 @@ from hfos.events.system import authorizedevent
 from hfos.events.client import send
 from hfos.database import objectmodels
 from hfos.logger import error, verbose, warn, hilight
+import datetime
+import xml.etree.ElementTree
 
 try:
     from subprocess import Popen
@@ -168,7 +170,7 @@ class GDAL(ConfigurableComponent):
 
         self.log('Done tiling: ', filename, target, lvl=hilight)
 
-        newlayer = self._register_map(name.rstrip('.KAP'), event.client)
+        newlayer = self._register_map(name.rstrip('.KAP'), target, event.client)
 
         notification = {
             'component': 'hfos.alert.manager',
@@ -192,14 +194,14 @@ class GDAL(ConfigurableComponent):
         count = 0
 
         for chart in charts:
-            if os.path.exists(os.path.join(self.tilepath, chart,
-                                           'tilemapresource.xml')):
+            target = os.path.join(self.tilepath, chart)
+            if os.path.exists(os.path.join(target, 'tilemapresource.xml')):
                 self.log('Raster chart found:', chart)
                 layer = objectmodels['layer'].find_one({'path': chart})
                 if layer is not None:
                     self.log('Layer exists: ', layer.uuid, layer.name)
                 else:
-                    self._register_map(chart, event.client)
+                    self._register_map(chart, target, event.client)
                     count += 1
             else:
                 self.log('Invalid raster tilecache found: ', chart, lvl=warn)
@@ -219,8 +221,39 @@ class GDAL(ConfigurableComponent):
         }
         self.fireEvent(send(event.client.uuid, notification))
 
-    def _register_map(self, name, client):
+    def _register_map(self, name, target, client):
         self.log('Storing new GDAL layer ', name, lvl=verbose)
+
+        try:
+            e = xml.etree.ElementTree.parse(
+                os.path.join(target, 'tilemapresource.xml')).getroot()
+
+            bounding_box = {
+                'minx': None,
+                'miny': None,
+                'maxx': None,
+                'maxy': None
+            }
+
+            if len(e.findall('BoundingBox')) != 1:
+                self.log('Irregular bounding box definitions found:',
+                         target, lvl=warn)
+            for thing in e.findall('BoundingBox'):
+                self.log('XMLBB:', thing, pretty=True, lvl=hilight)
+                for key in bounding_box:
+                    bounding_box[key] = float(thing.get(key))
+
+            self.log('BOUNDING BOX:', bounding_box, pretty=True, lvl=hilight)
+
+            zoomlevels = []
+            for level in e.findall('TileSets')[0].findall('TileSet'):
+                self.log("XMLTS:", level, pretty=True, lvl=hilight)
+                zoomlevels.append(int(level.get('order')))
+
+        except Exception as e:
+            self.log('Problem during XML parsing:', e, type(e), exc=True)
+            return
+
         layer = objectmodels['layer']({'uuid': str(uuid4())})
         layer.name = name
         layer.path = name
@@ -230,8 +263,13 @@ class GDAL(ConfigurableComponent):
         layer.type = 'xyz'
         layer.layerOptions = {
             'continuousWorld': False,
-            'tms': True
+            'tms': True,
+            'minZoom': min(zoomlevels),
+            'maxZoom': max(zoomlevels),
+            'bounds': [[bounding_box['miny'], bounding_box['minx']],
+                       [bounding_box['maxy'], bounding_box['maxx']]]
         }
+        layer.creation = datetime.datetime.now().isoformat()
         layer.url = 'http://hfoshost/rastertiles/' + name + '/{z}/{x}/{y}.png'
 
         layer.save()
