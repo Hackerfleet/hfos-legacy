@@ -60,7 +60,7 @@ class mapcomponent {
         
         this.layergroup = null;
         this.drawnLayer = new L.FeatureGroup();
-        this.drawnLayer.addLayer(new L.marker([50,50]));
+        this.drawnLayer.addLayer(new L.marker([50, 50]));
         this.objectlayers = {};
         this.map = '';
         
@@ -159,7 +159,7 @@ class mapcomponent {
                     }
                 },
                 edit: {
-                    featureGroup: self.drawnLayer
+                    featureGroup: new L.FeatureGroup()
                 }
             },
             scale: {}
@@ -275,7 +275,7 @@ class mapcomponent {
             }
         };
         
-        this.editObject = function(uuid) {
+        this.editObject = function (uuid) {
             console.log('Editing layer:', uuid);
             let layer = this.objectlayers[uuid];
             this.drawnLayer.addLayer(layer);
@@ -283,11 +283,25 @@ class mapcomponent {
         
         this.addLayer = function (uuid) {
             let layer = self.op.objects[uuid];
-            if (layer.layerOptions.minZoom == null || layer.layerOptions.maxZoom == null) {
+            
+            if (typeof layer.layerOptions.minZoom === 'undefined') {
                 layer.layerOptions.minZoom = 0;
+            }
+            if (typeof layer.layerOptions.maxZoom === 'undefined') {
                 layer.layerOptions.maxZoom = 18;
             }
+            
             layer.url = layer.url.replace('http://hfoshost/', self.host);
+            
+            //let bounds = null;
+            
+            /*if (layer.layerOptions.bounds != null) {
+                let top_left = L.latLng(layer.layerOptions.bounds[0]),
+                    top_right = L.latLng(layer.layerOptions.bounds[1]);
+                bounds = L.latLngBounds(top_left, top_right);
+                //layer.layerOptions.bounds = bounds;
+                //delete layer.layerOptions['bounds'];
+            }*/
             
             console.log('[MAP] Adding layer:', layer);
             if (layer.baselayer === true) {
@@ -375,6 +389,14 @@ class mapcomponent {
             }
         };
         
+        this.show_map_boundary = function(uuid) {
+            console.log('[MAP] Zooming to chart extents');
+            if (!this.leafletlayers.overlays.hasOwnProperty(uuid)) {
+                this.switchLayer('overlays', uuid);
+            }
+            this.map.fitBounds(this.layers.overlays[uuid].layerOptions.bounds);
+        };
+        
         this.scope.$on('OP.Get', function (event, objuuid, obj, schema) {
             console.log('[MAP] Object:', obj, schema);
             if (objuuid === self.mapviewuuid) {
@@ -420,6 +442,7 @@ class mapcomponent {
             } else if (schema === 'layer') {
                 console.log('[MAP] Received layer object: ', obj);
                 self.addLayer(objuuid);
+                console.log('[MAP] Layer flags after adding:', self.layer_flags);
             }
         });
         
@@ -598,8 +621,8 @@ class mapcomponent {
             
             //let PanControl = L.control.pan().addTo(map);
             self.courseplot = L.polyline([], {color: 'red'}).addTo(map);
-    
-            map.addLayer(self.drawnLayer);
+            
+            //map.addLayer(self.drawnLayer);
             
             self.toggledraw = L.easyButton({
                 id: 'btn_toggledraw',
@@ -711,15 +734,15 @@ class mapcomponent {
             self.togglefollow.addTo(map);
             self.togglesync.addTo(map);
             self.toggledash.addTo(map);
-    
-    
-            self.addContextMenu = function(layer, uuid) {
+            
+            
+            self.addContextMenu = function (layer, uuid) {
                 console.log('[MAP] Adding context menu to geoobject');
-                layer.on('click', function(e) {
+                layer.on('click', function (e) {
                     self.editObject(uuid);
                     // TODO: This is not angular-compatible - no access to this or other controllers
                     L.popup().setContent('<h2>Marker</h2>' +
-                        '<div><a href="#!/editor/geoobject/'+uuid+'/edit">Edit Object in Editor</a></div>')
+                        '<div><a href="#!/editor/geoobject/' + uuid + '/edit">Edit Object in Editor</a></div>')
                         .setLatLng(e.latlng)
                         .openOn(map);
                 });

@@ -41,6 +41,9 @@
                                                 <span ng-bind="layer.name"></span>
                                             </a>
                                             <div class="pull-right">
+                                                <a ng-hide="layer.layerOptions.bounds == null"
+                                                   ng-click="$ctrl.show_map_boundary(layer.uuid)"><span
+                                                        class="fa fa-search"></span></a>
                                                 <a href="#!/editor/layer/{{layer.uuid}}/edit"><span
                                                         class="fa fa-pencil"></span></a>
                                                 <a href="#!/editor/layer/{{layer.uuid}}/copy"><span
@@ -60,8 +63,9 @@
                                                 </slider>
                                                 <label>Available zoom levels</label>
                                                 <slider class="layer_zoom_levels"
-                                                        ng-model="$ctrl.layer_flags[uuid].zoom"
                                                         ng-disabled="true"
+                                                        ng-model="$ctrl.layer_flags[uuid].zoom"
+                                                        value="$ctrl.layer_flags[uuid].zoom"
                                                         range="true"
                                                         min="0"
                                                         handle="custom"
