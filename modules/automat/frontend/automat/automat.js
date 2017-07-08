@@ -119,6 +119,7 @@ class AutomatCtrl {
             enabled: true
         };
         
+        this.debug = false;
         this.rules = {};
         this.rules[demouuid] = this.demorule;
         

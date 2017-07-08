@@ -23,16 +23,19 @@
   -->
 
 <div class="well">
-    <h1>Automat</h1>
-    <div class="editor-buttons-top" ng-show="$ctrl.rules != null">
+    <div class="header-row row">
+        <h1>Automat</h1>
+        <h3 class="text-danger">Work in progress!</h3>
+        <div class="editor-buttons-top">
         <span id="debug">
                 <input type="checkbox" ng-model="$ctrl.debug"/>
                 <span>Debug</span>
         </span>
-        <button class="btn btn-success"
-                ng-disabled="!$ctrl.modified"
-                ng-click="$ctrl.storeRules()"><i class="fa fa-check"></i>Store
-        </button>
+            <button class="btn btn-success"
+                    ng-disabled="!$ctrl.modified"
+                    ng-click="$ctrl.storeRules()"><i class="fa fa-check"></i>Store
+            </button>
+        </div>
     </div>
 
     <table class="table table-hover">
@@ -49,13 +52,16 @@
                         <option ng-repeat="(key, value) in $ctrl.events" value="{{key}}">{{key}}</option>
                     </select>
                     <select class="form-control input-sm" ng-model="rule.input.event.name">
-                        <option ng-repeat="(key, value) in $ctrl.events[rule.input.event.source]" value="{{key}}">{{key}}</option>
+                        <option ng-repeat="(key, value) in $ctrl.events[rule.input.event.source]" value="{{key}}">
+                            {{key}}
+                        </option>
                     </select>
                 </form>
             </td>
             <td>
                 <div ng-repeat="condition in rule.input.logic">
-                    <div class="pull-right"><i class="fa fa-minus" ng-click="$ctrl.removeCondition($index, uuid)"></i></div>
+                    <div class="pull-right"><i class="fa fa-minus" ng-click="$ctrl.removeCondition($index, uuid)"></i>
+                    </div>
                     <form class="form-inline">
                         Do
                         <strong>
@@ -78,7 +84,9 @@
                         <option ng-repeat="(key, value) in $ctrl.events" value="{{key}}">{{key}}</option>
                     </select>
                     <select class="form-control input-sm" ng-model="rule.output.event.name">
-                        <option ng-repeat="(key, value) in $ctrl.events[rule.output.event.destination]" value="{{key}}">{{key}}</option>
+                        <option ng-repeat="(key, value) in $ctrl.events[rule.output.event.destination]" value="{{key}}">
+                            {{key}}
+                        </option>
                     </select>
                 </form>
             </td>
@@ -89,14 +97,16 @@
             </td>
         </tr>
     </table>
-    <div class="centered">
-        <i class="fa fa-plus" ng-click="$ctrl.addRule()"></i>
-    </div>
-    <div class="pull-right editor-buttons" ng-show="$ctrl.rules != null">
-        <button class="btn btn-success"
-                ng-disabled="!$ctrl.modified"
-                ng-click="$ctrl.storeRules()"><i class="fa fa-check"></i>Store
-        </button>
+    <div class="row">
+        <div class="text-center">
+            <i class="fa fa-plus" ng-click="$ctrl.addRule()"></i>
+        </div>
+        <div class="pull-right editor-buttons" ng-show="$ctrl.rules != null">
+            <button class="btn btn-success"
+                    ng-disabled="!$ctrl.modified"
+                    ng-click="$ctrl.storeRules()"><i class="fa fa-check"></i>Store
+            </button>
+        </div>
     </div>
     <div ng-show="$ctrl.debug">
         <hr>
