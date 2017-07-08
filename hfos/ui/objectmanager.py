@@ -202,7 +202,9 @@ class ObjectManager(ConfigurableComponent):
         storage_object = objectmodels[schema].find_one(object_filter)
 
         if not storage_object:
-            self._cancel_by_error(event, 'unavailable')
+            self._cancel_by_error(event, event.uuid + ' of ' + schema +
+                                  'unavailable')
+            return
 
         if storage_object:
             self.log(storage_object.perms, lvl=debug)
@@ -336,31 +338,35 @@ class ObjectManager(ConfigurableComponent):
             self.log("Getting a very long list of items for ", schema,
                      lvl=warn)
 
-        for item in objectmodels[schema].find(object_filter):
-            try:
-                if not self._check_permissions(user, 'list', item):
-                    continue
-                if fields in ('*', ['*']):
-                    item_fields = item.serializablefields()
-                    for field in hidden:
-                        item_fields.pop(field, None)
-                    object_list.append(item_fields)
-                else:
-                    list_item = {'uuid': item.uuid}
+        try:
+            for item in objectmodels[schema].find(object_filter):
+                try:
+                    if not self._check_permissions(user, 'list', item):
+                        continue
+                    if fields in ('*', ['*']):
+                        item_fields = item.serializablefields()
+                        for field in hidden:
+                            item_fields.pop(field, None)
+                        object_list.append(item_fields)
+                    else:
+                        list_item = {'uuid': item.uuid}
 
-                    if 'name' in item._fields:
-                        list_item['name'] = item._fields['name']
+                        if 'name' in item._fields:
+                            list_item['name'] = item._fields['name']
 
-                    for field in fields:
-                        if field in item._fields and field not in hidden:
-                            list_item[field] = item._fields[field]
-                        else:
-                            list_item[field] = None
+                        for field in fields:
+                            if field in item._fields and field not in hidden:
+                                list_item[field] = item._fields[field]
+                            else:
+                                list_item[field] = None
 
-                    object_list.append(list_item)
-            except Exception as e:
-                self.log("Faulty object or field: ", e, type(e),
-                         item._fields, fields, lvl=error, exc=True)
+                        object_list.append(list_item)
+                except Exception as e:
+                    self.log("Faulty object or field: ", e, type(e),
+                             item._fields, fields, lvl=error, exc=True)
+        except ValidationError as e:
+            self.log('Invalid object in database encountered!', e, exc=True,
+                     lvl=warn)
         # self.log("Generated object list: ", object_list)
 
         result = {
