@@ -42,7 +42,11 @@
   height: 100%;
   width: 55px;
   float: left;
-  padding: 0 5px;
+  padding: 0 2px;
+}
+
+.todoTask {
+  min-height: 4em;
 }
 
 .box-content {
