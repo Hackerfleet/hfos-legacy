@@ -45,6 +45,7 @@ import pymongo
 from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
 from hfos.logger import hfoslog, debug, warn, critical, verbose
+from hfos.component import ConfigurableComponent
 from jsonschema import ValidationError  # NOQA
 from pkg_resources import iter_entry_points, DistributionNotFound
 from pprint import pprint
@@ -70,8 +71,10 @@ def clear_all():
     *This command is a maintenance tool and clears the complete database.*
     """
 
-    sure = input("Are you sure to drop the complete database content?")
-    if not (sure.upper() in ("Y", "J")):
+    sure = input("Are you sure to drop the complete database content? (Type "
+                 "in upppercase YES)")
+    if not (sure == 'YES'):
+        hfoslog('Not deleting the database.')
         sys.exit(5)
 
     # TODO: Accept argument for dbhost
@@ -231,4 +234,21 @@ def profile(schemaname='sensordata', profiletype='pjs'):
 
     hfoslog("Profiling done", emitter='DB')
 
+
 # profile(schemaname='sensordata', profiletype='warmongo')
+
+class Maintenance(ConfigurableComponent):
+
+    def __init__(self, *args, **kwargs):
+        super(Maintenance, self).__init__("MAINTENANCE", *args, **kwargs)
+        self.log("Maintenance started")
+
+        # TODO: Accept argument for dbhost
+        client = pymongo.MongoClient(host="localhost", port=27017)
+        db = client["hfos"]
+
+        sizes = {}
+
+        for col in db.collection_names(include_system_collections=False):
+            sizes[col] = db.command('collstats', col).get('storageSize', 0)
+            self.log("Collection size (", col, "):", sizes[col], lvl=verbose)
