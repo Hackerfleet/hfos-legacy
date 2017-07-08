@@ -49,7 +49,7 @@ class LogbookCtrl {
         
         const eventcolor = {
             primary: 'red',
-            secondary: 'blue'
+            secondary: 'white'
         };
         
         this.events = [
