@@ -26,14 +26,23 @@
 
 <div class="container">
     <div class="well">
-    <span>Map Importer</span>
+        <h1>Map Utilities</h1>
 
-    <form>
-        <input type="file" name="uploadfile" id="filename">
-        <button type="submit" class="btn btn-default" ng-click="$ctrl.upload()">Upload Map</button>
-        <button type="submit" class="btn btn-danger" ng-click="$ctrl.rescan()">Rescan Map folder</button>
+        <p>This tool allows to upload raster charts and to rescan for already converted map data, that got lost e.g. due
+            to a database upgrade</p>
 
-    </form>
+        <form>
+            <h3>Upload new chart</h3>
+            <p>The system currently only accepts BSB/KAP files. Please upload a single .kap file to convert it to a HFOS
+                layer.</p>
+            <input class="form-control" type="file" name="uploadfile" id="filename">
+            <button type="submit" class="btn btn-default" ng-click="$ctrl.upload()">Upload Map</button>
+            <hr>
+            <h3>Rescan existing layers</h3>
+            <p>The rescan action triggers an analysis of all stored HFOS layer caches and integrates them into the GDAL
+                layer group.</p>
+            <button type="submit" class="btn btn-danger" ng-click="$ctrl.rescan()">Rescan</button>
 
+        </form>
     </div>
 </div>
