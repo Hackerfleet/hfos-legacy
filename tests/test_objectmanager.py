@@ -185,7 +185,7 @@ def test_get_object_invalid():
     })
 
     assert packet['action'] == 'fail'
-    assert packet['data'] == 'unavailable'
+    assert 'unavailable' in packet['data']
 
 
 def test_get_schema_invalid():
