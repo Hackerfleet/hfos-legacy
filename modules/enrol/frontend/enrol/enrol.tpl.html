@@ -1,0 +1,166 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div class="jumbotron" style="padding-top: 5px">
+    <h1>Enrollment Manager</h1>
+    <h2 class="text-danger">Demo! No functionality, yet!</h2>
+    <span>Invite and verify new users</span>
+
+    <div class="panel-group" ng-model="panels.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        Invite
+                        <span class="badge"
+                              ng-hide="$ctrl.invitation_counter == 0"
+                              ng-bind="$ctrl.invitation_counter"></span>
+
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
+                <div class="panel-body">
+                    <span>Manage invitations</span>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span>Invite new users via email</span>
+                            <div class="container">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <td>#</td>
+                                        <td>Name</td>
+                                        <td>Email</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr ng-repeat="invite in $ctrl.new_invitations">
+                                        <td>{{$index + 1}}</td>
+                                        <td>
+                                            <input type="text" class="form-control" id="name"
+                                                   ng-model="invite.name"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="email"
+                                                   ng-model="invite.email"/>
+                                        </td>
+                                        <td>
+                                            <button ng-click="$ctrl.remove_invitation_row($index)"
+                                                    class="btn" ng-hide="$index == 0">
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                            <button ng-click="$ctrl.add_invitation_row()"
+                                                    class="btn" ng-hide="$index != $ctrl.new_invitations.length - 1">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <div class="pull-right">
+                                    <button ng-click="$ctrl.invite_by_email()" class="btn btn-success">Invite
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <span>Check pending invitations</span>
+                            <table class="table table-hover user-list">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="(uuid, item) in $ctrl.invitations"
+                                    ng-class="{'success': item.status === 'Accepted',
+                                           'danger': item.status === 'Denied',
+                                           'info': item.status === 'Pending'}">
+                                    <td>{{item.name}}</td>
+                                    <td>{{item.email}}</td>
+                                    <td>{{item.status}}</td>
+                                    <td>
+                                        <div ng-hide="item.status == 'Accepted'">
+                                            <button ng-click="$ctrl.cancel_invitation(uuid)"
+                                                    class="btn btn-danger btn-sm">Cancel
+                                            </button>
+                                            <button ng-click="$ctrl.resend_invitation(uuid)"
+                                                    class="btn btn-info btn-sm">Resend
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        Verify
+                        <span class="badge"
+                              ng-hide="$ctrl.verification_counter == 0">{{$ctrl.verification_counter}}</span>
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                <div class="panel-body">
+                    <span>Verify already accepted users</span>
+                    <table class="table table-hover user-list">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="(uuid, item) in $ctrl.verifications"
+                            ng-class="{'success': item.status === 'Accepted',
+                                           'danger': item.status === 'Denied',
+                                           'info': item.status === 'Pending'}">
+                            <td>{{item.name}}</td>
+                            <td>{{item.status}}</td>
+                            <td>
+                                <button ng-click="$ctrl.cancel_verification(uuid)"
+                                        class="btn btn-danger btn-sm">Cancel
+                                </button>
+                                <button ng-click="$ctrl.allow_verification(uuid)" class="btn btn-success btn-sm">Allow</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
