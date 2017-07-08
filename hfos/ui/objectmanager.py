@@ -202,7 +202,7 @@ class ObjectManager(ConfigurableComponent):
         storage_object = objectmodels[schema].find_one(object_filter)
 
         if not storage_object:
-            self._cancel_by_error(event, event.uuid + ' of ' + schema +
+            self._cancel_by_error(event, uuid + ' of ' + schema +
                                   'unavailable')
             return
 
