@@ -42,6 +42,7 @@ from pprint import pprint
 from pymongo.errors import DuplicateKeyError
 
 from hfos.ui.builder import install_frontend
+from hfos.migration import make_migrations
 from hfos.logger import verbose, debug, warn, error, critical, verbosity, \
     hfoslog
 import getpass
@@ -323,25 +324,52 @@ db_host_metavar = '<ip:port>'
 
 
 @click.group(cls=DYMGroup)
-@click.option("--username", help="Username for user related operations",
-              default=None)
-@click.option("--password", help="Password for user related operations",
-              default=None)
 @click.option('--dbhost', default=db_host_default, help=db_host_help,
               metavar=db_host_metavar)
 @click.pass_context
-def user(ctx, username, password, dbhost):
-    """User management operations (GROUP)"""
-
-    ctx.obj['username'] = username
-    ctx.obj['password'] = password
+def db(ctx, dbhost):
+    """Database management operations (GROUP)"""
 
     from hfos import database
     database.initialize(dbhost)
     ctx.obj['db'] = database
 
 
-cli.add_command(user)
+cli.add_command(db)
+
+
+@db.group(cls=DYMGroup)
+@click.option("--schema", help="Specify schema to work with",
+              default=None)
+@click.pass_context
+def migrations(ctx, schema):
+    """Data migration management (GROUP)"""
+
+    ctx.obj['schema'] = schema
+
+
+@migrations.command(short_help="make new migrations")
+@click.pass_context
+def make(ctx):
+    """Makes new migrations for all or the specified schema"""
+
+    make_migrations(ctx.obj['schema'])
+
+
+@db.group(cls=DYMGroup)
+@click.option("--username", help="Username for user related operations",
+              default=None)
+@click.option("--password", help="Password for user related operations",
+              default=None)
+@click.pass_context
+def user(ctx, username, password):
+    """User management operations (GROUP)"""
+
+    ctx.obj['username'] = username
+    ctx.obj['password'] = password
+
+
+db.add_command(user)
 
 
 @user.command(short_help='create new user')
@@ -861,17 +889,16 @@ def uninstall():
 cli.add_command(uninstall)
 
 
-@click.command(short_help='find in object model fields')
+@db.command(short_help='find in object model fields')
 @click.option("--search", help="Argument to search for in object model "
                                "fields",
               default=False, metavar='<text>')
 @click.option("--by-type", help="Find all fields by type",
               default=False, is_flag=True)
-@click.option('--dbhost', default=db_host_default, help=db_host_help,
-              metavar=db_host_metavar)
 @click.option('--obj', default=None, help="Search in specified object "
                                           "model", metavar='<name>')
-def find_field(search, by_type, dbhost, obj):
+@click.pass_context
+def find_field(ctx, search, by_type, obj):
     """Find fields in registered data models."""
 
     # TODO: Fix this to work recursively on all possible subschemes
@@ -880,8 +907,7 @@ def find_field(search, by_type, dbhost, obj):
     else:
         search = ask("Enter search term")
 
-    from hfos import database
-    database.initialize(dbhost)
+    database = ctx.obj['db']
 
     def find(schema, search, by_type, result=[], key=""):
         fields = schema['properties']
@@ -934,9 +960,6 @@ def find_field(search, by_type, dbhost, obj):
                 print(model)
                 # hfoslog(model, result)
                 pprint(result)
-
-
-cli.add_command(find_field)
 
 
 @cli.command(short_help='Start interactive management shell')
