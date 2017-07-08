@@ -11,5 +11,5 @@ import template from './crew/roster.tpl.html';
 export default angular
     .module('main.app.crew', [uirouter])
     .config(routing)
-    .component('roster', {controller: rostercomponent, template: template})
+    .component('crew', {controller: rostercomponent, template: template})
     .name;
