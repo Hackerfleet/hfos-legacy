@@ -1,16 +1,24 @@
-# Docker Image for hfos
+# Docker Image for HFOS
 #
-# This image essentially packages up HFOS
+# This image essentially packages up HFOS along with mongodb
 # into a Docker Image/Container.
 #
-# Usage Examples(s)::
+# Usage Examples::
 #
-#     $ docker run -i -t hackerfleet/hfos hfos_launcher.py
-#     $ docker run -i -t -p 127.0.0.1:443:443 --name hfos-test-live -t hackerfleet/hfos
+# To run your instance and see if the backend starts:
+#     $ docker run -i -t hackerfleet/hfos /bin/bash -c "/etc/init.d/mongodb start && hfos_launcher.py"
 #
-# VERSION: 1.1.1
+# To investigate problems on the docker container, i.e. get a shell:
+#     $ docker run -i -t --name hfos-test-live -t hackerfleet/hfos
 #
-# Last Updated: 20170226
+# If you want to run a productive instance with working SSL:
+#     $ docker run -i -p 127.0.0.1:443:443 -t hackerfleet/hfos /bin/bash -c "/etc/init.d/mongodb start && python3 \
+#       hfos_manage.py install frontend --dev --rebuild &&  python3 hfos_launcher.py --port 443 \
+#       --cert /etc/ssl/certs/hfos/selfsigned.pem --log 10 --dev"
+#
+# VERSION: 1.1.2
+#
+# Last Updated: 20170712
 
 FROM debian:experimental
 MAINTAINER Heiko 'riot' Weinen <riot@c-base.org>
@@ -85,9 +93,9 @@ RUN git submodule init && git submodule update
 RUN pip3 install -r requirements-dev.txt
 RUN python3 setup.py develop
 
-# Upgrade npm (from ancient Debian version to current)
+# Upgrade npm (from ancient Debian version to 4.6.1 which has a proven track record at assembling the frontend)
 
-RUN npm install npm -g
+RUN npm install -g npm@4.6.1
 
 # Install HFOS
 
@@ -100,12 +108,15 @@ RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions -p
 RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions -p user
 RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions
 RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install docs
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install frontend --dev
+RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install frontend --rebuild --dev
 
 #  Services
 
 EXPOSE 443
 
+# There is a frontend development server with hot reloading which can be started with
+#   $ hfos/frontend/npm run start
 # If you want to run the frontend development live server, uncomment this:
+#
 # EXPOSE 8081
 
