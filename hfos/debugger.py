@@ -43,7 +43,7 @@ from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
 from hfos.events.client import send
 from hfos.component import ConfigurableComponent, handler
 from hfos.database import objectmodels
-from hfos.logger import hfoslog, critical, warn
+from hfos.logger import hfoslog, critical, warn, debug, verbose
 
 try:
     import objgraph
@@ -80,6 +80,7 @@ class HFDebugger(ConfigurableComponent):
             self.root = root
 
         if hpy is not None:
+            # noinspection PyCallingNonCallable
             self.heapy = hpy()
         else:
             self.log("Can't use heapy. guppy package missing?")
@@ -226,7 +227,7 @@ class CLI(ConfigurableComponent):
         """
 
         data = data.strip().decode("utf-8")
-        self.log("Incoming:", data)
+        self.log("Incoming:", data, lvl=verbose)
 
         if len(data) == 0:
             return
@@ -238,7 +239,9 @@ class CLI(ConfigurableComponent):
                 cmd, args = cmd.split(' ', maxsplit=1)
                 args = args.split(' ')
             if cmd in self.hooks:
-                self.hooks[cmd](args)
+                self.log('Firing hooked event:', cmd, args, lvl=debug)
+                self.fireEvent(self.hooks[cmd](args))
+            # TODO: Move these out, so we get a simple logic here
             if cmd == 'FRONTEND':
                 self.log("Sending %s frontend rebuild event" % ("(forced)"
                                                                 if 'FORCE'
@@ -250,8 +253,12 @@ class CLI(ConfigurableComponent):
             if cmd == 'BACKEND':
                 self.log("Sending backend reload event")
                 self.fireEvent(componentupdaterequest(force=False), "setup")
-            if cmd == 'WHO':
-                self.fireEvent()
+
+    @handler('cli_register_event')
+    def register_event(self, event):
+        self.log('Registering event hook:', event.cmd, event.thing,
+                 pretty=True)
+        self.hooks[event.cmd.upper()] = event.thing
 
 
 class clicommand(Event):
@@ -259,3 +266,10 @@ class clicommand(Event):
         super(clicommand, self).__init__(*args, **kwargs)
         self.cmd = cmd
         self.args = cmdargs
+
+
+class cli_register_event(Event):
+    def __init__(self, cmd, thing, *args, **kwargs):
+        super(cli_register_event, self).__init__(*args, **kwargs)
+        self.cmd = cmd
+        self.thing = thing
