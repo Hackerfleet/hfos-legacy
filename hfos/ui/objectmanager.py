@@ -95,7 +95,11 @@ class ObjectManager(ConfigurableComponent):
         msg = {
             'component': 'hfos.events.objectmanager',
             'action': 'fail',
-            'data': (False, 'No permission', data)
+            'data': {
+                'reason': 'No permission',
+                'data': data,
+                'req': data.get('req')
+            }
         }
         self.fire(send(client.uuid, msg))
 
@@ -105,7 +109,10 @@ class ObjectManager(ConfigurableComponent):
         msg = {
             'component': 'hfos.events.objectmanager',
             'action': 'fail',
-            'data': reason
+            'data': {
+                'reason': reason,
+                'req': event.data.get('req', None)
+            }
         }
         self.fire(send(event.client.uuid, msg))
 
@@ -117,16 +124,7 @@ class ObjectManager(ConfigurableComponent):
 
         if 'schema' not in data or data['schema'] not in \
                 objectmodels.keys():
-            thing = data['schema'] if 'schema' in data else None
-            self.log("List for unavailable schema requested: ",
-                     thing,
-                     lvl=warn)
-            result = {
-                'component': 'hfos.events.objectmanager',
-                'action': "noschema",
-                'data': thing
-            }
-            self.fireEvent(send(event.client.uuid, result))
+            self._cancel_by_error(event, 'invalid_schema')
             return
         else:
             schema = data['schema']
@@ -162,10 +160,11 @@ class ObjectManager(ConfigurableComponent):
         if result:
             try:
                 self.log('Transmitting result', lvl=verbose)
+                result['data']['req'] = event.data.get('req')
                 self.fireEvent(send(event.client.uuid, result))
             except Exception as e:
                 self.log("Transmission error during response: %s" % e,
-                         lvl=error)
+                         lvl=error, exc=True)
 
     @handler(get)
     def get(self, event):
@@ -224,7 +223,11 @@ class ObjectManager(ConfigurableComponent):
             result = {
                 'component': 'hfos.events.objectmanager',
                 'action': 'get',
-                'data': storage_object.serializablefields()
+                'data': {
+                    'schema': schema,
+                    'uuid': uuid,
+                    'object': storage_object.serializablefields()
+                }
             }
 
         self._respond(None, result, event)
@@ -255,8 +258,6 @@ class ObjectManager(ConfigurableComponent):
             fields = data['fields']
         else:
             fields = []
-
-        request_id = data['req']
 
         object_list = []
 
@@ -306,7 +307,6 @@ class ObjectManager(ConfigurableComponent):
             'data': {
                 'schema': schema,
                 'list': object_list,
-                'req': request_id
             }
         }
 
@@ -314,6 +314,7 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(list)
     def objectlist(self, event):
+        self.log('LEGACY LIST FUNCTION CALLED!', lvl=warn)
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
@@ -385,7 +386,7 @@ class ObjectManager(ConfigurableComponent):
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
-            self._cancel_by_error(event)
+            self._cancel_by_error(event, 'missing_args')
             return
 
         try:
@@ -393,10 +394,10 @@ class ObjectManager(ConfigurableComponent):
             change = data['change']
             field = change['field']
             new_data = change['value']
-
         except KeyError as e:
             self.log("Update request with missing arguments!", data, e,
                      lvl=critical)
+            self._cancel_by_error(event, 'missing_args')
             return
 
         storage_object = None
@@ -406,29 +407,39 @@ class ObjectManager(ConfigurableComponent):
         except Exception as e:
             self.log('Change for unknown object requested:', schema,
                      data, lvl=warn)
+            self._cancel_by_error(event, 'not_found')
+            return
 
-        if storage_object is not None:
-            if not self._check_permissions(user, 'write', storage_object):
-                self._cancel_by_permission(schema, data, client)
-                return
+        if not self._check_permissions(user, 'write', storage_object):
+            self._cancel_by_permission(schema, data, client)
+            return
 
-            self.log("Changing object:", storage_object._fields, lvl=debug)
-            storage_object._fields[field] = new_data
+        self.log("Changing object:", storage_object._fields, lvl=debug)
+        storage_object._fields[field] = new_data
 
-            self.log("Storing object:", storage_object._fields, lvl=debug)
-            try:
-                storage_object.validate()
-            except ValidationError:
-                self.log("Validation of changed object failed!",
-                         storage_object, lvl=warn)
+        self.log("Storing object:", storage_object._fields, lvl=debug)
+        try:
+            storage_object.validate()
+        except ValidationError:
+            self.log("Validation of changed object failed!",
+                     storage_object, lvl=warn)
+            self._cancel_by_error('invalid_object')
+            return
 
-            storage_object.save()
+        storage_object.save()
 
-            self.log("Object stored.")
-            self._respond(None, True, event)
-        else:
-            self.log("Object update failed. No object.", lvl=warn)
-            self._respond(None, False, event)
+        self.log("Object stored.")
+
+        result = {
+            'component': 'hfos.ui.objectmanager',
+            'action': 'change',
+            'data': {
+                'schema': schema,
+                'uuid': uuid
+            }
+        }
+
+        self._respond(None, result, event)
 
     @handler(put)
     def put(self, event):
@@ -502,7 +513,11 @@ class ObjectManager(ConfigurableComponent):
             result = {
                 'component': 'hfos.events.objectmanager',
                 'action': 'put',
-                'data': (True, storage_object.uuid),
+                'data': {
+                    'schema': schema,
+                    'object': storage_object.serializablefields(),
+                    'uuid': storage_object.uuid,
+                }
             }
 
             self._respond(notification, result, event)
@@ -519,7 +534,7 @@ class ObjectManager(ConfigurableComponent):
             self._cancel_by_error(event)
             return
 
-        if True:  # try:
+        try:
             uuid = data['uuid']
 
             if schema in objectmodels.keys():
@@ -547,7 +562,10 @@ class ObjectManager(ConfigurableComponent):
                     deletion = {
                         'component': 'hfos.events.objectmanager',
                         'action': 'deletion',
-                        'data': uuid
+                        'data': {
+                            'schema': schema,
+                            'uuid': uuid,
+                        }
                     }
                     for recipient in self.subscriptions[uuid]:
                         self.fireEvent(send(recipient, deletion))
@@ -557,15 +575,18 @@ class ObjectManager(ConfigurableComponent):
                 result = {
                     'component': 'hfos.events.objectmanager',
                     'action': 'delete',
-                    'data': (True, schema, storage_object.uuid),
+                    'data': {
+                        'schema': schema,
+                        'uuid': storage_object.uuid
+                    }
                 }
 
                 self._respond(notification, result, event)
             else:
                 self.log("Unknown schema encountered: ", schema, lvl=warn)
-                # except Exception as e:
-                #    self.log("Error during delete request: ", e, type(e),
-                # lvl=error)
+        except Exception as e:
+            self.log("Error during delete request: ", e, type(e),
+                     lvl=error)
 
     @handler(subscribe)
     def subscribe(self, event):
