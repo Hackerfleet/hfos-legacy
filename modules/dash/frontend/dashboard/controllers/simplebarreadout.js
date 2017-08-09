@@ -10,7 +10,8 @@ class SimpleBarReadout {
 
         this.valuetype = this.scope.$parent.valuetype;
         this.scalevalue = 0;
-        this.scaleprop = '0%'
+        this.scaleprop = '0%';
+        this.heightprop = '100px';
         this.value = 0;
         this.age = 0;
         this.max = 1;
@@ -20,7 +21,15 @@ class SimpleBarReadout {
         console.log('[DASH-SBR] SimpleBarReadout loaded, observing:', this.valuetype);
 
         let self = this;
-
+    
+        self.scope.$on('resize', function (event, new_size) {
+            console.log('Resizing to:', new_size);
+            self.width = new_size[0];
+            self.height = new_size[1];
+            self.heightprop = self.height + "px";
+            self.fontsizeprop = Math.min(self.width/2, self.height) + "px";
+        });
+    
         this.updateAge = function() {
             let seconds = new Date() / 1000;
             if (self.age === 0) {
@@ -49,10 +58,10 @@ class SimpleBarReadout {
 
         this.interval(this.updateAge, 1000);
     
-        self.socket.listen('navdata', self.handleNavdata);
+        self.socket.listen('hfos.navdata.sensors', self.handleNavdata);
     
         self.scope.$on('$destroy', function() {
-            self.socket.unlisten('navdata', self.handleNavdata);
+            self.socket.unlisten('hfos.navdata.sensors', self.handleNavdata);
         });
     }
 }

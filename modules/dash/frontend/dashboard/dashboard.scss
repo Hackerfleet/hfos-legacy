@@ -32,6 +32,8 @@
   border-bottom: 1px solid $color-primary-3;
   cursor: move;
   position: relative;
+  max-height: 36px;
+  overflow: hidden;
 }
 
 .box-header h3 {
@@ -78,6 +80,12 @@
 
 .simplebarreadout {
   text-align: left;
+}
+
+.simplebarreadout > .center-block.small {
+  position: absolute;
+  bottom: 0;
+  mix-blend-mode: difference;
 }
 
 .simplebar {
@@ -130,6 +138,8 @@
   width: 0;
 }
 
+/* SimpleCompass */
+
 .angleMark {
   stroke: $color-primary-3;
   stroke-width: 2px;
@@ -167,4 +177,11 @@
   fill: $color-primary-4;
   font-weight: lighter;
   font-size: 12px;
+}
+
+
+/* Linechart */
+
+.linechart > angular-chart {
+  overflow: hidden;
 }

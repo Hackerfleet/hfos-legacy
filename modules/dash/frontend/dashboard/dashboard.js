@@ -2,8 +2,6 @@
 
 let humanizeDuration = require('humanize-duration');
 
-import configcomponent from './config';
-import configtemplate from './config.tpl.html';
 /**
  * @ngdoc function
  * @name hfosFrontendApp.controller:DashboardCtrl
@@ -60,17 +58,6 @@ class Dashboard {
         this.referencedata = {};
         this.referenceages = {};
         this.observed = [];
-        
-        this.configmodal = this.$modal({
-            template: configtemplate,
-            controller: configcomponent,
-            controllerAs: '$ctrl',
-            title: 'Dashboard configuration',
-            backdrop: false,
-            id: 'DashboardConfig',
-            show: false
-        });
-        
         
         this.op.getObject('dashboardconfig', this.dashboarduuid);
         
@@ -269,17 +256,6 @@ class Dashboard {
         console.log('[DASH] Putting new dashboard: ', this.dashboard);
         this.op.putObject('dashboardconfig', this.dashboard);
         this.updateObserved();
-    }
-    
-    configureCards() {
-        console.log('[DASH] Opening configuration:', configcomponent, configtemplate);
-        
-        // Pre-fetch an external template populated with a custom scope
-        // Show when some event occurs (use $promise property to ensure the template has been loaded)
-        this.configmodal.$promise.then(this.configmodal.show);
-        
-        
-        console.log('[DASH] I am done with this stuff..');
     }
 }
 

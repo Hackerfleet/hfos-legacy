@@ -1,11 +1,13 @@
 <div class="simplebarreadout" ng-controller="simplebarreadout as ctrl">
-    <span class="digital-inverted center-block" ng-bind="ctrl.value">{{ctrl.value}}</span>
-    <div class="simplebar" ng-style="{width: ctrl.scaleprop, 'background-color': ctrl.color}">
-    </div>
-    <span class="center-block small">
+    <span class="digital-inverted center-block" ng-bind="ctrl.value" ng-style="{'font-size': ctrl.fontsizeprop}">{{ctrl.value}}</span>
+
+    <span class="center-block small" ng-show="ctrl.height > 100">
         <span class="center-block">{{ctrl.valuetype}}</span>
         <span class="center-block">Max: {{ctrl.max}}</span>
         <span class="center-block">%: {{ctrl.scalevalue | number : 2 }}</span>
         <span class="center-block">{{ctrl.agehumanized}}</span>
     </span>
+
+    <div class="simplebar" ng-style="{width: ctrl.scaleprop, height: ctrl.heightprop, 'background-color': ctrl.color}">
+    </div>
 </div>

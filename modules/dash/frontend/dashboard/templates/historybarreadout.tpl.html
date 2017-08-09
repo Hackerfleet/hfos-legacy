@@ -29,7 +29,7 @@
         <div class="historybar" ng-repeat="historyvalue in ctrl.history track by $index" ng-style="{height: historyvalue, 'background-color': ctrl.color}">
         </div>
     </div>
-    <span class="center-block small">
+    <span class="center-block small" ng-show="ctrl.height > 100">
         <span class="center-block">{{ctrl.valuetype}}</span>
         <span class="center-block">Max: {{ctrl.max}}</span>
         <span class="center-block">%: {{ctrl.scalevalue | number : 2 }}</span>

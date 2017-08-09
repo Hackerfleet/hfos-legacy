@@ -46,7 +46,13 @@ class HistoryBarReadout {
         console.log('[DASH-HBR] HistoryBarReadout loaded, observing:', this.valuetype);
 
         let self = this;
-
+    
+        self.scope.$on('resize', function (event, new_size) {
+            console.log('Resizing to:', new_size);
+            self.width = new_size[0];
+            self.height = new_size[1];
+        });
+    
         this.updateAge = function() {
             let seconds = new Date() / 1000;
             if (self.age === 0) {
@@ -81,10 +87,10 @@ class HistoryBarReadout {
 
         this.interval(this.updateAge, 1000);
     
-        self.socket.listen('navdata', self.handleNavdata);
+        self.socket.listen('hfos.navdata.sensors', self.handleNavdata);
     
         self.scope.$on('$destroy', function() {
-            self.socket.unlisten('navdata', self.handleNavdata);
+            self.socket.unlisten('hfos.navdata.sensors', self.handleNavdata);
         });
     }
 }

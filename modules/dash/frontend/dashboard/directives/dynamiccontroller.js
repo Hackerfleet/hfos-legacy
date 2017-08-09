@@ -2,7 +2,7 @@
  * Created by riot on 14.05.16.
  */
 
-const widgettypes = ['digitalreadout', 'simplebarreadout', 'historybarreadout', 'simplecompass'];
+const widgettypes = ['digitalreadout', 'simplebarreadout', 'historybarreadout', 'simplecompass', 'linechart'];
 
 const widgettemplates = {};
 
@@ -30,6 +30,26 @@ let ngDynamicController = function ($compile, $http, $parse) {
             console.log('[NGDC] Appending template:', widgettemplates[ctrl]);
             elem.append(widgettemplates[ctrl]);
             $compile(elem)(scope);
+
+            scope.$watch(
+                function () {
+                    return [scope.gridsterItem.sizeX, scope.gridsterItem.sizeY].join('x');
+                },
+                function (value) {
+                    let split = value.split('x');
+                    split[0] = split[0] * scope.gridster.colWidth - 15;
+                    split[1] = split[1] * scope.gridster.rowHeight - 50;
+                    console.log('directive got resized:', split);
+                    scope.$broadcast('resize', split);
+                    scope.width = split[0];
+                    scope.height = split[1];
+                }
+            );
+            scope.width = scope.gridsterItem.sizeX * scope.gridster.colWidth - 15;
+            scope.height = scope.gridsterItem.sizeY * scope.gridster.rowHeight - 50;
+    
+            console.log('SCOPE:', scope);
+
             console.log('[NGDC] Done');
         }
     };

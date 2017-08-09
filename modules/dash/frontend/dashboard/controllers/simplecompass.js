@@ -49,20 +49,6 @@ class SimpleCompass {
         this.width = 350;
         this.height = 350;
         
-        let rawSvg = element.find('svg');
-        this.svg = d3.select(rawSvg[0])
-            .attr("width", this.width)
-            .attr("height", this.height)
-            .append("g")
-            .attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ") scale(1, -1)")
-            .on("mousedown", function () {
-                console.log(d3.mouse(this))
-            });
-        
-        console.log('[DASH-SC] d3 element: ', this.svg);
-        
-        let self = this;
-        
         this.updateAge = function () {
             let seconds = new Date() / 1000;
             if (self.age === 0) {
@@ -90,11 +76,38 @@ class SimpleCompass {
         
         this.interval(this.updateAge, 1000);
         
-        self.socket.listen('navdata', self.handleNavdata);
-    
-        self.scope.$on('$destroy', function() {
-            self.socket.unlisten('navdata', self.handleNavdata);
+        let self = this;
+        
+        self.socket.listen('hfos.navdata.sensors', self.handleNavdata);
+        
+        self.scope.$on('$destroy', function () {
+            self.socket.unlisten('hfos.navdata.sensors', self.handleNavdata);
         });
+        
+        self.scope.$on('resize', function (event, new_size) {
+            console.log('Resizing to:', new_size);
+            self.width = new_size[0];
+            self.height = new_size[1];
+            self.radius = (Math.min(self.width, self.height) - 60) / 2.7;
+            self.init_svg();
+            self.Compass();
+        });
+        
+        this.init_svg = function () {
+            self.rawSvg = element.find('svg');
+            d3.selectAll("svg > *").remove();
+            
+            self.svg = d3.select(self.rawSvg[0])
+                .attr("width", self.width)
+                .attr("height", self.height)
+                .append("g")
+                .attr("transform", "translate(" + self.width / 2 + "," + self.height / 2 + ") scale(1, -1)")
+                .on("mousedown", function () {
+                    console.log(d3.mouse(this))
+                });
+            
+            console.log('[DASH-SC] d3 element: ', self.svg);
+        };
         
         this.drawAngleSweep = function (realangle) {
             // TODO: Remove the right element via angular's component element, not via jquery
@@ -207,14 +220,15 @@ class SimpleCompass {
                     .attr("y2", coords.outer.y)
                     .style("fill", "none");
                 
-                
-                //Text
-                svg.append("text")
-                    .attr("class", "angleText")
-                    .attr("x", coords.text.x)
-                    .attr("y", coords.text.y)
-                    .attr("transform", "matrix(1, 0, 0, -1, " + (coords.text.x - (1) * coords.text.x) + ", " + (coords.text.y - (-1) * coords.text.y) + ")")
-                    .text(Math.round(parseFloat((180 / Math.PI) * angle)));
+                if (self.radius > 100) {
+                    //Text
+                    svg.append("text")
+                        .attr("class", "angleText")
+                        .attr("x", coords.text.x)
+                        .attr("y", coords.text.y)
+                        .attr("transform", "matrix(1, 0, 0, -1, " + (coords.text.x - (1) * coords.text.x) + ", " + (coords.text.y - (-1) * coords.text.y) + ")")
+                        .text(Math.round(parseFloat((180 / Math.PI) * angle)));
+                }
             }
             
             self.drawAngleSweep(self.lastAngle);
@@ -230,6 +244,7 @@ class SimpleCompass {
             scaleMarks();
         };
         
+        this.init_svg();
         this.Compass();
     }
 }

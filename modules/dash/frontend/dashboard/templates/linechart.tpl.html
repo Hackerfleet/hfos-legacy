@@ -1,0 +1,12 @@
+<div class="linechart" ng-controller="linechart as ctrl">
+    <div class="text-left small">
+    <label>History:</label>
+    <select ng-model="ctrl.history_length" ng-change="ctrl.prune_history()">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    </div>
+    <angular-chart options="ctrl.options" instance="ctrl.instance"></angular-chart>
+</div>

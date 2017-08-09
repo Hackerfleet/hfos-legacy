@@ -7,8 +7,6 @@
         ng-style="{display: $ctrl.hideui && 'none' || 'block'}">
         <li class="active"><a role="tab" ng-click="$ctrl.opentab('dashboard')" data-toggle="tab">Dashboard</a></li>
         <li><a role="tab" ng-click="$ctrl.opentab('sensed')" data-toggle="tab">Received Sensordata</a></li>
-        <li class="hidden"><a role="tab" ng-click="$ctrl.configureCards()">Configure Dashboard</a></li>
-        <li><a role="tab" ng-click="$ctrl.opentab('dashboardeditor')" data-toggle="tab">Edit Dashboard</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -70,9 +68,6 @@
                     </tr>
                 </table>
             </div>
-        </div>
-        <div class="tab-pane" id="dashboardeditor">
-            <objecteditor schema="dashboardconfig" uuid="{{$ctrl.dashboarduuid}}" action="edit"></objecteditor>
         </div>
     </div>
 </div>

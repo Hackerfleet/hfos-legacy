@@ -63,7 +63,8 @@ DashboardSchema['properties'].update({
                         'simplebarreadout',
                         'historybarreadout',
                         'digitalreadout',
-                        'simplecompass'
+                        'simplecompass',
+                        'linechart',
                     ]
                 },
                 'valuetype': {'type': 'string'},
