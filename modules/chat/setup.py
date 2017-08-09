@@ -23,27 +23,31 @@ __license__ = "GPLv3"
 
 from setuptools import setup, find_packages
 
-setup(name="hfos-chat",
-      version="0.0.1",
-      description="hfos-chat",
+setup(
+    name="hfos-chat",
+    version="0.0.2",
+    description="hfos-chat",
 
-      author="Hackerfleet Community",
-      author_email="riot@c-base.org",
-      url="https://github.com/hackerfleet/hfos-chat",
-      license="GNU General Public License v3",
-      packages=find_packages(),
-      long_description="""HFOS - Chat
+    author="Hackerfleet Community",
+    author_email="riot@c-base.org",
+    url="https://github.com/hackerfleet/hfos-chat",
+    license="GNU General Public License v3",
+    packages=find_packages(),
+    long_description="""HFOS - Chat
 ===========
 
 A chat system.
 
 This software package is a plugin module for HFOS.
 """,
-      dependency_links=[],
-      install_requires=['hfos>=1.2.0'],
-      entry_points="""[hfos.components]
+    dependency_links=[],
+    install_requires=['hfos>=1.2.0'],
+    entry_points="""[hfos.components]
     chat=hfos.chat.host:Host
 [hfos.schemata]
+    chatmessage=hfos.chat.schemata.chatmessage:ChatMessage
+    chatchannel=hfos.chat.schemata.channel:ChatChannel
+    chatlastlog=hfos.chat.schemata.lastlog:ChatLastlog
     """,
-      test_suite="tests.main.main",
-      )
+    test_suite="tests.main.main",
+)

@@ -1,16 +1,29 @@
-<div class="well chat">
-    <div class="row">
-        <h2>Chat</h2>
-    </div>
+<button id="sidebargrab" type="button" ng-click="$ctrl.showSidebar()">
+    <span id="sidebargrabicon" class="fa fa-arrow-left"></span>
+</button>
 
-    <div class="row" id="chatdisplay">
-        <ul class="chatmessages">
-            <li ng-repeat="msg in $ctrl.messages">
-                <img src="/assets/images/icons/anonymous-icon.png" height="32px" width="32px"/>
-                <span>{{msg.timestamp | date: 'HH:mm:ss'}}</span>
-                <span>{{msg.sender}}</span>
-                <br/>
-                <span ng-bind-html="msg.content"></span>
+<div class="well chat">
+    <div class="row" id="chatheader">
+        <h2>Chat: {{$ctrl.chat.channels[$ctrl.chat.channel].name}}
+
+        </h2>
+        <a href="#!/editor/chatchannel/{{$ctrl.chat.channel}}/edit">
+            <span class="fa fa-pencil"></span>
+        </a>
+        <span>{{$ctrl.chat.channels[$ctrl.chat.channel].topic}}</span>
+    </div>
+    <div class="row" id="chatdisplay" scroll-glue>
+        <a ng-click="$ctrl.chat.get_history()">Get older messages</a>
+        <ul class="chat-messages">
+            <li ng-repeat="(timestamp, msg) in $ctrl.chat.messages[$ctrl.chat.channel] | orderedObject">
+                <img class="profile-image" src="/assets/images/icons/anonymous-icon.png" height="32px" width="32px"/>
+                <div class="message-content">
+                    <span><strong>{{$ctrl.chat.users[$ctrl.chat.channel][msg.sender].name}}</strong></span>
+                    <span class="message-ago" am-time-ago="timestamp | amFromUnix"></span>
+                    <span class="message-timestamp"><small>{{timestamp * 1000| date:'mediumTime'}}</small></span>
+                    <br/>
+                    <span ng-bind-html="msg.content"></span>
+                </div>
             </li>
         </ul>
     </div>
@@ -18,13 +31,13 @@
     <div class="row chatinput">
         <form class="form-horizontal">
             <div class="input-group">
-                <textarea
-                        class="col-sm-11 form-control"
-                        rows="1" id="chatinput"
-                        ng-model="$ctrl.input"
-                        placeholder="Enter message..."
-                        ng-keyup="$event.keyCode == 13 && !$event.shiftKey && $ctrl.chatsend()"
-                ></textarea>
+            <textarea
+                    class="col-sm-11 form-control"
+                    rows="1" id="chatinput"
+                    ng-model="$ctrl.input"
+                    placeholder="Enter message..."
+                    ng-keyup="$event.keyCode == 13 && !$event.shiftKey && $ctrl.chatsend()"
+            ></textarea>
                 <div class="input-group-btn">
                     <button type="submit" class="btn btn-default" ng-click="$ctrl.chatsend()">Send
                     </button>
@@ -32,5 +45,4 @@
             </div>
         </form>
     </div>
-
 </div>

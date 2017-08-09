@@ -1,0 +1,59 @@
+<div class="aside bs-docs-aside" tabindex="-1" role="dialog">
+    <div class="aside-dialog">
+        <div class="aside-content">
+            <div class="aside-header">
+                <button type="button" class="close" ng-click="$hide();">&times;</button>
+                <h4 class="aside-title">Chat Sidebar</h4>
+            </div>
+            <div id="chatsidebar" class="aside-body bs-sidebar">
+                <uib-tabset active="active">
+                    <uib-tab index="0" heading="Channels">
+                        <div id="channel_selector">
+                            <h4>Channels</h4>
+
+                            <ul class="channel-overview">
+                                <li>Your channels</li>
+                                <li ng-repeat="(uuid, channel) in $ctrl.chat.joined">
+                                    <a ng-click="$ctrl.chat.change(uuid)">
+                                        <span>{{channel.name}}</span>
+                                        <span ng-hide="$ctrl.chat.unread[uuid] == 0" class="badge">{{$ctrl.chat.unread[uuid]}}</span>
+                                    </a>
+                                </li>
+                                <li>Other channels</li>
+                                <li ng-repeat="(uuid, channel) in $ctrl.chat.unjoined">
+                                    <a ng-click="$ctrl.chat.join(uuid)">
+                                        <span>{{channel.name}}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <a href="#!/editor/chatchannel//create" class="btn btn-default" role="button">Add channel</a>
+                        </div>
+                    </uib-tab>
+
+                    <uib-tab index="1" heading="Users">
+                        <div id="user_selector">
+                            <h4>Users</h4>
+                            <ul>
+                                <li ng-repeat="(uuid, user) in $ctrl.chat.users[$ctrl.chat.channel]">
+                                    <img src="/assets/images/icons/anonymous-icon.png" height="24px" width="24px"/>
+                                    <a ng-click="$ctrl.switch_user(uuid)">{{user.name}}</a>
+                                    <a ng-hide="user.profile.userdata === null" ng-click="isExpanded = !isExpanded">
+                                        <i class="fa" ng-class="{'fa-chevron-right': !isExpanded, 'fa-chevron-down': isExpanded}"></i>
+                                    </a>
+
+                                    <div uib-collapse="!isExpanded">
+                                        <div>{{user.profile.userdata.name}} {{user.profile.userdata.familyname}}</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </uib-tab>
+                </uib-tabset>
+
+            </div>
+            <div class="aside-footer">
+                <small>-</small>
+            </div>
+        </div>
+    </div>
+</div>

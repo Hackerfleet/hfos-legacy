@@ -21,6 +21,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * """
  */
+@import '../../../colors';
 
 .chat {
   height: 95%;
@@ -30,16 +31,24 @@
   bottom: 0;
 }
 
-.chatmessages {
+.chat-messages {
   list-style-type: none;
+  padding: 0;
+}
+
+#chatheader {
+  border-bottom: 1px solid $color-gray-dark;
 }
 
 #chatdisplay {
   overflow: auto;
   position: absolute;
-  width: 99%;
   bottom: 50px;
-  top: 60px;
+  top: 90px;
+  left: 0;
+  right: 0;
+  padding: 0;
+  margin: 10px;
 }
 
 .chatinput {
@@ -49,3 +58,53 @@
   bottom: 10px;
 }
 
+#chatsidebar ul {
+  list-style-type: none;
+  padding-left: 10px;
+}
+
+#chatsidebar .pull-right .fa {
+  color: $color-gray-light;
+  &:hover {
+    color: $color-gray-dark;
+  }
+}
+
+#chatsidebar {
+  padding: 0;
+  margin: 0;
+}
+
+#chatsidebar .slider.slider-horizontal {
+  width: 96% !important;
+}
+
+#chatsidebar .tab-content {
+  margin: 10px;
+}
+
+#btnchat {
+  position: relative;
+}
+
+#btnchat .badge {
+  position: absolute;
+  right: 0;
+  top: 5px;
+}
+
+.message-content {
+  display: inline-block;
+}
+
+.message-ago {
+  color: $color-gray-dark;
+}
+
+.message-timestamp {
+  color: $color-gray-light;
+}
+
+.profile-image {
+  vertical-align: top;
+}

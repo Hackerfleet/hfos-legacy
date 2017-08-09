@@ -39,7 +39,7 @@ from hfos.schemata.base import base_object
 ChatMessageSchema = base_object('chatmessage', all_roles='crew')
 
 ChatMessageSchema['properties'].update({
-    'timestamp': {'type': 'string', 'title': 'Timestamp',
+    'timestamp': {'type': 'number', 'title': 'Timestamp',
                   'format': 'datetimepicker',
                   'description': 'Message timestamp'},
     'recipient': {'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
