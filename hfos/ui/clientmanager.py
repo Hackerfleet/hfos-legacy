@@ -34,22 +34,46 @@ Coordinates clients communicating via websocket
 
 import datetime
 import json
-from pprint import pprint
-
 import random
+
+from time import time
+from collections import namedtuple
 from uuid import uuid4
 from base64 import b64decode
 
 from hfos.component import handler
 from circuits.net.events import write
-from hfos.events.system import get_user_events
+from circuits import Event, Timer
+from hfos.events.system import get_anonymous_events, get_user_events
 from hfos.events.client import authenticationrequest, send, clientdisconnect, \
-    userlogin
+    userlogin, userlogout
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, critical, debug, info, network, \
     verbose, hilight
 from hfos.ui.clientobjects import Socket, Client, User
+from hfos.debugger import cli_register_event
+from hfos.tools import std_table
+
+
+class cli_users(Event):
+    pass
+
+
+class cli_clients(Event):
+    pass
+
+
+class cli_who(Event):
+    pass
+
+
+class reset_flood_counters(Event):
+    pass
+
+
+class reset_flood_offenders(Event):
+    pass
 
 
 class ComplexEncoder(json.JSONEncoder):
@@ -76,6 +100,52 @@ class ClientManager(ConfigurableComponent):
         self._users = {}
         self._count = 0
         self._usermapping = {}
+        self._flooding = {}
+        self._flood_counter = {}
+
+        self.authorized_events = {}
+        self.anonymous_events = {}
+
+        self.fireEvent(cli_register_event('users', cli_users))
+        self.fireEvent(cli_register_event('clients', cli_clients))
+        self.fireEvent(cli_register_event('who', cli_who))
+        self._flood_counters_resetter = Timer(
+            2, Event.create('reset_flood_counters'), persist=True
+        ).register(self)
+        self._flood_offender_resetter = Timer(
+            10, Event.create('reset_flood_offenders'), persist=True
+        ).register(self)
+
+    @handler('cli_clients')
+    def client_list(self, *args):
+        self.log(self._clients, pretty=True)
+
+    @handler('cli_users')
+    def users_list(self, *args):
+        self.log(self._users, pretty=True)
+
+    @handler('cli_who')
+    def who(self, *args):
+        Row = namedtuple("Row", ['User', 'Client', 'IP'])
+        rows = []
+
+        for user in self._users.values():
+            for key, client in self._clients.items():
+                if client.useruuid == user.uuid:
+                    row = Row(user.account.name, key, client.ip)
+                    rows.append(row)
+
+        for key, client in self._clients.items():
+            if client.useruuid is None:
+                row = Row('ANON', key, client.ip)
+                rows.append(row)
+
+        self.log("\n" + std_table(rows))
+
+    @handler('ready')
+    def ready(self):
+        self.authorized_events = get_user_events()
+        self.anonymous_events = get_anonymous_events()
 
     @handler("disconnect", channel="wsserver")
     def disconnect(self, sock):
@@ -121,7 +191,10 @@ class ClientManager(ConfigurableComponent):
             self._users[useruuid].clients.remove(clientuuid)
             if len(self._users[useruuid].clients) == 0:
                 self.log("Last client of user disconnected.")
+
+                self.fireEvent(userlogout(useruuid))
                 del self._users[useruuid]
+
             self._clients[clientuuid].useruuid = None
         except Exception as e:
             self.log("Error during client logout: ", e, type(e),
@@ -268,23 +341,35 @@ class ClientManager(ConfigurableComponent):
         try:
             if component == "debugger":
                 self.log(component, action, data, user, client, lvl=info)
-            AuthorizedEvents = get_user_events()
-            # pprint(AuthorizedEvents)
 
-            if not user and component in AuthorizedEvents.keys():
+            if not user and component in self.authorized_events.keys():
                 self.log("Unknown client tried to do an authenticated "
                          "operation: %s",
                          component, action, data, user)
                 return
 
-            event = AuthorizedEvents[component][action]['event']
+            event = self.authorized_events[component][action]['event']
 
             self.log("Firing authorized event: ", component, action,
                      str(data)[:20], lvl=network)
             # self.log("", (user, action, data, client), lvl=critical)
             self.fireEvent(event(user, action, data, client))
         except Exception as e:
-            self.log("Critical error during authorized event handling:", e,
+            self.log("Critical error during authorized event handling:",
+                     component, action, e,
+                     type(e), lvl=critical, exc=True)
+
+    def _handleAnonymousEvents(self, component, action, data, client):
+        try:
+            event = self.anonymous_events[component][action]['event']
+
+            self.log("Firing anonymous event: ", component, action,
+                     str(data)[:20], lvl=network)
+            # self.log("", (user, action, data, client), lvl=critical)
+            self.fireEvent(event(action, data, client))
+        except Exception as e:
+            self.log("Critical error during anonymous event handling:",
+                     component, action, e,
                      type(e), lvl=critical, exc=True)
 
     def _handleAuthenticationEvents(self, requestdata, requestaction,
@@ -328,6 +413,7 @@ class ClientManager(ConfigurableComponent):
             try:
                 if clientuuid in self._clients:
                     client = self._clients[clientuuid]
+                    user_id = client.useruuid
                     if client.useruuid:
                         self.log("Logout client uuid: ", clientuuid)
                         self._logoutclient(client.useruuid, clientuuid)
@@ -336,10 +422,39 @@ class ClientManager(ConfigurableComponent):
                     self.log("Client is not connected!", lvl=warn)
             except Exception as e:
                 self.log("Error during client logout: ", e, type(e),
-                         lvl=error)
+                         lvl=error, exc=True)
         else:
             self.log("Unsupported auth action requested:",
                      requestaction, lvl=warn)
+
+    @handler('reset_flood_counters')
+    def _reset_flood_counters(self, *args):
+        # self.log('Resetting flood counter')
+        self._flood_counter = {}
+
+    @handler('reset_flood_offenders')
+    def _reset_flood_offenders(self, *args):
+        # self.log('Resetting flood offenders')
+        for offender, offence_time in self._flooding.items():
+            if time() - offence_time < 10:
+                self.log('Removed offender from flood list:', offender)
+                del self._flooding[offender]
+
+    def _check_flood_protection(self, component, action, clientuuid):
+        if clientuuid not in self._flood_counter:
+            self._flood_counter[clientuuid] = 0
+
+        self._flood_counter[clientuuid] += 1
+
+        if self._flood_counter[clientuuid] > 100:
+            packet = {
+                'component': 'hfos.ui.clientmanager',
+                'action': 'Flooding',
+                'data': True
+            }
+            self.fireEvent(send(clientuuid, packet))
+            self.log('Flooding from', clientuuid)
+            return True
 
     @handler("read", channel="wsserver")
     def read(self, *args):
@@ -356,6 +471,9 @@ class ClientManager(ConfigurableComponent):
         except Exception as e:
             self.log("Receiving error: ", e, type(e), lvl=error)
 
+        if clientuuid in self._flooding:
+            return
+
         try:
             msg = json.loads(msg)
             self.log("Message from client received: ", msg, lvl=network)
@@ -370,7 +488,13 @@ class ClientManager(ConfigurableComponent):
             self.log("Unpacking error: ", msg, e, type(e), lvl=error)
             return
 
+        if self._check_flood_protection(requestcomponent, requestaction,
+                                        clientuuid):
+            self.log('Flood protection triggered')
+            self._flooding[clientuuid] = time()
+
         try:
+            # TODO: Do not unpickle or decode anything from unsafe events
             requestdata = msg['data']
             if 'raw' in requestdata:
                 # self.log(requestdata['raw'], lvl=critical)
@@ -386,26 +510,44 @@ class ClientManager(ConfigurableComponent):
             return
 
         try:
-            # Only for signed in users
             client = self._clients[clientuuid]
-            useruuid = client.useruuid
-            self.log("Authenticated operation requested by ",
-                     client.config, lvl=network)
-        except Exception as e:
-            self.log("No useruuid!", e, type(e), lvl=critical)
+        except KeyError as e:
+            self.log('Could not get client for request!', e, type(e), lvl=warn)
             return
 
-        try:
-            user = self._users[useruuid]
-        except KeyError:
-            self.log("User not logged in.", lvl=warn)
+        if requestcomponent in self.anonymous_events and requestaction in \
+                self.anonymous_events[requestcomponent]:
+            self.log('Executing anonymous event:', requestcomponent,
+                     requestaction)
+            try:
+                self._handleAnonymousEvents(requestcomponent, requestaction,
+                                            requestdata, client)
+            except Exception as e:
+                self.log("Anonymous request failed:", e, type(e), lvl=warn,
+                         exc=True)
             return
 
-        try:
-            self._handleAuthorizedEvents(requestcomponent, requestaction,
-                                         requestdata, user, client)
-        except Exception as e:
-            self.log("Requested action failed: ", e, lvl=warn)
+        elif requestcomponent in self.authorized_events:
+            try:
+                useruuid = client.useruuid
+                self.log("Authenticated operation requested by ",
+                         client.config, lvl=network)
+            except Exception as e:
+                self.log("No useruuid!", e, type(e), lvl=critical)
+                return
+
+            try:
+                user = self._users[useruuid]
+            except KeyError:
+                self.log("User not logged in.", lvl=warn)
+                return
+
+            try:
+                self._handleAuthorizedEvents(requestcomponent, requestaction,
+                                             requestdata, user, client)
+            except Exception as e:
+                self.log("User request failed: ", e, type(e), lvl=warn,
+                         exc=True)
 
     @handler("authentication", channel="auth")
     def authentication(self, event):
