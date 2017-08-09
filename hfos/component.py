@@ -42,7 +42,7 @@ Provisions
 """
 from circuits.web.controllers import Controller
 
-from hfos.events.system import authorizedevent
+from hfos.events.system import hfosEvent, authorizedevent, anonymousevent
 from hfos.schemata.component import ComponentBaseConfigSchema, \
     ComponentConfigSchemaTemplate
 from hfos.logger import hfoslog, warn, critical, error, debug, verbose, hilight
@@ -122,7 +122,7 @@ def handler(*names, **kwargs):
             return f
 
         if len(names) > 0 and inspect.isclass(names[0]) and \
-                issubclass(names[0], authorizedevent):
+                issubclass(names[0], hfosEvent):
             f.names = (str(names[0].realname()),)
         else:
             f.names = names

@@ -38,6 +38,7 @@ from hfos.logger import hfoslog, critical, events
 from hfos.ui.clientobjects import User
 
 AuthorizedEvents = {}
+AnonymousEvents = {}
 
 
 def get_user_events():
@@ -45,8 +46,14 @@ def get_user_events():
     return AuthorizedEvents
 
 
+def get_anonymous_events():
+    global AnonymousEvents
+    return AnonymousEvents
+
+
 def populate_user_events():
     global AuthorizedEvents
+    global AnonymousEvents
 
     def inheritors(klass):
         subclasses = {}
@@ -83,10 +90,43 @@ def populate_user_events():
 
     # NormalEvents = inheritors(Event)
     AuthorizedEvents = inheritors(authorizedevent)
+    AnonymousEvents = inheritors(anonymousevent)
+
     # AuthorizedEvents.update(NormalEvents)
 
 
-class authorizedevent(Event):
+class hfosEvent(Event):
+    pass
+
+
+class anonymousevent(hfosEvent):
+    """Base class for events for logged in users."""
+
+    def __init__(self, action, data, client, *args):
+        """
+        Sets up an authorized event.
+
+        :param action:
+        :param data:
+        :param client:
+        :param args:
+        :return:
+        """
+
+        self.name = self.__module__ + '.' + self.__class__.__name__
+        super(anonymousevent, self).__init__(*args)
+        self.action = action
+        self.data = data
+        self.client = client
+        hfoslog('AnonymousEvent created:', self.name, lvl=events)
+
+    @classmethod
+    def realname(cls):
+        # For circuits manager to enable module/event namespaces
+        return cls.__module__ + '.' + cls.__name__
+
+
+class authorizedevent(hfosEvent):
     """Base class for events for logged in users."""
 
     def __init__(self, user, action, data, client, *args):
