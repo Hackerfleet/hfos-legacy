@@ -19,7 +19,12 @@
                         <input type="text" class="form-control" id="isbn" ng-model="$ctrl.searchISBN"
                                ng-disabled="searching"/>
                         <span class="input-group-btn">
-                                <button ng-click="$ctrl.searchByISBN()" class="btn btn-success">Search</button>
+                                <button ng-hide="$ctrl.unknown_book"
+                                        ng-click="$ctrl.searchByISBN()"
+                                        class="btn btn-success">Search</button>
+                                <button ng-click="$ctrl.registerByISBN()"
+                                        ng-show="$ctrl.unknown_book"
+                                        class="btn btn-info">Lookup</button>
                             </span>
                     </div>
                 </div>

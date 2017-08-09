@@ -106,7 +106,7 @@ class Manager(ConfigurableComponent):
             self.log("Book can't be lent, it is not available!",
                      lvl=warn)
 
-        self.notify_result(event, book)
+        self._notify_result(event, book)
 
     @handler(book_return)
     def book_return(self, event):
@@ -122,25 +122,26 @@ class Manager(ConfigurableComponent):
             self.log("Book can't be lent, it is not available!",
                      lvl=warn)
 
-        self.notify_result(event, book)
+        self._notify_result(event, book)
 
     @handler(book_augment)
     def book_augment(self, event):
-        self._augment_book(event.data, event.client)
+        self.log("Manually augmenting book")
+        self._augment_book(event.data, event)
 
-    def notify_result(self, event, book):
+    def objectcreation(self, event):
+        if event.schema == 'book':
+            self.log("Augmenting book.")
+            self._augment_book(event.uuid, event)
+
+    def _notify_result(self, event, book):
         if book:
             self.fireEvent(updatesubscriptions(
                 uuid=book.uuid, schema='book',
                 data=book, client=event.client)
             )
 
-    def objectcreation(self, event):
-        if event.schema == 'book':
-            self.log("Augmenting book.")
-            self._augment_book(event.uuid, event.client)
-
-    def _augment_book(self, uuid, client):
+    def _augment_book(self, uuid, event):
         """
         Checks if the newly created object is a book and only has an ISBN.
         If so, tries to fetch the book data off the internet.
@@ -191,7 +192,7 @@ class Manager(ConfigurableComponent):
                         new_book.update(new_meta)
                         new_book.save()
 
-                        self.notify_result(new_book, client)
+                        self._notify_result(event, new_book)
                         self.log("Book successfully augmented from ",
                                  self.config.isbnservice)
                     except Exception as e:
@@ -203,7 +204,8 @@ class Manager(ConfigurableComponent):
                             'data': 'Could not look up metadata, sorry:' + str(
                                 e)
                         }
-                        self.fireEvent(send(client.uuid, error_response))
+                        self.log(event, event.client, pretty=True)
+                        self.fireEvent(send(event.client.uuid, error_response))
 
             except Exception as e:
                 self.log("Error during book update.", e, type(e),

@@ -42,7 +42,7 @@ Provisions
 from hfos.schemata.defaultform import editbuttons
 from hfos.schemata.base import base_object
 
-BookSchema = base_object('bookschema', all_roles='crew')
+BookSchema = base_object('book', all_roles='crew')
 
 BookSchema['properties'].update({
     'authors': {
