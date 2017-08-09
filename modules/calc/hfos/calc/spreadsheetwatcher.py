@@ -24,8 +24,8 @@ __license__ = "GPLv3"
 """
 
 
-Module: Enrolmanager
-===================
+Module: SpreadsheetWatcher
+==========================
 
 
 """
@@ -33,16 +33,14 @@ Module: Enrolmanager
 from hfos.component import ConfigurableComponent
 from hfos.logger import warn  # , hfoslog, error, critical
 
-
 # from hfos.database import objectmodels
 # from datetime import datetime
 # from hfos.events.system import updatesubscriptions, send
 
 
-class Manager(ConfigurableComponent):
+class SpreadsheetWatcher(ConfigurableComponent):
     """
-    The Enrol-Manager handles enrollment requests, invitations and user
-    verification.
+    The SpreadsheetWatcher component monitors spreadsheet changes.
     """
     channel = "hfosweb"
 
@@ -51,18 +49,11 @@ class Manager(ConfigurableComponent):
 
     def __init__(self, *args):
         """
-        Initialize the Enrol Manager component.
+        Initialize the SpreadsheetWatcher component.
 
         :param args:
         """
 
-        super(Manager, self).__init__("ENROL", *args)
+        super(SpreadsheetWatcher, self).__init__("CALC", *args)
 
         self.log("Started")
-
-    def enrolrequest(self, event):
-        self.log("Someone interacts with the crew! Yay!", event, lvl=warn)
-
-    def objectcreation(self, event):
-        if event.schema == 'crewconfig':
-            self.log("Crewconfig was modified: ", event)

@@ -1,0 +1,48 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div class="jumbotron maximized">
+    <div style="">
+        <div class="pull-right" style="display: inline-flex;">
+            <span>Sheet:</span>
+            <select ng-model="$ctrl.sheetname" ng-change="$ctrl.select_sheet()">
+                <option value="INITIAL">Initial sheet</option>
+                <option ng-repeat="(uuid, sheet) in $ctrl.sheets" value="{{uuid}}">{{sheet.name}}</option>
+            </select>
+            <a href="#!/editor/spreadsheet//create"><span class="fa-plus"></span></a>
+        </div>
+
+        <h3>
+            <a ng-click="isExpanded = !isExpanded">
+                <i class="fa" ng-class="{'fa-chevron-up': !isExpanded, 'fa-chevron-right': isExpanded}"></i>
+            </a>
+            {{$ctrl.sheet.name}}
+        </h3>
+
+        <div uib-collapse="!isExpanded">
+            <div ng-bind-html="$ctrl.sheet.notes"></div>
+        </div>
+    </div>
+    <iframe id="ethercalc" ng-src="{{$ctrl.iframe_url | trusted}}" ng-style="isExpanded && {'height': '95%'} || {'height': '98%'}"></iframe>
+</div>
