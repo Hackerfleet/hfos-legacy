@@ -45,10 +45,10 @@ This software package is a plugin module for HFOS.
     gdal=hfos.map.gdal:GDAL
     map=hfos.map.maptileservice:MaptileService
 [hfos.schemata]
-    geoobject=hfos.map.geoobject:GeoObject
-    layer=hfos.map.layer:Layer
-    layergroup=hfos.map.layergroup:LayerGroup
-    mapview=hfos.map.mapview:MapView
+    geoobject=hfos.map.schemata.geoobject:GeoObject
+    layer=hfos.map.schemata.layer:Layer
+    layergroup=hfos.map.schemata.layergroup:LayerGroup
+    mapview=hfos.map.schemata.mapview:MapView
 [hfos.provisions]
     layer=hfos.map.provisions.layer:provision
     layergroup=hfos.map.provisions.layergroup:provision
