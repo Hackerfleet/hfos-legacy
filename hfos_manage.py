@@ -64,6 +64,7 @@ except NameError:
     unicode = str
 
 service_template = 'hfos.service'
+nginx_configuration = 'nginx.conf'
 
 paths = [
     'hfos',
@@ -720,6 +721,39 @@ def service():
     ])
 
     hfoslog("Done: Install Service", emitter="MANAGE")
+
+
+@install.command(short_help='install nginx configuration')
+def nginx():
+    """Install nginx configuration"""
+
+    check_root()
+
+    hfoslog("Installing nginx configuration", emitter="MANAGE")
+
+    definitions = {
+        'server_public_name': '',
+        'ssl_certificate': '',
+        'ssl_key': '',
+        'host_url': ''
+    }
+
+    configuration_file = '/etc/nginx/services_available/hfos.conf'
+    configuration_link = '/etc/nginx/services_enabled/hfos.conf'
+
+    write_template_file(os.path.join('dev/templates', nginx_configuration),
+                        configuration_file,
+                        definitions)
+
+    os.symlink(configuration_file, configuration_link)
+
+    Popen([
+        'systemctl',
+        'restart',
+        'nginx.service'
+    ])
+
+    hfoslog("Done: Install nginx configuration", emitter="MANAGE")
 
 
 @install.command(short_help='create system user')
