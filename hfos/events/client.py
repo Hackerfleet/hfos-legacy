@@ -109,6 +109,25 @@ class userlogin(Event):
                 lvl=events)
 
 
+class userlogout(Event):
+    """
+    A user has logged in to the system. This has to propagate to all
+    subscription based and other user aware components.
+
+    :param clientuuid: UUID of disconnecting client
+    :param useruuid: UUID of disconnecting user
+    :param args:
+
+    """
+
+    def __init__(self, useruuid, *args):
+        super(userlogout, self).__init__(*args)
+        self.useruuid = useruuid
+
+        hfoslog("[CM-EVENT] User logout event generated:", useruuid,
+                lvl=events)
+
+
 class authenticationrequest(Event):
     """A client wants to authenticate a client connection"""
 
