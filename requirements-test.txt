@@ -1,5 +1,6 @@
 # Running Tests
 tox
 pytest
+pytest.sugar
 coveralls
 pytest-cov
