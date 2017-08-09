@@ -607,6 +607,7 @@ class mapcomponent {
                     fill: '#000'
                 }).addTo(map);
             
+            /*
             L.simpleGraticule({
                 interval: 20,
                 showOriginLabel: true,
@@ -617,6 +618,7 @@ class mapcomponent {
                     {start: 6, end: 20, interval: 1}
                 ]
             }).addTo(map);
+            */
             //self.grid = L.grid({redraw: 'moveend'}).addTo(map);
             
             //let PanControl = L.control.pan().addTo(map);
