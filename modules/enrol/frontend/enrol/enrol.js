@@ -32,67 +32,153 @@
  * Controller of the hfosFrontendApp
  */
 class Enrol {
-
-    constructor(scope, $modal, navdata, user, objectproxy, socket, menu, qr) {
+    
+    constructor($location, scope, rootscope, alert, user, objectproxy, socket) {
         this.scope = scope;
-        this.$modal = $modal;
-        this.navdata = navdata;
+        this.rootscope = rootscope;
+        this.alert = alert;
         this.user = user;
         this.op = objectproxy;
         this.socket = socket;
-        this.menu = menu;
-        this.qr = qr;
         
-        this.invitations = {
-            uuid: {
-                name: 'Max Mustermann',
-                email: 'max@mustermann.com',
-                status: 'Pending'
-            },
-            other: {
-                name: 'Maxine Musterfrau',
-                email: 'maxine@musterfrau.de',
-                status: 'Accepted'
-            },
-            another: {
-                name: 'Lutz Lorbeer',
-                email: 'lutz@lorbeer.de',
-                status: 'Denied'
-            }
-        };
+        this.enrollments = {};
         
-        this.verifications = {
-            uuid: {
-                name: 'Dieter Doofmann',
-                email: 'd@doof.de',
-                status: 'Open'
-            },
-            other: {
-                name: 'Paul Paule',
-                email: 'p@paule.de',
-                status: 'Open'
-            }
-        };
-        
-        this.new_invitations = [{
+        this.invitations = [{
             name: '',
             email: ''
         }];
         
-        this.verification_counter = 2;
-        this.invitation_counter = 2;
+        // TODO: Fix the url. Needs to be constructed from the public/internal hostname, should be switchable in ui
+        this.invite_url = $location.protocol() + '://' + $location.host() + ":" + $location.port() + '/#!/invitation/';
+        
+        this.checked_enrollments = {};
+        this.all_enrollments = false;
+        this.action_enrollments = '';
+        
+        this.badge = false;
+
+        let self = this;
+        
+        this.socket.listen('hfos.enrol.manager', function (msg) {
+            console.log('[ENROL] Message received');
+            if (msg.action === 'invite') {
+                let result = msg.data[true];
+                if (typeof result !== 'undefined') {
+                    self.enrollments[result.uuid] = result;
+                    for (let invitation of self.invitations) {
+                        if (invitation.name === result.name) {
+                            self.invitations.pop(invitation);
+                        }
+                    }
+                    console.log('Length:', self.invitations.length);
+                    if (self.invitations.length === 0) {
+                        // Repopulate with a blank form element
+                        self.invitations = [{
+                            name: '',
+                            email: ''
+                        }];
+                    }
+                    self.alert.add('success', 'Enrol', 'Invitations sent to ' + result.email, 3);
+                    self.update_badge();
+                }
+            } else if (msg.action === 'change') {
+                let result = msg.data[true];
+                if (typeof result === 'undefined') {
+                    self.alert.add('warning', 'Enrol', 'Enrollment change failed', 3);
+                } else if (result === 'Resent') {
+                    self.alert.add('info', 'Enrol', 'Resent invitation mail', 3);
+                } else {
+                    console.log('[ENROL] Changed:', result);
+                    self.enrollments[result.uuid] = result;
+                }
+                self.update_badge();
+            } else {
+                console.log('[ENROL] Unkown action:', msg.action, msg.data);
+            }
+        });
+        
+        this.get_data = function () {
+            console.log('[ENROL] Getting data');
+            this.op.searchItems('enrollment', '*', '*').then(function (msg) {
+                console.log('[ENROL] Data received:', msg);
+                let enrollments = msg.data;
+                for (let enrollment of enrollments) {
+                    self.enrollments[enrollment.uuid] = enrollment;
+                }
+                self.update_badge();
+            })
+        };
+        
+        if (this.user.signedin) {
+            console.log('[ENROL] Already logged in - getting data');
+            this.get_data();
+        }
+        
+        this.rootscope.$on('User.Login', function () {
+            console.log('[ENROL] Login - getting data');
+            self.get_data();
+        });
+        
+        this.rootscope.$on('OP.Deleted', function (event, schema, uuid) {
+            console.log('Deletion!', schema, uuid);
+            if (schema === 'enrollment') {
+                console.log('[ENROL] Enrollment deleted:', uuid);
+                delete(self.enrollments[uuid]);
+                delete(self.checked_enrollments[uuid]);
+                self.update_badge();
+            }
+        })
     }
     
-    invite_by_email() {
-        for (let item of this.new_invitations) {
-            
+    get_qr(uuid) {
+        return this.invite_url + '/' + uuid;
+    }
+    
+    toggle_enrollments() {
+        for (let enrollment of Object.keys(this.enrollments)) {
+            this.checked_enrollments[enrollment] = this.all_enrollments;
+        }
+    }
+    
+    act_enrollments() {
+        for (let uuid of Object.keys(this.checked_enrollments)) {
+            if (this.checked_enrollments[uuid] === true) {
+                this.set_status(uuid, this.action_enrollments);
+            }
+        }
+        if (this.action_enrollments === 'Deleted') {
+            this.all_enrollments = false;
+        }
+        this.action_enrollments = null;
+    }
+    
+    set_status(uuid, status) {
+        console.log('[ENROL] Changing enrollment status', uuid, 'to', status);
+        if (status === 'Deleted') {
+            this.op.deleteObject('enrollment', uuid);
+        } else {
+            let request = {
+                component: 'hfos.enrol.manager',
+                action: 'change',
+                data: {
+                    uuid: uuid,
+                    status: status
+                }
+            };
+            this.socket.send(request);
+        }
+    }
+    
+    invite(method) {
+        for (let item of this.invitations) {
             console.log('[ENROL] Inviting user:', item);
             let request = {
                 component: 'hfos.enrol.manager',
                 action: 'invite',
                 data: {
                     name: item.name,
-                    email: item.email
+                    email: item.email,
+                    method: method
                 }
             };
             this.socket.send(request);
@@ -100,14 +186,18 @@ class Enrol {
     }
     
     add_invitation_row() {
-        this.new_invitations.push({name: '', email:''});
+        this.invitations.push({name: '', email: ''});
     }
     
     remove_invitation_row(index) {
-        this.new_invitations.splice(index, 1);
+        this.invitations.splice(index, 1);
+    }
+    
+    update_badge() {
+        this.badge = Object.keys(this.enrollments).length > 0;
     }
 }
 
-Enrol.$inject = ['$scope', '$modal', 'navdata', 'user', 'objectproxy', 'socket', 'menu', 'alert'];
+Enrol.$inject = ['$location', '$scope', '$rootScope', 'alert', 'user', 'objectproxy', 'socket'];
 
 export default Enrol;

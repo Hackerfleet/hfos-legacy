@@ -22,24 +22,33 @@
  * """
  */
 
-import icon from './assets/iconmonstr-user-24-icon.svg';
+'use strict';
 
-
-export function routing($stateProvider) {
-
-    $stateProvider
-        .state('app.enrol', {
-            url: '/enrol/',
-            template: '<enrol></enrol>',
-            label: 'Enrol',
-            icon: icon
-        })
-        .state('app.invitation', {
-            url: '/invitation/:uuid',
-            template: '<invitation></invitation>'
-        })
-        .state('app.password', {
-            url: '/password',
-            template: '<password></password>'
-        });
+/**
+ * @ngdoc function
+ * @name hfosFrontendApp.controller:PasswordChangeCtrl
+ * @description
+ * # PasswordChangeCtrl
+ * Controller of the hfosFrontendApp
+ */
+class PasswordChange {
+    
+    constructor(scope, user) {
+        this.scope = scope;
+        this.user = user;
+        
+        this.password_old = '';
+        this.password_new = '';
+        this.password_confirm = '';
+    
+        this.needs_old_password = true;
+    }
+    
+    update_password() {
+        this.user.changePassword(this.password_old, this.password_new, this.password_confirm);
+    }
 }
+
+PasswordChange.$inject = ['$scope', 'user'];
+
+export default PasswordChange;

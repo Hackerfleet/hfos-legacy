@@ -30,10 +30,19 @@ import uirouter from 'angular-ui-router';
 import { routing } from './enrol.config.js';
 
 import enrolcomponent from './enrol/enrol';
-import template from './enrol/enrol.tpl.html';
+import enroltemplate from './enrol/enrol.tpl.html';
+
+import invitationcomponent from './enrol/invitation';
+import invitationtemplate from './enrol/invitation.tpl.html';
+
+import passwordcomponent from './enrol/password';
+import passwordtemplate from './enrol/password.tpl.html';
+
 
 export default angular
     .module('main.app.enrol', [uirouter])
     .config(routing)
-    .component('enrol', {controller: enrolcomponent, template: template})
+    .component('enrol', {controller: enrolcomponent, template: enroltemplate})
+    .component('invitation', {controller: invitationcomponent, template: invitationtemplate})
+    .component('password', {controller: passwordcomponent, template: passwordtemplate})
     .name;

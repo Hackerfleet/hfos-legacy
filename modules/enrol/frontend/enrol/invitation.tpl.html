@@ -1,0 +1,42 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div class="jumbotron" style="padding-top: 5px">
+    <h1>Invitation</h1>
+
+    <div class="well" ng-hide="$ctrl.error">
+        <p class="bg-info lead" ng-hide="$ctrl.success">The system is processing your request, please wait a few
+            seconds.</p>
+        <div ng-show="$ctrl.success">
+            <h3>Successful invitation</h3>
+            <p class="bg-info lead">Thank you for accepting the invitation.</p>
+            <p class="bg-success" ng-show="$ctrl.status">{{$ctrl.status}}</p>
+        </div>
+    </div>
+    <div class="well bg-warning" ng-show="$ctrl.error">
+        <h3>Invitation Failure</h3>
+        <p class="text-warning">Something has failed during verification of your invitation! Please contact the system's
+            owner or administrators.</p>
+    </div>
+</div>

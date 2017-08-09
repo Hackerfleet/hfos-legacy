@@ -45,7 +45,7 @@ This software package is a plugin module for HFOS.
           'hfos-navdata>=0.0.1'
       ],
       entry_points="""[hfos.components]
-    enrol=hfos.enrol.enrolmanager:Manager
+    enrol=hfos.enrol.manager:Manager
     [hfos.schemata]
     enrollment=hfos.enrol.enrollment:Enrollment
     """,

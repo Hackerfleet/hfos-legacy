@@ -24,7 +24,6 @@
 
 <div class="jumbotron" style="padding-top: 5px">
     <h1>Enrollment Manager</h1>
-    <h2 class="text-danger">Demo! No functionality, yet!</h2>
     <span>Invite and verify new users</span>
 
     <div class="panel-group" ng-model="panels.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
@@ -33,128 +32,135 @@
                 <h4 class="panel-title">
                     <a bs-collapse-toggle>
                         Invite
-                        <span class="badge"
-                              ng-hide="$ctrl.invitation_counter == 0"
-                              ng-bind="$ctrl.invitation_counter"></span>
-
                     </a>
                 </h4>
             </div>
             <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
                 <div class="panel-body">
-                    <span>Manage invitations</span>
-                    <ul class="list-group">
-                        <li class="list-group-item">
-                            <span>Invite new users via email</span>
-                            <div class="container">
-                                <table class="table">
-                                    <thead>
-                                    <tr>
-                                        <td>#</td>
-                                        <td>Name</td>
-                                        <td>Email</td>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr ng-repeat="invite in $ctrl.new_invitations">
-                                        <td>{{$index + 1}}</td>
-                                        <td>
-                                            <input type="text" class="form-control" id="name"
-                                                   ng-model="invite.name"/>
-                                        </td>
-                                        <td>
-                                            <input type="text" class="form-control" id="email"
-                                                   ng-model="invite.email"/>
-                                        </td>
-                                        <td>
-                                            <button ng-click="$ctrl.remove_invitation_row($index)"
-                                                    class="btn" ng-hide="$index == 0">
-                                                <i class="fa fa-minus"></i>
-                                            </button>
-                                            <button ng-click="$ctrl.add_invitation_row()"
-                                                    class="btn" ng-hide="$index != $ctrl.new_invitations.length - 1">
-                                                <i class="fa fa-plus"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                                <div class="pull-right">
-                                    <button ng-click="$ctrl.invite_by_email()" class="btn btn-success">Invite
+                    <span>Invite new users via email</span>
+                    <div class="container">
+                        <table class="table table-responsive">
+                            <thead>
+                            <tr>
+                                <td>#</td>
+                                <td>Name</td>
+                                <td>Email</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="invite in $ctrl.invitations">
+                                <td>{{$index + 1}}</td>
+                                <td>
+                                    <input type="text" class="form-control" id="name"
+                                           ng-model="invite.name"/>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" id="email"
+                                           ng-model="invite.email"/>
+                                </td>
+                                <td>
+                                    <button ng-click="$ctrl.remove_invitation_row($index)"
+                                            class="btn" ng-hide="$index == 0">
+                                        <i class="fa fa-minus"></i>
                                     </button>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <span>Check pending invitations</span>
-                            <table class="table table-hover user-list">
-                                <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr ng-repeat="(uuid, item) in $ctrl.invitations"
-                                    ng-class="{'success': item.status === 'Accepted',
-                                           'danger': item.status === 'Denied',
-                                           'info': item.status === 'Pending'}">
-                                    <td>{{item.name}}</td>
-                                    <td>{{item.email}}</td>
-                                    <td>{{item.status}}</td>
-                                    <td>
-                                        <div ng-hide="item.status == 'Accepted'">
-                                            <button ng-click="$ctrl.cancel_invitation(uuid)"
-                                                    class="btn btn-danger btn-sm">Cancel
-                                            </button>
-                                            <button ng-click="$ctrl.resend_invitation(uuid)"
-                                                    class="btn btn-info btn-sm">Resend
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </li>
-                    </ul>
+                                    <button ng-click="$ctrl.add_invitation_row()"
+                                            class="btn" ng-hide="$index != $ctrl.invitations.length - 1">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                    <button ng-click="$ctrl.show_qr(invite.uuid)"
+                                            ng-show="invite.status === 'Open'"
+                                            class="btn btn-info btn-sm">
+                                        <span class="fa fa-qr-code"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="pull-right">
+                            <button ng-click="$ctrl.invite('Invited')" class="btn btn-success">Invite by email
+                            </button>
+                            <button ng-click="$ctrl.invite('Manual')" class="btn btn-success">Invite by QR code
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
         <div class="panel panel-default">
             <div class="panel-heading panel-hover" role="tab">
                 <h4 class="panel-title">
                     <a bs-collapse-toggle>
                         Verify
                         <span class="badge"
-                              ng-hide="$ctrl.verification_counter == 0">{{$ctrl.verification_counter}}</span>
+                              ng-show="$ctrl.badge">{{$ctrl.enrollments | objectLength}}</span>
                     </a>
                 </h4>
             </div>
             <div class="panel-collapse" role="tabpanel" bs-collapse-target>
                 <div class="panel-body">
                     <span>Verify already accepted users</span>
-                    <table class="table table-hover user-list">
+                    <table class="table table-hover table-responsive user-list">
                         <thead>
                         <tr>
+                            <th>#
+                                <input type="checkbox"
+                                       ng-click="$ctrl.toggle_enrollments()"
+                                       ng-model="$ctrl.all_enrollments" />
+                                <select ng-change="$ctrl.act_enrollments()" ng-model="$ctrl.action_enrollments">
+                                    <option value="Accepted">Accept</option>
+                                    <option value="Denied">Deny</option>
+                                    <option value="Deleted">Delete</option>
+                                </select>
+                            </th>
                             <th>Name</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="(uuid, item) in $ctrl.verifications"
+                        <tr ng-repeat="(uuid, item) in $ctrl.enrollments"
                             ng-class="{'success': item.status === 'Accepted',
                                            'danger': item.status === 'Denied',
-                                           'info': item.status === 'Pending'}">
-                            <td>{{item.name}}</td>
-                            <td>{{item.status}}</td>
+                                           'info': item.status === 'Open',
+                                           'warning': item.status === 'Pending'}">
+                            <td>{{$index + 1}}
+                                <input type="checkbox" ng-model="$ctrl.checked_enrollments[uuid]" />
+                            </td>
                             <td>
-                                <button ng-click="$ctrl.cancel_verification(uuid)"
-                                        class="btn btn-danger btn-sm">Cancel
+                                <span><strong>{{item.name}}</strong></span>
+                                <span>{{item.email}}</span>
+                            </td>
+                            <td>
+                                <span><strong>{{item.status}}</strong></span>
+                                <span>{{item.method}}</span>
+                            </td>
+                            <td>
+                                <button ng-click="$ctrl.set_status(uuid, 'Resend')"
+                                        ng-show="item.status === 'Open' && item.method === 'Invited'"
+                                        class="btn btn-info btn-sm">Resend email
                                 </button>
-                                <button ng-click="$ctrl.allow_verification(uuid)" class="btn btn-success btn-sm">Allow</button>
+
+                                <button ng-click="popoverIsOpen = !popoverIsOpen"
+                                        type="button"
+                                        class="btn btn-info btn-sm"
+                                        ng-class="{active: popoverIsOpen}"
+                                        ng-show="item.status === 'Open'">
+                                    <span class="glyphicon glyphicon-qrcode"></span>
+                                </button>
+                                <button ng-click="$ctrl.set_status(uuid, 'Accepted')"
+                                        ng-show="item.status === 'Pending'"
+                                        class="btn btn-success btn-sm">Accept
+                                </button>
+                                <button  ng-click="$ctrl.set_status(uuid, 'Denied')"
+                                         ng-show="item.status === 'Pending'"
+                                         class="btn btn-warning btn-sm">Deny
+                                </button>
+                                <button ng-click="$ctrl.set_status(uuid, 'Deleted')"
+                                        class="btn btn-danger btn-sm">Delete
+                                </button>
+
+                                <qrcode data="{{$ctrl.get_qr(uuid)}}" ng-show="popoverIsOpen" class="pull-right"></qrcode>
                             </td>
                         </tr>
                         </tbody>

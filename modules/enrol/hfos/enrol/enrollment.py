@@ -41,11 +41,28 @@ from hfos.schemata.base import base_object
 EnrollmentSchema = base_object('enrollment')
 
 EnrollmentSchema['properties'].update({
-    'mail-address': {'type': 'string', 'title': 'Address',
-                     'description': 'Enrollment email address'},
-    'description': {'type': 'string', 'format': 'html',
-                    'title': 'Enrollment description',
-                    'description': 'Enrollment description'},
+    'email': {'type': 'string', 'title': 'Address',
+              'description': 'Enrollment email address'},
+    'status': {
+        'type': 'string',
+        'enum': [
+            'Open', 'Pending', 'Denied', 'Accepted'
+        ],
+        'title': 'Enrollment description',
+        'description': 'Enrollment description'
+    },
+    'method': {
+        'type': 'string',
+        'enum': [
+            'Invited', 'Registered', 'Manual'
+        ]
+    },
+    'changes': {
+        'type': 'object'
+    },
+    'timestamp': {'type': 'string', 'format': 'datetimepicker',
+                  'title': 'Last change',
+                  'description': 'Latest change date of Enrollment'}
 })
 
 EnrollmentForm = [
@@ -57,19 +74,18 @@ EnrollmentForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'name',
+                    'name', 'status'
                 ]
             },
             {
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'mail-address'
+                    'email', 'timestamp'
                 ]
             },
         ]
     },
-    'description',
     editbuttons
 ]
 
