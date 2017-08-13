@@ -43,6 +43,7 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
+from circuits.web.errors import redirect
 # from circuits.app.daemon import Daemon
 from hfos.component import handler
 from circuits import reprhandler, Event
@@ -155,8 +156,8 @@ class Core(ConfigurableComponent):
             'debugger',
             'recorder',
             'playback',
-            #'sensors',
-            #'navdatasim'
+            # 'sensors',
+            # 'navdatasim'
             # 'ldap',
             # 'navdata',
             # 'nmeaparser',
@@ -367,7 +368,7 @@ class Core(ConfigurableComponent):
         populate_user_events()
 
         from hfos.events.system import AuthorizedEvents
-        self.log(len(AuthorizedEvents), "authorized events:",
+        self.log(len(AuthorizedEvents), "authorized event sources:",
                  list(AuthorizedEvents.keys()), lvl=hilight)
 
         self._instantiate_components()
@@ -386,7 +387,8 @@ def construct_graph(args):
         from circuits import Debugger
         hfoslog("Starting circuits debugger", lvl=warn, emitter='GRAPH')
         dbg = Debugger().register(app)
-        dbg.IgnoreEvents.extend(["write", "_write", "streamsuccess"])
+        dbg.IgnoreEvents.extend(["read", "_read", "write", "_write",
+                                 "streamsuccess"])
 
     hfoslog("Beginning graph assembly.", emitter='GRAPH')
 
@@ -397,7 +399,7 @@ def construct_graph(args):
 
     if args['opengui']:
         import webbrowser
-
+        # TODO: Fix up that url:
         webbrowser.open("http://%s:%i/" % (args['host'], args['port']))
 
     hfoslog("Graph assembly done.", emitter='GRAPH')
@@ -407,9 +409,9 @@ def construct_graph(args):
 
 @click.command()
 @click.option("-p", "--port", help="Define port for server", type=int,
-              default=80)
+              default=8055)
 @click.option("--host", help="Define hostname for server", type=str,
-              default='0.0.0.0')
+              default='127.0.0.1')
 @click.option("--certificate", "--cert", '-c', help="Certificate file path",
               type=str, default=None)
 @click.option("--dbhost", help="Define hostname for database server",
@@ -441,6 +443,9 @@ def launch(run=True, **args):
     hfoslog("Running with Python", sys.version.replace("\n", ""),
             sys.platform, lvl=debug, emitter='CORE')
     hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
+    if args['cert'] is not None:
+        hfoslog("Warning! Using SSL without nginx is currently not broken!",
+                lvl=critical, emitter='CORE')
 
     hfoslog("Initializing database access", emitter='CORE')
     initialize(args['dbhost'])
