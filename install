@@ -1,0 +1,40 @@
+#!/bin/bash
+
+echo "You may need to enter your root password to install a few dependencies."
+
+# Find our package manager
+if VERB="$( which apt-get )" 2> /dev/null; then
+    echo "Debian-based"
+    # TODO:
+    # Insert nodesource repo into apt-sources
+
+    sudo apt-get install mongodb python3.5 python3-pip python3-grib \
+                         python3-bson python3-pymongo python3-serial \
+                         python3-pymongo-ext python3-bson-ext \
+                         npm nodejs enchant nginx \
+                         gdal-bin python-gdal
+
+    sudo npm install -g npm@4.2.0
+
+    git submodule init
+    git submodule update
+
+    virtualenv -p /usr/bin/python3.5 --system-site-packages venv
+    source venv/bin/activate
+    pip install -Ur requirements.txt
+    python setup.py develop
+    sudo venv/bin/python hfos_manage.py install all
+
+    echo "Done!"
+elif VERB="$( which yum )" 2> /dev/null; then
+    echo "Modern Red Hat-based - NOT SUPPORTED YET"
+elif VERB="$( which portage )" 2> /dev/null; then
+    echo "Gentoo-based - NOT SUPPORTED YET"
+elif VERB="$( which pacman )" 2> /dev/null; then
+    echo "Arch-based - NOT SUPPORTED YET"
+else
+    echo "Your distribution is not yet supported." >&2
+    exit 1
+fi
+
+
