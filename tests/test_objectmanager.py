@@ -144,7 +144,7 @@ def test_no_schema():
     packet = transmit('get', {
     })
 
-    assert packet['action'] == 'noschema'
+    assert packet['action'] == 'fail'
 
 
 def test_invalid_schema():
@@ -154,7 +154,7 @@ def test_invalid_schema():
         'schema': 'BERTRAM'
     })
 
-    assert packet['action'] == 'noschema'
+    assert packet['action'] == 'fail'
 
 
 def test_search():
@@ -185,7 +185,7 @@ def test_get_object_invalid():
     })
 
     assert packet['action'] == 'fail'
-    assert 'unavailable' in packet['data']
+    assert 'unavailable' in packet['data']['reason']
 
 
 def test_get_schema_invalid():
@@ -195,8 +195,8 @@ def test_get_schema_invalid():
         'uuid': 'BERTRAM'
     })
 
-    assert packet['action'] == 'noschema'
-    assert packet['data'] is None
+    assert packet['action'] == 'fail'
+    assert packet['data']['reason'] is 'invalid_schema'
 
 
 def test_get_object():
@@ -242,11 +242,10 @@ def test_get_permission_error():
 
     data = packet['data']
 
-    assert data[0] is False
-    assert data[1] == 'No permission'
-    assert type(data[2]) == dict
+    assert data['reason'] == 'No permission'
+    assert type(data['data']) == dict
 
-    query = packet['data'][2]
+    query = packet['data']['data']
     assert query['schema'] == 'systemconfig'
     assert query['uuid'] == system_config_uuid
 
@@ -280,7 +279,7 @@ def test_subscribe():
     system_config_uuid = system_configs[0]['uuid']
 
     packet = transmit('subscribe', system_config_uuid)
-
+    pprint(packet)
     assert packet['data']['success']
     assert packet['data']['uuid'] == system_config_uuid
 
@@ -294,7 +293,7 @@ def test_unsubscribe():
     system_config_uuid = system_configs[0]['uuid']
 
     packet = transmit('unsubscribe', system_config_uuid)
-
+    pprint(packet)
     assert packet['data']['success']
     assert packet['data']['uuid'] == system_config_uuid
 
@@ -310,8 +309,10 @@ def test_put_new():
         'obj': obj.serializablefields(),
         'uuid': uuid
     })
-
-    assert packet['data'][0]
+    pprint(packet)
+    assert packet['data']['object']
+    assert packet['data']['schema'] == 'systemconfig'
+    assert packet['data']['uuid'] == uuid
 
 
 def test_put_new_permission_error():
@@ -328,15 +329,14 @@ def test_put_new_permission_error():
         'obj': obj.serializablefields(),
         'uuid': uuid
     }, account)
-
+    pprint(packet)
     assert packet['action'] == 'fail'
     assert 'data' in packet
 
     data = packet['data']
 
-    assert data[0] is False
-    assert data[1] == 'No permission'
-    assert type(data[2]) == dict
+    assert data['reason'] == 'No permission'
+    assert type(data['data']) == dict
 
 
 def test_delete():
@@ -353,16 +353,15 @@ def test_delete():
     })
 
     assert packet['action'] == 'put'
-    assert packet['data'][0] is True
+    assert packet['data']['uuid'] == uuid
 
     packet = transmit('delete', {
         'schema': 'systemconfig',
         'uuid': uuid
     })
 
-    assert packet['data'][0] is True
-    assert packet['data'][1] == 'systemconfig'
-    assert packet['data'][2] == uuid
+    assert packet['data']['schema'] == 'systemconfig'
+    assert packet['data']['uuid'] == uuid
 
 
 def test_delete_invalid_object():
@@ -370,6 +369,6 @@ def test_delete_invalid_object():
         'schema': 'systemconfig',
         'uuid': 'FOOBAR'
     })
-
+    pprint(packet)
     assert packet['action'] == 'fail'
-    assert packet['data'] == 'not found'
+    assert packet['data']['reason'] == 'not found'
