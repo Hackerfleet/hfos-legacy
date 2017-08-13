@@ -12,9 +12,8 @@
 #     $ docker run -i -t --name hfos-test-live -t hackerfleet/hfos
 #
 # If you want to run a productive instance with working SSL:
-#     $ docker run -i -p 127.0.0.1:443:443 -t hackerfleet/hfos /bin/bash -c "/etc/init.d/mongodb start && python3 \
-#       hfos_manage.py install frontend --dev --rebuild &&  python3 hfos_launcher.py --port 443 \
-#       --cert /etc/ssl/certs/hfos/selfsigned.pem --log 10 --dev"
+#     $ docker run -i -p 127.0.0.1:443:443 -t hackerfleet/hfos /bin/bash -c "/etc/init.d/mongodb start && \
+#       python3 hfos_launcher.py --port 443 --cert /etc/ssl/certs/hfos/selfsigned.pem --log 10 --dev"
 #
 # VERSION: 1.1.2
 #
