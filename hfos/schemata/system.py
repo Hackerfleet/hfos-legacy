@@ -84,6 +84,9 @@ SystemconfigSchema['properties'].update({
     'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
                      'description': 'Default theme used for user '
                                     'interface'},
+    'hostname': {'type': 'string', 'title': 'Public hostname',
+                 'description': 'Public FQDN hostname to use for internet '
+                                'based services (host.domain.tld)'}
 })
 
 SystemconfigForm = [
