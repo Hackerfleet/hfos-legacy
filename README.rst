@@ -48,11 +48,13 @@ ping riot@c-base.org, to get it added to the list.
 sails          Web UI, compatible with all modern browsers
 automat        Automation for non programmers
 alert          User alerting and notification system
+calc           Integrated EtherCalc
 camera         Camera support
 chat           Integrated chat
 comms          Communication package
 countables     Count arbitrary things
 dash           Dashboard information system
+enrol          Enrollment (new user) management
 garden         Garden automation tools
 ldap           LDAP user authorization
 library        Library management
@@ -112,7 +114,6 @@ forum <https://github.com/hackerfleet/discussion/issues>`__
 
 You can also find us here:
 
-* `irc #hackerfleet on freenode <http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__
 * `github.com/Hackerfleet <https://github.com/Hackerfleet>`__
 * `Waffle.io <https://waffle.io/hackerfleet/hfos>`__
 * `reddit <https://reddit.com/r/hackerfleet>`__
@@ -120,148 +121,23 @@ You can also find us here:
 * `Facebook <https://www.facebook.com/Hackerfleet>`__
 * `soup.io <http://hackerfleet.soup.io/>`__
 * `G+ <https://plus.google.com/105528689027070271173>`__
+* `irc #hackerfleet on freenode <http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__
+
+.. note:: Please be patient when using IRC, responses might take a few hours!
 
 Installation
 ============
 
-First of all: The installation procedure is rather complex right now.
-We're trying to simplify the process, but in the meantime, if you encounter
-any trouble/problems, just contact us via irc or email and we'll happily try to
-help you get your installation running.
+There is more than one way of installing HFOS, :ref:`see the quickstart instructions for those <quick_install>`.
 
-This is very important for us, since the system has not yet been deployed
-very often and we're not yet aware of most of the pitfalls and traps on that
-route.
+The simplest way is to use the new install script:
 
-We encourage you to use Python >= 3.4 for HFOS, but the system is
-built (and checked against) 2.7, too.
+.. code-block:: sh
 
-Warning: **HFOS is not compatible with Python 3.2!**
+    $ sudo ./install
 
-Preparation
------------
+If you run into trouble or get any unexpected errors, :ref:`try the complex installation procedure <complex_install>`.
 
-Before doing anything with HFOS, be sure you have all the dependencies
-installed via your distribution's package manager.
-
-For Debian Unstable use this:
-
-.. code-block:: bash
-
-    $ sudo apt-get install mongodb python3.4 python3-pip python3-grib \
-                           python3-bson python3-pymongo python3-serial
-
-If you want (and can), install the mongo and bson extensions for
-speedups:
-
-.. code-block:: bash
-
-    $ sudo apt-get install python3-pymongo-ext python3-bson-ext
-
-You will need to set up a bunch of more dependencies via npm to set up
-the frontend, so install npm and if necessary the nodejs-legacy-symlink
-package:
-
-.. code-block:: bash
-
-    $ sudo apt-get install npm nodejs-legacy
-
-If you want to install the full development dependencies to write
-documentation as well, you need to install the enchant package:
-
-.. code-block:: bash
-
-    $ sudo apt-get install enchant
-
-In case you want to use raster (or in future: vector) charts, you'll
-need to install libgdal and its binaries:
-
-.. code-block:: bash
-
-    $ sudo apt-get install gdal-bin python-gdal
-
-Note, that it is necessary to install python-gdal 2.7 - not the python3 variant,
-as the scripts are not included in that.
-
-Backend
--------
-
-The manage tool usually can install everything you need. It starts by adding
-a new system user for HFOS and generating a (currently only self signed)
-certificate.
-
-The process also involves getting the frontend dependencies, installing the
-supplied modules, building and installing the documentation, etc.
-
-It also installs and activates a systemd service script to launch HFOS on
-bootup.
-
-We also create two folders in /var (lib/hfos and cache/hfos) for hfos' tile-
-cache and other stuff as well as install basic default provisions into the
-database:
-
-.. code-block:: bash
-
-    $ git clone https://github.com/hackerfleet/hfos
-    $ git submodule init
-    $ git submodule update
-    $ cd hfos
-    $ virtualenv -p /usr/bin/python3.4 --system-site-packages venv
-    $ source venv/bin/activate
-    $ pip install -Ur requirements.txt
-    $ python setup.py develop
-    $ sudo venv/bin/python hfos_manage.py install all
-    $ python hfos_launcher.py
-
-If you want to develop (documentation) as well, you'll need to use the
-`requirements-dev.txt` instead of the normal one.
-
-If you want to manually start HFOS, invoke the launcher thus:
-
-.. code-block:: bash
-
-    $ sudo ./venv/bin/python hfos_launcher.py --cert /etc/ssl/certs/hfos/selfsigned.pem --port 443
-
-Running the launcher as root to be able to open ports below 1024 should be
-safe, as it drops its root privileges, unless you specify --insecure,
-which is strongly discouraged and only meant for development purposes.
-
-Documentation
--------------
-
-The documentation is available online on `ReadTheDocs.org
-<https://hfos.readthedocs.org>`__.
-If you wish to build and install the included documentation for offline use,
-run these commands:
-
-.. code-block:: bash
-
-    $ sudo ./venv/bin/python hfos_manage.py install docs
-
-This installs all necessary documentation tools and copies the files to the
-expected HFOS web data folder.
-
-You can also build the PDF file (and various other formats) by using the
-Makefile inside the docs directory.
-
-.. code-block:: bash
-
-    $ cd docs
-    $ make pdf
-
-Just running make without arguments gives you a list of the other available
-documentation formats.
-
-Docker-Install
---------------
-
-There is a Docker image available. This is usually the quickest
-way to install HFOS, but it is only updated occasionally (for now):
-
-.. code-block:: bash
-
-    $ docker run -i -t -p 127.0.0.1:8055:8055 --name hfos-test-live \
-       -t hackerfleet/hfos
 
 Contributors
 ============
