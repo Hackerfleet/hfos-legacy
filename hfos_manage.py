@@ -26,15 +26,17 @@ import shutil
 import pwd
 import grp
 import click
+import getpass
+
 from click_didyoumean import DYMGroup
 from click_repl import repl
 from prompt_toolkit.history import FileHistory
 
+from ast import literal_eval
 from distutils.dir_util import copy_tree
 from time import localtime
 from uuid import uuid4
 from collections import OrderedDict
-from dev.templates import write_template_file
 from hashlib import sha512
 from OpenSSL import crypto
 from socket import gethostname
@@ -45,7 +47,7 @@ from hfos.ui.builder import install_frontend
 from hfos.migration import make_migrations
 from hfos.logger import verbose, debug, warn, error, critical, verbosity, \
     hfoslog
-import getpass
+from dev.templates import write_template_file
 
 # 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
 try:
@@ -65,6 +67,10 @@ except NameError:
 
 service_template = 'hfos.service'
 nginx_configuration = 'nginx.conf'
+
+key_file = "/etc/ssl/certs/hfos/selfsigned.key"
+cert_file = "/etc/ssl/certs/hfos/selfsigned.crt"
+combined_file = "/etc/ssl/certs/hfos/selfsigned.pem"
 
 paths = [
     'hfos',
@@ -260,6 +266,16 @@ def get_credentials(username=None, password=None, dbhost=None):
     passhash.update(salt)
 
     return username, passhash.hexdigest()
+
+
+def get_system_configuration():
+    from hfos import database
+    database.initialize()
+    systemconfig = database.objectmodels['systemconfig'].find_one({
+        'active': True
+    })
+
+    return systemconfig
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']},
@@ -491,6 +507,10 @@ def install():
 def docs(clear):
     """Build and install documentation"""
 
+    install_docs(clear)
+
+
+def install_docs(clear):
     check_root()
 
     def make_docs():
@@ -546,6 +566,10 @@ def docs(clear):
 def var(clear, clear_all):
     """Install variable data to /var/[lib,cache]/hfos"""
 
+    install_var(clear, clear_all)
+
+
+def install_var(clear, clear_all):
     check_root()
 
     hfoslog("Checking frontend library and cache directories",
@@ -593,9 +617,13 @@ def var(clear, clear_all):
 @click.option('--overwrite', '-o', help='Overwrites existing provisions',
               is_flag=True, default=False)
 @click.option('--dbhost', default=db_host_default, help=db_host_help)
-def provisions(provision, clear, overwrite, dbhost):
+def provisions(provision, dbhost, clear, overwrite):
     """Install default provisioning data"""
 
+    install_provisions(provision, dbhost, clear, overwrite)
+
+
+def install_provisions(provision, dbhost, clear=False, overwrite=False):
     hfoslog("Installing HFOS default provisions", emitter='MANAGE')
 
     # from hfos.logger import verbosity, events
@@ -605,19 +633,19 @@ def provisions(provision, clear, overwrite, dbhost):
 
     from hfos.provisions import provisionstore
 
-    if provision is not None and provision in provisionstore:
-        hfoslog("Provisioning ", provision, emitter="MANAGE")
-        provisionstore[provision](overwrite=overwrite, clear=clear)
-    elif provision is None:
+    if provision is not None:
+        if provision in provisionstore:
+            hfoslog("Provisioning ", provision, emitter="MANAGE")
+            provisionstore[provision](overwrite=overwrite, clear=clear)
+        else:
+            hfoslog("Unknown provision: ", provision, "\nValid provisions are",
+                    list(provisionstore.keys()),
+                    lvl=error,
+                    emitter='MANAGE')
+    else:
         for provision_name in provisionstore:
             hfoslog("Provisioning " + provision_name, emitter='MANAGE')
             provisionstore[provision_name](overwrite=overwrite, clear=clear)
-    else:
-        hfoslog("Unknown provision: ", provision, "\nValid provisions "
-                                                  "are",
-                list(provisionstore.keys()),
-                lvl=error,
-                emitter='MANAGE')
 
     hfoslog("Done: Install Provisions")
 
@@ -626,6 +654,10 @@ def provisions(provision, clear, overwrite, dbhost):
 def modules():
     """Install the plugin modules"""
 
+    install_modules()
+
+
+def install_modules():
     def install_module(module):
         try:
             setup = Popen(
@@ -696,13 +728,16 @@ def modules():
 def service():
     """Install systemd service configuration"""
 
+    install_service()
+
+
+def install_service():
     check_root()
 
     hfoslog("Installing systemd service", emitter="MANAGE")
 
     launcher = os.path.realpath(__file__).replace('manage', 'launcher')
     executable = sys.executable + " " + launcher
-    executable += " --port 443 --cert /etc/ssl/certs/hfos/selfsigned.pem"
     executable += " --dolog --logfile /var/log/hfos.log"
     executable += " --logfileverbosity 30 -q"
 
@@ -724,29 +759,58 @@ def service():
 
 
 @install.command(short_help='install nginx configuration')
-def nginx():
+@click.option(
+    '--hostname', default=None,
+    help='Override public Hostname (FQDN) Default from active system '
+         'configuration')
+def nginx(hostname):
     """Install nginx configuration"""
 
+    install_nginx(hostname)
+
+
+def install_nginx(hostname=None):
     check_root()
 
     hfoslog("Installing nginx configuration", emitter="MANAGE")
 
+    global key_file
+    global cert_file
+    global combined_file
+
+    if hostname is None:
+        try:
+            config = get_system_configuration()
+            hostname = config.hostname
+        except Exception as e:
+            hfoslog('Exception:', e, type(e), exc=True, lvl=error)
+            hfoslog("""Could not determine public fully qualified hostname!
+Check systemconfig (see db view and db modify commands) or specify
+manually with --hostname host.domain.tld
+
+Using 'localhost' for now""", lvl=warn)
+            hostname = 'localhost'
+
     definitions = {
-        'server_public_name': '',
-        'ssl_certificate': '',
-        'ssl_key': '',
-        'host_url': ''
+        'server_public_name': hostname,
+        'ssl_certificate': cert_file,
+        'ssl_key': key_file,
+        'host_url': 'http://127.0.0.1:8055/'
     }
 
-    configuration_file = '/etc/nginx/services_available/hfos.conf'
-    configuration_link = '/etc/nginx/services_enabled/hfos.conf'
+    configuration_file = '/etc/nginx/sites-available/hfos.conf'
+    configuration_link = '/etc/nginx/sites-enabled/hfos.conf'
 
+    hfoslog('Writing nginx HFOS site definition')
     write_template_file(os.path.join('dev/templates', nginx_configuration),
                         configuration_file,
                         definitions)
 
-    os.symlink(configuration_file, configuration_link)
+    hfoslog('Enabling nginx HFOS site')
+    if not os.path.exists(configuration_link):
+        os.symlink(configuration_file, configuration_link)
 
+    hfoslog('Restarting nginx service')
     Popen([
         'systemctl',
         'restart',
@@ -756,10 +820,7 @@ def nginx():
     hfoslog("Done: Install nginx configuration", emitter="MANAGE")
 
 
-@install.command(short_help='create system user')
-def system_user():
-    """Install HFOS system user (hfos.hfos)"""
-
+def install_system_user():
     check_root()
 
     Popen([
@@ -774,15 +835,16 @@ def system_user():
         'hfos'
     ])
 
+
+@install.command(short_help='create system user')
+def system_user(*args):
+    """Install HFOS system user (hfos.hfos)"""
+
+    install_system_user()
     hfoslog("Done: Setup User")
 
 
-@install.command(short_help='install ssl certificate')
-@click.option('--selfsigned', help="Use a self-signed certificate",
-              default=True, is_flag=True)
-def cert(selfsigned):
-    """Install a local SSL certificate"""
-
+def install_cert(selfsigned):
     check_root()
 
     if selfsigned:
@@ -797,9 +859,9 @@ def cert(selfsigned):
             hfoslog("Need root (e.g. via sudo) to generate ssl certificate")
             sys.exit(1)
 
-        key_file = "/etc/ssl/certs/hfos/selfsigned.key"
-        cert_file = "/etc/ssl/certs/hfos/selfsigned.crt"
-        combined_file = "/etc/ssl/certs/hfos/selfsigned.pem"
+        global key_file
+        global cert_file
+        global combined_file
 
         def create_self_signed_cert():
             # create a key pair
@@ -858,6 +920,15 @@ def cert(selfsigned):
                 'there is no way to enter a separate key.', lvl=error)
 
 
+@install.command(short_help='install ssl certificate')
+@click.option('--selfsigned', help="Use a self-signed certificate",
+              default=True, is_flag=True)
+def cert(selfsigned):
+    """Install a local SSL certificate"""
+
+    install_cert(selfsigned)
+
+
 @install.command(short_help='build and install frontend')
 @click.option('--dev', help="Use frontend development (./frontend) location",
               default=False, is_flag=True)
@@ -871,7 +942,8 @@ def frontend(dev, rebuild):
 
 @install.command('all', short_help='install everything')
 @click.option('--clear', help='Clears already existing cache '
-                              'directories', is_flag=True, default=False)
+                              'directories and data', is_flag=True,
+              default=False)
 @click.pass_context
 def install_all(ctx, clear):
     """Default-Install everything installable
@@ -890,18 +962,19 @@ def install_all(ctx, clear):
 
     check_root()
 
-    system_user()
-    cert(selfsigned=True)
+    install_system_user()
+    install_cert(selfsigned=True)
 
-    var(clear=clear, clear_all=clear)
-    modules()
+    install_var(clear=clear, clear_all=clear)
+    install_modules()
+    install_provisions(provision=None, dbhost=db_host_default, clear=clear)
+    install_docs(clear=clear)
 
-    provisions(provision=None, dbhost=db_host_default)
-    docs(clear=clear)
+    install_frontend(forcerebuild=True, development=True)
+    install_service()
+    install_nginx()
 
-    frontend(dev=False, rebuild=True)
-
-    service()
+    hfoslog('Done')
 
 
 cli.add_command(install)
@@ -921,6 +994,60 @@ def uninstall():
 
 
 cli.add_command(uninstall)
+
+
+@db.command(short_help='modify fields of objects')
+@click.option("--schema")
+@click.option("--uuid")
+@click.option("--filter")
+@click.argument('field')
+@click.argument('value')
+@click.pass_context
+def modify(ctx, schema, uuid, filter, field, value):
+    database = ctx.obj['db']
+
+    model = database.objectmodels[schema]
+
+    if uuid:
+        obj = model.find_one({'uuid': uuid})
+    elif filter:
+        obj = model.find_one(literal_eval(filter))
+    else:
+        hfoslog('No object uuid or filter specified. Read the help.',
+                lvl=error, emitter='manage')
+
+    hfoslog('Object found, modifying', lvl=debug, emitter='manage')
+    obj._fields[field] = literal_eval(value)
+    obj.validate()
+    hfoslog('Changed object validated', lvl=debug, emitter='manage')
+    obj.save()
+    hfoslog('Done')
+
+
+@db.command(short_help='view objects')
+@click.option("--schema", default=None)
+@click.option("--uuid", default=None)
+@click.option("--filter", default=None)
+@click.pass_context
+def view(ctx, schema, uuid, filter):
+    database = ctx.obj['db']
+
+    if schema is None:
+        hfoslog('No schema given. Read the help', lvl=warn, emitter='manage')
+        return
+
+    model = database.objectmodels[schema]
+
+    if uuid:
+        obj = model.find({'uuid': uuid})
+    elif filter:
+        obj = model.find(literal_eval(filter))
+    else:
+        hfoslog('No object uuid or filter specified. Read the help.',
+                lvl=warn, emitter='manage')
+        return
+    for item in obj:
+        pprint(item._fields)
 
 
 @db.command(short_help='find in object model fields')
