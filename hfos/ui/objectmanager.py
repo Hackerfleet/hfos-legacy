@@ -160,7 +160,8 @@ class ObjectManager(ConfigurableComponent):
         if result:
             try:
                 self.log('Transmitting result', lvl=verbose)
-                result['data']['req'] = event.data.get('req')
+                if isinstance(event.data, dict):
+                    result['data']['req'] = event.data.get('req', None)
                 self.fireEvent(send(event.client.uuid, result))
             except Exception as e:
                 self.log("Transmission error during response: %s" % e,
