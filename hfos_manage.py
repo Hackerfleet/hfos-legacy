@@ -34,7 +34,7 @@ from prompt_toolkit.history import FileHistory
 
 from ast import literal_eval
 from distutils.dir_util import copy_tree
-from time import localtime
+from time import localtime, sleep
 from uuid import uuid4
 from collections import OrderedDict
 from hashlib import sha512
@@ -834,6 +834,7 @@ def install_system_user():
         '--disabled-login',
         'hfos'
     ])
+    sleep(2)
 
 
 @install.command(short_help='create system user')
