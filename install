@@ -17,6 +17,7 @@ if VERB="$( which apt-get )" 2> /dev/null; then
         apt-get install apt-transport-https
         echo "deb https://deb.nodesource.com/node_7.x jessie main
 deb-src https://deb.nodesource.com/node_7.x jessie main" > /etc/apt/sources.list.d/nodesource.list
+        wget -qO- https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
         apt-get update
     fi
 
