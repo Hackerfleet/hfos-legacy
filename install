@@ -14,6 +14,7 @@ if VERB="$( which apt-get )" 2> /dev/null; then
     if [ ! -f /etc/apt/sources.list.d/nodesource.list ]
     then
         echo "Adding node source Debian repository."
+        apt-get install apt-transport-https
         echo "deb https://deb.nodesource.com/node_7.x jessie main
 deb-src https://deb.nodesource.com/node_7.x jessie main" > /etc/apt/sources.list.d/nodesource.list
         apt-get update
