@@ -128,7 +128,7 @@ You can also find us here:
 Installation
 ============
 
-There is more than one way of installing HFOS, :ref:`see the quickstart instructions for those <quick_install>`.
+There is more than one way of installing HFOS, `see the quickstart instructions for those <http://hfos.readthedocs.io/en/latest/start/quick.html>`__.
 
 The simplest way is to use the new install script:
 
@@ -136,7 +136,8 @@ The simplest way is to use the new install script:
 
     $ sudo ./install
 
-If you run into trouble or get any unexpected errors, :ref:`try the complex installation procedure <complex_install>`.
+It installs all dependencies then sets up a user account and the system's services.
+If you run into trouble or get any unexpected errors, `try the complex installation procedure <http://hfos.readthedocs.io/en/latest/start/installing.html>`__.
 
 
 Contributors
