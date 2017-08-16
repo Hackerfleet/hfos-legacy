@@ -1,4 +1,7 @@
 # build data
+MANIFEST.in
+venv
+.cache
 build
 dist
 docs/build
