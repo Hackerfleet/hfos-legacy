@@ -93,7 +93,7 @@ live = False
 
 verbosity = {'global': console,
              'file': off,
-             'system': error,
+             'system': info,
              'console': console
              }
 
@@ -231,7 +231,8 @@ def hfoslog(*what, **kwargs):
 
     output = None
 
-    now = time.time() - start
+    timestamp = time.time()
+    runtime = timestamp - start
 
     callee = None
 
@@ -262,7 +263,7 @@ def hfoslog(*what, **kwargs):
 
     msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (time.asctime(),
                                                lvldata[lvl][0],
-                                               now,
+                                               runtime,
                                                count,
                                                emitter)
 
@@ -311,8 +312,9 @@ def hfoslog(*what, **kwargs):
                     lvl=error)
         except BlockingIOError:
             hfoslog("Too long log line encountered:", output[:20], lvl=error)
+
     if lvl >= verbosity['system'] and root and output:
-        root.fire(logevent(now, lvl, emitter, callee, content), "logger")
+        root.fire(logevent(timestamp, lvl, emitter, callee, content), "logger")
 
     if live:
         LiveLog.append(output)
