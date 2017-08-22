@@ -152,7 +152,7 @@ class Core(ConfigurableComponent):
         self.websocket = None
 
         self.component_blacklist = [  # 'camera',
-            'logger',
+            # 'logger',
             'debugger',
             'recorder',
             'playback',

@@ -38,11 +38,12 @@ from uuid import uuid4
 from circuits.core.events import Event
 from circuits.core.handlers import reprhandler
 from circuits.io import stdin
-from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
-    logtailrequest, debugrequest
-from hfos.events.client import send
+
 from hfos.component import ConfigurableComponent, handler
 from hfos.database import objectmodels
+from hfos.events.client import send
+from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
+    logtailrequest, debugrequest
 from hfos.logger import hfoslog, critical, warn, debug, verbose
 
 try:
@@ -168,6 +169,12 @@ class HFDebugger(ConfigurableComponent):
                      lvl=critical)
 
 
+class logupdate(Event):
+    def __init__(self, message, *args, **kwargs):
+        super(logupdate, self).__init__(*args, **kwargs)
+        self.message = message
+
+
 class Logger(ConfigurableComponent):
     """
     System logger
@@ -186,21 +193,22 @@ class Logger(ConfigurableComponent):
     @handler("logevent")
     def logevent(self, event):
         """
-        Should once in a time log events to the live system log.
+        Logs log events to the live system log.
 
         :param event: Log event to log.
         """
 
-        logentry = objectmodels['logmessage']
+        logentry = objectmodels['logmessage']({'uuid': str(uuid4())})
 
         logentry.timestamp = event.timestamp
         logentry.severity = event.severity
         logentry.emitter = event.emitter
         logentry.sourceloc = event.sourceloc
         logentry.content = event.content
-        logentry.uuid = str(uuid4())
 
         logentry.save()
+
+        self.fireEvent(logupdate(logentry))
 
 
 class CLI(ConfigurableComponent):
