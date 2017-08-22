@@ -36,7 +36,9 @@ LogMessage: LogMessage to store messages in rooms and private logs
 from hfos.schemata.defaultform import readonlyform
 from hfos.schemata.base import base_object
 
-LogMessageSchema = base_object('logmessage', has_owner=False)
+LogMessageSchema = base_object('logmessage', no_perms=True)
+
+LogMessageSchema.update({'roles_create': 'SYSTEM'})
 
 LogMessageSchema['properties'].update({
     'timestamp': {'type': 'number', 'title': 'Timestamp',
@@ -52,4 +54,9 @@ LogMessageSchema['properties'].update({
                 'description': 'Log Message content'}
 })
 
-LogMessage = {'schema': LogMessageSchema, 'form': readonlyform}
+LogOptions = {
+    'disabled': True
+}
+
+LogMessage = {'schema': LogMessageSchema, 'form': readonlyform, 'options':
+    LogOptions}
