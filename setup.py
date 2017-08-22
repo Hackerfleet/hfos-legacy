@@ -119,6 +119,7 @@ See https://github.com/hackerfleet/hfos""",
     debugger=hfos.debugger:HFDebugger
     cli=hfos.debugger:CLI
     logger=hfos.debugger:Logger
+    syslog=hfos.ui.syslog:Syslog
     maintenance=hfos.database:Maintenance
 
     [hfos.sails]
