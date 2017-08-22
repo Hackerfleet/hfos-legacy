@@ -65,6 +65,16 @@ class ObjectManager(ConfigurableComponent):
     def _check_permissions(self, subject, action, obj):
         self.log('Roles of user:', subject.account.roles, lvl=verbose)
 
+        if 'perms' not in obj._fields:
+            if 'admin' in subject.account.roles:
+                self.log('Access to administrative object granted',
+                         lvl=verbose)
+                return True
+            else:
+                self.log('Access to administrative object failed',
+                         lvl=verbose)
+                return False
+
         if 'owner' in obj.perms[action]:
             try:
                 if subject.uuid == obj.owner:
@@ -207,7 +217,6 @@ class ObjectManager(ConfigurableComponent):
             return
 
         if storage_object:
-            self.log(storage_object.perms, lvl=debug)
             self.log("Object found, checking permissions: ", data, lvl=debug)
 
             if not self._check_permissions(user, 'read',
