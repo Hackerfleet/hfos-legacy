@@ -36,8 +36,6 @@ from hfos.database import configschemastore, ValidationError, objectmodels
 from hfos.logger import error, warn, verbose, hilight
 from warmongo import model_factory
 
-from pprint import pprint
-
 try:
     PermissionError
 except NameError:
@@ -60,6 +58,8 @@ class put(authorizedevent):
 class Configurator(ConfigurableComponent):
     """
     Provides a common configuration interface for all HFOS components.
+
+    (You're probably looking at it right now)
     """
 
     channel = "hfosweb"
@@ -83,10 +83,7 @@ class Configurator(ConfigurableComponent):
     def list(self, event):
         """Processes configuration list requests
 
-        :param event: ConfigRequest with actions
-        * Get
-        * Store
-        * Restart?
+        :param event:
         """
 
         try:
