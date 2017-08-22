@@ -47,7 +47,7 @@ from hfos.ui.builder import install_frontend
 from hfos.migration import make_migrations
 from hfos.logger import verbose, debug, warn, error, critical, verbosity, \
     hfoslog
-from dev.templates import write_template_file
+from hfos.tools import write_template_file
 
 # 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
 try:
