@@ -41,11 +41,14 @@ Schemastore and Objectstore builder functions.
 import sys
 import warmongo
 import pymongo
+from os import statvfs, walk
+from os.path import join, getsize, isfile, isdir, splitext
 # noinspection PyUnresolvedReferences
 from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
+from circuits import Timer, Event
 from hfos.logger import hfoslog, debug, warn, critical, verbose
-from hfos.component import ConfigurableComponent
+from hfos.component import ConfigurableComponent, handler
 from jsonschema import ValidationError  # NOQA
 from pkg_resources import iter_entry_points, DistributionNotFound
 from pprint import pprint
@@ -94,8 +97,8 @@ def _build_schemastore_new():
         try:
             hfoslog("Schemata found: ", schema_entrypoint.name, lvl=verbose,
                     emitter='DB')
-
-            available[schema_entrypoint.name] = schema_entrypoint.load()
+            schema = schema_entrypoint.load()
+            available[schema_entrypoint.name] = schema
         except (ImportError, DistributionNotFound) as e:
             hfoslog("Problematic schema: ", e, type(e),
                     schema_entrypoint.name, exc=True, lvl=warn,
@@ -238,6 +241,59 @@ def profile(schemaname='sensordata', profiletype='pjs'):
 # profile(schemaname='sensordata', profiletype='warmongo')
 
 class Maintenance(ConfigurableComponent):
+    configprops = {
+        'locations': {
+            'type': 'object',
+            'properties': {
+                'cache': {
+                    'type': 'object',
+                    'properties': {
+                        'minimum': {
+                            'type': 'integer',
+                            'description': 'Minimum cache free space to '
+                                           'alert on',
+                            'title': 'Minimum cache',
+                            'default': 500 * 1024 * 1024
+                        },
+                        'location': {
+                            'type': 'string',
+                            'description': 'Location of cache data',
+                            'title': 'Cache location',
+                            'default': '/var/cache/hfos'
+                        }
+                    },
+                    'default': {}
+                },
+                'library': {
+                    'type': 'object',
+                    'properties': {
+                        'minimum': {
+                            'type': 'integer',
+                            'description': 'Minimum library free space to '
+                                           'alert on',
+                            'title': 'Minimum library space',
+                            'default': 50 * 1024 * 1024
+                        },
+                        'location': {
+                            'type': 'string',
+                            'description': 'Location of library data',
+                            'title': 'Library location',
+                            'default': '/var/lib/hfos'
+                        }
+                    },
+                    'default': {}
+                }
+            },
+            'default': {}
+        },
+        'interval': {
+            'type': 'integer',
+            'title': 'Check interval',
+            'description': 'Interval in seconds to check maintenance '
+                           'conditions',
+            'default': 43200
+        }
+    }
 
     def __init__(self, *args, **kwargs):
         super(Maintenance, self).__init__("MAINTENANCE", *args, **kwargs)
@@ -245,10 +301,61 @@ class Maintenance(ConfigurableComponent):
 
         # TODO: Accept argument for dbhost
         client = pymongo.MongoClient(host="localhost", port=27017)
-        db = client["hfos"]
+        self.db = client["hfos"]
 
-        sizes = {}
+        self.collection_sizes = {}
+        self.collection_total = 0
 
-        for col in db.collection_names(include_system_collections=False):
-            sizes[col] = db.command('collstats', col).get('storageSize', 0)
-            self.log("Collection size (", col, "):", sizes[col], lvl=verbose)
+        self.disk_allocated = {}
+        self.disk_free = {}
+
+        self.maintenance_check()
+        self.timer = Timer(
+            self.config.interval,
+            Event.create('maintenance_check'), persist=True
+        ).register(self)
+
+    @handler('maintenance_check')
+    def maintenance_check(self, *args):
+        self.log('Performing maintenance check')
+        self._check_collections()
+        self._check_free_space()
+
+    def _check_collections(self):
+        self.collection_sizes = {}
+        self.collection_total = 0
+        for col in self.db.collection_names(include_system_collections=False):
+            self.collection_sizes[col] = self.db.command('collstats', col).get(
+                'storageSize', 0)
+            self.collection_total += self.collection_sizes[col]
+            self.log("Collection size (%s): %.2f MB" % (
+                col, self.collection_sizes[col] / 1024.0 / 1024),
+                     lvl=verbose)
+
+        self.log("Total collection sizes: %.2f MB" % (self.collection_total /
+                                                      1024.0 / 1024))
+
+    def _check_free_space(self):
+        def get_folder_size(path):
+            total_size = 0
+            for item in walk(path):
+                for file in item[2]:
+                    try:
+                        total_size = total_size + getsize(join(item[0], file))
+                    except:
+                        self.log("error with file:  " + join(item[0], file))
+            return total_size
+
+        for name, checkpoint in self.config.locations.items():
+            stats = statvfs(checkpoint['location'])
+            free_space = stats.f_frsize * stats.f_bavail
+            used_space = get_folder_size(
+                checkpoint['location']
+            ) / 1024.0 / 1024
+
+            self.log('Location %s uses %.2f MB' % (name, used_space))
+
+            if free_space < checkpoint['minimum']:
+                self.log('Short of free space on %s: %.2f MB left' % (
+                    name, free_space / 1024.0 / 1024 / 1024),
+                         lvl=warn)
