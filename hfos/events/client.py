@@ -29,7 +29,7 @@ class send(Event):
     """Send a packet to a known client by UUID"""
 
     def __init__(self, uuid, packet, sendtype="client",
-                 raw=False, username=None, *args):
+                 raw=False, username=None, fail_quiet=False, *args):
         """
 
         :param uuid: Unique User ID of known connection
@@ -45,6 +45,7 @@ class send(Event):
         self.username = username
         self.sendtype = sendtype
         self.raw = raw
+        self.fail_quiet = fail_quiet
 
         hfoslog("[CM-EVENT] Send event generated:", uuid, str(packet)[:50],
                 sendtype,
