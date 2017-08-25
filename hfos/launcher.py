@@ -388,7 +388,8 @@ def construct_graph(args):
         hfoslog("Starting circuits debugger", lvl=warn, emitter='GRAPH')
         dbg = Debugger().register(app)
         dbg.IgnoreEvents.extend(["read", "_read", "write", "_write",
-                                 "streamsuccess"])
+                                 "stream_success", "stream_complete",
+                                 "stream"])
 
     hfoslog("Beginning graph assembly.", emitter='GRAPH')
 
