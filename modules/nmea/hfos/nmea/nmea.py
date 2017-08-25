@@ -38,10 +38,11 @@ from circuits.net.sockets import TCPClient
 from circuits.net.events import connect, read
 from circuits.io.serial import Serial
 from decimal import Decimal
-from hfos.component import ConfigurableComponent
+from hfos.component import ConfigurableComponent, handler
 from hfos.database import ValidationError
 from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
 from hfos.navdata.events import sensordata
+from hfos.navdata.sensors import register_scanner_protocol, start_scanner
 
 # from pprint import pprint
 
@@ -145,7 +146,7 @@ class NMEAParser(ConfigurableComponent):
             'enum': ports + [''],
             'title': 'Serial port device',
             'description': 'File descriptor to access serial port',
-            'default': ports[0] if len(ports) > 0 else '',
+            'default': '',
             'allowadditional': True,
             'x-schema-form': {
                 'type': 'select',
@@ -153,6 +154,12 @@ class NMEAParser(ConfigurableComponent):
                 'titleMap': get_file_title_map(ports)
             }
         },
+        'auto_configure': {
+            'type': 'boolean',
+            'title': 'Auto configure',
+            'description': 'Auto detect and configure serial device',
+            'default': True
+        }
     }
 
     channel = "nmea"
@@ -176,7 +183,31 @@ class NMEAParser(ConfigurableComponent):
         self.unhandled = []
         self.unparsable = []
 
+        # TODO: This only finds nmea busses with a connected GPS
+        self.fireEvent(register_scanner_protocol('NMEA0183', '$GPG'),
+                       'hfosweb')
+
+        if self.config.connectiontype == 'USB/Serial' and \
+                        self.config.serialfile == '':
+            if self.config.auto_configure:
+                self.log('Automatically configuring NMEA source')
+                self.fireEvent(start_scanner(), 'hfosweb')
+            else:
+                self.log('No NMEA source specified', lvl=warn)
+        else:
+            self._setup_connection()
+
+    @handler('scan_results', channel='hfosweb')
+    def scan_results(self, event):
+        if self.config.auto_configure:
+            for device, protocols in event.results.items():
+                if 'NMEA0183' in protocols:
+                    self.config.serialfile = device
+                    self._setup_connection()
+
+    def _setup_connection(self):
         portup = False
+
         if self.config.connectiontype == 'USB/Serial':
             self.log("Connecting to serial port:", self.config.serialfile,
                      lvl=debug)
