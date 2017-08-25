@@ -157,7 +157,7 @@ class ConfigurableMeta(object):
                 self.names.append(uniquename)
             else:
                 hfoslog("Unique component added twice: ", uniquename,
-                        lvl=critical)
+                        lvl=critical, emitter="CORE")
         else:
             while True:
                 uniquename = "%s%s" % (self.name, randint(0, 32768))
@@ -210,7 +210,7 @@ class ConfigurableMeta(object):
         try:
             self.config = self.componentmodel.find_one(
                 {'name': self.uniquename})
-        except ServerSelectionTimeoutError:
+        except ServerSelectionTimeoutError:  # pragma: no cover
             self.log("No database access! Check if mongodb is running "
                      "correctly.", lvl=critical)
         if self.config:
@@ -224,13 +224,8 @@ class ConfigurableMeta(object):
             self.log("Unable to write non existing configuration", lvl=error)
             return
 
-        try:
-            self.config.validate()
-            self.config.save()
-            self.log("Configuration stored.")
-        except ValidationError as e:
-            self.log("Not storing invalid configuration: ", e, type(e),
-                     exc=True, lvl=error)
+        self.config.save()
+        self.log("Configuration stored.")
 
     def _set_config(self, config=None):
         if not config:
@@ -247,12 +242,12 @@ class ConfigurableMeta(object):
             try:
                 name = self.config.name
                 self.log("Name set to: ", name, lvl=verbose)
-            except (AttributeError, KeyError):
+            except (AttributeError, KeyError):  # pragma: no cover
                 self.log("Has no name.", lvl=verbose)
 
             try:
                 self.config.name = self.uniquename
-            except (AttributeError, KeyError) as e:
+            except (AttributeError, KeyError) as e:  # pragma: no cover
                 self.log("Cannot set component name for configuration: ", e,
                          type(e), self.name, exc=True, lvl=critical)
 

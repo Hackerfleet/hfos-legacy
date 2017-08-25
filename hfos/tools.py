@@ -76,7 +76,7 @@ def write_template_file(source, target, content):
             f.write(line)
 
 
-def insert_nginx_service(definition):
+def insert_nginx_service(definition):  # pragma: no cover
     config_file = '/etc/nginx/sites-available/hfos.conf'
     splitter = "### SERVICE DEFINITIONS ###"
 
