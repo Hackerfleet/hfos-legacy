@@ -18,7 +18,7 @@ __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 # See http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
 try:
     __import__('pkg_resources').declare_namespace(__name__)
-except ImportError:
+except ImportError:  # pragma: no cover
     from pkgutil import extend_path
 
     # noinspection PyUnboundLocalVariable
