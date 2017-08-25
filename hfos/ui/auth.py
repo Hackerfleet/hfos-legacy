@@ -32,14 +32,22 @@ Authentication (and later Authorization) system
 """
 
 from uuid import uuid4
+from hashlib import sha512
+from random import randint
+from circuits import Event
 
 from hfos.component import handler
 from hfos.events.client import authentication, send
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels, makesalt
 from hfos.logger import error, warn, debug, verbose
-from hashlib import sha512
-from random import randint
+
+
+class add_auth_hook(Event):
+    def __init__(self, authenticator_name, event, *args, **kwargs):
+        super(add_auth_hook, self).__init__(*args, **kwargs)
+        self.authenticator_name = authenticator_name
+        self.event = event
 
 
 class Authenticator(ConfigurableComponent):
@@ -68,6 +76,8 @@ class Authenticator(ConfigurableComponent):
         self.salt = salt
         self.systemconfig = systemconfig
 
+        self.auth_hooks = {}
+
     def makehash(self, word):
         try:
             password = word.encode('utf-8')
@@ -79,6 +89,11 @@ class Authenticator(ConfigurableComponent):
         hex_hash = hashword.hexdigest()
 
         return hex_hash
+
+    @handler("add_auth_hook")
+    def add_auth_hook(self, event):
+        self.log('Adding authentication hook for', event.authenticator_name)
+        self.auth_hooks[event.authenticator_name] = event.event
 
     @handler("authenticationrequest", channel="auth")
     def authenticationrequest(self, event):
@@ -168,7 +183,7 @@ class Authenticator(ConfigurableComponent):
                          lvl=error)
 
             if useraccount:
-                self.log("User found.")
+                self.log("User found.", lvl=debug)
 
                 if self.makehash(event.password) == useraccount.passhash:
                     self.log("Passhash matches, checking client and profile.",
@@ -201,7 +216,7 @@ class Authenticator(ConfigurableComponent):
                         # Either no configuration was found or requested
                         # -> Create a new client configuration
                         uuid = event.clientuuid if event.clientuuid is not \
-                            None else str(uuid4())
+                                                   None else str(uuid4())
 
                         clientconfig = objectmodels['client']({'uuid': uuid})
 
