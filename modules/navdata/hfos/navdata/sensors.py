@@ -30,20 +30,66 @@ Module NavData
 
 """
 
-from circuits import Event, Timer
-from hfos.component import handler
+import sys
+import glob
+from copy import copy
+from circuits import Component, Event, Timer
+from circuits.net.sockets import TCPClient
+from circuits.net.events import connect, read
+from circuits.io.serial import Serial
 
 from hfos.database import objectmodels  # , ValidationError
 from hfos.events.system import authorizedevent
-from hfos.events.objectmanager import updatesubscriptions
 from hfos.navdata.events import referenceframe
 from hfos.logger import hfoslog, events, debug, verbose, critical, warn, \
-    hilight
-from hfos.component import ConfigurableComponent
+    error, hilight
+from hfos.component import ConfigurableComponent, handler
 from hfos.events.client import send, broadcast
 
+from pprint import pprint
 
-# from pprint import pprint
+try:
+    import serial
+except ImportError:
+    serial = None
+    hfoslog(
+        "[NMEA] No serialport found. Serial bus NMEA devices will be "
+        "unavailable, install requirements.txt!",
+        lvl=critical, emitter="NMEA")
+
+
+def serial_ports():
+    """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+
+        Courtesy: Thomas ( http://stackoverflow.com/questions/12090503
+        /listing-available-com-ports-with-python )
+    """
+    if sys.platform.startswith('win'):
+        ports = ['COM%s' % (i + 1) for i in range(256)]
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this excludes your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException) as e:
+            hfoslog('Could not open serial port:', port, e, type(e),
+                    exc=True, lvl=warn)
+    return result
+
 
 class subscribe(authorizedevent):
     """Subscribes from a navigation data subscription"""
@@ -55,6 +101,14 @@ class unsubscribe(authorizedevent):
 
 class sensed(authorizedevent):
     """Requests a list of sensed values"""
+
+
+class start_scanner_user(authorizedevent):
+    """Starts the sensor bus scanning"""
+
+
+class stop_scanner(authorizedevent):
+    """Stops the sensor bus scanning"""
 
 
 class Sensors(ConfigurableComponent):
@@ -262,3 +316,185 @@ class Sensors(ConfigurableComponent):
         except Exception as e:
             self.log("Could not push referenceframe: ", e, type(e),
                      lvl=critical)
+
+
+class ProtocolAnalyser(Component):
+    protocols = {}
+
+    def __init__(self, interface, *args, **kwargs):
+        super(ProtocolAnalyser, self).__init__(*args, **kwargs)
+
+        self.interface = interface
+        self.channel = "scanner_" + interface
+
+    def read(self, *event):
+        detected = []
+
+        for key, item in self.protocols.items():
+            if not isinstance(item, list):
+                checks = [item]
+            else:
+                checks = item
+
+            for check in checks:
+                if check.encode('utf-8') in event[0]:
+                    detected.append(key)
+
+        if len(detected) > 0:
+            self.fireEvent(detected_protocol(self.interface, detected),
+                           'hfosweb')
+
+
+class detected_protocol(Event):
+    def __init__(self, device, protocol, *args, **kwargs):
+        super(detected_protocol, self).__init__(*args, **kwargs)
+        self.device = device
+        self.protocol = protocol
+
+
+class register_scanner_protocol(Event):
+    def __init__(self, name, keyword, *args, **kwargs):
+        super(register_scanner_protocol, self).__init__(*args, **kwargs)
+        self.protocol = name
+        self.keyword = keyword
+
+
+class restart_scan(Event):
+    pass
+
+
+class start_scanner(Event):
+    pass
+
+
+class scan_results(Event):
+    def __init__(self, results, *args, **kwargs):
+        super(scan_results, self).__init__(*args, **kwargs)
+        self.results = results
+
+
+class SensorScanner(ConfigurableComponent):
+    channel = 'hfosweb'
+
+    configprops = {
+        'baud_rates': {
+            'type': 'array',
+            'items': {
+                'type': 'integer'
+            },
+            'default': [9600, 4800, 1200, 2400, 19200, 38400, 57600, 115200]
+        },
+        'timeout': {
+            'type': 'integer',
+            'default': 5
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(SensorScanner, self).__init__('SENSORSCAN', *args, **kwargs)
+        self.log("Started")
+
+        self.scanning = {}
+        self.scan_rates = {}
+        self.scan_results = {}
+
+    def _scan_serial_port(self, port):
+        analyser = ProtocolAnalyser(port).register(self)
+
+        if port not in self.scan_rates:
+            self.scan_rates[port] = copy(self.config.baud_rates)
+
+        try:
+            baudrate = self.scan_rates[port].pop(0)
+        except IndexError:
+            self.log('Scan instructed, but no more baudrates left:', port,
+                     lvl=warn)
+            return
+
+        self.log("Now scanning on serial port:", port, '(', baudrate, 'bps)',
+                 lvl=debug)
+
+        try:
+            serial = Serial(
+                port,
+                baudrate=baudrate,
+                channel="scanner_" + port
+            ).register(analyser)
+
+            self.scanning[port] = analyser
+        except serial.SerialException as e:
+            self.log("Could not open configured port:", port, e,
+                     lvl=error)
+
+    # def _scan_ip_port(self, host, port):
+    #     name = str(host) + str(port)
+    #     self.log('Now scanning on ip port:', name, lvl=debug)
+    #     self.scanning_ip[name] = TCPClient(
+    #         channel='scanner_' + name).register(self)
+    #     self.fire(connect(self.config.host, self.config.port),
+    #               channel='scanner_' + name)
+
+    @handler('detected_protocol')
+    def detected_protocol(self, event):
+        if event.device in self.scanning:
+            self.log('Detected protocol on', event.device, ':', event.protocol)
+            self.scan_results[event.device] = event.protocol
+
+            self._unregister_scanner(event.device)
+            del self.scanning[event.device]
+            del self.scan_rates[event.device]
+        else:
+            self.log('Scanner not registered (anymore)', lvl=verbose)
+
+    def _unregister_scanner(self, device):
+        self.log('Unregistering scanner', lvl=verbose)
+        detector = self.scanning[device]
+        detector.stop()
+        detector.unregister()
+
+    @handler('register_scanner_protocol')
+    def register_scanner_protocol(self, event):
+        self.log('Registering scanner protocol:', event)
+        ProtocolAnalyser.protocols[event.protocol] = event.keyword
+
+    @handler('restart_scan')
+    def restart_scan(self, event):
+        self.log('Restarting scan with new parameters', lvl=verbose)
+        deleted = []
+
+        for device in self.scanning.keys():
+            self._unregister_scanner(device)
+            if len(self.scan_rates[device]) > 0:
+                self._scan_serial_port(device)
+            else:
+                deleted.append(device)
+
+        for device in deleted:
+            self.scan_results[device] = []
+            del self.scanning[device]
+            del self.scan_rates[device]
+
+        if len(self.scanning) > 0:
+            Timer(self.config.timeout, restart_scan()).register(self)
+        else:
+            self.log('Scan done. Found protocols:', self.scan_results)
+            self.fireEvent(scan_results(self.scan_results))
+
+    @handler('start_scanner')
+    def start_scanner(self, *args):
+        self.log('Initiating scan')
+        scanning = False
+
+        portlist = serial_ports()
+        self.log('Scanning all found devices.', lvl=debug)
+
+        self.log('Scanning', portlist, lvl=debug)
+        for port in portlist:
+            if port.startswith('/dev'):
+                self._scan_serial_port(port)
+                scanning = True
+            else:
+                self.log('Cannot yet scan non serial ports', lvl=warn)
+
+        if scanning:
+            Timer(self.config.timeout, restart_scan()).register(self)
