@@ -27,6 +27,7 @@ import pwd
 import grp
 import click
 import getpass
+import json
 
 from click_didyoumean import DYMGroup
 from click_repl import repl
@@ -41,6 +42,7 @@ from hashlib import sha512
 from OpenSSL import crypto
 from socket import gethostname
 from pprint import pprint
+from warmongo import model_factory
 from pymongo.errors import DuplicateKeyError
 
 from hfos.ui.builder import install_frontend
@@ -371,6 +373,69 @@ def make(ctx):
     """Makes new migrations for all or the specified schema"""
 
     make_migrations(ctx.obj['schema'])
+
+@click.group(cls=DYMGroup)
+@click.option('--dbhost', default=db_host_default, help=db_host_help,
+              metavar=db_host_metavar)
+@click.pass_context
+def config(ctx, dbhost):
+    """Configuration management operations (GROUP)"""
+
+    from hfos import database
+    database.initialize(dbhost)
+    ctx.obj['db'] = database
+
+    from hfos.schemata.component import ComponentConfigSchemaTemplate
+    ctx.obj['col'] = model_factory(ComponentConfigSchemaTemplate)
+
+
+cli.add_command(config)
+
+@config.command(short_help="Delete component configuration")
+@click.argument('componentname')
+@click.pass_context
+def delete(ctx, componentname):
+    col = ctx.obj['col']
+
+    if col.count({'name': componentname}) > 1:
+        hfoslog('More than one component configuration of this name! Try '
+                 'one of the uuids as argument. Get a list with "config '
+                'list"', emitter='MANAGE')
+        return
+
+    hfoslog('Deleting component configuration', componentname,
+            emitter='MANAGE')
+    config = col.find_one({'name': componentname})
+    if config is None:
+        hfoslog('Component configuration not found:', componentname,
+                emitter='MANAGE')
+        return
+    config.delete()
+    hfoslog('Done', emitter='MANAGE')
+
+
+@config.command(short_help="Show component configurations")
+@click.option('--component', default=None)
+@click.pass_context
+def show(ctx, component):
+    col = ctx.obj['col']
+
+    if col.count({'name': component}) > 1:
+        hfoslog('More than one component configuration of this name! Try '
+                'one of the uuids as argument. Get a list with "config '
+                'list"', emitter='MANAGE')
+        return
+
+    if component is None:
+        configurations = col.find()
+        for configuration in configurations:
+            hfoslog("%-10s : %s" % (configuration.name,
+                                    configuration.uuid),
+                    emitter='MANAGE')
+    else:
+        configuration = col.find_one({'name': component})
+
+        print(json.dumps(configuration.serializablefields(), indent=4))
 
 
 @db.group(cls=DYMGroup)
@@ -1122,6 +1187,7 @@ def find_field(ctx, search, by_type, obj):
                 print(model)
                 # hfoslog(model, result)
                 pprint(result)
+
 
 
 @cli.command(short_help='Start interactive management shell')
