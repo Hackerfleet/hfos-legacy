@@ -49,6 +49,7 @@ This software package is a plugin module for HFOS.
     layer=hfos.map.schemata.layer:Layer
     layergroup=hfos.map.schemata.layergroup:LayerGroup
     mapview=hfos.map.schemata.mapview:MapView
+    route=hfos.map.schemata.route:Route
 [hfos.provisions]
     layer=hfos.map.provisions.layer:provision
     layergroup=hfos.map.provisions.layergroup:provision
