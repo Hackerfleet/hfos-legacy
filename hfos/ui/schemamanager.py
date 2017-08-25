@@ -53,7 +53,7 @@ class SchemaManager(ConfigurableComponent):
     def ready(self):
         """Sets up the application after startup."""
         self.log('Got', len(schemastore), 'data and',
-                 len(configschemastore), 'component schemata.')
+                 len(configschemastore), 'component schemata.', lvl=debug)
 
         # pprint(schemastore.keys())
         # pprint(configschemastore.keys())
@@ -61,7 +61,7 @@ class SchemaManager(ConfigurableComponent):
     @handler(all)
     def all(self, event):
         self.log("Schemarequest for all schemata from",
-                 event.user)
+                 event.user, lvl=debug)
         response = {
             'component': 'hfos.events.schemamanager',
             'action': 'all',
@@ -72,7 +72,7 @@ class SchemaManager(ConfigurableComponent):
     @handler(get)
     def get(self, event):
         self.log("Schemarequest for", event.data, "from",
-                 event.user)
+                 event.user, lvl=debug)
         if event.data in schemastore:
             response = {
                 'component': 'hfos.events.schemamanager',
@@ -87,7 +87,7 @@ class SchemaManager(ConfigurableComponent):
     def configuration(self, event):
         try:
             self.log("Schemarequest for all configuration schemata from",
-                     event.user.account.name)
+                     event.user.account.name, lvl=debug)
             response = {
                 'component': 'hfos.events.schemamanager',
                 'action': 'configuration',

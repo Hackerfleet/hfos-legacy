@@ -38,7 +38,7 @@ from warmongo import model_factory
 
 try:
     PermissionError
-except NameError:
+except NameError:  # pragma: no cover
     class PermissionError(Exception):
         pass
 

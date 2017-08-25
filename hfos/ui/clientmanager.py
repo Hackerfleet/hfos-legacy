@@ -205,14 +205,14 @@ class ClientManager(ConfigurableComponent):
     def connect(self, *args):
         """Registers new sockets and their clients and allocates uuids"""
 
-        self.log("Connect ", args, lvl=debug)
+        self.log("Connect ", args, lvl=verbose)
 
         try:
             sock = args[0]
             ip = args[1]
 
             if sock not in self._sockets:
-                self.log("New ip!", ip, lvl=debug)
+                self.log("New client connected:", ip, lvl=debug)
                 clientuuid = str(uuid4())
                 self._sockets[sock] = Socket(ip, clientuuid)
                 # Key uuid is temporary, until signin, will then be replaced
@@ -224,9 +224,9 @@ class ClientManager(ConfigurableComponent):
                     clientuuid=clientuuid,
                 )
 
-                self.log("Client connected:", clientuuid)
+                self.log("Client connected:", clientuuid, lvl=debug)
             else:
-                self.log("Strange! Old IP reconnected!" + "#" * 15)
+                self.log("Old IP reconnected!", lvl=warn)
                 #     self.fireEvent(write(sock, "Another client is
                 # connecting from your IP!"))
                 #     self._sockets[sock] = (ip, uuid.uuid4())
@@ -280,8 +280,9 @@ class ClientManager(ConfigurableComponent):
                 self.log("Sending to user's client: '%s': '%s'" % (
                     event.uuid, jsonpacket[:20]), lvl=network)
                 if event.uuid not in self._clients:
-                    self.log("Unknown client!", event.uuid, lvl=critical)
-                    self.log("Clients:", self._clients, lvl=debug)
+                    if not event.fail_quiet:
+                        self.log("Unknown client!", event.uuid, lvl=critical)
+                        self.log("Clients:", self._clients, lvl=debug)
                     return
 
                 sock = self._clients[event.uuid].sock
@@ -377,14 +378,14 @@ class ClientManager(ConfigurableComponent):
         # TODO: Move this stuff over to ./auth.py
         if requestaction in ("login", "autologin"):
             try:
-                self.log("Login request")
+                self.log("Login request", lvl=verbose)
 
                 if requestaction == "autologin":
                     username = password = None
                     requestedclientuuid = requestdata
                     auto = True
 
-                    self.log("Autologin for", requestedclientuuid)
+                    self.log("Autologin for", requestedclientuuid, lvl=debug)
                 else:
                     username = requestdata['username']
                     password = requestdata['password']
@@ -395,7 +396,7 @@ class ClientManager(ConfigurableComponent):
                         requestedclientuuid = None
                     auto = False
 
-                    self.log("Auth request by", username)
+                    self.log("Auth request by", username, lvl=verbose)
 
                 self.fireEvent(authenticationrequest(
                     username,
@@ -555,7 +556,7 @@ class ClientManager(ConfigurableComponent):
         then notifies the client"""
         try:
             self.log("Authorization has been granted by DB check:",
-                     event.username)
+                     event.username, lvl=debug)
 
             account, profile, clientconfig = event.userdata
 
@@ -586,7 +587,7 @@ class ClientManager(ConfigurableComponent):
                 signedinuser.clients.append(clientuuid)
                 self.log("Active client (", clientuuid, ") registered to "
                                                         "user", useruuid,
-                         lvl=info)
+                         lvl=debug)
 
             # Update socket..
             socket = self._sockets[event.sock]
@@ -636,7 +637,7 @@ class ClientManager(ConfigurableComponent):
                      signedinuser.account.name, "Profile",
                      signedinuser.profile.uuid, "Clients",
                      signedinuser.clients,
-                     lvl=info)
+                     lvl=debug)
 
         except Exception as e:
             self.log("Error (%s, %s) during auth grant: %s" % (
