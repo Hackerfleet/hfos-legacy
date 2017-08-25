@@ -41,6 +41,7 @@ Schemastore and Objectstore builder functions.
 import sys
 import warmongo
 import pymongo
+import operator
 from os import statvfs, walk
 from os.path import join, getsize, isfile, isdir, splitext
 # noinspection PyUnresolvedReferences
@@ -328,8 +329,12 @@ class Maintenance(ConfigurableComponent):
             self.collection_sizes[col] = self.db.command('collstats', col).get(
                 'storageSize', 0)
             self.collection_total += self.collection_sizes[col]
+
+        sorted_x = sorted(self.collection_sizes.items(), key=operator.itemgetter(1))
+
+        for item in sorted_x:
             self.log("Collection size (%s): %.2f MB" % (
-                col, self.collection_sizes[col] / 1024.0 / 1024),
+                item[0], item[1] / 1024.0 / 1024),
                      lvl=verbose)
 
         self.log("Total collection sizes: %.2f MB" % (self.collection_total /
