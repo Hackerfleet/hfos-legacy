@@ -113,50 +113,6 @@ def set_logfile(path):
     logfile = path
 
 
-class logevent(Event):
-    """
-    Generates a new log event to be logged to the system log
-
-    :param msg: Description of event
-    :param severity:  Severity of event
-    :param args:
-    """
-
-    def __init__(self, timestamp, severity, emitter, sourceloc, content,
-                 *args):
-        super(logevent, self).__init__(*args)
-        self.timestamp = timestamp
-        self.severity = severity
-        self.emitter = emitter
-        self.sourceloc = sourceloc
-        self.content = content
-
-    def __str__(self):
-        return str(self.content)
-
-
-class send(Event):
-    """Send a packet to a known client by UUID"""
-
-    def __init__(self, uuid, packet, sendtype="client",
-                 raw=False, username=None, *args):
-        """
-
-        :param uuid: Unique User ID of known connection
-        :param packet: Data packet to transmit to client
-        :param args: Further Args
-        """
-        super(send, self).__init__(*args)
-
-        if uuid is None and username is None:
-            hfoslog("[SEND-EVENT] No recipient (uuid/name) given!", lvl=warn)
-        self.uuid = uuid
-        self.packet = packet
-        self.username = username
-        self.sendtype = sendtype
-        self.raw = raw
-
-
 def ismuted(what):
     """
     Checks if a logged event is to be muted for debugging purposes.
@@ -312,9 +268,6 @@ def hfoslog(*what, **kwargs):
                     lvl=error)
         except BlockingIOError:
             hfoslog("Too long log line encountered:", output[:20], lvl=error)
-
-    if lvl >= verbosity['system'] and root and output:
-        root.fire(logevent(timestamp, lvl, emitter, callee, content), "logger")
 
     if live:
         LiveLog.append(output)

@@ -40,7 +40,6 @@ from circuits.core.handlers import reprhandler
 from circuits.io import stdin
 
 from hfos.component import ConfigurableComponent, handler
-from hfos.database import objectmodels
 from hfos.events.client import send
 from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
     logtailrequest, debugrequest
@@ -169,48 +168,6 @@ class HFDebugger(ConfigurableComponent):
                      lvl=critical)
 
 
-class logupdate(Event):
-    def __init__(self, message, *args, **kwargs):
-        super(logupdate, self).__init__(*args, **kwargs)
-        self.message = message
-
-
-class Logger(ConfigurableComponent):
-    """
-    System logger
-
-    Handles all the logging aspects.
-
-    """
-
-    channels = "logger"
-
-    def __init__(self, *args):
-        super(Logger, self).__init__('LOGGER', *args)
-
-        self.log("Started.")
-
-    @handler("logevent")
-    def logevent(self, event):
-        """
-        Logs log events to the live system log.
-
-        :param event: Log event to log.
-        """
-
-        logentry = objectmodels['logmessage']({'uuid': str(uuid4())})
-
-        logentry.timestamp = event.timestamp
-        logentry.severity = event.severity
-        logentry.emitter = event.emitter
-        logentry.sourceloc = event.sourceloc
-        logentry.content = event.content
-
-        logentry.save()
-
-        self.fireEvent(logupdate(logentry))
-
-
 class CLI(ConfigurableComponent):
     """
     Command Line Interface support
@@ -265,7 +222,7 @@ class CLI(ConfigurableComponent):
     @handler('cli_register_event')
     def register_event(self, event):
         self.log('Registering event hook:', event.cmd, event.thing,
-                 pretty=True)
+                 pretty=True, lvl=debug)
         self.hooks[event.cmd.upper()] = event.thing
 
 
