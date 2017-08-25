@@ -21,11 +21,16 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
-from hfos.logger import hfoslog, debug, warn, critical, error
+
 import base64
 import hashlib
+
 from datetime import datetime
+from circuits import handler, Event
+
 from hfos.component import ConfigurableComponent
+from hfos.ui.auth import add_auth_hook
+from hfos.logger import hfoslog, debug, warn, critical, error
 
 try:
     from lmap import lmap, ldap
@@ -58,6 +63,14 @@ defaultcomponentconfig = {
                      'dc=c-base,dc=org)(memberof=cn=crew,ou=groups,'
                      'dc=c-base,dc=org))'
 }
+
+
+class lmap_authenticate(Event):
+    def __init__(self, username, password, *args, **kwargs):
+        super(lmap_authenticate, self).__init__(*args, **kwargs)
+
+        self.uid = username
+        self.pin = password
 
 
 class LDAPAdaptor(ConfigurableComponent):
@@ -118,11 +131,13 @@ class LDAPAdaptor(ConfigurableComponent):
             self.log("Loaded configuration, ", self.config._fields, lvl=debug)
 
         self._ldap_connect()
+        self.log('Adding authentication hook', lvl=debug)
+        self.fireEvent(add_auth_hook(self.uniquename, lmap_authenticate))
 
     def _ldap_connect(self):
         self.log("Connecting to LDAP server:", self.config.URI)
         try:
-            ld = ldap.ldap(bytes(self.config.URI))
+            ld = ldap.ldap(self.config.URI)
             ld.simple_bind(self.config.BINDDN, self.config.BINDPW)
             self.ldap = lmap.lmap(dn=self.config.BASE, ldap=ld)
         except ldap.LDAPError as e:
@@ -138,7 +153,8 @@ class LDAPAdaptor(ConfigurableComponent):
         newhashv = hashlib.sha1(bytearray(pw, 'UTF-8') + salt).digest()
         return hashv == newhashv
 
-    def authenticate(self, uid, pin):
+    @handler('lmap_authenticate')
+    def lmap_authenticate(self, uid, pin):
         lm = self.ldap  # ldap_connect()
         try:
             user = lm(self.config.USERBASE).search(

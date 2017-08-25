@@ -38,8 +38,13 @@ A LDAP authentication protocol adaptor.
 
 This software package is a plugin module for HFOS.
 """,
-      dependency_links=[],
-      install_requires=['hfos>=1.2.0'],
+      dependency_links=[
+          'https://github.com/jaseg/python-lmap/tarball/master#egg=lmap'
+      ],
+      install_requires=[
+          'hfos>=1.2.0',
+          'lmap'
+      ],
       entry_points="""[hfos.components]
     ldap=hfos.ldap.ldap:LDAPAdaptor
     """,
