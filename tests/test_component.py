@@ -33,7 +33,9 @@ Test HFOS Basic Provisioning
 
 import pytest
 from uuid import uuid4
+from circuits import Manager
 import hfos.logger as logger
+import hfos.component
 
 
 def test_uniquename():
@@ -98,3 +100,54 @@ def test_component_log():
     pytest.clean_test_components()
 
     assert unique in str(log)
+
+
+def test_unique_warning():
+    log = logger.LiveLog
+    logger.live = True
+
+    c = pytest.TestComponent(uniquename='FOO')
+    d = pytest.TestComponent(uniquename='FOO')
+
+    pytest.clean_test_components()
+
+    assert "Unique component added twice: " in str(log)
+
+
+def test_unregister():
+    name = "test_unregister"
+    m = Manager()
+
+    c = pytest.TestComponent(uniquename=name)
+    c.register(m)
+
+    assert name in pytest.TestComponent.names
+
+    c.unregister()
+
+    assert name not in pytest.TestComponent.names
+
+
+def test_write_none_config():
+    log = logger.LiveLog
+    logger.live = True
+
+    c = pytest.TestComponent()
+    c.config = None
+    c._write_config()
+
+    pytest.clean_test_components()
+
+    assert "Unable to write non existing configuration" in str(log)
+
+
+def test_configurable_controller():
+    c = hfos.component.ConfigurableController()
+
+    assert type(c) == hfos.component.ConfigurableController
+
+
+def test_example_component():
+    c = hfos.component.ExampleComponent()
+
+    assert type(c) == hfos.component.ExampleComponent
