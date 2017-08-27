@@ -44,102 +44,137 @@ VesselSchema['properties'].update({
         'type': 'string',
         'title': 'Unique Vessel Moving Mapview ID'
     },
+    'description': {
+        'type': 'string', 'format': 'html',
+        'title': 'Vessel description',
+        'description': 'Freeform vessel '
+                       'description'
+    },
+    'color': {
+        'type': 'string', 'title': 'Vessel Color',
+        'format': 'color',
+        'description': 'Color used for annotations'
+    },
     'details': {
         'type': 'object',
-        'oneOf': [
+        'properties':
             {
-                'type': 'object',
-                'title': 'Seafaring Vessel',
-                'properties': {
-                    'mmsi': {'type': 'string', 'minLength': 9, 'maxLength': 9,
-                             'title': 'MMSI',
-                             'description': 'Martime Mobile Service Identity'},
-                    'vesseltype': {'type': 'string', 'title': 'Vessel Type',
-                                   'enum': ['Sailboat', 'Motorboat',
-                                            'Platform'],
-                                   'description': 'General classification of '
-                                                  'vessel'},
-                    'color': {'type': 'string', 'title': 'Vessel Color',
-                              'format': 'color',
-                              'description': 'Color used for annotations'},
-                    'registration': {'type': 'string', 'minLength': 1,
-                                     'title': 'Registration',
-                                     'description': 'Official registration'},
-                    'origin': {'type': 'string', 'minLength': 1,
-                               'title': 'Country of origin',
-                               'description': 'Registration country'},
-                    'hullplan': {'type': 'string', 'title': 'Hull-plan',
-                                 'description': 'Hull-plan configuration',
-                                 'enum': ['Monohull', 'Catamaran', 'Trimaran',
-                                          'Quadrimaran', 'Pentamaran']
-                                 },
-                    'loa': {'type': 'number', 'title': 'LOA',
-                            'description': 'Length-over-all'},
-                    'lwl': {'type': 'number', 'title': 'LWL',
-                            'description': 'Length-water-line'},
-                    'beam': {'type': 'number', 'title': 'Beam',
-                             'description': 'Breadth amidships'},
-                    'draft': {'type': 'number', 'title': 'Draft',
-                              'description': "Static depth of a vessel's "
-                                             "keel below watersurface"},
-                    'height-max': {'type': 'number',
-                                   'title': 'Height (raised)',
-                                   'description': 'Maximal vessel height'},
-                    'height-min': {'type': 'number',
-                                   'title': 'Height (lowered)',
-                                   'description': 'Minimal vessel height'},
-                    'motors': {'type': 'number', 'title': 'Engines',
-                               'description': 'Count of engines'},
-                    'motorpower': {'type': 'number', 'title': 'Enginepower',
-                                   'description': 'Cumulative engine power'},
-                    'sailplan': {'type': 'string', 'title': 'Sail-plan',
-                                 'description': 'Sail-plan configuration',
-                                 'enum': ['Barque',
-                                          'Barquentine/Schooner barque',
-                                          'Bragana/Felucca', 'Catboat',
-                                          'Cutter', 'Gunter',
-                                          'Hermaphrodite Brig/Schooner Brig',
-                                          'Ketch',
-                                          'Polacre', 'Proa', 'Schooner',
-                                          'Sloop', 'Snow', 'Sunfish',
-                                          'Topsail Schooner',
-                                          'Two-topsail Schooner', 'Yawl'
-                                          ]
-                                 },
-                    'sailarea': {'type': 'number', 'title': 'Sail area',
-                                 'description': 'Maximum unfolded usable '
-                                                'sail area (m²)'},
-                    'water-production': {'type': 'number',
-                                         'title': 'Water (production)',
-                                         'description': 'Potable water '
-                                                        'production l/day'},
-                    'water-storage': {'type': 'number',
-                                      'title': 'Water (storage)',
-                                      'description': 'Potable water storage '
-                                                     'capacity'},
-                    'fuel-storage': {'type': 'number',
-                                     'title': 'Fuel (storage)',
-                                     'description': 'Fuel storage capacity'},
-                    'fuel-consumption': {'type': 'number',
-                                         'title': 'Fuel (consumption)',
-                                         'description': 'Maximum fuel '
-                                                        'consumption per '
-                                                        'hour'},
-                    'waste-storage': {'type': 'number',
-                                      'title': 'Wastewater (storage)',
-                                      'description': 'Waste water storage '
-                                                     'capacity'},
-                    'cabins': {'type': 'number', 'title': 'Cabin count',
-                               'description': 'Crew cabins'},
-                    'bunks': {'type': 'number', 'title': 'Bunk count',
-                              'description': 'Crew bunks'},
-                    'description': {'type': 'string', 'format': 'html',
-                                    'title': 'Vessel description',
-                                    'description': 'Freeform vessel '
-                                                   'description'},
-                }
+                # 'type': 'object',
+                # 'title': 'Seafaring Vessel',
+                # 'properties': {
+                'mmsi': {'type': 'string', 'minLength': 9, 'maxLength': 9,
+                         'title': 'MMSI',
+                         'description': 'Maritime Mobile Service '
+                                        'Identity'},
+                'vessel_type': {'type': 'string', 'title': 'Vessel Type',
+                                'enum': ['Sailboat', 'Motorboat',
+                                         'Platform'],
+                                'description': 'General classification of '
+                                               'vessel'},
+                'registration': {'type': 'string', 'minLength': 1,
+                                 'title': 'Registration',
+                                 'description': 'Official registration'},
+                'origin': {'type': 'string', 'minLength': 1,
+                           'title': 'Country of origin',
+                           'description': 'Registration country'},
+                'call_sign': {'type': 'string', 'minLength': 1,
+                              'title': 'Call sign',
+                              'description': 'Radio call sign/number'},
+                'contact_mail': {'type': 'string', 'minLength': 1,
+                                 'title': 'Contact email',
+                                 'description': 'Emergency email contact'},
+                'contact_phone': {'type': 'string', 'minLength': 1,
+                                  'title': 'Contact phone',
+                                  'description': 'Emergency '
+                                                 'phone/sat contact'},
+                'year_built': {'type': 'integer', 'title': 'Year built',
+                               'description': 'Year of vessel '
+                                              'construction'},
+                'hull_plan': {'type': 'string', 'title': 'Hull-plan',
+                              'description': 'Hull-plan configuration',
+                              'enum': ['Monohull', 'Catamaran', 'Trimaran',
+                                       'Quadrimaran', 'Pentamaran']
+                              },
+                'features': {'type': 'string', 'format': 'html',
+                             'title': 'Features', 'minLength': 1,
+                             'description': 'Prominent features'},
+                'loa': {'type': 'number', 'title': 'LOA',
+                        'description': 'Length-over-all (m)'},
+                'lwl': {'type': 'number', 'title': 'LWL',
+                        'description': 'Length-water-line (m)'},
+                'beam': {'type': 'number', 'title': 'Beam',
+                         'description': 'Breadth amidships (m)'},
+                'draft': {'type': 'number', 'title': 'Draft',
+                          'description': "Static depth of a vessel's "
+                                         "keel below watersurface (m)"},
+                'height_max': {'type': 'number',
+                               'title': 'Height raised',
+                               'description': 'Maximal vessel height (m)'},
+                'height_min': {'type': 'number',
+                               'title': 'Height (lowered)',
+                               'description': 'Minimal vessel height (m)'},
+                'motor_count': {'type': 'number', 'title': 'Engines',
+                                'description': 'Count of engines'},
+                'motor_power': {'type': 'number', 'title': 'Enginepower',
+                                'description': 'Cumulative engine power (kW)'},
+                'sail_plan': {'type': 'string', 'title': 'Sail-plan',
+                              'description': 'Sail-plan configuration',
+                              'enum': ['Barque',
+                                       'Barquentine/Schooner barque',
+                                       'Bragana/Felucca', 'Catboat',
+                                       'Cutter', 'Gunter',
+                                       'Hermaphrodite Brig/Schooner Brig',
+                                       'Ketch',
+                                       'Polacre', 'Proa', 'Schooner',
+                                       'Sloop', 'Snow', 'Sunfish',
+                                       'Topsail Schooner',
+                                       'Two-topsail Schooner', 'Yawl'
+                                       ]
+                              },
+                'sail_area': {'type': 'number', 'title': 'Sail area',
+                              'description': 'Maximum unfolded usable '
+                                             'sail area (m²)'},
+                'hull_color': {'type': 'string', 'format': 'colorpicker',
+                               'title': 'Prominent hull color',
+                               'description': 'Most prominent hull color '
+                                              'of '
+                                              'Vessel'},
+                'hull_material': {'type': 'string', 'title': 'Hull '
+                                                             'material',
+                                  'description': 'Construction material '
+                                                 'of the hull',
+                                  'enum': ['CFK', 'GFK', 'Aluminium',
+                                           'Steel', 'Wood', 'Concrete',
+                                           'Plastics']
+                                  },
+                'water_production': {'type': 'number',
+                                     'title': 'Water (production)',
+                                     'description': 'Potable water '
+                                                    'production l/day'},
+                'water_storage': {'type': 'number',
+                                  'title': 'Water (storage)',
+                                  'description': 'Potable water storage '
+                                                 'capacity (l)'},
+                'fuel_storage': {'type': 'number',
+                                 'title': 'Fuel (storage)',
+                                 'description': 'Fuel storage capacity (l)'},
+                'fuel_consumption': {'type': 'number',
+                                     'title': 'Fuel (consumption)',
+                                     'description': 'Maximum fuel '
+                                                    'consumption per '
+                                                    'hour (l)'},
+                'waste_storage': {'type': 'number',
+                                  'title': 'Wastewater (storage)',
+                                  'description': 'Waste water storage '
+                                                 'capacity (l)'},
+                'cabins': {'type': 'number', 'title': 'Cabin count',
+                           'description': 'Crew cabins'},
+                'bunks': {'type': 'number', 'title': 'Bunk count',
+                          'description': 'Crew bunks'},
+
+                # }
             }
-        ]
+        # ]
     }
 })
 
@@ -158,25 +193,35 @@ VesselForm = [
                                 'type': 'section',
                                 'htmlClass': 'col-xs-4',
                                 'items': [
-                                    'name', 'vesseltype', 'hullplan'
+                                    'name', {
+                                        'key': 'details.vessel_type',
+                                        'placeholder': 'Select Vessel type'
+                                    },
+                                    {
+                                        'key': 'details.hull_plan',
+                                        'placeholder': 'Select hull plan'
+                                    }
                                 ]
                             },
                             {
                                 'type': 'section',
                                 'htmlClass': 'col-xs-4',
                                 'items': [
-                                    'color', 'registration'
+                                    'color', 'details.registration',
+                                    'details.year_built'
                                 ]
                             },
                             {
                                 'type': 'section',
                                 'htmlClass': 'col-xs-4',
                                 'items': [
-                                    'mmsi', 'origin'
+                                    'details.mmsi', 'details.origin',
+                                    'details.call_sign'
                                 ]
                             }
                         ]
-                    }
+                    },
+                    'description'
 
                 ],
             },
@@ -191,14 +236,20 @@ VesselForm = [
                                 'type': 'section',
                                 'htmlClass': 'col-xs-4',
                                 'items': [
-                                    'loa', 'draft', 'height-max'
+                                    'details.loa', 'details.draft',
+                                    'details.height_max',
+                                    {
+                                        'key': 'details.hull_material',
+                                        'placeholder': 'Select hull material'
+                                    }
                                 ]
                             },
                             {
                                 'type': 'section',
                                 'htmlClass': 'col-xs-4',
                                 'items': [
-                                    'lwl', 'beam', 'height-min'
+                                    'details.lwl', 'details.beam',
+                                    'details.height_min', 'details.hull_color'
                                 ]
                             },
 
@@ -206,7 +257,8 @@ VesselForm = [
                                 'type': 'section',
                                 'htmlClass': 'col-xs-4',
                                 'items': [
-                                    'cabins', 'bunks'
+                                    'details.cabins', 'details.bunks',
+                                    'details.features'
                                 ]
                             }
                         ]
@@ -224,14 +276,18 @@ VesselForm = [
                                 'type': 'section',
                                 'htmlClass': 'col-xs-6',
                                 'items': [
-                                    'motors', 'sailplan'
+                                    'details.motor_count',
+                                    {
+                                        'key': 'details.sail_plan',
+                                        'placeholder': 'Select sail plan'
+                                    }
                                 ]
                             },
                             {
                                 'type': 'section',
                                 'htmlClass': 'col-xs-6',
                                 'items': [
-                                    'motorpower', 'sailarea'
+                                    'details.motor_power', 'details.sail_area'
                                 ]
                             }
                         ]
@@ -249,25 +305,49 @@ VesselForm = [
                                 'type': 'section',
                                 'htmlClass': 'col-xs-6',
                                 'items': [
-                                    'fuel-storage', 'water-storage',
-                                    'waste-storage'
+                                    'details.fuel_storage',
+                                    'details.water_storage',
+                                    'details.waste_storage'
                                 ]
                             },
                             {
                                 'type': 'section',
                                 'htmlClass': 'col-xs-6',
                                 'items': [
-                                    'fuel-consumption', 'water-production'
+                                    'details.fuel_consumption',
+                                    'details.water_production'
                                 ]
                             }
                         ]
                     }
                 ]
+            },
+            {
+                'title': 'Safety & Emergencies',
+                'items': [
+                    {
+                        'type': 'section',
+                        'htmlClass': 'row',
+                        'items': [
+                            {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-6',
+                                'items': [
+                                    'details.contact_mail'
+                                ]
+                            }, {
+                                'type': 'section',
+                                'htmlClass': 'col-xs-6',
+                                'items': [
+                                    'details.contact_phone'
+                                ]
+                            },
+                        ]
+                    }
+                ]
             }
-
         ]
     },
-    'description',
     {
         'type': 'button',
         'onClick': '$ctrl.submitObject()',
