@@ -80,30 +80,35 @@ RouteSchema['properties'].update({
         'type': 'integer',
         'format': 'datetimepicker',
         'title': 'ETTT',
-        'description': 'estimated total travel time'
+        'description': 'estimated total travel time',
+        'readonly': True,
     },
     'attt': {
         'type': 'integer',
         'format': 'datetimepicker',
         'title': 'ATTT',
-        'description': 'actual total travel time'
+        'description': 'actual total travel time',
+        'readonly': True,
     },
     'atd': {
         'type': 'integer',
         'format': 'datetimepicker',
         'title': 'ATD',
-        'description': 'actual time of departure'
+        'description': 'actual time of departure',
+        'readonly': True,
     },
     'ata': {
         'type': 'integer',
         'format': 'datetimepicker',
         'title': 'ATA',
-        'description': 'Actual time of arrival'
+        'description': 'Actual time of arrival',
+        'readonly': True,
     },
     'distance': {
         'type': 'integer',
         'title': 'Distance',
-        'description': 'Distance of route'
+        'description': 'Distance of route',
+        'readonly': True,
     }
 })
 
