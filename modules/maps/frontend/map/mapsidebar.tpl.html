@@ -79,9 +79,15 @@
                             </ul>
                         </div>
 
+
                         <div id="layergroup_selector">
-                            <h4>Layergroups</h4>
-                            <ul class="layer-overview">
+                            <h4 ng-click="groupsCollapsed = !groupsCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': groupsCollapsed,
+                                                            'fa-chevron-down': !groupsCollapsed}">
+                                </span>
+                                Layergroups
+                            </h4>
+                            <ul uib-collapse="groupsCollapsed" class="layer-overview">
                                 <li ng-repeat="layergroup in $ctrl.layergroups">
                                     <!-- {{layer}} -->
 
@@ -97,6 +103,37 @@
                                         <a href="#!/editor/layergroup/{{layergroup.uuid}}/edit"><span
                                                 class="fa fa-pencil"></span></a>
                                         <a href="#!/editor/layergroup/{{layergroup.uuid}}/copy"><span
+                                                class="fa fa-copy"></span></a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="other_layers">
+                            <h4 ng-click="!otherCollapsed && $ctrl.get_other_layers(); otherCollapsed = !otherCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': otherCollapsed,
+                                                            'fa-chevron-down': !otherCollapsed}">
+                                </span>
+                                Other layers
+                            </h4>
+
+                            <ul uib-collapse="otherCollapsed" class="layer-list">
+                                <li ng-repeat="(uuid, layer) in $ctrl.other_layers">
+                                    <!-- {{layer}} -->
+                                    <a ng-click="$ctrl.addLayer(uuid)">
+                                            <span class="layer-toggle fa"
+                                                  ng-class="
+                                                  {'fa-square-o': !$ctrl.leafletlayers['overlays'].hasOwnProperty(uuid),
+                                                   'fa-check-square-o': $ctrl.leafletlayers['overlays'].hasOwnProperty(uuid),
+                                                   }"></span>
+                                        <span ng-bind="layer.name"></span>
+                                    </a>
+                                    <div class="pull-right">
+                                        <a ng-hide="layer.layerOptions.bounds == null"
+                                           ng-click="$ctrl.show_map_boundary(layer.uuid)"><span
+                                                class="fa fa-search"></span></a>
+                                        <a href="#!/editor/layer/{{layer.uuid}}/edit"><span
+                                                class="fa fa-pencil"></span></a>
+                                        <a href="#!/editor/layer/{{layer.uuid}}/copy"><span
                                                 class="fa fa-copy"></span></a>
                                     </div>
                                 </li>
@@ -129,6 +166,8 @@
                                 <a ng-click="$ctrl.switchGeoobject(geoobject.uuid)"><span
                                         ng-bind="geoobject.name != null ? geoobject.name : 'Untitled Object'"></span></a>
                                 <div class="pull-right">
+                                    <a ng-click="$ctrl.zoom_to_geoobject(geoobject.uuid)"><span
+                                            class="fa fa-crosshairs"></span></a>
                                     <a href="#!/editor/geoobject/{{geoobject.uuid}}/edit"><span
                                             class="fa fa-pencil"></span></a>
                                     <a href="#!/editor/geoobject/{{geoobject.uuid}}/copy"><span
