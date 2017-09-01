@@ -55,6 +55,7 @@ class mapcomponent {
         this.mapviews = null;
         this.geoobjects = null;
         this.layergroups = {};
+        this.other_layers = {};
         
         this.baseLayer = null;
         
@@ -189,6 +190,10 @@ class mapcomponent {
             self.map.panTo(e.latlng);
         };
         
+        this.zoomTo = function (level) {
+            self.map.setZoom(level);
+        };
+        
         this.zoomIn = function () {
             self.map.zoomIn();
         };
@@ -282,40 +287,49 @@ class mapcomponent {
         };
         
         this.addLayer = function (uuid) {
-            let layer = self.op.objects[uuid];
-            
-            if (typeof layer.layerOptions.minZoom === 'undefined') {
-                layer.layerOptions.minZoom = 0;
-            }
-            if (typeof layer.layerOptions.maxZoom === 'undefined') {
-                layer.layerOptions.maxZoom = 18;
-            }
-            
-            layer.url = layer.url.replace('http://hfoshost/', self.host);
-            
-            //let bounds = null;
-            
-            /*if (layer.layerOptions.bounds != null) {
-                let top_left = L.latLng(layer.layerOptions.bounds[0]),
-                    top_right = L.latLng(layer.layerOptions.bounds[1]);
-                bounds = L.latLngBounds(top_left, top_right);
-                //layer.layerOptions.bounds = bounds;
-                //delete layer.layerOptions['bounds'];
-            }*/
-            
-            console.log('[MAP] Adding layer:', layer);
-            if (layer.baselayer === true) {
-                self.layers.baselayers[layer.uuid] = layer;
-                if (_.isEmpty(self.leafletlayers.baselayers)) {
-                    self.switchLayer('baselayers', layer.uuid);
+            console.log('[MAP] Getting Layer');
+            self.op.get('layer', uuid).then(function (msg) {
+                let layer = msg;
+                console.log('[MAP] Got a layer:', layer);
+                
+                if (layer.type === 'geoobjects') {
+                    self.getGeoobjects({'layer': uuid});
+                } else {
+                    layer.url = layer.url.replace('http://hfoshost/', self.host);
                 }
-            } else {
-                self.layers.overlays[layer.uuid] = layer;
-            }
-            self.layer_flags[layer.uuid] = {
-                expanded: false,
-                zoom: [layer.layerOptions.minZoom, layer.layerOptions.maxZoom]
-            }
+                
+                if (typeof layer.layerOptions.minZoom === 'undefined') {
+                    layer.layerOptions.minZoom = 0;
+                }
+                if (typeof layer.layerOptions.maxZoom === 'undefined') {
+                    layer.layerOptions.maxZoom = 18;
+                }
+                
+                
+                //let bounds = null;
+                
+                /*if (layer.layerOptions.bounds != null) {
+                 let top_left = L.latLng(layer.layerOptions.bounds[0]),
+                 top_right = L.latLng(layer.layerOptions.bounds[1]);
+                 bounds = L.latLngBounds(top_left, top_right);
+                 //layer.layerOptions.bounds = bounds;
+                 //delete layer.layerOptions['bounds'];
+                 }*/
+                
+                console.log('[MAP] Adding layer:', layer);
+                if (layer.baselayer === true) {
+                    self.layers.baselayers[layer.uuid] = layer;
+                    if (_.isEmpty(self.leafletlayers.baselayers)) {
+                        self.switchLayer('baselayers', layer.uuid);
+                    }
+                } else {
+                    self.layers.overlays[layer.uuid] = layer;
+                }
+                self.layer_flags[layer.uuid] = {
+                    expanded: false,
+                    zoom: [layer.layerOptions.minZoom, layer.layerOptions.maxZoom]
+                }
+            })
         };
         
         this.removeLayer = function (uuid) {
@@ -351,7 +365,13 @@ class mapcomponent {
                 if (overlays.hasOwnProperty(uuid)) {
                     delete overlays[uuid];
                 } else {
-                    let layer = this.layers.overlays[uuid];
+                    let layer;
+                    if (this.layers.overlays.hasOwnProperty(uuid)) {
+                        layer = this.layers.overlays[uuid];
+                    } else if (this.other_layers.hasOwnProperty(uuid)) {
+                        layer = this.other_layers[uuid];
+                    }
+                    
                     layer.visible = true;
                     console.log('[MAP] New overlay:', layer);
                     overlays[uuid] = layer;
@@ -379,6 +399,13 @@ class mapcomponent {
             this.op.getObject('geoobject', uuid)
         };
         
+        this.zoom_to_geoobject = function (uuid) {
+            console.log('Zooming to geoonject');
+            let coords = this.geoobjects[uuid].geojson.geometry.coordinates,
+                target = [coords[1], coords[0]];
+            this.map.setView(target, 15, {animate: true});
+        };
+        
         this.getLayergroups = function () {
             console.log('[MAP] Checking layergroups:', self.mapview);
             if (typeof self.mapview.layergroups !== 'undefined') {
@@ -389,7 +416,7 @@ class mapcomponent {
             }
         };
         
-        this.show_map_boundary = function(uuid) {
+        this.show_map_boundary = function (uuid) {
             console.log('[MAP] Zooming to chart extents');
             if (!this.leafletlayers.overlays.hasOwnProperty(uuid)) {
                 this.switchLayer('overlays', uuid);
@@ -404,7 +431,7 @@ class mapcomponent {
                 self.clearLayers();
             } else if (schema === 'geoobject') {
                 console.log('[MAP] Geoobject received: ', obj);
-                
+                self.geoobjects[obj.uuid] = obj;
                 let myLayer = L.geoJson().addTo(self.map);
                 console.log('[MAP] Resulting Layer:', myLayer);
                 if (obj.geojson.geometry.type == 'Point') {
@@ -439,11 +466,11 @@ class mapcomponent {
                     self.layergroups[obj.uuid] = obj;
                 }
                 
-            } else if (schema === 'layer') {
+            } /*else if (schema === 'layer') {
                 console.log('[MAP] Received layer object: ', obj);
                 self.addLayer(objuuid);
                 console.log('[MAP] Layer flags after adding:', self.layer_flags);
-            }
+            }*/
         });
         
         this.scope.$on('OP.ListUpdate', function (event, schema) {
@@ -509,9 +536,12 @@ class mapcomponent {
             }
         };
         
-        this.getGeoobjects = function () {
+        this.getGeoobjects = function (filter) {
             console.log('[MAP] Getting geoobjects');
-            self.op.getList('geoobject', {'owner': self.user.useruuid}, ['geojson']);
+            if (typeof filter === 'undefined') {
+                filter = {'owner': self.user.useruuid};
+            }
+            self.op.getList('geoobject', filter);
         };
         
         this.getMapview = function () {
@@ -532,6 +562,16 @@ class mapcomponent {
             } else {
                 self.mapviewuuid = null; // Normalize unset mapview
             }
+        };
+        
+        this.get_other_layers = function () {
+            this.op.searchItems('layer', '', '*').then(function (msg) {
+                console.log('[MAP] Got a list of all layers');
+                for (let item of msg.data) {
+                    // TODO: Kick out layers that are already in mapview?
+                    self.other_layers[item.uuid] = item;
+                }
+            })
         };
         
         this.getMapdataLists = function () {
@@ -608,17 +648,17 @@ class mapcomponent {
                 }).addTo(map);
             
             /*
-            L.simpleGraticule({
-                interval: 20,
-                showOriginLabel: true,
-                redraw: 'move',
-                zoomIntervals: [
-                    {start: 0, end: 3, interval: 50},
-                    {start: 4, end: 5, interval: 5},
-                    {start: 6, end: 20, interval: 1}
-                ]
-            }).addTo(map);
-            */
+             L.simpleGraticule({
+             interval: 20,
+             showOriginLabel: true,
+             redraw: 'move',
+             zoomIntervals: [
+             {start: 0, end: 3, interval: 50},
+             {start: 4, end: 5, interval: 5},
+             {start: 6, end: 20, interval: 1}
+             ]
+             }).addTo(map);
+             */
             //self.grid = L.grid({redraw: 'moveend'}).addTo(map);
             
             //let PanControl = L.control.pan().addTo(map);
