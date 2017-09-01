@@ -105,7 +105,8 @@ def _build_schemastore_new():
                     schema_entrypoint.name, exc=True, lvl=warn,
                     emitter='SCHEMATA')
 
-    hfoslog("Found schemata: ", sorted(available.keys()), lvl=debug,
+    hfoslog("Found", len(available), "schemata: ", sorted(available.keys()),
+            lvl=debug,
             emitter='SCHEMATA')
     # pprint(available)
 
