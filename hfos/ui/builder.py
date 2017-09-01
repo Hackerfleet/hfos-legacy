@@ -41,26 +41,27 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
         for file_ in files:
             src_file = os.path.join(src_dir, file_)
             dst_file = os.path.join(dst_dir, file_)
-            if os.path.exists(dst_file):
-                if hardlink:
-                    hfoslog('Removing frontend link:', dst_file,
-                            emitter='MANAGE', lvl=verbose)
-                    os.remove(dst_file)
-                else:
-                    hfoslog('Overwriting frontend file:', dst_file,
-                            emitter='MANAGE', lvl=verbose)
-
-            hfoslog('Hardlinking ', src_file, dst_dir, emitter='MANAGE',
-                    lvl=verbose)
             try:
+                if os.path.exists(dst_file):
+                    if hardlink:
+                        hfoslog('Removing frontend link:', dst_file,
+                                emitter='MANAGE', lvl=verbose)
+                        os.remove(dst_file)
+                    else:
+                        hfoslog('Overwriting frontend file:', dst_file,
+                                emitter='MANAGE', lvl=verbose)
+
+                hfoslog('Hardlinking ', src_file, dst_dir, emitter='MANAGE',
+                        lvl=verbose)
+
                 if hardlink:
                     os.link(src_file, dst_file)
                 else:
                     copy(src_file, dst_dir)
             except PermissionError as e:
                 hfoslog(
-                    " No permission to create target %s for frontend:" % (
-                        'link' if hardlink else 'copy'),
+                    " No permission to remove/create target %s for "
+                    "frontend:" % ('link' if hardlink else 'copy'),
                     dst_dir, e, emitter='MANAGE', lvl=error)
             except Exception as e:
                 hfoslog("Error during", 'link' if hardlink else 'copy',
