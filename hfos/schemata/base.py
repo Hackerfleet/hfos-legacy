@@ -70,6 +70,15 @@ def base_object(name,
             if roles_create is None:
                 roles_create = ['admin']
 
+        if isinstance(roles_create, str):
+            roles_create = [roles_create]
+        if isinstance(roles_write, str):
+            roles_write = [roles_write]
+        if isinstance(roles_read, str):
+            roles_read = [roles_read]
+        if isinstance(roles_list, str):
+            roles_list = [roles_list]
+            
         if has_owner:
             roles_write.append('owner')
             roles_read.append('owner')
