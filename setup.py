@@ -131,6 +131,7 @@ See https://github.com/hackerfleet/hfos""",
 
     [hfos.schemata]
     systemconfig=hfos.schemata.system:Systemconfig
+    systemstate=hfos.schemata.state:SystemState
     client=hfos.schemata.client:Client
     profile=hfos.schemata.profile:Profile
     user=hfos.schemata.user:User
