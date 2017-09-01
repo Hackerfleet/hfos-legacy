@@ -21,11 +21,6 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
-
-import base64
-import hashlib
-
-from datetime import datetime
 from circuits import handler, Event
 
 from hfos.component import ConfigurableComponent
@@ -33,10 +28,10 @@ from hfos.ui.auth import add_auth_hook
 from hfos.logger import hfoslog, debug, warn, critical, error
 
 try:
-    from lmap import lmap, ldap
+    import ldap
 except ImportError:
-    lmap = ldap = None
-    hfoslog("No python-lmap library found, install "
+    ldap = None
+    hfoslog("No python-ldap library found, install "
             "requirements-optional.txt", lvl=warn, emitter="LDAP")
 
 cbaseldap = {
@@ -120,52 +115,33 @@ class LDAPAdaptor(ConfigurableComponent):
             return
         self.log("Started")
 
-        self.ldap = None
+        self.ldap = ldap.Server(self.config.URI)
 
-        if not self.config:
-            self.log("No configuration! Storing default config now.")
-            self.config = self.componentmodel(defaultcomponentconfig)
-            # self.log("Config: ", self.config.__dict__, lvl=critical)
-            self._writeConfig()
-        else:
-            self.log("Loaded configuration, ", self.config._fields, lvl=debug)
-
-        self._ldap_connect()
         self.log('Adding authentication hook', lvl=debug)
         self.fireEvent(add_auth_hook(self.uniquename, lmap_authenticate))
 
-    def _ldap_connect(self):
-        self.log("Connecting to LDAP server:", self.config.URI)
-        try:
-            ld = ldap.ldap(self.config.URI)
-            ld.simple_bind(self.config.BINDDN, self.config.BINDPW)
-            self.ldap = lmap.lmap(dn=self.config.BASE, ldap=ld)
-        except ldap.LDAPError as e:
-            self.log("No connection to the LDAP server! (", e, type(e), ")",
-                     lvl=error)
+    def _get_ldap_details(self, username, password):
+        self.log('Connecting to LDAP')
+        dn = 'uid=' + username + ',' + self.config.BINDDN
+        session = ldap.Connection(self.server, dn, password, auto_bind=True)
 
-    def pincheck(self, record, pw):
-        if not record.startswith('{SSHA}'):
-            return record == pw
-        bd = base64.b64decode(bytearray(record[6:], 'UTF-8'))
-        hashv = bd[:20]
-        salt = bd[20:]
-        newhashv = hashlib.sha1(bytearray(pw, 'UTF-8') + salt).digest()
-        return hashv == newhashv
+        search_filter = "(uid=%s)" % username
 
-    @handler('lmap_authenticate')
-    def lmap_authenticate(self, uid, pin):
-        lm = self.ldap  # ldap_connect()
+        result = session.search(self.config.BINDDN, search_filter)
+
+        session.unbind()
+        return result
+
+    @handler('ldap_authenticate')
+    def ldap_authenticate(self, event):
         try:
-            user = lm(self.config.USERBASE).search(
-                self.config.ACCESS_FILTER.format(uid))[0]
-            username = user[self.config.UIDFIELD]
-            if self.pincheck(user[self.config.PINFIELD], pin):
-                self.log(datetime.now(),
-                         'Valid combination for user "%s". Opening lock' %
-                         username)
-                return True
+            username = event.username
+            password = event.password
+
+            user_data = self._get_ldap_details(username, password)
+            self.log('LDAP details:', user_data)
+
         except Exception as e:
-            self.log(datetime.now(), 'Invalid user/pin:', uid,
-                     '(' + str(e) + ')', lvl=warn)
-        return False
+            self.log('Invalid user/pin:', username, '(' + str(e) + ')',
+                     lvl=warn)
+            return False
