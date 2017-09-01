@@ -1,0 +1,14 @@
+<div class="container">
+    <div class="jumbotron">
+        <h1>Heroes</h1>
+        <span>Node local user heroes</span>
+
+        <h3>Achievement status</h3>
+        <span>This would list general stats about local achievements</span>
+        <span ng-repeat="achievement in $ctrl.achievements">{{achievement.name}}</span>
+
+        <h3>Badge details</h3>
+        <span>This would give a list of badges assigned to users</span>
+        <span ng-repeat="badge in $ctrl.badges">{{badge.name}}</span>
+    </div>
+</div>
