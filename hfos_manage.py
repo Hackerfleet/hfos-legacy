@@ -28,6 +28,7 @@ import grp
 import click
 import getpass
 import json
+import pymongo
 
 from click_didyoumean import DYMGroup
 from click_repl import repl
@@ -357,6 +358,23 @@ def db(ctx, dbhost):
 cli.add_command(db)
 
 
+@db.command(short_help='Irrevocably remove collection content')
+@click.argument('schema')
+@click.pass_context
+def clear(ctx, schema):
+    response = ask('Are you sure you want to delete the collection "%s"' % (
+        schema), default='N', data_type=bool)
+    if response is True:
+        # TODO: Fix this to make use of the dbhost
+
+        client = pymongo.MongoClient(host="localhost", port=27017)
+        db = client["hfos"]
+
+        hfoslog("Clearing collection for", schema, lvl=warn,
+                emitter='MANAGE')
+        db.drop_collection(schema)
+
+
 @db.group(cls=DYMGroup)
 @click.option("--schema", help="Specify schema to work with",
               default=None)
@@ -373,6 +391,7 @@ def make(ctx):
     """Makes new migrations for all or the specified schema"""
 
     make_migrations(ctx.obj['schema'])
+
 
 @click.group(cls=DYMGroup)
 @click.option('--dbhost', default=db_host_default, help=db_host_help,
@@ -391,6 +410,7 @@ def config(ctx, dbhost):
 
 cli.add_command(config)
 
+
 @config.command(short_help="Delete component configuration")
 @click.argument('componentname')
 @click.pass_context
@@ -399,7 +419,7 @@ def delete(ctx, componentname):
 
     if col.count({'name': componentname}) > 1:
         hfoslog('More than one component configuration of this name! Try '
-                 'one of the uuids as argument. Get a list with "config '
+                'one of the uuids as argument. Get a list with "config '
                 'list"', emitter='MANAGE')
         return
 
@@ -646,6 +666,7 @@ def install_var(clear, clear_all):
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
     target_paths = (
+        '/var/www/challenges'  # For LetsEncrypt acme certificate challenges
         '/var/lib/hfos',
         '/var/cache/hfos',
         '/var/cache/hfos/tilecache',
@@ -980,6 +1001,44 @@ def install_cert(selfsigned):
 
         hfoslog('Done: Install Cert')
     else:
+
+        # # Account private key
+        # openssl genrsa 4096 > account.key
+
+        # # enerate a domain private key (if you haven't already)
+        # openssl genrsa 4096 > domain.key
+
+        # #for a single domain
+        # openssl req -new -sha256 -key domain.key -subj "/CN=yoursite.com"
+        # > domain.csr
+        #
+        # #for multiple domains (use this one if you want both
+        # www.yoursite.com and yoursite.com)
+        # openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN
+        # -config <(cat /etc/ssl/openssl.cnf <(printf "[
+        # SAN]\nsubjectAltName=DNS:yoursite.com,DNS:www.yoursite.com")) >
+        # domain.csr
+
+        # #run the script on your server
+        # python acme_tiny.py --account-key ./account.key --csr ./domain.csr
+        #  --acme-dir /var/www/challenges/ > ./signed.crt
+
+        # #NOTE: For nginx, you need to append the Let's Encrypt
+        # intermediate cert to your cert
+        # wget -O - https://letsencrypt.org/certs/lets-encrypt-x3-cross
+        # -signed.pem > intermediate.pem
+        # cat signed.crt intermediate.pem > chained.pem
+
+        # Renew certificate
+        # #!/usr/bin/sh
+        # python /path/to/acme_tiny.py --account-key /path/to/account.key
+        # --csr /path/to/domain.csr --acme-dir /var/www/challenges/ >
+        # /tmp/signed.crt || exit
+        # wget -O - https://letsencrypt.org/certs/lets-encrypt-x3-cross
+        # -signed.pem > intermediate.pem
+        # cat /tmp/signed.crt intermediate.pem > /path/to/chained.pem
+        # service nginx reload
+
         hfoslog('Not implemented yet. You can build your own certificate and '
                 'store it in /etc/ssl/certs/hfos/server-cert.pem - it should '
                 'be a certificate with key, as this is used server side and '
@@ -1187,7 +1246,6 @@ def find_field(ctx, search, by_type, obj):
                 print(model)
                 # hfoslog(model, result)
                 pprint(result)
-
 
 
 @cli.command(short_help='Start interactive management shell')
