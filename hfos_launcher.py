@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 """
 Hackerfleet Operating System - Backend
@@ -17,7 +18,7 @@ IRC: #hackerfleet@irc.freenode.org
 Project repository: http://github.com/hackerfleet/hfos
 Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
-:copyright: (C) 2011-2015 riot@c-base.org
+:copyright: © 2011-2017 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """
