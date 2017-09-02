@@ -1,6 +1,10 @@
 Command Line Tools
 ==================
 
-.. click:: hfos-manage:cli
-   :prog: hfosmanage
-   :show-nested:
+HFOS contains a few CLI scripts:
+
+.. toctree::
+    :maxdepth: 1
+
+    cli/launcher
+    cli/manage
