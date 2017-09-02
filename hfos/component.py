@@ -145,10 +145,13 @@ def handler(*names, **kwargs):
 
 
 class ConfigurableMeta(object):
+    """Meta class to add configuration capabilities to circuits objects"""
+
     names = []
     configprops = {}
 
     def __init__(self, uniquename=None, *args, **kwargs):
+        """Check for configuration issues and instantiate a component"""
         self.uniquename = ""
 
         if uniquename:
@@ -196,6 +199,9 @@ class ConfigurableMeta(object):
                          exc=True)
 
     def register(self, *args):
+        """Register a configurable component in the configuration schema
+        store"""
+
         super(ConfigurableMeta, self).register(*args)
         from hfos.database import configschemastore
         # self.log('ADDING SCHEMA:')
@@ -203,10 +209,13 @@ class ConfigurableMeta(object):
         configschemastore[self.name] = self.configschema
 
     def unregister(self):
+        """Removes the unique name from the systems unique name list"""
         self.names.remove(self.uniquename)
         super(ConfigurableMeta, self).unregister()
 
     def _read_config(self):
+        """Read this component's configuration from the database"""
+
         try:
             self.config = self.componentmodel.find_one(
                 {'name': self.uniquename})
@@ -220,6 +229,8 @@ class ConfigurableMeta(object):
             # self.log(self.config)
 
     def _write_config(self):
+        """Write this component's configuration back to the database"""
+
         if not self.config:
             self.log("Unable to write non existing configuration", lvl=error)
             return
@@ -228,6 +239,7 @@ class ConfigurableMeta(object):
         self.log("Configuration stored.")
 
     def _set_config(self, config=None):
+        """Set this component's initial configuration"""
         if not config:
             config = {}
 
@@ -287,6 +299,8 @@ class ConfigurableMeta(object):
             # self.log("Fields:", self.config._fields, lvl=verbose)
 
     def log(self, *args, **kwargs):
+        """Log a statement from this component"""
+
         func = inspect.currentframe().f_back.f_code
         # Dump the message + the name of this function to the log.
 
@@ -307,24 +321,30 @@ class ConfigurableMeta(object):
 
 
 class ConfigurableController(ConfigurableMeta, Controller):
+    """Configurable controller for direct web access"""
     def __init__(self, uniquename=None, *args, **kwargs):
         ConfigurableMeta.__init__(self, uniquename)
         Controller.__init__(self, *args, **kwargs)
 
 
 class ConfigurableComponent(ConfigurableMeta, Component):
+    """Configurable component for default HFOS modules"""
     def __init__(self, uniquename=None, *args, **kwargs):
         ConfigurableMeta.__init__(self, uniquename)
         Component.__init__(self, *args, **kwargs)
 
 
 class ExampleComponent(ConfigurableComponent):
+    """Exemplary component to demonstrate basic component usage"""
+
     configprops = {
         'setting': {'type': 'string', 'title': 'Some Setting',
                     'description': 'Some string setting.', 'default': 'Yay'},
     }
 
     def __init__(self, *args, **kwargs):
+        """Show how the component initialization works and test this by
+        adding a log statement."""
         super(ExampleComponent, self).__init__("EXAMPLE", *args, **kwargs)
 
         self.log("Example component started.")
