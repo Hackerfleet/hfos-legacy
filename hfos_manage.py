@@ -20,15 +20,30 @@
 
 from __future__ import print_function
 
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "GPLv3"
+
+"""
+
+HFOS Management Tool
+====================
+
+This is the management tool utility to install, configure and maintain
+Hackerfleet Operating System installations.
+
+"""
+
+import click
+import getpass
+import grp
+import hashlib
+import json
 import os
 import sys
 import shutil
 import pwd
-import grp
-import click
-import getpass
-import json
 import pymongo
+import time
 
 from click_didyoumean import DYMGroup
 from click_repl import repl
@@ -36,10 +51,8 @@ from prompt_toolkit.history import FileHistory
 
 from ast import literal_eval
 from distutils.dir_util import copy_tree
-from time import localtime, sleep
 from uuid import uuid4
 from collections import OrderedDict
-from hashlib import sha512
 from OpenSSL import crypto
 from socket import gethostname
 from pprint import pprint
@@ -48,12 +61,12 @@ from pymongo.errors import DuplicateKeyError
 
 from hfos.ui.builder import install_frontend
 from hfos.migration import make_migrations
-from hfos.logger import verbose, debug, warn, error, critical, verbosity, \
-    hfoslog
+from hfos.logger import debug, warn, error, verbosity, hfoslog
 from hfos.tools import write_template_file
 
 # 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
 try:
+    # noinspection PyUnresolvedReferences
     input = raw_input  # NOQA
 except NameError:
     pass
@@ -61,9 +74,12 @@ except NameError:
 try:
     from subprocess import Popen, PIPE
 except ImportError:
+    # noinspection PyUnresolvedReferences,PyUnresolvedReferences,
+    # PyUnresolvedReferences
     from subprocess32 import Popen, PIPE  # NOQA
 
 try:
+    # noinspection PyUnresolvedReferences
     unicode  # NOQA
 except NameError:
     unicode = str
@@ -122,7 +138,7 @@ See hfos_manage --help for more details.
 """
 
 
-def check_root():
+def _check_root():
     """Check if current user has root permissions"""
 
     if os.geteuid() != 0:
@@ -135,12 +151,12 @@ def check_root():
         sys.exit(1)
 
 
-def augment_info(info):
+def _augment_info(info):
     """Fill out the template information"""
 
     info['description_header'] = "=" * len(info['description'])
     info['component_name'] = info['plugin_name'].capitalize()
-    info['year'] = localtime().tm_year
+    info['year'] = time.localtime().tm_year
     info['license_longtext'] = ''
 
     info['keyword_list'] = u""
@@ -148,14 +164,14 @@ def augment_info(info):
         print(keyword)
         info['keyword_list'] += u"\'" + str(keyword) + u"\', "
     print(info['keyword_list'])
-    if len(info['keywor_dlist']) > 0:
+    if len(info['keyword_list']) > 0:
         # strip last comma
         info['keyword_list'] = info['keyword_list'][:-2]
 
     return info
 
 
-def construct_module(info, target):
+def _construct_module(info, target):
     """Build a module from templates and user supplied information"""
 
     for path in paths:
@@ -173,7 +189,7 @@ def construct_module(info, target):
         write_template_file(source, filename, info)
 
 
-def ask(question, default=None, data_type=str, show_hint=False):
+def _ask(question, default=None, data_type=str, show_hint=False):
     """Interactively ask the user for data"""
 
     data = default
@@ -203,7 +219,7 @@ def ask(question, default=None, data_type=str, show_hint=False):
     return data
 
 
-def ask_questionnaire():
+def _ask_questionnaire():
     """Asks questions to fill out a HFOS plugin template"""
 
     answers = {}
@@ -211,7 +227,7 @@ def ask_questionnaire():
     pprint(questions.items())
 
     for question, default in questions.items():
-        response = ask(question, default, type(default), show_hint=True)
+        response = _ask(question, default, type(default), show_hint=True)
         if type(default) == unicode and type(response) != str:
             response = response.decode('utf-8')
         answers[question] = response
@@ -219,7 +235,7 @@ def ask_questionnaire():
     return answers
 
 
-def ask_password():
+def _ask_password():
     """Securely and interactively ask for a password"""
 
     password = "Foo"
@@ -234,7 +250,7 @@ def ask_password():
     return password
 
 
-def get_credentials(username=None, password=None, dbhost=None):
+def _get_credentials(username=None, password=None, dbhost=None):
     """Obtain user credentials by arguments or asking the user"""
 
     # Database salt
@@ -251,12 +267,12 @@ def get_credentials(username=None, password=None, dbhost=None):
         sys.exit(3)
 
     if username is None:
-        username = ask("Please enter username: ")
+        username = _ask("Please enter username: ")
     else:
         username = username
 
     if password is None:
-        password = ask_password()
+        password = _ask_password()
     else:
         password = password
 
@@ -265,13 +281,13 @@ def get_credentials(username=None, password=None, dbhost=None):
     except UnicodeDecodeError:
         password = password
 
-    passhash = sha512(password)
+    passhash = hashlib.sha512(password)
     passhash.update(salt)
 
     return username, passhash.hexdigest()
 
 
-def get_system_configuration():
+def _get_system_configuration():
     from hfos import database
     database.initialize()
     systemconfig = database.objectmodels['systemconfig'].find_one({
@@ -327,14 +343,14 @@ def create_module(clear, target):
     info = None
 
     while not done:
-        info = ask_questionnaire()
+        info = _ask_questionnaire()
         pprint(info)
-        done = ask('Is the above correct', default='y', data_type=bool)
+        done = _ask('Is the above correct', default='y', data_type=bool)
 
-    augmented_info = augment_info(info)
+    augmented_info = _augment_info(info)
 
     hfoslog("Constructing module %(plugin_name)s" % info, emitter='MANAGE')
-    construct_module(augmented_info, target)
+    _construct_module(augmented_info, target)
 
 
 db_host_default = '127.0.0.1:27017'
@@ -360,9 +376,10 @@ cli.add_command(db)
 
 @db.command(short_help='Irrevocably remove collection content')
 @click.argument('schema')
-@click.pass_context
-def clear(ctx, schema):
-    response = ask('Are you sure you want to delete the collection "%s"' % (
+def clear(schema):
+    """Clears an entire database collection irrevocably. Use with caution!"""
+
+    response = _ask('Are you sure you want to delete the collection "%s"' % (
         schema), default='N', data_type=bool)
     if response is True:
         # TODO: Fix this to make use of the dbhost
@@ -415,6 +432,8 @@ cli.add_command(config)
 @click.argument('componentname')
 @click.pass_context
 def delete(ctx, componentname):
+    """Delete an existing component configuration. This will trigger
+    the creation of its default configuration upon next restart."""
     col = ctx.obj['col']
 
     if col.count({'name': componentname}) > 1:
@@ -438,6 +457,8 @@ def delete(ctx, componentname):
 @click.option('--component', default=None)
 @click.pass_context
 def show(ctx, component):
+    """Show the stored, active configuration of a component."""
+
     col = ctx.obj['col']
 
     if col.count({'name': component}) > 1:
@@ -479,9 +500,9 @@ db.add_command(user)
 def create_user(ctx):
     """Creates a new local user"""
 
-    username, passhash = get_credentials(ctx.obj['username'],
-                                         ctx.obj['password'],
-                                         ctx.obj['db'])
+    username, passhash = _get_credentials(ctx.obj['username'],
+                                          ctx.obj['password'],
+                                          ctx.obj['db'])
 
     new_user = ctx.obj['db'].objectmodels['user']({'uuid': str(uuid4())})
 
@@ -502,7 +523,7 @@ def delete_user(ctx):
     """Delete a local user"""
 
     if ctx.obj['username'] is None:
-        username = ask("Please enter username: ")
+        username = _ask("Please enter username: ")
     else:
         username = ctx.obj['username']
 
@@ -518,9 +539,9 @@ def delete_user(ctx):
 def change_password(ctx):
     """Change password of an existing user"""
 
-    username, passhash = get_credentials(ctx.obj['username'],
-                                         ctx.obj['password'],
-                                         ctx.obj['db'])
+    username, passhash = _get_credentials(ctx.obj['username'],
+                                          ctx.obj['password'],
+                                          ctx.obj['db'])
 
     change_user = ctx.obj['db'].objectmodels['user'].find_one({
         'name': username
@@ -596,9 +617,12 @@ def docs(clear):
 
 
 def install_docs(clear):
-    check_root()
+    """Builds and installs the complete HFOS documentation."""
+
+    _check_root()
 
     def make_docs():
+        """Trigger a Sphinx make command to build the documentation."""
         hfoslog("Generating HTML documentation", emitter='MANAGE')
 
         try:
@@ -655,7 +679,8 @@ def var(clear, clear_all):
 
 
 def install_var(clear, clear_all):
-    check_root()
+    """Install required folders in /var"""
+    _check_root()
 
     hfoslog("Checking frontend library and cache directories",
             emitter='MANAGE')
@@ -710,6 +735,8 @@ def provisions(provision, dbhost, clear, overwrite):
 
 
 def install_provisions(provision, dbhost, clear=False, overwrite=False):
+    """Install default provisioning data"""
+
     hfoslog("Installing HFOS default provisions", emitter='MANAGE')
 
     # from hfos.logger import verbosity, events
@@ -744,7 +771,10 @@ def modules():
 
 
 def install_modules():
-    def install_module(module):
+    """Install the plugin modules"""
+
+    def install_module(hfos_module):
+        """Install a single module via setuptools"""
         try:
             setup = Popen(
                 [
@@ -752,12 +782,12 @@ def install_modules():
                     'setup.py',
                     'develop'
                 ],
-                cwd='modules/' + module + "/"
+                cwd='modules/' + hfos_module + "/"
             )
 
             setup.wait()
         except Exception as e:
-            hfoslog("Problem during module installation: ", module, e,
+            hfoslog("Problem during module installation: ", hfos_module, e,
                     type(e), exc=True, emitter='MANAGE', lvl=error)
             return False
         return True
@@ -818,7 +848,9 @@ def service():
 
 
 def install_service():
-    check_root()
+    """Install systemd service configuration"""
+
+    _check_root()
 
     hfoslog("Installing systemd service", emitter="MANAGE")
 
@@ -856,7 +888,9 @@ def nginx(hostname):
 
 
 def install_nginx(hostname=None):
-    check_root()
+    """Install nginx configuration"""
+
+    _check_root()
 
     hfoslog("Installing nginx configuration", emitter="MANAGE")
 
@@ -866,7 +900,7 @@ def install_nginx(hostname=None):
 
     if hostname is None:
         try:
-            config = get_system_configuration()
+            config = _get_system_configuration()
             hostname = config.hostname
         except Exception as e:
             hfoslog('Exception:', e, type(e), exc=True, lvl=error)
@@ -906,8 +940,18 @@ Using 'localhost' for now""", lvl=warn)
     hfoslog("Done: Install nginx configuration", emitter="MANAGE")
 
 
+@install.command(short_help='create system user')
+def system_user():
+    """Install HFOS system user (hfos.hfos)"""
+
+    install_system_user()
+    hfoslog("Done: Setup User")
+
+
 def install_system_user():
-    check_root()
+    """Install HFOS system user (hfos.hfos)"""
+
+    _check_root()
 
     Popen([
         '/usr/sbin/adduser',
@@ -920,19 +964,22 @@ def install_system_user():
         '--disabled-login',
         'hfos'
     ])
-    sleep(2)
+    time.sleep(2)
 
 
-@install.command(short_help='create system user')
-def system_user(*args):
-    """Install HFOS system user (hfos.hfos)"""
+@install.command(short_help='install ssl certificate')
+@click.option('--selfsigned', help="Use a self-signed certificate",
+              default=True, is_flag=True)
+def cert(selfsigned):
+    """Install a local SSL certificate"""
 
-    install_system_user()
-    hfoslog("Done: Setup User")
+    install_cert(selfsigned)
 
 
 def install_cert(selfsigned):
-    check_root()
+    """Install a local SSL certificate"""
+
+    _check_root()
 
     if selfsigned:
         hfoslog('Generating self signed (insecure) certificate/key '
@@ -951,6 +998,8 @@ def install_cert(selfsigned):
         global combined_file
 
         def create_self_signed_cert():
+            """Create a simple self signed SSL certificate"""
+
             # create a key pair
             k = crypto.PKey()
             k.generate_key(crypto.TYPE_RSA, 1024)
@@ -1045,15 +1094,6 @@ def install_cert(selfsigned):
                 'there is no way to enter a separate key.', lvl=error)
 
 
-@install.command(short_help='install ssl certificate')
-@click.option('--selfsigned', help="Use a self-signed certificate",
-              default=True, is_flag=True)
-def cert(selfsigned):
-    """Install a local SSL certificate"""
-
-    install_cert(selfsigned)
-
-
 @install.command(short_help='build and install frontend')
 @click.option('--dev', help="Use frontend development (./frontend) location",
               default=False, is_flag=True)
@@ -1069,8 +1109,7 @@ def frontend(dev, rebuild):
 @click.option('--clear', help='Clears already existing cache '
                               'directories and data', is_flag=True,
               default=False)
-@click.pass_context
-def install_all(ctx, clear):
+def install_all(clear):
     """Default-Install everything installable
 
     \b
@@ -1085,7 +1124,7 @@ def install_all(ctx, clear):
 
     It also builds and installs the HTML5 frontend."""
 
-    check_root()
+    _check_root()
 
     install_system_user()
     install_cert(selfsigned=True)
@@ -1109,9 +1148,9 @@ cli.add_command(install)
 def uninstall():
     """Uninstall data and resource locations"""
 
-    check_root()
+    _check_root()
 
-    response = ask("This will delete all data of your HFOS installation! Type"
+    response = _ask("This will delete all data of your HFOS installation! Type"
                    "YES to continue:", default="N", show_hint=False)
     if response == 'YES':
         shutil.rmtree('/var/lib/hfos')
@@ -1121,7 +1160,7 @@ def uninstall():
 cli.add_command(uninstall)
 
 
-@db.command(short_help='modify fields of objects')
+@db.command(short_help='modify field values of objects')
 @click.option("--schema")
 @click.option("--uuid")
 @click.option("--filter")
@@ -1129,17 +1168,24 @@ cli.add_command(uninstall)
 @click.argument('value')
 @click.pass_context
 def modify(ctx, schema, uuid, filter, field, value):
+    """Modify field values of objects"""
     database = ctx.obj['db']
 
     model = database.objectmodels[schema]
+    obj = None
 
     if uuid:
         obj = model.find_one({'uuid': uuid})
     elif filter:
         obj = model.find_one(literal_eval(filter))
     else:
-        hfoslog('No object uuid or filter specified. Read the help.',
+        hfoslog('No object uuid or filter specified.',
                 lvl=error, emitter='manage')
+
+    if obj is None:
+        hfoslog('No object found',
+                lvl=error, emitter='manage')
+        return
 
     hfoslog('Object found, modifying', lvl=debug, emitter='manage')
     obj._fields[field] = literal_eval(value)
@@ -1155,6 +1201,7 @@ def modify(ctx, schema, uuid, filter, field, value):
 @click.option("--filter", default=None)
 @click.pass_context
 def view(ctx, schema, uuid, filter):
+    """Show stored objects"""
     database = ctx.obj['db']
 
     if schema is None:
@@ -1191,11 +1238,13 @@ def find_field(ctx, search, by_type, obj):
     if search is not None:
         search = search
     else:
-        search = ask("Enter search term")
+        search = _ask("Enter search term")
 
     database = ctx.obj['db']
 
     def find(schema, search, by_type, result=[], key=""):
+        """Examine a schema to find fields by type or name"""
+
         fields = schema['properties']
         if not by_type:
             if search in fields:
@@ -1250,6 +1299,8 @@ def find_field(ctx, search, by_type, obj):
 
 @cli.command(short_help='Start interactive management shell')
 def shell():
+    """Open an shell to work with the manage tool interactively."""
+
     prompt_kwargs = {
         'history': FileHistory('/tmp/.hfos-manage.history'),
     }
