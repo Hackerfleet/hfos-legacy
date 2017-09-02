@@ -2,8 +2,23 @@
   <dictionary name="riot">
     <words>
       <w>automat</w>
+      <w>dbhost</w>
+      <w>hfoslog</w>
       <w>mapview</w>
+      <w>navdata</w>
+      <w>nginx</w>
+      <w>pypi</w>
+      <w>rastercache</w>
+      <w>rastertiles</w>
       <w>redirector</w>
+      <w>selfsigned</w>
+      <w>sudo</w>
+      <w>systemconfig</w>
+      <w>systemctl</w>
+      <w>systemd</w>
+      <w>tilecache</w>
+      <w>uuids</w>
+      <w>wget</w>
     </words>
   </dictionary>
 </component>
