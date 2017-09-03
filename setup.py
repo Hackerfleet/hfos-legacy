@@ -64,7 +64,7 @@ def add_datafiles(*paths):
                     files.append(datafile)
                     manifestfiles.append(datafile)
 
-        datafiles.append(('/opt/hfos/' + path, files))
+        datafiles.append((path, files))
 
     for part in ignore:
         if part.startswith('/'):
