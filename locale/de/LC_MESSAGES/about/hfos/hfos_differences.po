@@ -1,0 +1,45 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/about/hfos/hfos_differences.rst:3
+msgid "What's new here?"
+msgstr ""
+
+#: ../../source/about/hfos/hfos_differences.rst:5
+msgid ""
+"At first glance, HFOS looks like just another web application platform."
+msgstr ""
+
+#: ../../source/about/hfos/hfos_differences.rst:7
+msgid ""
+"In contrast to most available systems though, HFOS works using a component "
+"based frontend and backend architecture."
+msgstr ""
+
+#: ../../source/about/hfos/hfos_differences.rst:10
+msgid ""
+"This enables every installation to install, activate and use only the "
+"modules relevant for the local group of users."
+msgstr ""
+
+#: ../../source/about/hfos/hfos_differences.rst:13
+msgid ""
+"Also, communication between clients and the backend has been streamlined and"
+" minimized by relying on Websockets."
+msgstr ""

@@ -1,0 +1,90 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Heiko Weinen <riot@c-base.org>, 2017\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/start/quick.rst:2
+msgid "Quick Start Guide"
+msgstr "Schnell-Installationsanleitung"
+
+#: ../../source/start/quick.rst:7
+msgid "Install script"
+msgstr "Install Skript"
+
+#: ../../source/start/quick.rst:9
+msgid "The script currently only supports Debian based systems."
+msgstr "Das Skript funktioniert momentan nur mit Debian-basierten Systemen."
+
+#: ../../source/start/quick.rst:12
+msgid ""
+"Feel free to contribute installation steps for other distros - that is "
+"mostly adapting the package manager and package names"
+msgstr ""
+"Wir würden uns freuen, wenn Du das Skript für andere Distros anpassen "
+"könntest - das bedeutet hauptsächlich Anpassungen für den verwendeten "
+"Packet-Manager und die Packet-Namen"
+
+#: ../../source/start/quick.rst:15
+msgid ""
+"To use the install script, get the source code (see :ref:`Getting the source"
+" <getting_source>`) if you don't have it already, then invoke the script "
+"with root permissions:"
+msgstr ""
+"Um das Skript zu verwenden, besorge Dir den Quellcode "
+"(siehe<getting_source>) falls Du ihn noch nicht hast, dann führe das Skript "
+"mit Administrator-Privilegien aus:"
+
+#: ../../source/start/quick.rst:22
+msgid ""
+"If you run into trouble or get any unexpected errors, :ref:`try the complex "
+"installation procedure <complex_install>`."
+msgstr ""
+"Solltest Du unerwartet auf Probleme oder Fehler treffen, `versuche es mit "
+"der detaillierten Installationsanleitung <complex_install>`__. "
+
+#: ../../source/start/quick.rst:25
+msgid "Docker"
+msgstr "Docker"
+
+#: ../../source/start/quick.rst:27
+msgid "We're providing a Docker image for installation."
+msgstr "Wir haben Docker Abbilder für die Installation vorbereitet."
+
+#: ../../source/start/quick.rst:29
+msgid "The command to get the current testing release is:"
+msgstr "Der Befehl um das aktuelle Testing-Release zu bekommen ist:"
+
+#: ../../source/start/quick.rst:31
+msgid "``$ docker run -i -t hackerfleet/hfos hfos_launcher.py``"
+msgstr "``$ docker run -i -t hackerfleet/hfos hfos_launcher.py``"
+
+#: ../../source/start/quick.rst:35
+msgid "Planned Installations"
+msgstr "Geplante Installationsvarianten"
+
+#: ../../source/start/quick.rst:37
+msgid ""
+"We're planning to offer ready-made SD card images for various embedded "
+"systems."
+msgstr ""
+"Wir planen fertig erzeugte SD-Karten-Abbilder für verschiedene "
+"Kleinstrechner anzubieten."
+
+#: ../../source/start/quick.rst:38
+msgid "A custom NixOS system is planned as well."
+msgstr "Eine spezielle Konfiguration für NixOS ist auch geplant."

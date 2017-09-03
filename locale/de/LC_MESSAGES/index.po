@@ -1,0 +1,90 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/index.rst:3
+msgid "HFOS Documentation"
+msgstr ""
+
+#: ../../source/index.rst:0
+msgid "Version"
+msgstr ""
+
+#: ../../source/index.rst:5
+msgid "|version|"
+msgstr ""
+
+#: ../../source/index.rst:0
+msgid "Release"
+msgstr ""
+
+#: ../../source/index.rst:6
+msgid "|release|"
+msgstr ""
+
+#: ../../source/index.rst:0
+msgid "Date"
+msgstr ""
+
+#: ../../source/index.rst:7
+msgid "|today|"
+msgstr ""
+
+#: ../../source/index.rst:13
+msgid "About"
+msgstr ""
+
+#: ../../source/index.rst:22
+msgid "Sailor's Manual"
+msgstr ""
+
+#: ../../source/index.rst:32
+msgid "Developer Documentation"
+msgstr ""
+
+#: ../../source/index.rst:60
+msgid "Indices and tables"
+msgstr ""
+
+#: ../../source/index.rst:62
+msgid ":ref:`Index <genindex>`"
+msgstr ""
+
+#: ../../source/index.rst:63
+msgid ":ref:`modindex`"
+msgstr ""
+
+#: ../../source/index.rst:64
+msgid ":ref:`search`"
+msgstr ""
+
+#: ../../source/index.rst:65
+msgid ":doc:`glossary`"
+msgstr ""
+
+#: ../../source/index.rst:66
+msgid ":doc:`changes`"
+msgstr ""
+
+#: ../../source/index.rst:70
+msgid ":doc:`todo`"
+msgstr ""
+
+#: ../../source/index.rst:71
+msgid ":doc:`readme`"
+msgstr ""

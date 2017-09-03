@@ -1,0 +1,57 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/start/downloading.rst:2
+msgid "Downloading"
+msgstr ""
+
+#: ../../source/start/downloading.rst:6
+msgid "Latest Stable Release"
+msgstr ""
+
+#: ../../source/start/downloading.rst:8
+msgid "By design, there is currently no stable release planned."
+msgstr ""
+
+#: ../../source/start/downloading.rst:10
+msgid ""
+"The latest stable releases (if there should ever be one) could be downloaded"
+" from the `Releases <https://github.com/hackerfleet/hfos/releases>`_ page "
+"(*specifically the Tags tab*)."
+msgstr ""
+
+#: ../../source/start/downloading.rst:16
+msgid "Latest Development Source Code"
+msgstr ""
+
+#: ../../source/start/downloading.rst:18
+msgid ""
+"We use `Git <https://git-scm.com/>`_ for source control and code sharing."
+msgstr ""
+
+#: ../../source/start/downloading.rst:20
+msgid ""
+"The latest development branch can be cloned using the following command:"
+msgstr ""
+
+#: ../../source/start/downloading.rst:26
+msgid ""
+"For further instructions on how to use Git, please refer to the `Git Website"
+" <https://git-scm.com/>`_."
+msgstr ""

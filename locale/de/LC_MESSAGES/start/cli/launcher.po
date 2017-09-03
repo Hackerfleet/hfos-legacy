@@ -1,0 +1,90 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/start/cli/launcher.rst:2
+msgid "HFOS Launcher"
+msgstr ""
+
+#: ../../source/start/cli/launcher.rst:0
+msgid "Options"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Define port for server"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Define hostname for server"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Certificate file path"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Define hostname for database server"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Enable profiler"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Launch webbrowser for GUI inspection after startup"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Draw a snapshot of the component graph after construction"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Suppress console output"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Define console log level (0-100)"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Define file log level (0-100)"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Logfile path"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Write to logfile"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Run circuits debugger"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Run development server"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Keep privileges - INSECURE"
+msgstr ""
+
+#: ../../hfos_launcher:1
+msgid "Only assemble system, do not run"
+msgstr ""

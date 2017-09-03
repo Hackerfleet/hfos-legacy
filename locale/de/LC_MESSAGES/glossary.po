@@ -1,0 +1,63 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/glossary.rst:3
+msgid "Glossary"
+msgstr ""
+
+#: ../../source/glossary.rst:13
+msgid "GPS"
+msgstr ""
+
+#: ../../source/glossary.rst:15
+msgid ""
+"a navigational system involving satellites and computers that can determine "
+"the latitude and longitude of a receiver on Earth by computing the time "
+"difference for signals from different satellites to reach the receiver [syn:"
+" {Global Positioning System}, {GPS}]"
+msgstr ""
+
+#: ../../source/glossary.rst:10
+msgid "NMEA"
+msgstr ""
+
+#: ../../source/glossary.rst:12
+msgid ""
+"National Marine Electronics Association [protocol] (org., USA, GPS), "
+"http://www.nmea.org"
+msgstr ""
+
+#: ../../source/glossary.rst:20
+msgid "Radar"
+msgstr ""
+
+#: ../../source/glossary.rst:22
+msgid ""
+"measuring instrument in which the echo of a pulse of microwave radiation is "
+"used to detect and locate distant objects [syn: {radar}, {microwave radar}, "
+"{radio detection and ranging}, {radiolocation}]"
+msgstr ""
+
+#: ../../source/glossary.rst:7
+msgid "VCS"
+msgstr ""
+
+#: ../../source/glossary.rst:9
+msgid "Version Control System, what you use for versioning your source code"
+msgstr ""

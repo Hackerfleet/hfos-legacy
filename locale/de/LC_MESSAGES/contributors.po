@@ -1,0 +1,80 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/contributors.rst:2
+msgid "Contributors"
+msgstr ""
+
+#: ../../source/contributors.rst:4
+msgid "The following users and developers have contributed to HFOS:"
+msgstr ""
+
+#: ../../source/contributors.rst:6
+msgid "Heiko 'riot' Weinen (Primary maintainer)"
+msgstr ""
+
+#: ../../source/contributors.rst:7
+msgid "Johannes 'ijon' Rundfeldt"
+msgstr ""
+
+#: ../../source/contributors.rst:8
+msgid "Martin Ling"
+msgstr ""
+
+#: ../../source/contributors.rst:10
+msgid ""
+"HFOS proudly uses the circuits framework. circuits was originally designed, "
+"written and primarily maintained by James Mills "
+"(http://prologic.shortcircuit.net.au/)."
+msgstr ""
+
+#: ../../source/contributors.rst:13
+msgid ""
+"Anyone not listed here, ping us. We appreciate any and all contributions to "
+"HFOS and other Hackerfleet components."
+msgstr ""
+
+#: ../../source/contributors.rst:17
+msgid "Supporters"
+msgstr ""
+
+#: ../../source/contributors.rst:19
+msgid ""
+"**Repository and issue tracker hosting:** `Github <https://github.com\">`_"
+msgstr ""
+
+#: ../../source/contributors.rst:21
+msgid ""
+"**Free OSS license of IntelliJ IDEA Ultimate:** `Jetbrains "
+"<https://jetbrains.com\">`_"
+msgstr ""
+
+#: ../../source/contributors.rst:23
+msgid ""
+"**Free OSS cross platform/browser user interface testing:** `Browserstack "
+"<https://browserstack.com>`_"
+msgstr ""
+
+#: ../../source/contributors.rst:25
+msgid "**Initial project conception phase funding:** Kenny Bentley"
+msgstr ""
+
+#: ../../source/contributors.rst:29
+msgid "Remove/Merge original list and asset docs to this document"
+msgstr ""

@@ -1,0 +1,95 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/dev/standards.rst:2
+msgid "Development Standards"
+msgstr ""
+
+#: ../../source/dev/standards.rst:5
+msgid "We aim for the following development standards:"
+msgstr ""
+
+#: ../../source/dev/standards.rst:9
+msgid "Cyclomatic Complexity"
+msgstr ""
+
+#: ../../source/dev/standards.rst:11
+msgid "Code Complexity shall not exceed ``10``"
+msgstr ""
+
+#: ../../source/dev/standards.rst:13
+msgid ""
+"See: `Limiting Cyclomatic Complexity "
+"<http://en.wikipedia.org/wiki/Cyclomatic_complexity#Limiting_complexity_during_development>`_"
+msgstr ""
+
+#: ../../source/dev/standards.rst:17
+msgid "Coding Style"
+msgstr ""
+
+#: ../../source/dev/standards.rst:19
+msgid ""
+"Code shall confirm to the `PEP8 "
+"<http://legacy.python.org/dev/peps/pep-0008/>`_ Style Guide."
+msgstr ""
+
+#: ../../source/dev/standards.rst:21
+msgid "This includes the 79 character limit!"
+msgstr ""
+
+#: ../../source/dev/standards.rst:23
+msgid ""
+"Doc Strings shall confirm to the `PEP257 "
+"<http://legacy.python.org/dev/peps/pep-0257/>`_ Convention."
+msgstr ""
+
+#: ../../source/dev/standards.rst:25
+msgid ""
+"Arguments, Keyword Arguments, Return and Exceptions must be documented with "
+"the appropriate Sphinx `Python Domain <http://sphinx-"
+"doc.org/latest/domains.html#the-python-domain>`_."
+msgstr ""
+
+#: ../../source/dev/standards.rst:30
+msgid "Revision History"
+msgstr ""
+
+#: ../../source/dev/standards.rst:32
+msgid ""
+"Commits shall be small tangible pieces of work. - Each commit must be "
+"concise and manageable. - Large changes are to be done over smaller commits."
+msgstr ""
+
+#: ../../source/dev/standards.rst:35
+msgid "There shall be no commit squashing."
+msgstr ""
+
+#: ../../source/dev/standards.rst:36
+msgid "Rebase your changes as often as you can."
+msgstr ""
+
+#: ../../source/dev/standards.rst:40
+msgid "Unit Tests"
+msgstr ""
+
+#: ../../source/dev/standards.rst:42
+msgid ""
+"Every new feature and bug fix must be accompanied with a unit test. (*The "
+"only exception to this are minor trivial changes*)."
+msgstr ""

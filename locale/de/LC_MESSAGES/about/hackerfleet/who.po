@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/about/hackerfleet/who.rst:2
+msgid "Who we are"
+msgstr ""
+
+#: ../../source/about/hackerfleet/who.rst:4
+msgid ""
+"The Hackerfleet is a research & development venture founded by some friends "
+"who decided to revolutionize the maritime technology sector."
+msgstr ""
+
+#: ../../source/about/hackerfleet/who.rst:7
+msgid ""
+"We develop opensource hardware and software for unmanned and manned vessels "
+"on all waters, we do this publicly and transparent, our repositorys are open"
+" for you."
+msgstr ""

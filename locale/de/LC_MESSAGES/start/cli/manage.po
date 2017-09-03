@@ -1,0 +1,291 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/start/cli/manage.rst:2
+msgid "Management Tool"
+msgstr ""
+
+#: ../../hfos_manage:1
+msgid "HFOS Management Utility"
+msgstr ""
+
+#: ../../hfos_manage:1
+msgid ""
+"This utility supports various operations to manage HFOS installations. Most "
+"of the commands are grouped. To obtain more information about the groups' "
+"available sub commands, try"
+msgstr ""
+
+#: ../../hfos_manage:1
+msgid "hfos_manage group --help"
+msgstr ""
+
+#: ../../hfos_manage:1
+msgid "To display details of a command, try"
+msgstr ""
+
+#: ../../hfos_manage:1
+msgid "hfos_manage group command --help"
+msgstr ""
+
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+msgid "Options"
+msgstr ""
+
+#: ../../hfos_manage:1
+msgid "Suppress all output"
+msgstr ""
+
+#: ../../hfos_manage:1
+msgid "Log level to use (0-100)"
+msgstr ""
+
+#: ../../hfos_manage config:1
+msgid "Configuration management operations (GROUP)"
+msgstr ""
+
+#: ../../hfos_manage config:1 ../../hfos_manage db:1 ../../hfos_manage install
+#: provisions:1
+msgid "Define hostname for database server (default: 127.0.0.1:27017)"
+msgstr ""
+
+#: ../../hfos_manage config delete:1
+msgid ""
+"Delete an existing component configuration. This will trigger the creation "
+"of its default configuration upon next restart."
+msgstr ""
+
+#: ../../source/start/cli/manage.rst:0 ../../source/start/cli/manage.rst:0
+#: ../../source/start/cli/manage.rst:0
+msgid "Arguments"
+msgstr ""
+
+#: ../../hfos_manage config delete:1 ../../hfos_manage db clear:1
+#: ../../hfos_manage db modify:1 ../../hfos_manage db modify:1
+msgid "Required argument"
+msgstr ""
+
+#: ../../hfos_manage config show:1
+msgid "Show the stored, active configuration of a component."
+msgstr ""
+
+#: ../../hfos_manage db:1
+msgid "Database management operations (GROUP)"
+msgstr ""
+
+#: ../../hfos_manage db clear:1
+msgid "Clears an entire database collection irrevocably. Use with caution!"
+msgstr ""
+
+#: ../../hfos_manage db find_field:1
+msgid "Find fields in registered data models."
+msgstr ""
+
+#: ../../hfos_manage db find_field:1
+msgid "Argument to search for in object model fields"
+msgstr ""
+
+#: ../../hfos_manage db find_field:1
+msgid "Find all fields by type"
+msgstr ""
+
+#: ../../hfos_manage db find_field:1
+msgid "Search in specified object model"
+msgstr ""
+
+#: ../../hfos_manage db migrations:1
+msgid "Data migration management (GROUP)"
+msgstr ""
+
+#: ../../hfos_manage db migrations:1
+msgid "Specify schema to work with"
+msgstr ""
+
+#: ../../hfos_manage db migrations make:1
+msgid "Makes new migrations for all or the specified schema"
+msgstr ""
+
+#: ../../hfos_manage db modify:1
+msgid "Modify field values of objects"
+msgstr ""
+
+#: ../../hfos_manage db user:1
+msgid "User management operations (GROUP)"
+msgstr ""
+
+#: ../../hfos_manage db user:1
+msgid "Username for user related operations"
+msgstr ""
+
+#: ../../hfos_manage db user:1
+msgid "Password for user related operations"
+msgstr ""
+
+#: ../../hfos_manage db user add_role:1
+msgid "Grant a role to an existing user"
+msgstr ""
+
+#: ../../hfos_manage db user add_role:1
+msgid "Specifies the new role"
+msgstr ""
+
+#: ../../hfos_manage db user change_password:1
+msgid "Change password of an existing user"
+msgstr ""
+
+#: ../../hfos_manage db user create_user:1
+msgid "Creates a new local user"
+msgstr ""
+
+#: ../../hfos_manage db user delete_user:1
+msgid "Delete a local user"
+msgstr ""
+
+#: ../../hfos_manage db user list_users:1
+msgid "List all locally known users"
+msgstr ""
+
+#: ../../hfos_manage db user list_users:1
+msgid "Specify a term for searching"
+msgstr ""
+
+#: ../../hfos_manage db user list_users:1
+msgid "Print users uuid as well"
+msgstr ""
+
+#: ../../hfos_manage db view:1
+msgid "Show stored objects"
+msgstr ""
+
+#: ../../hfos_manage install:1
+msgid "Install various aspects of HFOS (GROUP)"
+msgstr ""
+
+#: ../../hfos_manage install all:1
+msgid "Default-Install everything installable"
+msgstr ""
+
+#: ../../hfos_manage install all:1
+msgid ""
+" This includes * System user (hfos.hfos) * Self signed certificate * "
+"Variable data locations (/var/lib/hfos and /var/cache/hfos) * All the "
+"official modules in this repository * Default module provisioning data * "
+"Documentation * systemd service descriptor"
+msgstr ""
+
+#: ../../hfos_manage install all:1
+msgid "It also builds and installs the HTML5 frontend."
+msgstr ""
+
+#: ../../hfos_manage install all:1
+msgid "Clears already existing cache directories and data"
+msgstr ""
+
+#: ../../hfos_manage install cert:1
+msgid "Install a local SSL certificate"
+msgstr ""
+
+#: ../../hfos_manage install cert:1
+msgid "Use a self-signed certificate"
+msgstr ""
+
+#: ../../hfos_manage install docs:1
+msgid "Build and install documentation"
+msgstr ""
+
+#: ../../hfos_manage install docs:1
+msgid "Clears target documentation folders"
+msgstr ""
+
+#: ../../hfos_manage install frontend:1
+msgid "Build and install frontend"
+msgstr ""
+
+#: ../../hfos_manage install frontend:1
+msgid "Use frontend development (./frontend) location"
+msgstr ""
+
+#: ../../hfos_manage install frontend:1
+msgid "Rebuild frontend before installation"
+msgstr ""
+
+#: ../../hfos_manage install modules:1
+msgid "Install the plugin modules"
+msgstr ""
+
+#: ../../hfos_manage install nginx:1
+msgid "Install nginx configuration"
+msgstr ""
+
+#: ../../hfos_manage install nginx:1
+msgid ""
+"Override public Hostname (FQDN) Default from active system configuration"
+msgstr ""
+
+#: ../../hfos_manage install provisions:1
+msgid "Install default provisioning data"
+msgstr ""
+
+#: ../../hfos_manage install provisions:1
+msgid "Specify a provision (default=install all)"
+msgstr ""
+
+#: ../../hfos_manage install provisions:1
+msgid "Clears already existing collections (DANGER!)"
+msgstr ""
+
+#: ../../hfos_manage install provisions:1
+msgid "Overwrites existing provisions"
+msgstr ""
+
+#: ../../hfos_manage install service:1
+msgid "Install systemd service configuration"
+msgstr ""
+
+#: ../../hfos_manage install system_user:1
+msgid "Install HFOS system user (hfos.hfos)"
+msgstr ""
+
+#: ../../hfos_manage install var:1
+msgid "Install variable data to /var/[lib,cache]/hfos"
+msgstr ""
+
+#: ../../hfos_manage install var:1
+msgid "Clears already existing cache directories"
+msgstr ""
+
+#: ../../hfos_manage install var:1
+msgid "Clears all already existing directories"
+msgstr ""
+
+#: ../../hfos_manage shell:1
+msgid "Open an shell to work with the manage tool interactively."
+msgstr ""
+
+#: ../../hfos_manage uninstall:1
+msgid "Uninstall data and resource locations"
+msgstr ""

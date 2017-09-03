@@ -1,0 +1,40 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/about/hackerfleet/goals.rst:2
+msgid "Our goals"
+msgstr ""
+
+#: ../../source/about/hackerfleet/goals.rst:4
+msgid ""
+"One of our primary goals is to establish a better communication network "
+"between compatible hardware, for automatic data exchange between ships."
+msgstr ""
+
+#: ../../source/about/hackerfleet/goals.rst:7
+msgid ""
+"We want to aggregate all the information that is currently thrown away on "
+"shipbridges all over the world and make the best free map of the ocean."
+msgstr ""
+
+#: ../../source/about/hackerfleet/goals.rst:10
+msgid ""
+"This vast ressource of currently nearly unused data will also help "
+"scientists understand our oceans better."
+msgstr ""
