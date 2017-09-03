@@ -1,0 +1,152 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/dev/introduction.rst:7
+msgid "Development Introduction"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:10
+msgid "Here's how we do things in HFOS..."
+msgstr ""
+
+#: ../../source/dev/introduction.rst:14
+msgid "Communication"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:16
+msgid "`IRC Channel`_ on the `FreeNode IRC Network`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:17
+msgid "`Issue Tracker`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:20
+msgid ""
+"If you are familiar with `IRC <http://en.wikipedia.org/wiki/"
+"Internet_Relay_Chat>`_ and use your own IRC Client then connect to the "
+"FreeNode Network and ``/join #hackerfleet``."
+msgstr ""
+
+#: ../../source/dev/introduction.rst:25
+msgid "Standards"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:27
+msgid "We use the following coding standard:"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:29
+msgid "`PEP-008 <http://www.python.org/dev/peps/pep-0008/>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:31
+msgid "We also lint our codebase with the following tools:"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:33
+msgid "`pyflakes <https://pypi.python.org/pypi/pyflakes>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:34
+msgid "`pep8 <https://pypi.python.org/pypi/pep8>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:35
+msgid "`mccabe <https://pypi.python.org/pypi/mccabe/0.2.1>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:37
+msgid ""
+"Please ensure your Development IDE or Editor has the above linters and "
+"checkers in place and enabled."
+msgstr ""
+
+#: ../../source/dev/introduction.rst:40
+msgid "Alternatively you can use the following command line tool:"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:42
+msgid "`flake8 <https://pypi.python.org/pypi/flake8>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:46
+msgid "Tools"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:48
+msgid "We use the following tools to develop HFOS and share code:"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:50
+msgid "**Code Sharing:** `Git <https://git-scm.com/>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:52
+msgid ""
+"**Code Hosting and Bug Reporting:** `GitHub <https://github.com/hackerfleet/"
+"hfos>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:54
+msgid ""
+"**Issue Tracker:** `Issue Tracker <https://github.com/hackerfleet/hfos/"
+"issues>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:56
+msgid "**Documentation Hosting:** `Read the Docs <http://hfos.readthedocs.org>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:58
+msgid ""
+"**Package Hosting:** `Python Package Index (PyPi) <http://pypi.python.org/pypi/"
+"hfos>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:60
+msgid ""
+"**Docker Hub Automated Builds:** `Dockerhub <https://hub.docker.com/r/"
+"hackerfleet/hfos/>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:62
+msgid ""
+"**Continuous Integration:** `Travis CI <https://travis-ci.org/Hackerfleet/"
+"hfos>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:64
+msgid ""
+"**Code Quality:** `Landscape <https://landscape.io/github/Hackerfleet/hfos/>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:66
+msgid "**Frontend Testing:** `Browserstack <https://browserstack.com>`_"
+msgstr ""
+
+#: ../../source/dev/introduction.rst:69
+msgid ""
+"We strongly suggest familiarizing with all of them, to make sure you "
+"understand our CI."
+msgstr ""
+
+#: ../../source/dev/introduction.rst:71
+msgid "Big thanks to all of these magnificent and free-for-opensource services!"
+msgstr ""

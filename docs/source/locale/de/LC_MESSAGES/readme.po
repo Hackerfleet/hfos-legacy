@@ -1,0 +1,571 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Heiko Weinen <riot@c-base.org>, 2017\n"
+"Language-Team: German (https://www.transifex.com/hackerfleet-community/teams/78369/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../../source/readme.rst:3
+msgid "Development README Page"
+msgstr "Entwickler LIESMICH Seite"
+
+#: ../../../README.rst:19
+msgid "HFOS - The Hackerfleet Operating System"
+msgstr "HFOS Das Hackerfleet Betriebssystem"
+
+#: ../../../README.rst:21
+msgid "A modern, opensource approach to collaborative tasks."
+msgstr "Ein moderner, freier Ansatz für kollaborative Aufgaben"
+
+#: ../../../README.rst:23
+msgid ""
+"This software package is supposed to run on your "
+"home/office/ship/plane/ufo/*space's board computer."
+msgstr ""
+"Dieses Softwarepakte ist dazu gedacht, auf Deinem "
+"Heim/Büro/Schiff/Flugzeug/UFO/*raum Bordcomputer zu laufen."
+
+#: ../../../README.rst:26
+msgid ""
+"It initially grew out of frustration with existing navigation solutions for "
+"sailors, as none of these are really oriented towards sailing crews (i.e. "
+"multi-user setups), but we saw the potential for other 'classic' areas of "
+"collaboration and started extending it towards a more general application "
+"framework."
+msgstr ""
+"Es entstand ursprünglich aus Frustration mit bereits bestehenden "
+"Navigationslösungen für Segler, weil diese zumeist nicht für Seglercrews "
+"geeignet sind (insbesondere Verwendung durch mehrere Nutzer ). Wir sahen "
+"aber auch früh das Potential für klassischere Fälle der Kollaboration und "
+"haben es zu einem generischeren Anwendungssystem weiterentwickelt."
+
+#: ../../../README.rst:31
+msgid ""
+"A lot of the included modules are still Work in Progress, so help out, if "
+"you're interested in a powerful - cloud independent - collaboration tool "
+"suite."
+msgstr ""
+"Viele der beigefügten Module sind noch in Arbeit, also hilf gerne mit, wenn "
+"Du an einer mächtigen - Cloud-unabhängigen - Plattform für "
+"Kollaborationswerkzeug interessiert bist."
+
+#: ../../../README.rst:35
+msgid "Modules"
+msgstr "Module"
+
+#: ../../../README.rst:37
+msgid ""
+"The system is modular, so you can install what you need and leave other "
+"things."
+msgstr ""
+"Das System ist modular aufgebaut, so kannst Du benötigte Module installieren"
+" und anderes einfach weglassen."
+
+#: ../../../README.rst:40
+msgid "General modules"
+msgstr "Allgemeine Module"
+
+#: ../../../README.rst:42
+msgid ""
+"These are 'official' Hackerfleet developed modules. If you'd like to "
+"contribute your own, ping riot@c-base.org, to get it added to the list."
+msgstr ""
+"Dies sind die 'offiziellen' von der Hackerfleet Community entwickelten "
+"Module. Wenn Du gerne selber ein Modul beisteuern möchtest, schreibe eine "
+"mail an riot@c-base.org, um es in die Liste aufnehmen zu lassen."
+
+#: ../../../README.rst:46 ../../../README.rst:83
+msgid "Name"
+msgstr "Name"
+
+#: ../../../README.rst:46 ../../../README.rst:83
+msgid "Description"
+msgstr "Beschreibung"
+
+#: ../../../README.rst:48
+msgid "sails"
+msgstr "sails"
+
+#: ../../../README.rst:48
+msgid "Web UI, compatible with all modern browsers"
+msgstr "Web Anwenderinterface, kompatibel zu allen modernen Browsern"
+
+#: ../../../README.rst:49
+msgid "automat"
+msgstr "automat"
+
+#: ../../../README.rst:49
+msgid "Automation for non programmers"
+msgstr "Automation für Nicht-Programmierer"
+
+#: ../../../README.rst:50
+msgid "alert"
+msgstr "alert"
+
+#: ../../../README.rst:50
+msgid "User alerting and notification system"
+msgstr "Anwender Alarmierungs- und Benachrichtungssystem"
+
+#: ../../../README.rst:51
+msgid "calc"
+msgstr "calc"
+
+#: ../../../README.rst:51
+msgid "Integrated EtherCalc"
+msgstr "Integriertes EtherCalc"
+
+#: ../../../README.rst:52
+msgid "camera"
+msgstr "camera"
+
+#: ../../../README.rst:52
+msgid "Camera support"
+msgstr "Unterstützung für Kameras"
+
+#: ../../../README.rst:53
+msgid "chat"
+msgstr "chat"
+
+#: ../../../README.rst:53
+msgid "Integrated chat"
+msgstr "Integrierte Unterhaltungen"
+
+#: ../../../README.rst:54
+msgid "comms"
+msgstr "comms"
+
+#: ../../../README.rst:54
+msgid "Communication package"
+msgstr "Kommunikationspaket"
+
+#: ../../../README.rst:55
+msgid "countables"
+msgstr "countables"
+
+#: ../../../README.rst:55
+msgid "Count arbitrary things"
+msgstr "Zählen von arbiträren Dingen"
+
+#: ../../../README.rst:56
+msgid "dash"
+msgstr "dash"
+
+#: ../../../README.rst:56
+msgid "Dashboard information system"
+msgstr "Informationssystem mit Anzeigetafeln"
+
+#: ../../../README.rst:57
+msgid "enrol"
+msgstr "enrol"
+
+#: ../../../README.rst:57
+msgid "Enrollment (new user) management"
+msgstr "Registrierungsmanagement (von neuen Nutzern)"
+
+#: ../../../README.rst:58
+msgid "garden"
+msgstr "garden"
+
+#: ../../../README.rst:58
+msgid "Garden automation tools"
+msgstr "Werkzeuge zur Gartenautomation"
+
+#: ../../../README.rst:59
+msgid "ldap"
+msgstr "ldap"
+
+#: ../../../README.rst:59
+msgid "LDAP user authorization"
+msgstr "LDAP Nutzer Authentifizierung"
+
+#: ../../../README.rst:60
+msgid "library"
+msgstr "library"
+
+#: ../../../README.rst:60
+msgid "Library management"
+msgstr "Bibliotheksverwaltung"
+
+#: ../../../README.rst:61
+msgid "mesh"
+msgstr "mesh"
+
+#: ../../../README.rst:61
+msgid "Mesh networking"
+msgstr "Mesh Vernetzung"
+
+#: ../../../README.rst:62
+msgid "polls"
+msgstr "polls"
+
+#: ../../../README.rst:62
+msgid "Tool for lightweight internet voting"
+msgstr "Werkzeug für einfache Online-Abstimmungen"
+
+#: ../../../README.rst:63
+msgid "project"
+msgstr "project"
+
+#: ../../../README.rst:63
+msgid "Project management tools"
+msgstr "Werkzeuge zur Projektplanung"
+
+#: ../../../README.rst:64
+msgid "protocols"
+msgstr "protocols"
+
+#: ../../../README.rst:64
+msgid "Miscellaneous communication protocols"
+msgstr "Verschiedene Kommunikationsprotokolle"
+
+#: ../../../README.rst:65
+msgid "robot"
+msgstr "robot"
+
+#: ../../../README.rst:65
+msgid "RC remote control unit"
+msgstr "Robotik Fernsteuerungsmodul"
+
+#: ../../../README.rst:66
+msgid "shareables"
+msgstr "shareables"
+
+#: ../../../README.rst:66
+msgid "Shared resource blocking tool"
+msgstr "Reservierungswerkzeug für gemeinsam genutzte Ressourcen"
+
+#: ../../../README.rst:67
+msgid "switchboard"
+msgstr "switchboard"
+
+#: ../../../README.rst:67
+msgid "Virtual switchboard"
+msgstr "Virtueller Sicherungskasten"
+
+#: ../../../README.rst:68
+msgid "wiki"
+msgstr "wiki"
+
+#: ../../../README.rst:68
+msgid "Etherpad + Wiki = awesomeness"
+msgstr "Etherpad + Wiki = Großartig"
+
+#: ../../../README.rst:71
+msgid ""
+"Most of these are not yet fully usable, so please help out and perhaps take "
+"ownership of one (or more) of them!"
+msgstr ""
+"Die meisten der Module sind noch nicht vollständig nutzbar, also hilf bitte "
+"mit und übernimm vielleicht die Patenschaft für eins von Ihnen (oder "
+"mehrere)!"
+
+#: ../../../README.rst:74
+msgid "Navigation (Hackerfleet) modules"
+msgstr "Module für die Navigation (Hackerfleet)"
+
+#: ../../../README.rst:76
+msgid ""
+"We primarily focused on navigation tools, so these are currently the 'more "
+"usable' modules. They are far from complete, see the WiP list below."
+msgstr ""
+"Wir haben uns primär auf Navigations-Werkzeuge konzentriert, folglich sind "
+"diese bisher \"eher nutzbar\". Sie sind allerdings von 'Fertig' noch einiges"
+" entfernt, wie in der Liste hier drunter ersichtlich."
+
+#: ../../../README.rst:79
+msgid ""
+"*Obligatory Warning*: **Do not use for navigational purposes!** *Always have"
+" up to date paper maps and know how to use them!*"
+msgstr ""
+"*Obligatorische Warnung*: **Nicht für Navigationszwecke zu benutzen!** "
+"*Immer eine Papierkarte mitnehmen und vorher lernen, diese zu verwenden!*"
+
+#: ../../../README.rst:85
+msgid "busrepeater"
+msgstr "busrepeater"
+
+#: ../../../README.rst:85
+msgid "Tool to repeat navigation data bus frames to other media"
+msgstr ""
+"Werkzeug um Navigationsdaten vom Sensorbus zu anderen Systemen zu übertragen"
+
+#: ../../../README.rst:86
+msgid "logbook"
+msgstr "logbook"
+
+#: ../../../README.rst:86
+msgid "Displaying and manual logging of important (nautical) events"
+msgstr ""
+"Anzeige und manuelle Eingabe von Log-Einträgen wichtiger (nautischer) "
+"Ereignisse"
+
+#: ../../../README.rst:87
+msgid "maps"
+msgstr "maps"
+
+#: ../../../README.rst:87
+msgid "(Offline) moving maps with shareable views/layers"
+msgstr ""
+"Internetunabhängige bewegte Karte mit gemeinschaftlich nutzbaren "
+"Ansichten/Ebenen"
+
+#: ../../../README.rst:88
+msgid "navdata"
+msgstr "navdata"
+
+#: ../../../README.rst:88
+msgid "Navigational data module"
+msgstr "Modul für Navigationsdaten"
+
+#: ../../../README.rst:89
+msgid "nmea"
+msgstr "nmea"
+
+#: ../../../README.rst:89
+msgid "NMEA-0183 Navigation data bus parser"
+msgstr "NMEA-0183 Protokollübersetzer für Navigationsdatenbusse"
+
+#: ../../../README.rst:93
+msgid "Work in progress"
+msgstr "In Arbeit befindlich"
+
+#: ../../../README.rst:95
+msgid "Full GDAL based vector chart support (Currently only raster charts)"
+msgstr ""
+"Vollständige GDAL basierte Vektor-Karten Unterstützung (momentan nur "
+"Rasterkarten)"
+
+#: ../../../README.rst:96
+msgid "Dynamic Logbook"
+msgstr "Dynamisches Logbuch"
+
+#: ../../../README.rst:97
+msgid "GRIB data (in charts)"
+msgstr "GRIB Wetterdaten (in Karten)"
+
+#: ../../../README.rst:98
+msgid "Navigation aides, planning"
+msgstr "Navigations-Hilfen und -Planung"
+
+#: ../../../README.rst:99
+msgid "Datalog, automated navigational data exchange"
+msgstr "Datenlog, zum automatisierten Navigationsdaten-Austausch"
+
+#: ../../../README.rst:100
+msgid "Crew management, more safety tools"
+msgstr "Crew Management, mehr Sicherheits-Werkzeuge"
+
+#: ../../../README.rst:101
+msgid "wireless crew network and general communications"
+msgstr "Drahtloses Crew-Netzwerk und generelle Kommunikation"
+
+#: ../../../README.rst:104
+msgid "Bugs & Discussion"
+msgstr "Fehlerreporte und Diskussion"
+
+#: ../../../README.rst:106
+msgid ""
+"Please research any bugs you find via our `Github issue tracker for HFOS "
+"<https://github.com/hackerfleet/hfos/issues>`__ and report them, if they're "
+"still unknown."
+msgstr ""
+"Bitte prüfe ob alle Fehler die Du findest in unserem `HFOS Github issue "
+"tracker <https://github.com/hackerfleet/hfos/issues>`__ eingetragen sind und"
+" berichte sie dort, falls sie noch unbekannt sind."
+
+#: ../../../README.rst:110
+msgid ""
+"If you want to discuss distributed, opensource (or maritime) technology in "
+"general incl. where we're heading, head over to our `Github discussion forum"
+" <https://github.com/hackerfleet/discussion/issues>`__ ...which is cleverly "
+"disguised as a Github issue tracker."
+msgstr ""
+"Falls Du über verteilte, freie maritime Technologie und auch unsere "
+"Zielrichtung diskutieren möchtest, haben wir eine Art `Github "
+"Diskussionsforum <https://github.com/hackerfleet/discussion/issues>`__ "
+"eingerichtet ... welches sich klever als Github Issue Tracker tarnt."
+
+#: ../../../README.rst:115
+msgid "You can also find us here:"
+msgstr "Du kannst uns auch hier finden:"
+
+#: ../../../README.rst:117
+msgid "`github.com/Hackerfleet <https://github.com/Hackerfleet>`__"
+msgstr "`github.com/Hackerfleet <https://github.com/Hackerfleet>`__"
+
+#: ../../../README.rst:118
+msgid "`Waffle.io <https://waffle.io/hackerfleet/hfos>`__"
+msgstr "`Waffle.io <https://waffle.io/hackerfleet/hfos>`__"
+
+#: ../../../README.rst:119
+msgid "`reddit <https://reddit.com/r/hackerfleet>`__"
+msgstr "`reddit <https://reddit.com/r/hackerfleet>`__"
+
+#: ../../../README.rst:120
+msgid "`Twitter <https://twitter.com/hackerfleet>`__"
+msgstr "`Twitter <https://twitter.com/hackerfleet>`__"
+
+#: ../../../README.rst:121
+msgid "`Facebook <https://www.facebook.com/Hackerfleet>`__"
+msgstr "`Facebook <https://www.facebook.com/Hackerfleet>`__"
+
+#: ../../../README.rst:122
+msgid "`soup.io <http://hackerfleet.soup.io/>`__"
+msgstr "`soup.io <http://hackerfleet.soup.io/>`__"
+
+#: ../../../README.rst:123
+msgid "`G+ <https://plus.google.com/105528689027070271173>`__"
+msgstr "`G+ <https://plus.google.com/105528689027070271173>`__"
+
+#: ../../../README.rst:124
+msgid ""
+"`irc #hackerfleet on freenode "
+"<http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__"
+msgstr ""
+"`irc #hackerfleet auf freenode "
+"<http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__"
+
+#: ../../../README.rst:126
+msgid "Please be patient when using IRC, responses might take a few hours!"
+msgstr ""
+"Bitte hab etwas Geduld wenn Du IRC benutzt, Antworten könnten schonmal ein "
+"paar Stunden brauchen!"
+
+#: ../../../README.rst:129
+msgid "Installation"
+msgstr "Installation"
+
+#: ../../../README.rst:131
+msgid ""
+"There is more than one way of installing HFOS, `see the quickstart "
+"instructions for those "
+"<http://hfos.readthedocs.io/en/latest/start/quick.html>`__."
+msgstr ""
+"Es gibt mehr als eine Art HFOS zu installieren, `alle sind im Schnellstart-"
+"Dokument aufgegliedert: "
+"<http://hfos.readthedocs.io/de/latest/start/quick.html>`__."
+
+#: ../../../README.rst:133
+msgid "The simplest way is to use the new install script:"
+msgstr "Der einfachste Weg ist das neue Installations-Skript:"
+
+#: ../../../README.rst:139
+msgid ""
+"It installs all dependencies then sets up a user account and the system's "
+"services. If you run into trouble or get any unexpected errors, `try the "
+"complex installation procedure "
+"<http://hfos.readthedocs.io/en/latest/start/installing.html>`__."
+msgstr ""
+"Es installiert automatisch alle Abhängigkeiten und legt einen System-User "
+"sowie die benötigten Dienst-Definitionen an. Solltest Du unerwartet auf "
+"Probleme oder Fehler treffen, `versuche es mit der detaillierten "
+"Installationsanleitung "
+"<http://hfos.readthedocs.io/de/latest/start/installing.html>`__."
+
+#: ../../../README.rst:144
+msgid "Contributors"
+msgstr "Mithelfende"
+
+#: ../../../README.rst:146
+msgid ""
+"We like to hang out on irc, if you want to chat or help out, join "
+"irc://freenode.org/hackerfleet :)"
+msgstr ""
+"Wir nutzen zur kollaboration gerne IRC, wenn Du mithelfen oder einfach nur "
+"chatten möchtest, komm in irc://freenode.org/hackerfleet :)"
+
+#: ../../../README.rst:149
+msgid ""
+"Please be patient or even better use screen/tmux or something to irc. Most "
+"of us are there 24/7 but not always in front of our machines."
+msgstr ""
+"Bitte sei etwas geduldsam oder verwende noch besser screen/tmux oder etwas "
+"ähnliches zum irc'en. Die meisten von uns sind 24/7 dort, aber nicht immer "
+"vor dem Rechner."
+
+#: ../../../README.rst:152
+msgid "Missing in the list below? Add yourself or ping us ;)"
+msgstr ""
+"Du fehlst in der Liste unten? Füge Dich selbst hinzu oder benachrichtige uns"
+" ;)"
+
+#: ../../../README.rst:155
+msgid "Code"
+msgstr "Quellcode"
+
+#: ../../../README.rst:157
+msgid "Heiko 'riot' Weinen riot@c-base.org"
+msgstr "Heiko 'riot' Weinen riot@c-base.org"
+
+#: ../../../README.rst:158
+msgid "Johannes 'ijon' Rundfeldt ijon@c-base.org"
+msgstr "Johannes 'ijon' Rundfeldt ijon@c-base.org"
+
+#: ../../../README.rst:159
+msgid "Martin Ling"
+msgstr "Martin Ling"
+
+#: ../../../README.rst:162
+msgid "Assets"
+msgstr "Medien"
+
+#: ../../../README.rst:164
+msgid "Fabulous icons by iconmonstr.com and Hackerfleet contributors"
+msgstr "Fabulöse Icons von iconmonstr.com und Hackerfleet Helfern"
+
+#: ../../../README.rst:167
+msgid "License"
+msgstr "Lizenz"
+
+#: ../../../README.rst:169
+msgid "Copyright (C) 2011-2017 riot <riot@c-base.org> and others."
+msgstr "Copyright (C) 2011-2017 riot <riot@c-base.org> und Andere."
+
+#: ../../../README.rst:171
+msgid ""
+"This program is free software: you can redistribute it and/or modify it "
+"under the terms of the GNU General Public License as published by the Free "
+"Software Foundation, either version 3 of the License, or (at your option) "
+"any later version."
+msgstr ""
+"Dieses Programm ist freie Software. Sie können es unter den Bedingungen der "
+"GNU General Public License, wie von der Free Software Foundation "
+"veröffentlicht, weitergeben und/oder modifizieren, entweder gemäß Version 3 "
+"der Lizenz oder (nach Ihrer Option) jeder späteren Version."
+
+#: ../../../README.rst:176
+msgid ""
+"This program is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for "
+"more details."
+msgstr ""
+"Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen "
+"von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die "
+"implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN "
+"BESTIMMTEN ZWECK. Details finden Sie in der GNU General Public License."
+
+#: ../../../README.rst:181
+msgid ""
+"You should have received a copy of the GNU General Public License along with"
+" this program.  If not, see <http://www.gnu.org/licenses/>."
+msgstr ""
+"Sie sollten ein Exemplar der GNU General Public License zusammen mit diesem "
+"Programm erhalten haben. Falls nicht, siehe <http://www.gnu.org/licenses/>."
+
+#: ../../../README.rst:185
+msgid "-- :boat: :+1:"
+msgstr "-- :boat: :+1:"

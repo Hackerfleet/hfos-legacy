@@ -1,0 +1,42 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/dev/packages/hfos.ldap.rst:2
+msgid "hfos.ldap package"
+msgstr ""
+
+#: ../../source/dev/packages/hfos.ldap.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../source/dev/packages/hfos.ldap.rst:8
+msgid "hfos.ldap.ldap module"
+msgstr ""
+
+#: hfos.ldap.ldap.LDAPAdaptor:1 of
+msgid "Bases: :class:`hfos.component.ConfigurableComponent`"
+msgstr ""
+
+#: hfos.ldap.ldap.lmap_authenticate:1 of
+msgid "Bases: :class:`circuits.core.events.Event`"
+msgstr ""
+
+#: ../../source/dev/packages/hfos.ldap.rst:17
+msgid "Module contents"
+msgstr ""

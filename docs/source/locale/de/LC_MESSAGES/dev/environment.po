@@ -1,0 +1,102 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/dev/environment.rst:9
+msgid "Setting up a HFOS Development Environment"
+msgstr ""
+
+#: ../../source/dev/environment.rst:11
+msgid ""
+"This is the recommended way to setup a development enviornment for "
+"developing the backend and frontend of HFOS ."
+msgstr ""
+
+#: ../../source/dev/environment.rst:14
+msgid ""
+"This document *assumes* you already have a working `Python`_ environment "
+"with a minimum `Python`_ version of 2.7 as well as mongodb and `pip`_ "
+"already installed."
+msgstr ""
+
+#: ../../source/dev/environment.rst:20
+msgid "Prerequisites"
+msgstr ""
+
+#: ../../source/dev/environment.rst:22
+msgid ""
+"It is highly recommended that you install and use `virtualenv`_ for all "
+"your `Python`_ development and production deployments (*not just HFOS*)."
+msgstr ""
+
+#: ../../source/dev/environment.rst:25
+msgid ""
+"It is also convenient to install and use the accompanying shell scripts "
+"and tools `virtualenvwrapper`_ which adds a nice set of workflows and "
+"functions useful for both development and deployments."
+msgstr ""
+
+#: ../../source/dev/environment.rst:34
+msgid ""
+"You should put ``source $(which virtualenvwrapper.sh)`` in either your ``"
+"$HOME/.bashrc`` or ``$HOME/.profile`` depending on how you login and "
+"interact with your terminals."
+msgstr ""
+
+#: ../../source/dev/environment.rst:38
+msgid ""
+"In addition to the above recommendations you must also have a `Git`_ "
+"client installed and ready to use as well as your Editor/IDE of choice "
+"ready to use."
+msgstr ""
+
+#: ../../source/dev/environment.rst:43
+msgid "Getting Started"
+msgstr ""
+
+#: ../../source/dev/environment.rst:45
+msgid ""
+"`Fork HFOS <https://github.com/hackerfleet/hfos#fork-destination-box>`_ "
+"(*if you haven't done so already*)"
+msgstr ""
+
+#: ../../source/dev/environment.rst:47
+msgid "Clone your forked repository using `Git`_"
+msgstr ""
+
+#: ../../source/dev/environment.rst:48
+msgid "Create a new virtual environment using `virtualenvwrapper`_"
+msgstr ""
+
+#: ../../source/dev/environment.rst:49
+msgid ""
+"Install the `Development Requirements <https://github.com/hackerfleet/"
+"hfos/blob/master/requirements-dev.txt>`_"
+msgstr ""
+
+#: ../../source/dev/environment.rst:50
+msgid "Install HFOS in \"develop\" mode"
+msgstr ""
+
+#: ../../source/dev/environment.rst:52
+msgid "And you're done!"
+msgstr ""
+
+#: ../../source/dev/environment.rst:54
+msgid "Example:"
+msgstr ""

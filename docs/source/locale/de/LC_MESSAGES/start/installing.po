@@ -1,0 +1,275 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/start/installing.rst:4
+msgid "Installing"
+msgstr ""
+
+#: ../../source/start/installing.rst:6
+msgid ""
+"First of all: The manual installation procedure is rather complex right "
+"now."
+msgstr ""
+
+#: ../../source/start/installing.rst:8
+msgid ""
+"We've :ref:`simplified the process by supplying an install script "
+"<quick_install>`, but if you encounter any trouble/problems, checkout "
+"these detailed installation steps."
+msgstr ""
+
+#: ../../source/start/installing.rst:11
+msgid ""
+"If you still can't get it to install, :ref:`contact us via irc or email "
+"<communication>` and we'll happily try to help you get your installation "
+"running."
+msgstr ""
+
+#: ../../source/start/installing.rst:14
+msgid ""
+"This is very important for us, since the system has not yet been deployed "
+"very often and we're not yet aware of all of the pitfalls and traps on "
+"that route."
+msgstr ""
+
+#: ../../source/start/installing.rst:18
+msgid ""
+"We encourage you to use Python >= 3.5 for HFOS, but the system is built "
+"(and checked against) 2.7, too."
+msgstr ""
+
+#: ../../source/start/installing.rst:21
+msgid "Warning: **HFOS is not compatible with Python 3.2!**"
+msgstr ""
+
+#: ../../source/start/installing.rst:24
+msgid "Preparation"
+msgstr ""
+
+#: ../../source/start/installing.rst:26
+msgid ""
+"These instructions are for Debian or Ubuntu based systems. Installation on "
+"other distributions is possible."
+msgstr ""
+
+#: ../../source/start/installing.rst:29
+msgid ""
+"Before doing anything with HFOS, be sure you have all the dependencies "
+"installed via your distribution's package manager."
+msgstr ""
+
+#: ../../source/start/installing.rst:32
+msgid "For Debian Unstable use this:"
+msgstr ""
+
+#: ../../source/start/installing.rst:39
+msgid ""
+"If you want (and can, depending on your platform/distribution), install "
+"the mongo and bson extensions for speedups:"
+msgstr ""
+
+#: ../../source/start/installing.rst:46
+msgid ""
+"The system will need to get a bunch of more dependencies via npm to set up "
+"the frontend, so install npm and if necessary the nodejs-legacy-symlink "
+"package:"
+msgstr ""
+
+#: ../../source/start/installing.rst:55
+msgid ""
+"If you want to install the full development dependencies to write "
+"documentation as well, you need to install the enchant package:"
+msgstr ""
+
+#: ../../source/start/installing.rst:62
+msgid ""
+"In case you want to use raster (or in future: vector) charts in HFOS' map "
+"module, you'll need to install libgdal and its binaries:"
+msgstr ""
+
+#: ../../source/start/installing.rst:69
+msgid ""
+"Note, that it is necessary to install python-gdal 2.7 - not the python3 "
+"variant, as the scripts are not included in that."
+msgstr ""
+
+#: ../../source/start/installing.rst:75
+msgid "Getting the source"
+msgstr ""
+
+#: ../../source/start/installing.rst:77
+msgid ""
+"To initially obtain the development source code if you don't have it "
+"already, use git thus:"
+msgstr ""
+
+#: ../../source/start/installing.rst:94
+msgid "Backend"
+msgstr ""
+
+#: ../../source/start/installing.rst:96
+msgid ""
+"The manage tool usually can install everything you need. It starts by "
+"adding a new system user for HFOS and generating a (currently only self "
+"signed) certificate."
+msgstr ""
+
+#: ../../source/start/installing.rst:100
+msgid ""
+"The process also involves installing the supplied modules, getting the "
+"frontend dependencies, building and installing the documentation, etc."
+msgstr ""
+
+#: ../../source/start/installing.rst:103
+msgid ""
+"It also creates two folders in /var (lib/hfos and cache/hfos) for hfos' "
+"tile- cache and other stuff as well as install basic default provisions "
+"into the database."
+msgstr ""
+
+#: ../../source/start/installing.rst:107
+msgid ""
+"Finally, it installs and activates a systemd and nginx service script to "
+"launch HFOS on bootup and make it available to users."
+msgstr ""
+
+#: ../../source/start/installing.rst:118
+msgid ""
+"If you want to develop (documentation) as well, you'll need to use the "
+"`requirements-dev.txt` instead of the normal one."
+msgstr ""
+
+#: ../../source/start/installing.rst:121
+msgid "If you want to manually start HFOS, invoke the launcher thus:"
+msgstr ""
+
+#: ../../source/start/installing.rst:127
+msgid ""
+"Running the launcher as root to be able to open ports below 1024 should be "
+"safe, as it drops its root privileges, unless you specify --insecure, "
+"which is strongly discouraged and only meant for development purposes. The "
+"default is to use port 8055 and relay that with the supplied nginx site "
+"definition"
+msgstr ""
+
+#: ../../source/start/installing.rst:134
+msgid "Documentation"
+msgstr ""
+
+#: ../../source/start/installing.rst:136
+msgid ""
+"The documentation is available online on `ReadTheDocs.org <https://hfos."
+"readthedocs.org>`__. If you wish to build and install the included "
+"documentation for offline use, run these commands:"
+msgstr ""
+
+#: ../../source/start/installing.rst:145
+msgid ""
+"This installs all necessary documentation tools and copies the files to "
+"the expected HFOS web data folder."
+msgstr ""
+
+#: ../../source/start/installing.rst:148
+msgid ""
+"You can also build the PDF file (and various other formats) by using the "
+"Makefile inside the docs directory."
+msgstr ""
+
+#: ../../source/start/installing.rst:156
+msgid ""
+"Just running make without arguments gives you a list of the other "
+"available documentation formats."
+msgstr ""
+
+#: ../../source/start/installing.rst:160
+msgid "Installing from a Source Package"
+msgstr ""
+
+#: ../../source/start/installing.rst:161
+msgid "*If you have downloaded a source archive, this applies to you.*"
+msgstr ""
+
+#: ../../source/start/installing.rst:167
+msgid "For other installation options see:"
+msgstr ""
+
+#: ../../source/start/installing.rst:175
+msgid "Installing from the Development Repository"
+msgstr ""
+
+#: ../../source/start/installing.rst:176
+msgid "*If you have cloned the source code repository, this applies to you.*"
+msgstr ""
+
+#: ../../source/start/installing.rst:178
+msgid ""
+"If you have cloned the development repository, it is recommended that you "
+"use setuptools and use the following command:"
+msgstr ""
+
+#: ../../source/start/installing.rst:185
+msgid ""
+"This will allow you to regularly update your copy of the hfos development "
+"repository by simply performing the following in the hfos working "
+"directory:"
+msgstr ""
+
+#: ../../source/start/installing.rst:195
+msgid ""
+"You do not need to reinstall if you have installed with setuptools via the "
+"hfos repository and used setuptools to install in \"develop\" mode."
+msgstr ""
+
+#: ../../source/start/installing.rst:199
+msgid "Windows & OS X installation notes"
+msgstr ""
+
+#: ../../source/start/installing.rst:200
+msgid ""
+"*These instructions are WiP. The easiest way to get HFOS on Win7 or newer "
+"is to install and user Docker or a virtual machine*"
+msgstr ""
+
+#: ../../source/start/installing.rst:203
+msgid "To install on Windows, you'll need to install these packages first:"
+msgstr ""
+
+#: ../../source/start/installing.rst:205
+msgid "Python 3.5 https://www.python.org/downloads/windows/"
+msgstr ""
+
+#: ../../source/start/installing.rst:206
+msgid "MongoDB https://www.mongodb.org/downloads#production"
+msgstr ""
+
+#: ../../source/start/installing.rst:207
+msgid "pymongo"
+msgstr ""
+
+#: ../../source/start/installing.rst:208
+msgid "numpy"
+msgstr ""
+
+#: ../../source/start/installing.rst:211
+msgid "Platform specific"
+msgstr ""
+
+#: ../../source/start/installing.rst:213
+msgid "There are some collected instructions for various hardware platforms:"
+msgstr ""

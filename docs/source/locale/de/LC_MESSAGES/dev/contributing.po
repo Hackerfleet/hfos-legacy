@@ -1,0 +1,77 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/dev/contributing.rst:7
+msgid "Contributing to HFOS"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:9
+msgid "Here's how you can contribute to HFOS"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:12
+msgid "Submitting Bug Reports"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:15
+msgid ""
+"We welcome all bug reports. We do however prefer bug reports in a clear "
+"and concise form with repeatable steps. One of the best ways you can "
+"report a bug to us is by writing a unit test (//similar to the ones in "
+"our tests//) so that we can verify the bug, fix it and commit the fix "
+"along with the test."
+msgstr ""
+
+#: ../../source/dev/contributing.rst:20
+msgid "To submit a bug report, please `Create an Issue`_"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:24
+msgid "Writing new tests"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:27
+msgid ""
+"We're not perfect, and we're still writing more tests to ensure quality "
+"code. If you'd like to help, please `Fork HFOS`_, write more tests that "
+"cover more of our code base and submit a `Pull Request`_. Many Thanks!"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:33
+msgid "Adding New Features"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:36
+msgid ""
+"If you'd like to see a new feature added to HFOS, then we'd like to hear "
+"about it~ We would like to see some discussion around any new features "
+"as well as valid use-cases. To start the discussions off, please either:"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:40
+msgid "`Chat with us`_ on #hackerfleet on the FreeNode IRC Network"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:42
+msgid "or"
+msgstr ""
+
+#: ../../source/dev/contributing.rst:44
+msgid "`Create an Issue`_"
+msgstr ""

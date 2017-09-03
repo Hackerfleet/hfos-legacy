@@ -1,0 +1,52 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/about/hackerfleet/timeline.rst:2
+msgid "Timeline"
+msgstr ""
+
+#: ../../source/about/hackerfleet/timeline.rst:4
+msgid "2011 Founding -> CCC Camp MS 0x00"
+msgstr ""
+
+#: ../../source/about/hackerfleet/timeline.rst:5
+msgid "2012 Hackathon for Android App 'Social Bearing'"
+msgstr ""
+
+#: ../../source/about/hackerfleet/timeline.rst:6
+msgid "2013 Mariner's code: Computer hackers conquering the high seas"
+msgstr ""
+
+#: ../../source/about/hackerfleet/timeline.rst:7
+msgid "2014 EuroPython Hackathons"
+msgstr ""
+
+#: ../../source/about/hackerfleet/timeline.rst:8
+msgid "2015 Oh, camp again! We did some crowdsourced management"
+msgstr ""
+
+#: ../../source/about/hackerfleet/timeline.rst:10
+msgid "And now, we're here!"
+msgstr ""
+
+#: ../../source/about/hackerfleet/timeline.rst:12
+msgid ""
+"You can check all this out on the intertubes. Youtube, CNN, etc. Just "
+"search for 'Hackerfleet' - hmm.. succinct name, eh?"
+msgstr ""

@@ -1,0 +1,58 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:56+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/about/hackerfleet/contact.rst:4
+msgid "Communication"
+msgstr "Kommunikation"
+
+#: ../../source/about/hackerfleet/contact.rst:6
+msgid "`github.com/Hackerfleet <https://github.com/Hackerfleet>`__"
+msgstr ""
+
+#: ../../source/about/hackerfleet/contact.rst:7
+msgid "`Waffle.io/hackerfleet/hfos <https://waffle.io/hackerfleet/hfos>`__"
+msgstr ""
+
+#: ../../source/about/hackerfleet/contact.rst:8
+msgid "`Twitter.com/hackerfleet <https://twitter.com/hackerfleet>`__"
+msgstr ""
+
+#: ../../source/about/hackerfleet/contact.rst:9
+msgid "`Facebook/hackerfleet <https://www.facebook.com/Hackerfleet>`__"
+msgstr ""
+
+#: ../../source/about/hackerfleet/contact.rst:10
+msgid "`hackerfleet.soup.io <http://hackerfleet.soup.io/>`__"
+msgstr ""
+
+#: ../../source/about/hackerfleet/contact.rst:11
+msgid "`Also on G+ <https://plus.google.com/105528689027070271173>`__"
+msgstr ""
+
+#: ../../source/about/hackerfleet/contact.rst:12
+msgid ""
+"`irc #hackerfleet on freenode <http://webchat.freenode.net/?"
+"randomnick=1&channels=hackerfleet&uio=d4>`__"
+msgstr ""
+
+#: ../../source/about/hackerfleet/contact.rst:14
+msgid "Please be patient when using IRC, responses might take a few hours!"
+msgstr ""
+"Bitte bring etwas Geduld mit in den IRC, Antworten können schonmal "
+"einige Stunden benötigen."

@@ -1,0 +1,61 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/about/hfos/hfos.rst:2
+msgid "About HFOS"
+msgstr ""
+
+#: ../../source/about/hfos/hfos.rst:4
+msgid ""
+"The Hackerfleet Operating System (Short HFOS) is being developed "
+"specifically to target a handful of properties and challenges, that are "
+"unique to the projected use of the system:"
+msgstr ""
+
+#: ../../source/about/hfos/hfos.rst:7
+msgid "Locally offline and undisruptable operation (True Internet!)"
+msgstr ""
+
+#: ../../source/about/hfos/hfos.rst:8
+msgid "Extremely low energy profile"
+msgstr ""
+
+#: ../../source/about/hfos/hfos.rst:9
+msgid ""
+"Must work on embedded systems with low memory, storage and computing "
+"capacity"
+msgstr ""
+
+#: ../../source/about/hfos/hfos.rst:10
+msgid "Realtime handling and federation of incoming and outgoing data"
+msgstr ""
+
+#: ../../source/about/hfos/hfos.rst:11
+msgid "Many, many different bus and sensor systems as well as configurations"
+msgstr ""
+
+#: ../../source/about/hfos/hfos.rst:12
+msgid "Clients should not be limited in any way"
+msgstr ""
+
+#: ../../source/about/hfos/hfos.rst:14
+msgid ""
+"To master all these challenges, a rather radical approach was chosen after "
+"evaluation of most of the currently available frameworks and libraries."
+msgstr ""

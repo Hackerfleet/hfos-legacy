@@ -1,0 +1,199 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2011-2017, Hackerfleet
+# This file is distributed under the same license as the HFOS package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HFOS 1.1.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-02 18:44+0200\n"
+"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: ../../source/dev/processes.rst:5
+msgid "Development Processes"
+msgstr ""
+
+#: ../../source/dev/processes.rst:8
+msgid ""
+"We document all our internal development processes here so you know exactly how "
+"we work and what to expect. If you find any issues or problems, please let us "
+"know!"
+msgstr ""
+
+#: ../../source/dev/processes.rst:14
+msgid "Software Development Life Cycle (SDLC)"
+msgstr ""
+
+#: ../../source/dev/processes.rst:17
+msgid ""
+"We employ the use of the `SCRUM Agile Process <http://en.wikipedia.org/wiki/"
+"Scrum_(development)>`_ and use our `Issue Tracker`_ to track features, bugs, "
+"chores and releases. If you wish to contribute to HFOS, please familiarize "
+"yourself with SCRUM and `GitHub's Issue Tracker <https://github.com>`_."
+msgstr ""
+
+#: ../../source/dev/processes.rst:24
+msgid "Bug Reports"
+msgstr ""
+
+#: ../../source/dev/processes.rst:27
+msgid ""
+"New Bug Reports are submitted via: https://github.com/hackerfleet/hfos/issues"
+msgstr ""
+
+#: ../../source/dev/processes.rst:29
+msgid "Confirmation and Discussion of all New Bug Reports."
+msgstr ""
+
+#: ../../source/dev/processes.rst:30
+msgid "Once confirmed, a new Bug is raised in our `Issue Tracker`_"
+msgstr ""
+
+#: ../../source/dev/processes.rst:31 ../../source/dev/processes.rst:52
+msgid ""
+"An appropriate milestone will be set (*depending on current milestone's "
+"schedule and resources*)"
+msgstr ""
+
+#: ../../source/dev/processes.rst:32
+msgid "A unit test developed that demonstrates the bug's failure."
+msgstr ""
+
+#: ../../source/dev/processes.rst:33
+msgid "A fix developed that passes the unit test and breaks no others."
+msgstr ""
+
+#: ../../source/dev/processes.rst:34 ../../source/dev/processes.rst:55
+msgid ""
+"A `New Pull Request <https://github.com/hackerfleet/hfos/compare/>`_ created "
+"with the fix."
+msgstr ""
+
+#: ../../source/dev/processes.rst:36
+msgid ""
+"This should contain: - A new or modified unit test. - A patch that fixes the "
+"bug ensuring all unit tests pass. - The `Change Log <https://github.com/"
+"hackerfleet/hfos/tree/master/CHANGES.rst>`_ updated. - Appropriate "
+"documentation updated."
+msgstr ""
+
+#: ../../source/dev/processes.rst:41 ../../source/dev/processes.rst:62
+msgid ""
+"The `Pull Request <https://github.com/hackerfleet/hfos/pulls>`_ is reviewed and "
+"approved by at least two other developers."
+msgstr ""
+
+#: ../../source/dev/processes.rst:45
+msgid "Feature Requests"
+msgstr ""
+
+#: ../../source/dev/processes.rst:48
+msgid ""
+"New Feature Requests are submitted via: https://github.com/hackerfleet/hfos/"
+"issues"
+msgstr ""
+
+#: ../../source/dev/processes.rst:50
+msgid "Confirmation and Discussion of all New Feature Requests."
+msgstr ""
+
+#: ../../source/dev/processes.rst:51
+msgid "Once confirmed, a new Feature is raised in our `Issue Tracker`_"
+msgstr ""
+
+#: ../../source/dev/processes.rst:53
+msgid "A unit test developed that demonstrates the new feature."
+msgstr ""
+
+#: ../../source/dev/processes.rst:54
+msgid "The new feature developed that passes the unit test and breaks no others."
+msgstr ""
+
+#: ../../source/dev/processes.rst:57
+msgid ""
+"This must contains: - A new or modified unit test. - A patch that implements "
+"the new feature ensuring all unit tests pass. - The `Change Log <https://github."
+"com/hackerfleet/hfos/tree/master/CHANGES.rst>`_ updated. - Appropriate "
+"documentation updated."
+msgstr ""
+
+#: ../../source/dev/processes.rst:66
+msgid "Writing new Code"
+msgstr ""
+
+#: ../../source/dev/processes.rst:69
+msgid "Submit a `New Issue <https://github.com/hackerfleet/hfos/issues/new>`_"
+msgstr ""
+
+#: ../../source/dev/processes.rst:70
+msgid "Write your code."
+msgstr ""
+
+#: ../../source/dev/processes.rst:71
+msgid "Use `flake8 <http://pypi.python.org/pypi/flake8>`_ to ensure code quality."
+msgstr ""
+
+#: ../../source/dev/processes.rst:72
+msgid "Run the tests::"
+msgstr ""
+
+#: ../../source/dev/processes.rst:76
+msgid "Ensure any new or modified code does not break existing unit tests."
+msgstr ""
+
+#: ../../source/dev/processes.rst:77
+msgid "Update any relevant doc strings or documentation."
+msgstr ""
+
+#: ../../source/dev/processes.rst:78
+msgid ""
+"Update the `Change Log <https://github.com/hackerfleet/hfos/tree/master/CHANGES."
+"rst>`_ updated."
+msgstr ""
+
+#: ../../source/dev/processes.rst:79
+msgid ""
+"Submit a `New Pull Request <https://github.com/hackerfleet/hfos/compare/>`_."
+msgstr ""
+
+#: ../../source/dev/processes.rst:83
+msgid "Running the Tests"
+msgstr ""
+
+#: ../../source/dev/processes.rst:86
+msgid "To run the tests you will need the following installed:"
+msgstr ""
+
+#: ../../source/dev/processes.rst:88
+msgid "`tox <http://codespeak.net/tox/>`_ installed as well as"
+msgstr ""
+
+#: ../../source/dev/processes.rst:89
+msgid "`pytest-cov <http://pypi.python.org/pypi/pytest-cov>`_"
+msgstr ""
+
+#: ../../source/dev/processes.rst:90
+msgid "`pytest <http://pytest.org/latest/>`_"
+msgstr ""
+
+#: ../../source/dev/processes.rst:92
+msgid "All of these can be installed via ``pip``."
+msgstr ""
+
+#: ../../source/dev/processes.rst:94
+msgid ""
+"Please also ensure that you you have all supported versions of Python that HFOS "
+"supports installed in your local environment."
+msgstr ""
+
+#: ../../source/dev/processes.rst:97
+msgid "To run the tests::"
+msgstr ""
