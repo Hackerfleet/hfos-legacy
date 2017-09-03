@@ -1,0 +1,254 @@
+[main]
+host = https://www.transifex.com
+type = PO
+
+[hfos.roadmap]
+file_filter = locale/<lang>/LC_MESSAGES/roadmap.po
+source_file = docs/build/locale/roadmap.pot
+source_lang = en
+
+[hfos.faq]
+file_filter = locale/<lang>/LC_MESSAGES/faq.po
+source_file = docs/build/locale/faq.pot
+source_lang = en
+
+[hfos.todo]
+file_filter = locale/<lang>/LC_MESSAGES/todo.po
+source_file = docs/build/locale/todo.pot
+source_lang = en
+
+[hfos.glossary_]
+file_filter = locale/<lang>/LC_MESSAGES/glossary.po
+source_file = docs/build/locale/glossary.pot
+source_lang = en
+
+[hfos.changes]
+file_filter = locale/<lang>/LC_MESSAGES/changes.po
+source_file = docs/build/locale/changes.pot
+source_lang = en
+
+[hfos.contributors]
+file_filter = locale/<lang>/LC_MESSAGES/contributors.po
+source_file = docs/build/locale/contributors.pot
+source_lang = en
+
+[hfos.index]
+file_filter = locale/<lang>/LC_MESSAGES/index.po
+source_file = docs/build/locale/index.pot
+source_lang = en
+
+[hfos.readme]
+file_filter = locale/<lang>/LC_MESSAGES/readme.po
+source_file = docs/build/locale/readme.pot
+source_lang = en
+
+[hfos.manual--index]
+file_filter = locale/<lang>/LC_MESSAGES/manual/index.po
+source_file = docs/build/locale/manual/index.pot
+source_lang = en
+
+[hfos.start--installing]
+file_filter = locale/<lang>/LC_MESSAGES/start/installing.po
+source_file = docs/build/locale/start/installing.pot
+source_lang = en
+
+[hfos.start--quick]
+file_filter = locale/<lang>/LC_MESSAGES/start/quick.po
+source_file = docs/build/locale/start/quick.pot
+source_lang = en
+
+[hfos.start--downloading]
+file_filter = locale/<lang>/LC_MESSAGES/start/downloading.po
+source_file = docs/build/locale/start/downloading.pot
+source_lang = en
+
+[hfos.start--requirements]
+file_filter = locale/<lang>/LC_MESSAGES/start/requirements.po
+source_file = docs/build/locale/start/requirements.pot
+source_lang = en
+
+[hfos.start--tools]
+file_filter = locale/<lang>/LC_MESSAGES/start/tools.po
+source_file = docs/build/locale/start/tools.pot
+source_lang = en
+
+[hfos.start--index]
+file_filter = locale/<lang>/LC_MESSAGES/start/index.po
+source_file = docs/build/locale/start/index.pot
+source_lang = en
+
+[hfos.start--cli--manage]
+file_filter = locale/<lang>/LC_MESSAGES/start/cli/manage.po
+source_file = docs/build/locale/start/cli/manage.pot
+source_lang = en
+
+[hfos.start--cli--launcher]
+file_filter = locale/<lang>/LC_MESSAGES/start/cli/launcher.po
+source_file = docs/build/locale/start/cli/launcher.pot
+source_lang = en
+
+[hfos.start--platforms--rpi]
+file_filter = locale/<lang>/LC_MESSAGES/start/platforms/rpi.po
+source_file = docs/build/locale/start/platforms/rpi.pot
+source_lang = en
+
+[hfos.dev--introduction]
+file_filter = locale/<lang>/LC_MESSAGES/dev/introduction.po
+source_file = docs/build/locale/dev/introduction.pot
+source_lang = en
+
+[hfos.dev--contributing]
+file_filter = locale/<lang>/LC_MESSAGES/dev/contributing.po
+source_file = docs/build/locale/dev/contributing.pot
+source_lang = en
+
+[hfos.dev--processes]
+file_filter = locale/<lang>/LC_MESSAGES/dev/processes.po
+source_file = docs/build/locale/dev/processes.pot
+source_lang = en
+
+[hfos.dev--environment]
+file_filter = locale/<lang>/LC_MESSAGES/dev/environment.po
+source_file = docs/build/locale/dev/environment.pot
+source_lang = en
+
+[hfos.dev--standards]
+file_filter = locale/<lang>/LC_MESSAGES/dev/standards.po
+source_file = docs/build/locale/dev/standards.pot
+source_lang = en
+
+[hfos.dev--index]
+file_filter = locale/<lang>/LC_MESSAGES/dev/index.po
+source_file = docs/build/locale/dev/index.pot
+source_lang = en
+
+[hfos.dev--packages--hfos_ldap]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/hfos.ldap.po
+source_file = docs/build/locale/dev/packages/hfos.ldap.pot
+source_lang = en
+
+[hfos.dev--packages--hfos_alert]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/hfos.alert.po
+source_file = docs/build/locale/dev/packages/hfos.alert.pot
+source_lang = en
+
+[hfos.dev--packages--modules]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/modules.po
+source_file = docs/build/locale/dev/packages/modules.pot
+source_lang = en
+
+[hfos.dev--packages--robot]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/robot.po
+source_file = docs/build/locale/dev/packages/robot.pot
+source_lang = en
+
+[hfos.dev--packages--hfos]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/hfos.po
+source_file = docs/build/locale/dev/packages/hfos.pot
+source_lang = en
+
+[hfos.dev--packages--robot_provisions]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/robot.provisions.po
+source_file = docs/build/locale/dev/packages/robot.provisions.pot
+source_lang = en
+
+[hfos.dev--packages--wiki_provisions]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/wiki.provisions.po
+source_file = docs/build/locale/dev/packages/wiki.provisions.pot
+source_lang = en
+
+[hfos.dev--packages--wiki]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/wiki.po
+source_file = docs/build/locale/dev/packages/wiki.pot
+source_lang = en
+
+[hfos.dev--packages--ldap]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/ldap.po
+source_file = docs/build/locale/dev/packages/ldap.pot
+source_lang = en
+
+[hfos.dev--api--index]
+file_filter = locale/<lang>/LC_MESSAGES/dev/api/index.po
+source_file = docs/build/locale/dev/api/index.pot
+source_lang = en
+
+[hfos.dev--man--schemata]
+file_filter = locale/<lang>/LC_MESSAGES/dev/man/schemata.po
+source_file = docs/build/locale/dev/man/schemata.pot
+source_lang = en
+
+[hfos.dev--man--provisions]
+file_filter = locale/<lang>/LC_MESSAGES/dev/man/provisions.po
+source_file = docs/build/locale/dev/man/provisions.pot
+source_lang = en
+
+[hfos.dev--man--authentication]
+file_filter = locale/<lang>/LC_MESSAGES/dev/man/authentication.po
+source_file = docs/build/locale/dev/man/authentication.pot
+source_lang = en
+
+[hfos.dev--man--index]
+file_filter = locale/<lang>/LC_MESSAGES/dev/man/index.po
+source_file = docs/build/locale/dev/man/index.pot
+source_lang = en
+
+[hfos.dev--man--web]
+file_filter = locale/<lang>/LC_MESSAGES/dev/man/web.po
+source_file = docs/build/locale/dev/man/web.pot
+source_lang = en
+
+[hfos.dev--man--misc--tools]
+file_filter = locale/<lang>/LC_MESSAGES/dev/man/misc/tools.po
+source_file = docs/build/locale/dev/man/misc/tools.pot
+source_lang = en
+
+[hfos.about--hackerfleet]
+file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet.po
+source_file = docs/build/locale/about/hackerfleet.pot
+source_lang = en
+
+[hfos.about--hfos]
+file_filter = locale/<lang>/LC_MESSAGES/about/hfos.po
+source_file = docs/build/locale/about/hfos.pot
+source_lang = en
+
+[hfos.about--hfos--hfos_differences]
+file_filter = locale/<lang>/LC_MESSAGES/about/hfos/hfos_differences.po
+source_file = docs/build/locale/about/hfos/hfos_differences.pot
+source_lang = en
+
+[hfos.about--hfos--hfos]
+file_filter = locale/<lang>/LC_MESSAGES/about/hfos/hfos.po
+source_file = docs/build/locale/about/hfos/hfos.pot
+source_lang = en
+
+[hfos.about--hfos--hfos_details]
+file_filter = locale/<lang>/LC_MESSAGES/about/hfos/hfos_details.po
+source_file = docs/build/locale/about/hfos/hfos_details.pot
+source_lang = en
+
+[hfos.about--hackerfleet--contact]
+file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/contact.po
+source_file = docs/build/locale/about/hackerfleet/contact.pot
+source_lang = en
+
+[hfos.about--hackerfleet--who]
+file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/who.po
+source_file = docs/build/locale/about/hackerfleet/who.pot
+source_lang = en
+
+[hfos.about--hackerfleet--goals]
+file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/goals.po
+source_file = docs/build/locale/about/hackerfleet/goals.pot
+source_lang = en
+
+[hfos.about--hackerfleet--founders]
+file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/founders.po
+source_file = docs/build/locale/about/hackerfleet/founders.pot
+source_lang = en
+
+[hfos.about--hackerfleet--timeline]
+file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/timeline.po
+source_file = docs/build/locale/about/hackerfleet/timeline.pot
+source_lang = en
+
