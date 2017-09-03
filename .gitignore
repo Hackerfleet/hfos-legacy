@@ -19,6 +19,9 @@ debian/files
 # SCM versioning
 hfos/version.py
 
+# Documentation
+*.mo
+
 # Testing stuff
 .tox
 coverage
