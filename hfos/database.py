@@ -55,6 +55,11 @@ from pkg_resources import iter_entry_points, DistributionNotFound
 from pprint import pprint
 from random import choice
 
+try:  # 2/3
+    PermissionError
+except NameError:
+    PermissionError = IOError  # NOQA
+
 schemastore = None
 configschemastore = {}
 objectmodels = None
