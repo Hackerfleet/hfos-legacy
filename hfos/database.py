@@ -48,7 +48,7 @@ from os.path import join, getsize, isfile, isdir, splitext
 from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
 from circuits import Timer, Event
-from hfos.logger import hfoslog, debug, warn, critical, verbose
+from hfos.logger import hfoslog, debug, warn, error, critical, verbose
 from hfos.component import ConfigurableComponent, handler
 from jsonschema import ValidationError  # NOQA
 from pkg_resources import iter_entry_points, DistributionNotFound
@@ -331,7 +331,8 @@ class Maintenance(ConfigurableComponent):
                 'storageSize', 0)
             self.collection_total += self.collection_sizes[col]
 
-        sorted_x = sorted(self.collection_sizes.items(), key=operator.itemgetter(1))
+        sorted_x = sorted(self.collection_sizes.items(),
+                          key=operator.itemgetter(1))
 
         for item in sorted_x:
             self.log("Collection size (%s): %.2f MB" % (
@@ -348,12 +349,17 @@ class Maintenance(ConfigurableComponent):
                 for file in item[2]:
                     try:
                         total_size = total_size + getsize(join(item[0], file))
-                    except:
-                        self.log("error with file:  " + join(item[0], file))
+                    except (OSError, PermissionError) as e:
+                        self.log("error with file:  " + join(item[0], file), e)
             return total_size
 
         for name, checkpoint in self.config.locations.items():
-            stats = statvfs(checkpoint['location'])
+            try:
+                stats = statvfs(checkpoint['location'])
+            except (OSError, PermissionError) as e:
+                self.log('Location unavailable:', name, e, type(e),
+                         lvl=error, exc=True)
+                continue
             free_space = stats.f_frsize * stats.f_bavail
             used_space = get_folder_size(
                 checkpoint['location']
