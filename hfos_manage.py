@@ -691,7 +691,7 @@ def install_var(clear, clear_all):
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
     target_paths = (
-        '/var/www/challenges'  # For LetsEncrypt acme certificate challenges
+        '/var/www/challenges',  # For LetsEncrypt acme certificate challenges
         '/var/lib/hfos',
         '/var/cache/hfos',
         '/var/cache/hfos/tilecache',
