@@ -84,6 +84,8 @@ try:
 except NameError:
     unicode = str
 
+distribution = 'DEBIAN'
+
 service_template = 'hfos.service'
 nginx_configuration = 'nginx.conf'
 
@@ -918,17 +920,26 @@ Using 'localhost' for now""", lvl=warn)
         'host_url': 'http://127.0.0.1:8055/'
     }
 
-    configuration_file = '/etc/nginx/sites-available/hfos.conf'
-    configuration_link = '/etc/nginx/sites-enabled/hfos.conf'
+    if distribution == 'DEBIAN':
+        configuration_file = '/etc/nginx/sites-available/hfos.conf'
+        configuration_link = '/etc/nginx/sites-enabled/hfos.conf'
+    elif distribution == 'ARCH':
+        configuration_file = '/etc/nginx/nginx.conf'
+        configuration_link = None
+    else:
+        hfoslog('Unsure how to proceed, you may need to specify your '
+                'distribution', lvl=error, emitter='MANAGE')
+        return
 
     hfoslog('Writing nginx HFOS site definition')
     write_template_file(os.path.join('dev/templates', nginx_configuration),
                         configuration_file,
                         definitions)
 
-    hfoslog('Enabling nginx HFOS site')
-    if not os.path.exists(configuration_link):
-        os.symlink(configuration_file, configuration_link)
+    if configuration_link is not None:
+        hfoslog('Enabling nginx HFOS site (symlink)')
+        if not os.path.exists(configuration_link):
+            os.symlink(configuration_file, configuration_link)
 
     hfoslog('Restarting nginx service')
     Popen([
@@ -1151,7 +1162,7 @@ def uninstall():
     _check_root()
 
     response = _ask("This will delete all data of your HFOS installation! Type"
-                   "YES to continue:", default="N", show_hint=False)
+                    "YES to continue:", default="N", show_hint=False)
     if response == 'YES':
         shutil.rmtree('/var/lib/hfos')
         shutil.rmtree('/var/cache/hfos')
@@ -1188,7 +1199,13 @@ def modify(ctx, schema, uuid, filter, field, value):
         return
 
     hfoslog('Object found, modifying', lvl=debug, emitter='manage')
-    obj._fields[field] = literal_eval(value)
+    try:
+        new_value = literal_eval(value)
+    except ValueError:
+        hfoslog('Interpreting value as string')
+        new_value = str(value)
+
+    obj._fields[field] = new_value
     obj.validate()
     hfoslog('Changed object validated', lvl=debug, emitter='manage')
     obj.save()
@@ -1202,6 +1219,7 @@ def modify(ctx, schema, uuid, filter, field, value):
 @click.pass_context
 def view(ctx, schema, uuid, filter):
     """Show stored objects"""
+
     database = ctx.obj['db']
 
     if schema is None:
@@ -1215,9 +1233,8 @@ def view(ctx, schema, uuid, filter):
     elif filter:
         obj = model.find(literal_eval(filter))
     else:
-        hfoslog('No object uuid or filter specified. Read the help.',
-                lvl=warn, emitter='manage')
-        return
+        obj = model.find()
+
     for item in obj:
         pprint(item._fields)
 
