@@ -31,3 +31,6 @@ coverage
 workspace.xml
 tasks.xml
 shelf
+
+# Scratchspace
+scratch
