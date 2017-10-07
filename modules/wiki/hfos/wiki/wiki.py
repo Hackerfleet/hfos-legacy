@@ -93,6 +93,9 @@ class Wiki(ConfigurableComponent):
         for item in wikipage.find(sort=[("name", pymongo.DESCENDING)]):
             try:
                 title = item.title
+
+                if title.startswith('#'):
+                    continue
             except AttributeError:
                 title = item.name
             index.html += '<li><a href="#!/wiki/' + item.name + '">' + \
