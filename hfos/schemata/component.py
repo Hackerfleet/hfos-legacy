@@ -21,6 +21,8 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
+"""Basic component configuration schemata template"""
+
 ComponentConfigSchemaTemplate = {
     'type': 'object',
     'id': '#component',
@@ -95,7 +97,10 @@ ComponentConfigSchemaTemplate = {
 }
 
 ComponentConfigForm = [
-    '*'
+    'name',
+    'componentclass'
+    'notes',
+    'active',
 ]
 
 ComponentBaseConfigSchema = {'schema': ComponentConfigSchemaTemplate,
