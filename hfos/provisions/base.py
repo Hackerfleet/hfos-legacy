@@ -42,7 +42,7 @@ system_user = None
 
 
 def provisionList(items, dbobject, overwrite=False, clear=False,
-                  indices=None):
+                  indices=None, indices_types=None):
     """Provisions a list of items according to their schema
 
     :param items: A list of provisionable items.
@@ -50,10 +50,12 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
     :param overwrite: Causes existing items to be overwritten
     :param clear: Clears the collection first (Danger!)
     :param indices: Creates indices for the given fields
+    :param indices_types: Optional list of indices-types for each indexed field
     :return:
     """
 
     def get_system_user():
+        """Retrieves the node local system user"""
         global system_user
 
         if system_user is None:
@@ -67,6 +69,7 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
 
     # TODO: Do not check this on specific objects but on the model (i.e. once)
     def needs_owner(obj):
+        """Determines whether a basic object has an ownership field"""
         for privilege in obj._fields.get('perms', None):
             if 'owner' in obj._fields['perms'][privilege]:
                 return True
@@ -125,8 +128,14 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
 
     if indices is not None:
         col = db[col_name]
-        for item in indices:
-            col.ensure_index([(item, pymongo.TEXT)], unique=True)
+        for index, index_name in zip(indices, indices_types):
+            if index_name in (None, 'text'):
+                index_type = pymongo.TEXT
+            elif index_name == '2dsphere':
+                index_type = pymongo.GEOSPHERE
+            hfoslog('Enabling index of type', index_type, 'on', index,
+                    emitter='PROVISIONS')
+            col.ensure_index([(index, index_type)], unique=True)
 
             # for index in col.list_indexes():
             #    hfoslog("Index: ", index, emitter='PROVISIONS')
