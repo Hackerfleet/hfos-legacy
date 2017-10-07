@@ -43,9 +43,8 @@ Provisions
 from circuits.web.controllers import Controller
 
 from hfos.events.system import hfosEvent, authorizedevent, anonymousevent
-from hfos.schemata.component import ComponentBaseConfigSchema, \
-    ComponentConfigSchemaTemplate
-from hfos.logger import hfoslog, warn, critical, error, debug, verbose, hilight
+from hfos.schemata.component import ComponentBaseConfigSchema
+from hfos.logger import hfoslog, warn, critical, error, verbose
 from circuits import Component
 from jsonschema import ValidationError
 from warmongo import model_factory
@@ -57,7 +56,8 @@ import inspect
 import traceback
 from sys import exc_info
 
-from pprint import pprint
+
+# from pprint import pprint
 
 
 def handler(*names, **kwargs):
@@ -144,11 +144,11 @@ def handler(*names, **kwargs):
     return wrapper
 
 
-class ConfigurableMeta(object):
-    """Meta class to add configuration capabilities to circuits objects"""
+class LoggingMeta(object):
+    """Baseclass for all components that adds naming and logging
+    functionality"""
 
     names = []
-    configprops = {}
 
     def __init__(self, uniquename=None, *args, **kwargs):
         """Check for configuration issues and instantiate a component"""
@@ -163,16 +163,54 @@ class ConfigurableMeta(object):
                         lvl=critical, emitter="CORE")
         else:
             while True:
-                uniquename = "%s%s" % (self.name, randint(0, 32768))
+                uniquename = "%s%s" % (self.__class__.__name__,
+                                       randint(0, 32768))
                 if uniquename not in self.names:
                     self.uniquename = uniquename
                     self.names.append(uniquename)
 
                     break
 
+    def log(self, *args, **kwargs):
+        """Log a statement from this component"""
+
+        func = inspect.currentframe().f_back.f_code
+        # Dump the message + the name of this function to the log.
+
+        if 'exc' in kwargs and kwargs['exc'] is True:
+            exc_type, exc_obj, exc_tb = exc_info()
+            line_no = exc_tb.tb_lineno
+            # print('EXCEPTION DATA:', line_no, exc_type, exc_obj, exc_tb)
+            args += traceback.extract_tb(exc_tb),
+        else:
+            line_no = func.co_firstlineno
+
+        sourceloc = "[%.10s@%s:%i]" % (
+            func.co_name,
+            func.co_filename,
+            line_no
+        )
+        hfoslog(sourceloc=sourceloc, emitter=self.uniquename, *args, **kwargs)
+
+
+class ConfigurableMeta(LoggingMeta):
+    """Meta class to add configuration capabilities to circuits objects"""
+
+    configprops = {}
+    configform = []
+
+    def __init__(self, *args, **kwargs):
+        """Check for configuration issues and instantiate a component"""
+
+        super(ConfigurableMeta, self).__init__(*args, **kwargs)
+
         self.configschema = deepcopy(ComponentBaseConfigSchema)
 
         self.configschema['schema']['properties'].update(self.configprops)
+        if len(self.configform) > 0:
+            self.configschema['form'] += self.configform
+        else:
+            self.configschema['form'] = ['*']
 
         # self.log("[UNIQUECOMPONENT] Config Schema: ", self.configschema,
         #         lvl=critical)
@@ -298,30 +336,18 @@ class ConfigurableMeta(object):
 
             # self.log("Fields:", self.config._fields, lvl=verbose)
 
-    def log(self, *args, **kwargs):
-        """Log a statement from this component"""
 
-        func = inspect.currentframe().f_back.f_code
-        # Dump the message + the name of this function to the log.
+class LoggingComponent(LoggingMeta, Component):
+    """Logging capable component for simple HFOS components"""
 
-        if 'exc' in kwargs and kwargs['exc'] is True:
-            exc_type, exc_obj, exc_tb = exc_info()
-            line_no = exc_tb.tb_lineno
-            # print('EXCEPTION DATA:', line_no, exc_type, exc_obj, exc_tb)
-            args += traceback.extract_tb(exc_tb),
-        else:
-            line_no = func.co_firstlineno
-
-        sourceloc = "[%.10s@%s:%i]" % (
-            func.co_name,
-            func.co_filename,
-            line_no
-        )
-        hfoslog(sourceloc=sourceloc, emitter=self.uniquename, *args, **kwargs)
+    def __init__(self, uniquename=None, *args, **kwargs):
+        LoggingMeta.__init__(self, uniquename)
+        Component.__init__(self, *args, **kwargs)
 
 
 class ConfigurableController(ConfigurableMeta, Controller):
     """Configurable controller for direct web access"""
+
     def __init__(self, uniquename=None, *args, **kwargs):
         ConfigurableMeta.__init__(self, uniquename)
         Controller.__init__(self, *args, **kwargs)
@@ -329,6 +355,7 @@ class ConfigurableController(ConfigurableMeta, Controller):
 
 class ConfigurableComponent(ConfigurableMeta, Component):
     """Configurable component for default HFOS modules"""
+
     def __init__(self, uniquename=None, *args, **kwargs):
         ConfigurableMeta.__init__(self, uniquename)
         Component.__init__(self, *args, **kwargs)
