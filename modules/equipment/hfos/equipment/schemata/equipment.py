@@ -289,6 +289,6 @@ EquipmentForm = [{
             ]
         }
     ]
-}]
+}, editbuttons]
 
 Equipment = {'schema': EquipmentSchema, 'form': EquipmentForm}
