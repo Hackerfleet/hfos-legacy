@@ -32,12 +32,13 @@ Chat manager
 """
 
 from time import time
+from collections import namedtuple
 from hfos.component import ConfigurableComponent, handler
 from hfos.logger import error, warn, hilight, debug, verbose
 from hfos.database import objectmodels
 from hfos.events.client import broadcast, send
 from hfos.events.system import authorizedevent
-from hfos.tools import std_now, std_uuid
+from hfos.tools import std_now, std_uuid, std_table
 from circuits import Event
 from pymongo import DESCENDING
 
@@ -100,7 +101,7 @@ class Host(ConfigurableComponent):
             chat_channels[channel.uuid] = channel
 
         self.chat_channels = chat_channels
-        self.users = []
+        self.users = {}
         self.user_attention = {}
         self.user_joins = {}
         self.clients = {}
@@ -115,7 +116,14 @@ class Host(ConfigurableComponent):
 
     @handler("user_list")
     def user_list(self, *args):
-        self.log('Logged in users:', self.users, pretty=True)
+        #self.log('Logged in users:', self.users, pretty=True)
+        Row = namedtuple("User", ['Name', 'Attention'])
+        rows = []
+        for user in self.users.values():
+            rows.append(Row(user.name, self.user_attention[user.uuid]))
+
+        table = std_table(rows)
+        self.log("Users:\n", table)
 
     def _get_recipient(self, event):
         try:
@@ -134,6 +142,9 @@ class Host(ConfigurableComponent):
 
         return msg
 
+    def objectcreation(self, event):
+        self.log('Creation event!')
+
     @handler('clientdisconnect')
     def clientdisconnect(self, event):
         if event.clientuuid in self.clients:
@@ -143,7 +154,7 @@ class Host(ConfigurableComponent):
     @handler("userlogout")
     def userlogout(self, event):
         self.log('Logging out user:', event.useruuid, lvl=debug)
-        self.users.remove(event.useruuid)
+        self.users.pop(event.useruuid)
         self.user_attention.pop(event.useruuid)
 
     @handler("userlogin")
@@ -153,6 +164,7 @@ class Host(ConfigurableComponent):
 
         try:
             user_uuid = event.useruuid
+            user = objectmodels['user'].find_one({'uuid': user_uuid})
 
             if user_uuid not in self.lastlogs:
                 self.log('Setting up lastlog for a new user.', lvl=debug)
@@ -164,7 +176,7 @@ class Host(ConfigurableComponent):
                 lastlog.save()
                 self.lastlogs[user_uuid] = lastlog
 
-            self.users.append(user_uuid)
+            self.users[user_uuid] = user
             self.user_attention[user_uuid] = None
             self._send_status(user_uuid, event.clientuuid)
         except Exception as e:
