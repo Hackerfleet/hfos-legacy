@@ -24,11 +24,11 @@
 @import '../../../colors';
 
 .chat {
-  height: 95%;
   width: 100%;
   padding: 0 20px 0 20px;
-  position: relative;
+  position: absolute;
   bottom: 0;
+  top: 50px;
 }
 
 .chat-messages {

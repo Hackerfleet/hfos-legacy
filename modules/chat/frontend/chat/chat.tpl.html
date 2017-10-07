@@ -3,46 +3,69 @@
 </button>
 
 <div class="well chat">
-    <div class="row" id="chatheader">
-        <h2>Chat: {{$ctrl.chat.channels[$ctrl.chat.channel].name}}
+    <div ng-show="$ctrl.user.signedin">
+        <div ng-if="keys($ctrl.chat.channels).length === 0">
+            <h2>No channels!</h2>
+            <span>Looks like there are no channels on this node, yet!</span>
+            <span><a href="#!/editor/chatchannel//create"><span
+                    class="fa fa-pencil"></span>Create a new channel</a></span>
+        </div>
 
-        </h2>
-        <a href="#!/editor/chatchannel/{{$ctrl.chat.channel}}/edit">
-            <span class="fa fa-pencil"></span>
-        </a>
-        <span>{{$ctrl.chat.channels[$ctrl.chat.channel].topic}}</span>
-    </div>
-    <div class="row" id="chatdisplay" scroll-glue>
-        <a ng-click="$ctrl.chat.get_history()">Get older messages</a>
-        <ul class="chat-messages">
-            <li ng-repeat="(timestamp, msg) in $ctrl.chat.messages[$ctrl.chat.channel] | orderedObject">
-                <img class="profile-image" src="/assets/images/icons/anonymous-icon.png" height="32px" width="32px"/>
-                <div class="message-content">
-                    <span><strong>{{$ctrl.chat.users[$ctrl.chat.channel][msg.sender].name}}</strong></span>
-                    <span class="message-ago" am-time-ago="timestamp | amFromUnix"></span>
-                    <span class="message-timestamp"><small>{{timestamp * 1000| date:'mediumTime'}}</small></span>
-                    <br/>
-                    <span ng-bind-html="msg.content"></span>
-                </div>
-            </li>
-        </ul>
+        <div ng-show="$ctrl.chat.channel === ''">
+            <h2>Join a channel</h2>
+            <span>Looks like you haven't joined a channel, yet!</span>
+            <span>To join a channel, open the right hand menu and select one to join.</span>
+        </div>
     </div>
 
-    <div class="row chatinput">
-        <form class="form-horizontal">
-            <div class="input-group">
+    <div ng-hide="$ctrl.user.signedin">
+        <h2>Login required</h2>
+        <span>Please <a ng-click="$ctrl.user.login()">login or register your account</a> to use this node.</span>
+    </div>
+
+    <div ng-if="$ctrl.user.signedin && (keys($ctrl.chat.channels).length || $ctrl.chat.channel !== '')">
+        <div class="row" id="chatheader">
+            <h2>Chat: <span ng-bind="$ctrl.chat.channels[$ctrl.chat.channel].name"></span>
+
+            </h2>
+            <a href="#!/editor/chatchannel/{{$ctrl.chat.channel}}/edit">
+                <span class="fa fa-pencil"></span>
+            </a>
+            <span ng-bind="$ctrl.chat.channels[$ctrl.chat.channel].topic"></span>
+        </div>
+        <div class="row" id="chatdisplay" scroll-glue>
+            <a ng-click="$ctrl.chat.get_history()">Get older messages</a>
+            <ul class="chat-messages">
+                <li ng-repeat="(timestamp, msg) in $ctrl.chat.messages[$ctrl.chat.channel] | orderedObject">
+                    <img class="profile-image" src="/assets/images/icons/anonymous-icon.png" height="32px"
+                         width="32px"/>
+                    <div class="message-content">
+                        <span><strong>{{$ctrl.chat.users[$ctrl.chat.channel][msg.sender].name}}</strong></span>
+                        <span class="message-ago" am-time-ago="timestamp | amFromUnix"></span>
+                        <span class="message-timestamp"><small>{{timestamp * 1000| date:'mediumTime'}}</small></span>
+                        <br/>
+                        <span ng-bind-html="msg.content"></span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="row chatinput">
+            <form class="form-horizontal">
+                <div class="input-group">
             <textarea
                     class="col-sm-11 form-control"
                     rows="1" id="chatinput"
                     ng-model="$ctrl.input"
                     placeholder="Enter message..."
-                    ng-keyup="$event.keyCode == 13 && !$event.shiftKey && $ctrl.chatsend()"
+                    ng-keyup="$ctrl.keyup($event)"
             ></textarea>
-                <div class="input-group-btn">
-                    <button type="submit" class="btn btn-default" ng-click="$ctrl.chatsend()">Send
-                    </button>
+                    <div class="input-group-btn">
+                        <button type="submit" class="btn btn-default" ng-click="$ctrl.chatsend()">Send
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>

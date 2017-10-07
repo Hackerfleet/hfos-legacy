@@ -10,8 +10,9 @@
 
 class chatservice {
     
-    constructor(user, interval, socket, rootscope, $timeout, objectproxy) {
+    constructor(user, alert, interval, socket, rootscope, $timeout, objectproxy) {
         this.user = user;
+        this.alert = alert;
         this.interval = interval;
         this.socket = socket;
         this.rootscope = rootscope;
@@ -133,6 +134,15 @@ class chatservice {
                 }
                 self.sort_channels();
                 console.log('[CHAT] Channels:', self.channels, self.joined, self.unjoined);
+                if (self.channel === '') {
+                    try {
+                        self.change(self.user.profile.settings.chat.last_channel);
+                    } catch (err) {
+                        self.change(Object.keys(self.channels)[0]);
+                    }
+                    
+                }
+                self.get_history();
             })
         };
         
@@ -158,7 +168,7 @@ class chatservice {
                         } else if (profile.userdata.name !== null || profile.userdata.familyname !== null) {
                             user.name = profile.userdata.name + ' ' + profile.userdata.familyname;
                         }
-    
+                        
                         self.users[self.channel][profile.owner] = user;
                     } else {
                         self.op.get('user', profile.owner).then(function (account) {
@@ -210,21 +220,39 @@ class chatservice {
         this.socket.send(packet);
     }
     
+    set_last_channel(channel) {
+        if (typeof this.user.profile.settings.chat === 'undefined') {
+            this.user.profile.settings.chat = {last_channel: channel};
+        } else {
+            this.user.profile.settings.chat.last_channel = channel;
+        }
+        this.user.saveProfile();
+    }
+    
     change(channel) {
         if (typeof channel === 'undefined') {
-            // TODO: Remember last channel and restore that
+            console.log('[CHAT] Undefined channel:', channel, Object.keys(this.channels), this.channel);
             channel = Object.keys(this.channels)[0];
+            console.log(this.channels[0])
         }
+        if (typeof channel === 'undefined') {
+            console.log('[CHAT] Tried to join undefined channel');
+            return
+        }
+        
         console.log('[CHAT] Changing to channel ', channel);
         this.channel = channel;
+        this.set_last_channel(channel);
+        
         let packet = {
             component: 'hfos.chat.host',
             action: 'change',
             data: channel
         };
-        this.request_profiles();
         this.socket.send(packet);
-        
+    
+        this.request_profiles();
+    
         if (typeof this.messages[channel] === 'undefined' || this.messages[channel].length === 0) {
             this.get_history();
         }
@@ -249,6 +277,6 @@ class chatservice {
     
 }
 
-chatservice.$inject = ['user', '$interval', 'socket', '$rootScope', '$timeout', 'objectproxy'];
+chatservice.$inject = ['user', 'alert', '$interval', 'socket', '$rootScope', '$timeout', 'objectproxy'];
 
 export default chatservice;
