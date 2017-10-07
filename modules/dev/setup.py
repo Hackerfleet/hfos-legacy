@@ -46,6 +46,7 @@ This package a few modules to debug others, as well as the core system.
     recorder=hfos.misc.recorder:Recorder
     playback=hfos.misc.playback:Playback
     navdatasim=hfos.misc.navdatasim:NavdataSim
+    vesselsim=hfos.misc.vesselsim:VesselSim
     """,
       test_suite="tests.main.main",
       )
