@@ -1,14 +1,14 @@
 <div class="container">
     <div class="jumbotron">
-        <h1>Heroes</h1>
-        <span>Node local user heroes</span>
-
-        <h3>Achievement status</h3>
-        <span>This would list general stats about local achievements</span>
-        <span ng-repeat="achievement in $ctrl.achievements">{{achievement.name}}</span>
-
-        <h3>Badge details</h3>
-        <span>This would give a list of badges assigned to users</span>
-        <span ng-repeat="badge in $ctrl.badges">{{badge.name}}</span>
+        <h1>Equipment</h1>
+        <span>Local equipment list and status</span>
+        <table ng-table="$ctrl.tableParams"
+               show-filter="true"
+               class="table table-condensed table-bordered table-striped">
+            <tr ng-repeat="(uuid, item) in $ctrl.equipment">
+                <td title="'Name'" sortable="'name'">{{item.name}}</td>
+                <td title="'Status'" sortable="'status'">{{item.status}}</td>
+            </tr>
+        </table>
     </div>
 </div>

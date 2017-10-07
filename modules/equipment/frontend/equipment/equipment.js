@@ -26,21 +26,22 @@
 
 class equipmentcomponent {
 
-    constructor(objectproxy, user, $state, $scope, socket) {
+    constructor($scope, $rootScope, objectproxy, user, $state, socket) {
+        this.scope = $scope;
+        this.rootscope = $rootScope;
         this.op = objectproxy;
         this.user = user;
         this.state = $state;
-        this.scope = $scope;
         this.socket = socket;
 
         let self = this;
 
-        self.equipment = [];
+        self.equipment = {};
         
         this.getEquipment = function () {
             self.op.searchItems('equipment', '', '*').then(function(result){
-                for (item of result.data) {
-                    self.equipment.push(item);
+                for (let item of result.data) {
+                    self.equipment[item.uuid] = item;
                 }
             });
     
@@ -49,14 +50,12 @@ class equipmentcomponent {
         if (this.user.signedin === true) {
             console.log('User signed in. Getting data.');
             this.getEquipment();
-        } else {
-            console.log('Not logged in apparently, heres this:', this.user);
         }
 
         $scope.$on('User.Login', this.getEquipment);
     }
 }
 
-countablescomponent.$inject = ['objectproxy', 'user', '$state', '$scope', 'socket'];
+equipmentcomponent.$inject = ['$scope', '$rootScope', 'objectproxy', 'user', '$state', 'socket'];
 
-export default countablescomponent;
+export default equipmentcomponent;
