@@ -61,7 +61,7 @@ class Equipment(ConfigurableComponent):
         self.equipment = {}
 
         for item in objectmodels['equipment'].find():
-            self.accounts[item.uuid] = item
+            self.equipment[item.uuid] = item
 
         self.log('Cached', len(self.equipment), 'Equipment items')
 
