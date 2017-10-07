@@ -42,7 +42,7 @@ off = 100
 
 """
 
-from circuits.core import Event
+# from circuits.core import Event
 import pprint
 # from circuits import Component, handler
 # from uuid import uuid4
@@ -102,6 +102,7 @@ color = True  # TODO: Make this switchable via args
 
 mute = []
 solo = []
+mark = ['serial']
 
 LiveLog = []
 
@@ -109,11 +110,13 @@ start = time.time()
 
 
 def set_logfile(path):
+    """Specify logfile path"""
+
     global logfile
     logfile = path
 
 
-def ismuted(what):
+def is_muted(what):
     """
     Checks if a logged event is to be muted for debugging purposes.
 
@@ -138,6 +141,16 @@ def ismuted(what):
             break
 
     return state
+
+
+def is_marked(what):
+    """Check if log line qualifies for highlighting"""
+
+    for item in mark:
+        if item in what:
+            return True
+
+    return False
 
 
 def setup_root(newroot):
@@ -240,7 +253,7 @@ def hfoslog(*what, **kwargs):
 
     msg += content
 
-    if ismuted(msg):
+    if is_muted(msg):
         return
 
     if not uncut and lvl > 10 and len(msg) > 1000:
@@ -255,6 +268,9 @@ def hfoslog(*what, **kwargs):
         except IOError:
             print("Can't open logfile %s for writing!" % logfile)
             # sys.exit(23)
+
+    if is_marked(msg):
+        lvl = hilight
 
     if lvl >= verbosity['console']:
         output = str(msg)
