@@ -2,7 +2,7 @@ import icon from './assets/iconmonstr-speech-bubble-26.svg';
 
 
 export function routing($stateProvider) {
-
+    
     $stateProvider
         .state('app.chat', {
             url: '/chat',

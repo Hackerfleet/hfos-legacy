@@ -8,7 +8,7 @@
             <h2>No channels!</h2>
             <span>Looks like there are no channels on this node, yet!</span>
             <span><a href="#!/editor/chatchannel//create"><span
-                    class="fa fa-pencil"></span>Create a new channel</a></span>
+                class="fa fa-pencil"></span>Create a new channel</a></span>
         </div>
 
         <div ng-show="$ctrl.chat.channel === ''">
@@ -44,7 +44,10 @@
                         <span class="message-ago" am-time-ago="timestamp | amFromUnix"></span>
                         <span class="message-timestamp"><small>{{timestamp * 1000| date:'mediumTime'}}</small></span>
                         <br/>
-                        <span ng-bind-html="msg.content"></span>
+                        <ng-embed embed-data="msg.content"
+                                  embed-options="$ctrl.embed_options">
+                            <!--embed-template-url="template.html" -->
+                        </ng-embed>
                     </div>
                 </li>
             </ul>
@@ -54,11 +57,12 @@
             <form class="form-horizontal">
                 <div class="input-group">
             <textarea
-                    class="col-sm-11 form-control"
-                    rows="1" id="chatinput"
-                    ng-model="$ctrl.input"
-                    placeholder="Enter message..."
-                    ng-keyup="$ctrl.keyup($event)"
+                class="col-sm-11 form-control"
+                rows="1" id="chatinput"
+                ng-model="$ctrl.input"
+                ng-model-options="{ debounce: 250 }"
+                placeholder="Enter message..."
+                ng-keyup="$ctrl.keyup($event)"
             ></textarea>
                     <div class="input-group-btn">
                         <button type="submit" class="btn btn-default" ng-click="$ctrl.chatsend()">Send

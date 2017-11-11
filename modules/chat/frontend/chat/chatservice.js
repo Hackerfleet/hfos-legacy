@@ -111,11 +111,11 @@ class chatservice {
                 return
             }
             for (let uuid of Object.keys(self.channels)) {
-                console.log('[CHAT] UUID:', uuid);
+                //console.log('[CHAT] UUID:', uuid);
                 
                 let channel = self.channels[uuid];
-                console.log('[CHAT] Channel:', channel);
-                console.log('[CHAT] UUID indexof:', self.joined_channels.indexOf(uuid), uuid);
+                //console.log('[CHAT] Channel:', channel);
+                //console.log('[CHAT] UUID indexof:', self.joined_channels.indexOf(uuid), uuid);
                 if (self.joined_channels.indexOf(uuid) >= 0) {
                     console.log('[CHAT] Joined channel:', channel.name);
                     self.joined[uuid] = channel;
