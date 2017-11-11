@@ -45,7 +45,8 @@ This software package is a plugin module for HFOS.
       install_requires=['hfos>=1.2.0'],
       entry_points="""[hfos.components]
     sensors=hfos.navdata.sensors:Sensors
-    sensorscanner=hfos.navdata.sensors:SensorScanner
+    sensorplayback=hfos.navdata.playback:SensorPlayback
+    busmanager=hfos.navdata.bus:SerialBusManager
     vesselmanager=hfos.navdata.vesselmanager:VesselManager
 [hfos.schemata]
     sensordata=hfos.navdata.sensordata:SensorData

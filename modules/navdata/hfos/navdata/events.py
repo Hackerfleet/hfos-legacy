@@ -54,3 +54,20 @@ class referenceframe(Event):
         self.data = data
         hfoslog("[NAVDATA-EVENT] Reference frame generated: ", data,
                 lvl=events)
+
+
+class updatevessel(Event):
+    """Vessel has transmitted new coordinates"""
+
+    def __init__(self, ship_id, coords, source, timestamp, data):
+        """
+
+        :param data: Parsed NMEA? Data
+        """
+        super(updatevessel, self).__init__()
+        self.ship_id = ship_id
+        self.source = source
+        self.coords = coords
+        self.data = data
+        self.timestamp = timestamp
+

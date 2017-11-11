@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos.tools import std_uuid
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
@@ -33,7 +34,7 @@ Module NavData
 from hfos.component import handler
 from hfos.database import objectmodels  # , ValidationError
 from hfos.events.objectmanager import updatesubscriptions
-from hfos.navdata.events import referenceframe
+from hfos.navdata.events import referenceframe, updatevessel
 from hfos.logger import hfoslog, events, debug, verbose, critical, warn, \
     hilight
 from hfos.component import ConfigurableComponent
@@ -100,6 +101,54 @@ class VesselManager(ConfigurableComponent):
             vessel.save()
 
         self.vessel_mapview = mapview
+
+    @handler('ais_position', channel='ais')
+    def update_from_ais(self, event):
+        self.log('AIS Position update', lvl=verbose)
+        mmsi = event.data['mmsi']
+
+        vessel = objectmodels['vessel'].find_one({'mmsi': mmsi})
+
+        if vessel is None:
+            vessel = objectmodels['vessel']({'uuid': std_uuid()})
+            vessel.name = 'AIS tracked ship'
+            vessel.mmsi = mmsi
+            vessel.sog = event.data['sog']
+            vessel.cog = event.data['cog'] % 360
+            vessel.true_heading = event.data['true_heading'] % 360
+            vessel.source = 'AIS'
+
+        #pprint(vessel.serializablefields())
+
+        lat = max(-90, min(event.data['y'], 90))
+        lon = max(-180, min(event.data['x'], 180))
+
+        vessel.geojson['coordinates'] = [lat, lon]
+
+        vessel.save()
+
+    @handler('updatevessel', channel='navdata')
+    def updatevessel(self, event):
+        coords = event.coords
+        self.log('Ship updated at ', coords)
+        if event.source in ('OSDM', 'SIM'):
+            self.log('OSDM based ship update:', event.ship_id)
+
+            if objectmodels['vessel'].count({'uuid': event.ship_id}) == 0:
+                vessel = objectmodels['vessel']({
+                    'uuid': event.ship_id,
+                    'description': 'Automatically tracked vessel (OSDM)',
+                    'source': event.source
+                })
+            else:
+                vessel = objectmodels['vessel'].find_one({
+                    'uuid': event.ship_id
+                })
+
+            vessel.geojson['coordinates'] = [coords['lat'], coords['lon']]
+
+            vessel.save()
+            self.log('Vessel updated')
 
     @handler('referenceframe', channel='navdata')
     def referenceframeupdate(self, event):

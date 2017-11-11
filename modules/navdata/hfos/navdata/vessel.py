@@ -44,6 +44,55 @@ VesselSchema['properties'].update({
         'type': 'string',
         'title': 'Unique Vessel Moving Mapview ID'
     },
+    'sog': {'type': 'number', 'title': 'SOG',
+            'description': 'Speed over ground (kn)'},
+    'cog': {'type': 'number', 'title': 'COG',
+            'description': 'Course over ground (rel. to true North)'},
+    'rot': {'type': 'number', 'title': 'ROT',
+            'description': 'Rate of turn (+-720°/min)'},
+    'true_heading': {'type': 'number', 'title': 'True heading',
+                     'description': 'True heading (0°-359°)'},
+    'true_bearing': {'type': 'number', 'title': 'True bearing',
+                     'description': 'True bearing at own position (0°-359°'},
+    'geojson': {
+        'type': 'object',
+        'default': {
+            'type': 'Point',
+            'coordinates': [0.0, 0.0]
+        },
+        'properties': {
+            "type": {
+                'enum': ['Point']
+            },
+            'accuracy': {
+                'type': 'array',
+                'title': 'Accuracy',
+                'description': 'Positional Accuracy (Lon/Lat)',
+                'default': [0.0, 0.0],
+                'items': {
+                    'type': 'number',
+                    'minItems': 2,
+                    'maxItems': 2
+                }
+            },
+            "coordinates": {
+                'type': 'array',
+                # TODO: Decide if we want to integrate null island as default
+                'default': [0.0, 0.0],
+                'items': {
+                    'type': 'number',
+                    'minItems': 2,
+                    'maxItems': 2
+                }
+            }
+        }
+    },
+    'source': {
+        'type': 'string',
+        'title': 'Source',
+        'enum': ['AIS', 'OSDM', 'SIM'],
+        'description': 'Data source for this vessel'
+    },
     'description': {
         'type': 'string', 'format': 'html',
         'title': 'Vessel description',
@@ -66,6 +115,9 @@ VesselSchema['properties'].update({
                          'title': 'MMSI',
                          'description': 'Maritime Mobile Service '
                                         'Identity'},
+                'imo_sin': {'type': 'string', 'minLength': 7, 'maxLength': 7,
+                            'title': 'IMO SIN',
+                            'description': 'IMO Ship identification number'},
                 'vessel_type': {'type': 'string', 'title': 'Vessel Type',
                                 'enum': ['Sailboat', 'Motorboat',
                                          'Platform'],
