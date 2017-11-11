@@ -120,7 +120,7 @@ DashboardForm = [
             'cards[].widgettype',
             {
                 'key': 'cards[].valuetype',
-                'type': 'strapselect',
+                'type': 'uiselect',
                 'placeholder': 'Select a Sensor Value',
                 'options': {
                     "type": "sensordatatype",
