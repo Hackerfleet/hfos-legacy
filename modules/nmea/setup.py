@@ -35,7 +35,7 @@ setup(name="hfos-NMEA",
       long_description="""HFOS - NMEA
 ===========
 
-A NMEA-0183 parser for HFOS' NavData package.
+A NMEA-0183 and an AIS parser for HFOS' NavData package.
 
 This software package is a plugin module for HFOS.
 """,
@@ -43,11 +43,12 @@ This software package is a plugin module for HFOS.
       install_requires=[
           'hfos>=1.2.0',
           'pynmea2>=1.5.1',
+          'libais>=0.16',
           'pyserial>=3.1.1'
       ],
       entry_points="""[hfos.components]
     nmeaparser=hfos.nmea.nmea:NMEAParser
-    nmeaplayback=hfos.nmea.nmea:NMEAPlayback
+    aisparser=hfos.nmea.ais:AISParser
     """,
       test_suite="tests.main.main",
       )
