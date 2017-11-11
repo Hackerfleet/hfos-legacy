@@ -51,6 +51,11 @@ GeoObjectSchema['properties'].update({
         'type': 'string',
         'title': 'Unique GeoObject Layer ID'
     },
+    'type': {
+        'type': 'string',
+        'title': 'Type',
+        'description': 'Free-form classification with reserved types'
+    },
     'color': {'type': 'string', 'title': 'Background Color',
               # 'format': 'color',
               'description': 'GeoObject background color indicator',
@@ -63,9 +68,6 @@ GeoObjectSchema['properties'].update({
              'description': 'Custom user icon', 'default': 'flag'},
     'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
               'description': 'Custom user notes'},
-    'zitronensalat': {'type': 'string', 'format': 'html',
-                      'title': 'User notes',
-                      'description': 'Custom user notes'},
     'minZoom': {'type': 'number', 'description': 'Minimum zoom number.',
                 'default': 0},
     'maxZoom': {'type': 'number', 'description': 'Maximum zoom number.',

@@ -40,10 +40,13 @@ A modern, opensource approach to map management.
 This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
-      install_requires=['hfos>=1.2.0'],
+      install_requires=[
+            'hfos>=1.2.0',
+      ],
       entry_points="""[hfos.components]
     gdal=hfos.map.gdal:GDAL
-    map=hfos.map.maptileservice:MaptileService
+    mts=hfos.map.maptileservice:MaptileService
+    mtl=hfos.map.maptileservice:MaptileLoader
 [hfos.schemata]
     geoobject=hfos.map.schemata.geoobject:GeoObject
     layer=hfos.map.schemata.layer:Layer

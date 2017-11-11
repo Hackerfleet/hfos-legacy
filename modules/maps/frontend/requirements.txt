@@ -20,3 +20,6 @@ leaflet.zoomslider@~0.7.0
 leaflet-contextmenu@1.1.0
 git+https://git@github.com/Hackerfleet/Leaflet.SimpleGraticule.git
 Leaflet.vector-markers@0.0.6
+mt-geo@~1.0.1
+geodesy@~1.1.2
+leaflet-virtual-grid@~1.0.4

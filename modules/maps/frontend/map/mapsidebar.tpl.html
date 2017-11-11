@@ -109,7 +109,7 @@
                             </ul>
                         </div>
                         <div id="other_layers">
-                            <h4 ng-click="!otherCollapsed && $ctrl.get_other_layers(); otherCollapsed = !otherCollapsed">
+                            <h4 ng-click="otherCollapsed && $ctrl.get_other_layers(); otherCollapsed = !otherCollapsed">
                                 <span class="fa" ng-class="{'fa-chevron-right': otherCollapsed,
                                                             'fa-chevron-down': !otherCollapsed}">
                                 </span>
@@ -161,23 +161,184 @@
                         </ul>
                     </uib-tab>
                     <uib-tab index="2" heading="Geo Objects">
-                        <ul>
-                            <li ng-repeat="(name, geoobject) in $ctrl.geoobjects">
-                                <a ng-click="$ctrl.switchGeoobject(geoobject.uuid)"><span
-                                        ng-bind="geoobject.name != null ? geoobject.name : 'Untitled Object'"></span></a>
-                                <div class="pull-right">
-                                    <a ng-click="$ctrl.zoom_to_geoobject(geoobject.uuid)"><span
-                                            class="fa fa-crosshairs"></span></a>
-                                    <a href="#!/editor/geoobject/{{geoobject.uuid}}/edit"><span
-                                            class="fa fa-pencil"></span></a>
-                                    <a href="#!/editor/geoobject/{{geoobject.uuid}}/copy"><span
-                                            class="fa fa-copy"></span></a>
-                                </div>
+                        <div id="geoobject_defaults">
+                            <h4 ng-click="geoobjectDetailsCollapsed = !geoobjectDetailsCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': geoobjectDetailsCollapsed,
+                                                            'fa-chevron-down': !geoobjectDetailsCollapsed}">
+                                </span>
+                                Defaults
+                            </h4>
+                            <ul uib-collapse="geoobjectDetailsCollapsed">
+                                <li>
+                                    <label>Draw Markers:</label>
+                                    <select class="pull-right" ng-model="$ctrl.default_marker">
+                                        <option ng-repeat="(value, label) in $ctrl.default_options.marker"
+                                                value="{{value}}">{{label}}
+                                        </option>
+                                    </select>
+                                    <div style="display: flow-root" ng-show="$ctrl.default_marker === 'custom'">
+                                        <label>Custom type:</label>
+                                        <input class="pull-right" type="text" ng-model="$ctrl.default_custom_marker">
+                                    </div>
+                                </li>
+                                <li>
+                                    <label>Draw Paths:</label>
+                                    <select class="pull-right" ng-model="$ctrl.default_path">
+                                        <option ng-repeat="(value, label) in $ctrl.default_options.path"
+                                                value="{{value}}">{{label}}
+                                        </option>
+                                    </select>
+                                    <div style="display: flow-root" ng-show="$ctrl.default_path === 'custom'">
+                                        <label>Custom type:</label>
+                                        <input class="pull-right" type="text" ng-model="$ctrl.default_custom_path">
+                                    </div>
+                                </li>
+                                <li>
+                                    <label>Draw Shapes:</label>
+                                    <select class="pull-right" ng-model="$ctrl.default_shape">
+                                        <option ng-repeat="(value, label) in $ctrl.default_options.shape"
+                                                value="{{value}}">{{label}}
+                                        </option>
+                                    </select>
+                                    <div style="display: flow-root" ng-show="$ctrl.default_shape === 'custom'">
+                                        <label>Custom type:</label>
+                                        <input class="pull-right" type="text" ng-model="$ctrl.default_custom_shape">
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
 
-                            </li>
-                        </ul>
+                        <div id="geoobjects">
+                            <h4 ng-click="geoobjectsCollapsed = !geoobjectsCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': geoobjectsCollapsed,
+                                                            'fa-chevron-down': !geoobjectsCollapsed}">
+                                </span>
+                                Geo Objects
+                            </h4>
+
+                            <div uib-collapse="geoobjectsCollapsed">
+                                <table ng-table="$ctrl.geoobject_tableParams"
+                                       show-filter="true"
+                                       class="table table-condensed table-bordered table-striped">
+                                    <tr ng-repeat="geoobject in $data">
+                                        <td class="text-nowrap" title="'name'" filter="{ name: 'text'}"
+                                            sortable="'name'">
+                                            <a ng-click="$ctrl.switchGeoobject(geoobject.uuid)"><span
+                                                    ng-bind="geoobject.name != null ? geoobject.name : 'Untitled Object'"></span></a>
+                                        </td>
+                                        <td class="text-nowrap"
+                                            title="'Actions'">
+                                            <a ng-click="$ctrl.zoom_to_geoobject(geoobject.uuid)"><span
+                                                    class="fa fa-crosshairs"></span></a>
+                                            <a href="#!/editor/geoobject/{{geoobject.uuid}}/edit"><span
+                                                    class="fa fa-pencil"></span></a>
+                                            <a href="#!/editor/geoobject/{{geoobject.uuid}}/copy"><span
+                                                    class="fa fa-copy"></span></a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
                     </uib-tab>
+
                     <uib-tab index="3" heading="Vessels" disable="true">
+                    </uib-tab>
+
+                    <uib-tab index="4" heading="Misc">
+                        <h3>Miscellaneous</h3>
+                        <span>Various tools & functionality</span>
+                        <div id="offline_loader">
+                            <h4 ng-click="offlineLoaderCollapsed = !offlineLoaderCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': offlineLoaderCollapsed,
+                                                            'fa-chevron-down': !offlineLoaderCollapsed}">
+                                </span>
+                                Offline Loader
+                            </h4>
+
+                            <div uib-collapse="offlineLoaderCollapsed">
+
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Maximum zoom</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control"
+                                                   ng-model="$ctrl.offline_loader_zoom">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input ng-model="$ctrl.offline_loader_overwrite"
+                                                           type="checkbox"> Overwrite existing
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <a class="btn btn-success form-control" type="button"
+                                       ng-click="$ctrl.get_offline_data()"
+                                       ng-class="{disabled: $ctrl.offline_loader_zoom > 4}">
+                                        Queue ({{$ctrl.offline_loader_zoom}} levels)
+                                    </a>
+                                    <br>
+                                    <span class="danger" ng-show="$ctrl.offline_loader_zoom > 4">Too many zoom levels, decreased desired zoom levels or zoom in</span>
+                                </form>
+                                <div ng-show="$ctrl.hasQueued()">
+                                    <h4>Queued operations</h4>
+                                    <div class="text-center">
+                                        <a class="btn btn-danger" type="button"
+                                           ng-click="$ctrl.queue_cancel()">Cancel all downloads</a>
+                                    </div>
+                                    <ul>
+                                        <li ng-repeat="(uuid, request) in $ctrl.offline_loader_queue">
+                                            <div class="panel">
+                                                <span>{{request.tiles}} tiles (~{{request.size}} kB)</span>
+                                                <span ng-show="request.active && request.completed === 0">Waiting...</span>
+                                                <a class="btn btn-sm btn-warning pull-right" type="button"
+                                                   ng-hide="request.active"
+                                                   ng-click="$ctrl.queue_trigger(uuid)">Start</a>
+                                                <a class="btn btn-sm btn-danger pull-right" type="button"
+                                                   ng-click="$ctrl.queue_remove(uuid)">Remove</a>
+                                            </div>
+                                            <uib-progressbar value="request.completed" max="request.tiles">
+                                                <span style="color:white; white-space:nowrap;">{{request.completed}} / {{request.tiles}}</span>
+                                            </uib-progressbar>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="gdal_loader">
+                            <h4 ng-click="gdalLoaderCollapsed = !gdalLoaderCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': gdalLoaderCollapsed,
+                                                            'fa-chevron-down': !gdalLoaderCollapsed}">
+                                </span>
+                                Raster charts
+                            </h4>
+
+                            <div uib-collapse="gdalLoaderCollapsed">
+                                <div>
+                                    <span>This tool allows to upload raster charts and to rescan for already converted
+                                        map data, that got lost e.g. due to a database upgrade</span>
+
+                                    <h3>Upload new chart</h3>
+                                    <span>The system currently only accepts BSB/KAP files. Please upload a single .kap
+                                        file to convert it to a HFOS layer.</span>
+                                    <input class="form-control" type="file" name="uploadfile" id="filename">
+                                    <button type="submit" class="btn btn-default" ng-click="$ctrl.gdal_upload()">
+                                        Upload Map
+                                    </button>
+                                    <hr>
+                                    <h3>Rescan existing layers</h3>
+                                    <span>The rescan action triggers an analysis of all stored HFOS layer caches and
+                                        integrates them into the GDAL layer group.</span>
+                                    <button type="submit" class="btn btn-danger" ng-click="$ctrl.gdal_rescan()">
+                                        Rescan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </uib-tab>
                 </uib-tabset>
 

@@ -65,6 +65,7 @@ MapViewSchema['properties'].update({
         'default': []
     },
     'coords': {
+        # TODO: Decide if we want to integrate null island as default
         "lat": {
             "id": "lat",
             "type": "number",

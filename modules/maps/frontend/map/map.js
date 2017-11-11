@@ -8,6 +8,8 @@
  */
 
 import L from 'leaflet';
+import Geo from 'mt-geo';
+import LatLon from 'geodesy/latlon-vincenty';
 
 import sidebar from './mapsidebar.tpl.html';
 
@@ -22,8 +24,7 @@ import contextmenu from 'leaflet-contextmenu';
 
 import 'Leaflet.vector-markers/dist/leaflet-vector-markers.css';
 
-import vectormarkers from 'Leaflet.vector-markers/dist/leaflet-vector-markers';
-
+let vectormarkers = require('Leaflet.vector-markers/dist/leaflet-vector-markers');
 import default_marker from 'leaflet/dist/images/marker-icon.png';
 
 // import 'Leaflet.Grid/L.Grid.css';
@@ -36,14 +37,23 @@ import 'leaflet.simplegraticule/L.SimpleGraticule.js';
 import 'leaflet-easybutton/src/easy-button.css';
 import 'leaflet.zoomslider/src/L.Control.Zoomslider.css';
 
+import defaultIcon from '../assets/images/icons/default.png';
+import vesselIcon from '../assets/images/icons/vessel.png';
+import vesselMovingIcon from '../assets/images/icons/vessel-moving.png';
+import vesselStoppedIcon from '../assets/images/icons/vessel-stopped.png';
+import lighthouseIcon from '../assets/images/icons/lighthouse.png';
+
+
 class mapcomponent {
     
-    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert, clipboard, navdata, $compile, $aside, uuid) {
+    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, alert, clipboard,
+                navdata, $compile, $aside, uuid, NgTableParams) {
         this.scope = scope;
         this.leaflet = leafletData;
         this.op = objectproxy;
         this.state = $state;
         this.rootscope = $rootScope;
+        this.socket = socket;
         this.user = user;
         this.schemata = schemata;
         this.menu = menu;
@@ -57,12 +67,50 @@ class mapcomponent {
         this.layergroups = {};
         this.other_layers = {};
         
+        this.scope.otherCollapsed = true;
+        
         this.baseLayer = null;
         
         this.layergroup = null;
+        
         this.drawnLayer = new L.FeatureGroup();
-        this.drawnLayer.addLayer(new L.marker([50, 50]));
+        //this.drawnLayer.addLayer(new L.marker([50, 50]));
         this.objectlayers = {};
+        
+        this.vessel_display = 'off';
+        
+        this.default_marker = "poi";
+        this.default_path = "route";
+        this.default_shape = "danger";
+        
+        this.default_custom_marker = "Custom";
+        this.default_custom_path = "Custom";
+        this.default_custom_shape = "Custom";
+        
+        this.offline_loader = false;
+        this.offline_loader_queue = {};
+        this.offline_loader_zoom = 2;
+        
+        this.default_options = {
+            marker: {
+                poi: 'Point of interest',
+                waypoint: 'Waypoint',
+                custom: 'Custom'
+            },
+            path: {
+                route: 'Route',
+                vessel_trail: 'Vessel trail',
+                custom: 'Custom'
+            },
+            shape: {
+                danger: 'Dangerous zone',
+                traffic: 'Traffic separation zone',
+                industry: 'Industrial zone',
+                fishing: 'Fishing zone',
+                custom: 'Custom'
+            }
+        };
+        
         this.map = '';
         
         let self = this;
@@ -145,8 +193,61 @@ class mapcomponent {
         this.vessels = [];
         
         //L.VectorMarkers.Icon.prototype.options.prefix = 'fa';
+        console.log("####################", vectormarkers);
+        let DefaultMarker = vectormarkers.Icon;
         
-        let DefaultMarker = L.VectorMarkers.icon;
+        
+        let Icons = {
+            Default: L.icon({
+                iconUrl: defaultIcon,
+                //shadowUrl: 'leaf-shadow.png',
+                
+                iconSize: [25, 25], // size of the icon
+                //shadowSize:   [50, 64], // size of the shadow
+                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                //shadowAnchor: [4, 62],  // the same for the shadow
+                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+            }),
+            Vessel: L.icon({
+                iconUrl: vesselIcon,
+                //shadowUrl: 'leaf-shadow.png',
+                
+                iconSize: [25, 25], // size of the icon
+                //shadowSize:   [50, 64], // size of the shadow
+                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                //shadowAnchor: [4, 62],  // the same for the shadow
+                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+            }),
+            VesselMoving: L.icon({
+                iconUrl: vesselMovingIcon,
+                //shadowUrl: 'leaf-shadow.png',
+                
+                iconSize: [25, 25], // size of the icon
+                //shadowSize:   [50, 64], // size of the shadow
+                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                //shadowAnchor: [4, 62],  // the same for the shadow
+                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+            }),
+            VesselStopped: L.icon({
+                iconUrl: vesselStoppedIcon,
+                //shadowUrl: 'leaf-shadow.png',
+                
+                iconSize: [25, 25], // size of the icon
+                //shadowSize:   [50, 64], // size of the shadow
+                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                //shadowAnchor: [4, 62],  // the same for the shadow
+                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+            }),
+            Lighthouse: L.icon({
+                iconUrl: lighthouseIcon,
+                
+                iconSize: [25, 25], // size of the icon
+                //shadowSize:   [50, 64], // size of the shadow
+                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                //shadowAnchor: [4, 62],  // the same for the shadow
+                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+            })
+        };
         
         this.controls = {
             draw: {
@@ -180,6 +281,9 @@ class mapcomponent {
             });
         };
         
+        this.hasQueued = function() {
+            return Object.keys(this.offline_loader_queue).length > 0
+        };
         
         this.copyCoordinates = function (e) {
             console.log(e);
@@ -400,7 +504,7 @@ class mapcomponent {
         };
         
         this.zoom_to_geoobject = function (uuid) {
-            console.log('Zooming to geoonject');
+            console.log('[MAP] Zooming to geoobject');
             let coords = this.geoobjects[uuid].geojson.geometry.coordinates,
                 target = [coords[1], coords[0]];
             this.map.setView(target, 15, {animate: true});
@@ -422,6 +526,90 @@ class mapcomponent {
                 this.switchLayer('overlays', uuid);
             }
             this.map.fitBounds(this.layers.overlays[uuid].layerOptions.bounds);
+        };
+        
+        this.get_offline_data = function () {
+            console.log('[MAP] Requesting extent for offline use');
+            let bounds = self.map.getBounds();
+            console.log('[MAP] bounds:', bounds);
+            let rect = [
+                bounds._southWest.lng, bounds._southWest.lat,
+                bounds._northEast.lng, bounds._northEast.lat
+            ];
+            let layers = [];
+            let uuid = null;
+            
+            for (uuid in self.leafletlayers.baselayers) {
+                if (self.layers.baselayers.hasOwnProperty(uuid)) {
+                    layers.push(uuid);
+                }
+            }
+            for (uuid in self.leafletlayers.overlays) {
+                if (self.layers.overlays.hasOwnProperty(uuid)) {
+                    layers.push(uuid);
+                }
+            }
+            let event = {
+                'component': 'hfos.map.maptileservice',
+                'action': 'request_maptile_area',
+                'data': {
+                    'extent': rect,
+                    'zoom': self.center.zoom + self.offline_loader_zoom,
+                    'layers': layers
+                }
+            };
+            self.socket.send(event);
+        };
+        
+        this.queue_trigger = function(uuid) {
+            console.log('[MAP] Requesting download of queue', uuid);
+            let event = {
+                'component': 'hfos.map.maptileservice',
+                'action': 'queue_trigger',
+                'data': uuid
+            };
+            self.socket.send(event);
+        };
+        this.queue_cancel = function() {
+            console.log('[MAP] Requesting cancellation of queues', uuid);
+            let event = {
+                'component': 'hfos.map.maptileservice',
+                'action': 'queue_cancel'
+            };
+            self.socket.send(event);
+        };
+        this.queue_remove = function(uuid) {
+            console.log('[MAP] Requesting removal of queue', uuid);
+            let event = {
+                'component': 'hfos.map.maptileservice',
+                'action': 'queue_remove',
+                'data': uuid
+            };
+            self.socket.send(event);
+        };
+    
+    
+        function handle_maptileservice(msg) {
+            if (msg.action === 'queued') {
+                console.log('[MAP] Loader request was queued');
+                self.offline_loader_queue[msg.data.uuid] = msg.data;
+            } else if (msg.action === 'empty') {
+                console.log('[MAP] No tiles to fetch');
+                self.alert.add('warning', 'No tiles to fetch', 'The area you selected does not contain any tile data.')
+            } else if (msg.action === 'acting') {
+                self.offline_loader_queue[msg.data].acting = true;
+                self.alert.add('success', 'Caching tiles', 'The system tries to download the requested tiles now.')
+            } else if (msg.action === 'offline_loader_progress') {
+                self.offline_loader_queue[msg.data.queue].completed = msg.data.completed;
+            } else if (msg.action === 'removed') {
+                delete self.offline_loader_queue[msg.data.uuid];
+            }
+        };
+        
+        this.socket.listen('hfos.map.maptileservice', handle_maptileservice);
+        
+        this.toggle_vessels = function (state) {
+            this.vessel_display = state;
         };
         
         this.scope.$on('OP.Get', function (event, objuuid, obj, schema) {
@@ -466,11 +654,17 @@ class mapcomponent {
                     self.layergroups[obj.uuid] = obj;
                 }
                 
-            } /*else if (schema === 'layer') {
+            } else if (schema === 'layer') {
                 console.log('[MAP] Received layer object: ', obj);
-                self.addLayer(objuuid);
-                console.log('[MAP] Layer flags after adding:', self.layer_flags);
-            }*/
+                
+                if (self.layergroups[self.layergroup].layers.indexOf(objuuid) >= 0) {
+                    console.log('[MAP] Is activated layer');
+                    self.addLayer(objuuid);
+                    console.log('[MAP] Layer flags after adding:', self.layer_flags);
+                } else {
+                    console.log('[MAP] Inactive layer');
+                }
+            }
         });
         
         this.scope.$on('OP.ListUpdate', function (event, schema) {
@@ -479,6 +673,13 @@ class mapcomponent {
                 
                 console.log('[MAP] Map received a list of geoobjects: ', schema, list);
                 self.geoobjects = list;
+                self.geoobject_tableParams = new NgTableParams(
+                    {},
+                    {
+                        dataset: self.geoobjects
+                    }
+                );
+                
                 
                 /*for (let item of list) {
                  console.log('[MAP] Item:', item);
@@ -606,6 +807,27 @@ class mapcomponent {
                         console.log('[MAP] Synchronizing map');
                         self.syncToMapview();
                     }
+                    if (self.vessel_display !== 'off') {
+                        let bounds = self.map.getBounds();
+                        console.log('bounds:', bounds);
+                        let rect = [
+                            [bounds._northEast.lng, bounds._northEast.lat],
+                            [bounds._southWest.lng, bounds._southWest.lat],
+                        ];
+                        let filter = {
+                            'geojson': {
+                                '$geoWithin': {
+                                    '$box': rect
+                                }
+                            }
+                        };
+                        console.log('[MAP] Vesselfilter:', filter);
+                        self.op.searchItems('vessel', filter, '*').then(function (msg) {
+                            console.log('[MAP] Returned Vessel data:', msg);
+                            self.vessels = msg.data;
+                            self.map.UpdateVessels();
+                        });
+                    }
                 } else if (event.name === 'leafletDirectiveMap.dblclick') {
                     //console.log(self.layers);
                 } else if (event.name === 'leafletDirectiveMap.mousemove') {
@@ -665,6 +887,19 @@ class mapcomponent {
             self.courseplot = L.polyline([], {color: 'red'}).addTo(map);
             
             //map.addLayer(self.drawnLayer);
+            
+            self.zoom_to_vessel = L.easyButton({
+                id: 'btn_zoom_to_vessel',
+                states: [{
+                    stateName: 'default',
+                    icon: 'fa-crosshairs',
+                    onClick: function (control) {
+                        let target = self.vessel.coords;
+                        self.map.setView(target, 15, {animate: true});
+                    }
+                }],
+                title: 'Toggle editing of GeoObjects'
+            });
             
             self.toggledraw = L.easyButton({
                 id: 'btn_toggledraw',
@@ -772,10 +1007,69 @@ class mapcomponent {
                 title: 'Toggle dashboard overlay'
             });
             
+            self.togglevesseldisplay = L.easyButton({
+                id: 'btn_togglevesseldisplay',
+                states: [{
+                    stateName: 'low',
+                    icon: 'fa-paper-plane-o',
+                    onClick: function (control) {
+                        console.log('[MAP] Toggling vessel display (high detail)');
+                        control.state('high');
+                        self.toggle_vessels('high');
+                        update_show_vessels();
+                    }
+                }, {
+                    stateName: 'high',
+                    icon: 'fa-paper-plane',
+                    onClick: function (control) {
+                        console.log('[MAP] Disabling vessel display');
+                        $('#btn_togglevesseldisplay').css({'color': '#aaa'});
+                        control.state('off');
+                        self.toggle_vessels('off');
+                    }
+                }, {
+                    stateName: 'off',
+                    icon: 'fa-paper-plane-o',
+                    onClick: function (control) {
+                        console.log('[MAP] Enabling vessel display (low detail)');
+                        $('#btn_togglevesseldisplay').css({'color': '#000'});
+                        control.state('low');
+                        self.toggle_vessels('low');
+                        update_show_vessels();
+                    }
+                }],
+                title: 'Toggle display of other nearby vessels'
+            });
+            
+            self.toggleradiorange = L.easyButton({
+                id: 'btn_toggleradiorange',
+                states: [{
+                    stateName: 'off',
+                    icon: 'fa-wifi',
+                    onClick: function (control) {
+                        console.log('[MAP] Enabling radio range display');
+                        $('#btn_toggleradiorange').css({'color': '#aaa'});
+                        control.state('on');
+                    }
+                }, {
+                    stateName: 'on',
+                    icon: 'fa-wifi',
+                    onClick: function (control) {
+                        console.log('[MAP] Disabling radio range display');
+                        $('#btn_toggleradiorange').css({'color': '#000'});
+                        control.state('off');
+                    }
+                }],
+                title: 'Toggle radio range display of nearby vessels'
+            });
+            
+            self.zoom_to_vessel.addTo(map);
             self.toggledraw.addTo(map);
             self.togglefollow.addTo(map);
             self.togglesync.addTo(map);
             self.toggledash.addTo(map);
+            self.togglevesseldisplay.addTo(map);
+            self.toggleradiorange.addTo(map);
             
             
             self.addContextMenu = function (layer, uuid) {
@@ -807,10 +1101,30 @@ class mapcomponent {
                     
                     self.geojson = geojson;
                     
+                    let objtype = "UNSET";
+                    if (geojson.geometry.type === 'Point') {
+                        objtype = self.default_marker;
+                        if (objtype === 'custom') {
+                            objtype = self.default_custom_marker;
+                        }
+                    } else if (geojson.geometry.type === 'LineString') {
+                        objtype = self.default_path;
+                        if (objtype === 'custom') {
+                            objtype = self.default_custom_path;
+                        }
+                    } else if (geojson.geometry.type === 'Polygon') {
+                        objtype = self.default_shape;
+                        if (objtype === 'custom') {
+                            objtype = self.default_custom_shape;
+                        }
+                    }
+                    
+                    
                     let geoobject = {
                         uuid: uuid,
                         //owner: self.user.useruuid,
-                        geojson: geojson
+                        geojson: geojson,
+                        type: objtype
                     };
                     self.op.putObject('geoobject', geoobject);
                 });
@@ -840,38 +1154,6 @@ class mapcomponent {
                 return new L.RotatedMarker(pos, options);
             };
             
-            let Icons = {
-                Vessel: L.icon({
-                    iconUrl: '/assets/images/icons/vessel.png',
-                    //shadowUrl: 'leaf-shadow.png',
-                    
-                    iconSize: [25, 25], // size of the icon
-                    //shadowSize:   [50, 64], // size of the shadow
-                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                    //shadowAnchor: [4, 62],  // the same for the shadow
-                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-                }),
-                VesselMoving: L.icon({
-                    iconUrl: '/assets/images/icons/vessel-moving.png',
-                    //shadowUrl: 'leaf-shadow.png',
-                    
-                    iconSize: [25, 25], // size of the icon
-                    //shadowSize:   [50, 64], // size of the shadow
-                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                    //shadowAnchor: [4, 62],  // the same for the shadow
-                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-                }),
-                VesselStopped: L.icon({
-                    iconUrl: '/assets/images/icons/vessel-stopped.png',
-                    //shadowUrl: 'leaf-shadow.png',
-                    
-                    iconSize: [25, 25], // size of the icon
-                    //shadowSize:   [50, 64], // size of the shadow
-                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                    //shadowAnchor: [4, 62],  // the same for the shadow
-                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-                })
-            };
             
             let VesselMarker = L.rotatedMarker(self.vessel.coords, {icon: Icons.Vessel}).addTo(map);
             
@@ -887,7 +1169,7 @@ class mapcomponent {
                         vessel.marker = vessel.plot = false;
                     }
                 } else {
-                    self.UpdateVessels();
+                    map.UpdateVessels();
                 }
             }
             
@@ -905,70 +1187,19 @@ class mapcomponent {
                     self.map.removeLayer(self.RangeDisplay);
                     self.RangeDisplay = false;
                 } else {
-                    self.UpdateVessels();
+                    map.UpdateVessels();
                 }
             }
             
-            self.togglevesseldisplay = L.easyButton({
-                id: 'btn_togglevesseldisplay',
-                states: [{
-                    stateName: 'low',
-                    icon: 'fa-paper-plane-o',
-                    onClick: function (control) {
-                        console.log('[MAP] Toggling vessel display (high detail)');
-                        control.state('high');
-                    }
-                }, {
-                    stateName: 'high',
-                    icon: 'fa-paper-plane',
-                    onClick: function (control) {
-                        console.log('[MAP] Disabling vessel display');
-                        $('#btn_togglevesseldisplay').css({'color': '#aaa'});
-                        control.state('off');
-                    }
-                }, {
-                    stateName: 'off',
-                    icon: 'fa-paper-plane-o',
-                    onClick: function (control) {
-                        console.log('[MAP] Enabling vessel display (low detail)');
-                        $('#btn_togglevesseldisplay').css({'color': '#000'});
-                        control.state('low');
-                    }
-                }],
-                title: 'Toggle display of other nearby vessels'
-            });
-            
-            self.toggleradiorange = L.easyButton({
-                id: 'btn_toggleradiorange',
-                states: [{
-                    stateName: 'off',
-                    icon: 'fa-wifi',
-                    onClick: function (control) {
-                        console.log('[MAP] Enabling radio range display');
-                        $('#btn_toggleradiorange').css({'color': '#aaa'});
-                        control.state('on');
-                    }
-                }, {
-                    stateName: 'on',
-                    icon: 'fa-wifi',
-                    onClick: function (control) {
-                        console.log('[MAP] Disabling radio range display');
-                        $('#btn_toggleradiorange').css({'color': '#000'});
-                        control.state('off');
-                    }
-                }],
-                title: 'Toggle radio range display of nearby vessels'
-            });
-            
-            self.togglevesseldisplay.addTo(map);
-            self.toggleradiorange.addTo(map);
-            
-            function UpdateVessels() {
-                if (self.togglevesseldisplay.state === 'low' || self.togglevesseldisplay.state === 'high') {
+            map.UpdateVessels = function () {
+                console.log('UpdateVessels called');
+                console.log('Icons:', Icons);
+                if (self.vessel_display !== 'off') {
+                    console.log('[MAP] Updating vessels:', self.vessels);
                     for (let vessel of self.vessels) {
-                        let icon;
+                        let icon = Icons.Default;
                         
-                        //console.log('[MAP] OSDMVESSELDISPLAY: ', type, name, ':',speed, '@', coords);
+                        console.log('[MAP] OSDMVESSELDISPLAY: ', vessel);
                         
                         if (self.toggleradiorange.state === 'on') {
                             if (vessel.rangedisplay === false) {
@@ -981,56 +1212,60 @@ class mapcomponent {
                             }
                         }
                         
-                        if (vessel.type === 'vessel') {
-                            if (vessel.speed > 0) {
-                                let dist = vessel.speed * (5 / 60);
-                                
-                                /* let target = [0,0];
-                                 target[0] = Math.asin( Math.sin(coords[0])*Math.cos(d/R) + Math.cos(coords[0])*Math.sin(d/R)*Math.cos(course) );
-                                 target[1] = coords[1] + Math.atan2(Math.sin(course)*Math.sin(d/R)*Math.cos(coords[0]), Math.cos(d/R)-Math.sin(coords[0])*Math.sin(target
-                                 */
-                                
-                                let lat1 = Geo.parseDMS(vessel.coords[0]);
-                                let lon1 = Geo.parseDMS(vessel.coords[1]);
-                                let brng = Geo.parseDMS(vessel.course);
-                                
-                                // calculate destination point, final bearing
-                                let p1 = LatLon(lat1, lon1);
-                                let p2 = p1.destinationPoint(brng, dist);
-                                let brngFinal = p1.finalBearingTo(p2);
-                                
-                                //console.log('[MAP] OSDMVESSELDISPLAY-ARROW: Distance travelled in 5 min:', dist, 'Coords: ', p1, ' Coords in 5 min:', p2, ' Final Bearing:',
-                                if (vessel.plot === false) {
-                                    vessel.plot = L.polyline([p1, p2], {color: 'red'}).addTo(map);
-                                } else {
-                                    vessel.plot.setLatLngs([p1, p2]);
-                                }
-                                
-                                icon = Icons.VesselMovingIcon;
-                                
+                        if (vessel.sog > 0) {
+                            console.log('[MAP] Is moving:', vessel.sog, vessel.cog);
+                            
+                            let dist = (vessel.sog * 1852) * (5 / 60);
+                            
+                            /* let target = [0,0];
+                             target[0] = Math.asin( Math.sin(coords[0])*Math.cos(d/R) + Math.cos(coords[0])*Math.sin(d/R)*Math.cos(course) );
+                             target[1] = coords[1] + Math.atan2(Math.sin(course)*Math.sin(d/R)*Math.cos(coords[0]), Math.cos(d/R)-Math.sin(coords[0])*Math.sin(target
+                             */
+                            
+                            let lat1 = Geo.parseDMS(vessel.geojson.coordinates[0]);
+                            let lon1 = Geo.parseDMS(vessel.geojson.coordinates[1]);
+                            let cog = vessel.cog;
+                            
+                            // calculate destination point, final bearing
+                            let p1 = LatLon(lat1, lon1);
+                            console.log(p1);
+                            console.log(LatLon);
+                            let p2 = p1.destinationPoint(dist, cog);
+                            let brngFinal = p1.finalBearingTo(p2);
+                            
+                            //console.log('[MAP] OSDMVESSELDISPLAY-ARROW: Distance travelled in 5 min:', dist, 'Coords: ', p1, ' Coords in 5 min:', p2, ' Final Bearing:',
+                            if (typeof vessel.plot === 'undefined') {
+                                vessel.plot = L.polyline([p1, p2], {color: 'red'}).addTo(map);
                             } else {
-                                if (vessel.plot !== false) {
-                                    map.removeLayer(vessel.plot);
-                                    vessel.plot = false;
-                                }
-                                icon = Icons.VesselStoppedIcon;
+                                vessel.plot.setLatLngs([p1, p2]);
                             }
-                        } else if (vessel.type === 'lighthouse') {
-                            icon = Icons.LighthouseIcon;
+                            
+                            icon = Icons.VesselMoving;
+                            
+                        } else {
+                            console.log('[MAP] Is stopped');
+                            if (typeof vessel.plot !== 'undefined') {
+                                map.removeLayer(vessel.plot);
+                                delete vessel.plot;
+                            }
+                            icon = Icons.VesselStopped;
                         }
                         
-                        if (vessel.marker !== false) {
-                            vessel.marker.setLatLng(vessel.coords);
-                            vessel.marker.options.angle = vessel.course;
+                        console.log('[MAP] Icon:', icon);
+                        
+                        
+                        if (typeof vessel.marker !== 'undefined') {
+                            vessel.marker.setLatLng(vessel.geojson.coordinates);
+                            vessel.marker.options.angle = vessel.cog;
                             vessel.marker.update();
                         } else {
-                            vessel.marker = L.rotatedMarker(vessel.coords, {icon: icon}).addTo(map);
-                            vessel.marker.options.angle = vessel.course;
+                            vessel.marker = L.rotatedMarker(vessel.geojson.coordinates, {icon: icon}).addTo(map);
+                            vessel.marker.options.angle = vessel.cog;
                             vessel.marker.update();
                         }
                     }
                 }
-            }
+            };
             
             
             function UpdateMapMarker() {
@@ -1079,9 +1314,27 @@ class mapcomponent {
             self.mapsidebar.hide();
         })
     }
+    gdal_upload() {
+        console.log('Uploading new map file.');
+        
+        let file = document.getElementById('filename').files[0];
+        console.log('file: ', file);
+        this.socket.sendFile(file, 'hfos.map.gdal', 'mapimport');
+        
+    }
     
+    gdal_rescan() {
+        console.log('Triggering rastertile path rescan.');
+        
+        this.socket.send({
+            component: 'hfos.map.gdal',
+            action:'rescan'
+        });
+        
+    }
 }
 
-mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata', 'menu', 'alert', 'clipboard', 'navdata', '$compile', '$aside', 'uuid'];
+mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata',
+    'menu', 'alert', 'clipboard', 'navdata', '$compile', '$aside', 'uuid', 'NgTableParams'];
 
 export default mapcomponent;
