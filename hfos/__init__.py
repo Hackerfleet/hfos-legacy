@@ -15,6 +15,9 @@ This is a namespace package.
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
+__all__ = ['events', 'provisions', 'schemata', 'ui', 'component', 'database',
+           'debugger', 'launcher', 'logger', 'migration', 'tools']
+
 # See http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
 try:
     __import__('pkg_resources').declare_namespace(__name__)
