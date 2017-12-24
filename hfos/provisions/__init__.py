@@ -18,6 +18,7 @@ from pkg_resources import iter_entry_points
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 
+# TODO: This probably has to be moved somewhere else (due to clashes with namespace-architecture)
 def _build_provisionstore():
     available = {}
 
@@ -40,3 +41,5 @@ def _build_provisionstore():
 
 
 provisionstore = _build_provisionstore()
+
+__import__('pkg_resources').declare_namespace(__name__)
