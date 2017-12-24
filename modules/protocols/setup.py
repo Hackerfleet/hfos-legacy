@@ -53,7 +53,6 @@ This software package is a plugin module for HFOS.
       entry_points="""[hfos.schemata]
       [hfos.components]
       mqttgateway=hfos.protocols.mqtt:MQTTGateway
-      zmqlistener=hfos.protocols.zmq:ZMQListener
     """,
       test_suite="tests.main.main",
       )
