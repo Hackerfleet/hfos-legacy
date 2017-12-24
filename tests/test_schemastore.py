@@ -33,7 +33,7 @@ Test HFOS Basic Provisioning
 
 from hfos.database import _build_schemastore_new
 
-from pprint import pprint
+# from pprint import pprint
 
 
 def test_invalid_schema_store_generation():

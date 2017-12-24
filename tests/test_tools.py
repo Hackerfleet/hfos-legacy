@@ -31,11 +31,11 @@ Test HFOS Tools
 
 """
 
-import os
+# import os
 import re
 import pytest
 from tempfile import NamedTemporaryFile
-from datetime import datetime
+# from datetime import datetime
 import dateutil.parser
 
 from hfos import tools

@@ -34,8 +34,8 @@ Major HFOS event declarations
 
 from circuits.core import Event
 
-from hfos.logger import hfoslog, critical, events
-from hfos.ui.clientobjects import User
+from hfos.logger import hfoslog, events
+# from hfos.ui.clientobjects import User
 from hfos.events.system import authorizedevent
 
 
@@ -69,22 +69,26 @@ class objectdeletion(objectevent):
 
 # Backend-side object change
 
-class updatesubscriptions(objectevent):
+class updatesubscriptions(Event):
     """A backend component needs to write changes to an object.
     Clients that are subscribed should be notified etc.
     """
 
-    def __init__(self, data, *args, **kwargs):
+    def __init__(self, schema, data, *args, **kwargs):
         super(updatesubscriptions, self).__init__(*args, **kwargs)
 
+        self.schema = schema
         self.data = data
+
+        hfoslog("Object event created: ", self.__doc__,
+                self.__dict__, lvl=events, emitter="OBJECT-EVENT")
 
 
 class search(authorizedevent):
     """A client requires a schema to validate data or display a form"""
 
 
-class list(authorizedevent):
+class getlist(authorizedevent):
     """A client requires a schema to validate data or display a form"""
 
 

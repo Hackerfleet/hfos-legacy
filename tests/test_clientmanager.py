@@ -31,17 +31,16 @@ Test HFOS Launcher
 
 """
 
-from hfos.ui.clientobjects import User, Client
 from circuits import Manager
-from circuits.web.websockets.client import WebSocketClient
-from circuits.web.websockets.dispatcher import WebSocketsDispatcher
-from circuits.web.servers import TCPServer
-from circuits.net.events import write, read
-from json import loads, dumps
+# from circuits.web.websockets.client import WebSocketClient
+# from circuits.web.websockets.dispatcher import WebSocketsDispatcher
+# from circuits.web.servers import TCPServer
+from circuits.net.events import read  # , write
+from json import dumps  # , loads
 import pytest
 from uuid import uuid4
 from hfos.ui.clientmanager import ClientManager
-from hfos.events.client import authenticationrequest
+# from hfos.events.client import authenticationrequest
 
 from pprint import pprint
 
@@ -58,6 +57,8 @@ def test_instantiate():
 
 
 def transmit(event_in, channel_in, event_out, channel_out):
+    """Fire an event and listen for a reply"""
+
     waiter = pytest.WaitEvent(m, event_in, channel_in)
 
     m.fire(event_out, channel_out)
@@ -68,6 +69,8 @@ def transmit(event_in, channel_in, event_out, channel_out):
 
 
 def test_auth_request():
+    """Test if clientmanager fires an authentication-request on login"""
+
     m.start()
 
     data = {

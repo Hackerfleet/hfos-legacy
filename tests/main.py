@@ -21,21 +21,28 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
+"""Testsuite runner"""
+
 import sys
+# noinspection PyUnresolvedReferences
 from types import ModuleType
 from os.path import abspath, dirname
 from subprocess import Popen, STDOUT
 
 
-def importable(module):
+def importable(module_name):
+    """Safely try to import a module"""
+
     try:
-        m = __import__(module, globals(), locals())
+        m = __import__(module_name, globals(), locals())
         return type(m) is ModuleType
     except ImportError:
         return False
 
 
 def main():
+    """Run all tests with coverage output"""
+
     cmd = ["py.test", "-r", "fsxX", "--durations=10", "--ignore=tmp"]
 
     if importable("pytest_cov"):

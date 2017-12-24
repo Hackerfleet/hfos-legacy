@@ -21,7 +21,12 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
+"""
+HFOS Client events
+"""
+
 from circuits import Event
+from hfos.events.system import authorizedevent
 from hfos.logger import hfoslog, warn, events
 
 
@@ -101,10 +106,12 @@ class userlogin(Event):
 
     """
 
-    def __init__(self, clientuuid, useruuid, *args):
+    def __init__(self, clientuuid, useruuid, client, user, *args):
         super(userlogin, self).__init__(*args)
         self.clientuuid = clientuuid
         self.useruuid = useruuid
+        self.client = client
+        self.user = user
 
         hfoslog("[CM-EVENT] User login event generated:", clientuuid, useruuid,
                 lvl=events)
@@ -112,7 +119,7 @@ class userlogin(Event):
 
 class userlogout(Event):
     """
-    A user has logged in to the system. This has to propagate to all
+    A user has logged out from the system. This has to propagate to all
     subscription based and other user aware components.
 
     :param clientuuid: UUID of disconnecting client
@@ -121,9 +128,10 @@ class userlogout(Event):
 
     """
 
-    def __init__(self, useruuid, *args):
+    def __init__(self, useruuid, clientuuid, *args):
         super(userlogout, self).__init__(*args)
         self.useruuid = useruuid
+        self.clientuuid = clientuuid
 
         hfoslog("[CM-EVENT] User logout event generated:", useruuid,
                 lvl=events)

@@ -34,9 +34,9 @@ Test HFOS Launcher
 from circuits import Manager
 import pytest
 from hfos import logger
-from time import sleep
+# from time import sleep
 
-from pprint import pprint
+# from pprint import pprint
 
 m = Manager()
 component = pytest.TestComponent()

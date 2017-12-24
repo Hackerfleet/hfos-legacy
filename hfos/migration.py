@@ -28,13 +28,13 @@ Module: Migration
 
 """
 
-from hfos.database import schemastore
-from hfos.logger import hfoslog, error, verbose, warn, critical, debug
+# from hfos.database import schemastore
+from hfos.logger import hfoslog, warn, debug  # , error, verbose, critical
 from deepdiff.diff import DeepDiff
 from pkg_resources import iter_entry_points, DistributionNotFound
 import dpath
 import os
-import json
+# import json
 
 from pprint import pprint
 
@@ -46,12 +46,17 @@ MIGRATION_TEMPLATE = """#!/usr/bin/env python
 
 
 def make_migrations(schema=None):
+    """Create migration data for a specified schema"""
+
     entrypoints = {}
     old = {}
 
     def apply_migrations(migrations, new_model):
+        """Apply migration data to compile an up to date model"""
 
         def get_path(raw_path):
+            """Get local path of schema definition"""
+
             print("RAW PATH:", raw_path, type(raw_path))
             path = []
             for item in raw_path.split("["):
@@ -69,8 +74,11 @@ def make_migrations(schema=None):
             return path
 
         def apply_entry(changetype, change, result):
+            """Upgrade with a single migration"""
 
             def apply_removes(removes, result):
+                """Delete removed fields"""
+
                 for remove in removes:
                     path = get_path(remove)
                     amount = dpath.util.delete(result, path)
@@ -78,6 +86,8 @@ def make_migrations(schema=None):
                 return result
 
             def apply_additions(additions, result):
+                """Add newly added fields"""
+
                 for addition in additions:
                     path = get_path(addition)
                     entry = additions[addition]
@@ -112,6 +122,8 @@ def make_migrations(schema=None):
             return result
 
         def get_renames(migrations):
+            """Check migrations for renamed fields"""
+
             hfoslog('Checking for rename operations:')
             pprint(migrations)
             for entry in migrations:
@@ -145,6 +157,8 @@ def make_migrations(schema=None):
         return result
 
     def write_migration(schema, counter, path, previous, current):
+        """Write out complete migration data"""
+
         filename = "%s_%04i.json" % (schema, counter)
         migration = DeepDiff(previous, current, verbose_level=2).json
         if migration == "{}":

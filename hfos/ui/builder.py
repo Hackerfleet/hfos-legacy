@@ -21,6 +21,10 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
+"""
+Frontend building process
+"""
+
 import os
 from glob import glob
 from shutil import copy
@@ -30,10 +34,13 @@ from hfos.logger import hfoslog, debug, verbose, warn, error, critical, hilight
 try:
     from subprocess import Popen
 except ImportError:
+    # noinspection PyUnresolvedReferences,PyUnresolvedReferences
     from subprocess32 import Popen  # NOQA
 
 
 def copytree(root_src_dir, root_dst_dir, hardlink=True):
+    """Copies a whole directory tree"""
+
     for src_dir, dirs, files in os.walk(root_src_dir):
         dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
         if not os.path.exists(dst_dir):
@@ -75,6 +82,8 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
 # TODO: Installation of frontend requirements is currently disabled
 def install_frontend(forcereload=False, forcerebuild=False,
                      forcecopy=True, install=True, development=False):
+    """Builds and installs the frontend"""
+
     hfoslog("Updating frontend components", emitter='MANAGE')
     components = {}
     loadable_components = {}
@@ -117,8 +126,9 @@ def install_frontend(forcereload=False, forcerebuild=False,
 
                     hfoslog("Entry point: ", entry_point,
                             name,
-                            entry_point.resolve(), lvl=verbose,
+                            entry_point.resolve().__module__, lvl=debug,
                             emitter='MANAGE')
+                    component_name = entry_point.resolve().__module__.split('.')[1]
 
                     hfoslog("Loaded: ", loaded, lvl=verbose, emitter='MANAGE')
                     comp = {
@@ -138,8 +148,8 @@ def install_frontend(forcereload=False, forcerebuild=False,
                                 "directory:", comp, lvl=debug,
                                 emitter='MANAGE')
 
-                    components[name] = comp
-                    loadable_components[name] = loaded
+                    components[component_name] = comp
+                    loadable_components[component_name] = loaded
 
                     hfoslog("Loaded component:", comp, lvl=verbose,
                             emitter='MANAGE')
@@ -206,8 +216,8 @@ def install_frontend(forcereload=False, forcerebuild=False,
                     modulename = os.path.basename(modulefilename).split(
                         ".module.js")[0]
                     line = u"import {s} from './components/{p}/{" \
-                           u"s}.module';\n" \
-                           u"modules.push({s});\n".format(s=modulename, p=name)
+                           u"s}.module';\nmodules.push({s});\n".format(
+                        s=modulename, p=name)
                     if modulename not in modules:
                         importlines += line
                         modules.append(modulename)

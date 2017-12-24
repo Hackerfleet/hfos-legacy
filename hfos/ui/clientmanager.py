@@ -34,7 +34,6 @@ Coordinates clients communicating via websocket
 
 import datetime
 import json
-import random
 
 from time import time
 from collections import namedtuple
@@ -44,23 +43,35 @@ from base64 import b64decode
 from hfos.component import handler
 from circuits.net.events import write
 from circuits import Event, Timer
-from hfos.events.system import get_anonymous_events, get_user_events
+from hfos.events.system import get_anonymous_events, get_user_events, authorizedevent
 from hfos.events.client import authenticationrequest, send, clientdisconnect, \
     userlogin, userlogout
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, critical, debug, info, network, \
-    verbose, hilight
+    verbose
 from hfos.ui.clientobjects import Socket, Client, User
 from hfos.debugger import cli_register_event
 from hfos.tools import std_table
 
 
 class cli_users(Event):
+    """Prints the list of connected users from the clientmanager"""
     pass
 
 
 class cli_clients(Event):
+    """Prints the list of connected clients from the clientmanager"""
+    pass
+
+
+class cli_events(Event):
+    """Prints the list of authorized and anonymous events"""
+    pass
+
+
+class cli_sources(Event):
+    """Prints the list of authorized and anonymous events"""
     pass
 
 
@@ -76,9 +87,15 @@ class reset_flood_offenders(Event):
     pass
 
 
+# Ping for latency measurement
+
+class ping(authorizedevent):
+    pass
+
+
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, datetime.time):
+        if isinstance(obj, (datetime.time, datetime.date)):
             return obj.isoformat()
             # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
@@ -108,7 +125,10 @@ class ClientManager(ConfigurableComponent):
 
         self.fireEvent(cli_register_event('users', cli_users))
         self.fireEvent(cli_register_event('clients', cli_clients))
+        self.fireEvent(cli_register_event('events', cli_events))
+        self.fireEvent(cli_register_event('sources', cli_sources))
         self.fireEvent(cli_register_event('who', cli_who))
+
         self._flood_counters_resetter = Timer(
             2, Event.create('reset_flood_counters'), persist=True
         ).register(self)
@@ -118,14 +138,59 @@ class ClientManager(ConfigurableComponent):
 
     @handler('cli_clients')
     def client_list(self, *args):
-        self.log(self._clients, pretty=True)
+        """Prints a list of connected users"""
+        if len(self._clients) == 0:
+            self.log('No clients connected')
+        else:
+            self.log(self._clients, pretty=True)
 
     @handler('cli_users')
     def users_list(self, *args):
-        self.log(self._users, pretty=True)
+        """Prints a list of connected users"""
+        if len(self._users) == 0:
+            self.log('No users connected')
+        else:
+            self.log(self._users, pretty=True)
+
+    @handler('cli_sources')
+    def sourcess_list(self, *args):
+        """Prints a list of all registered events"""
+
+        from pprint import pprint
+
+        sources = {}
+        sources.update(self.authorized_events)
+        sources.update(self.anonymous_events)
+
+        for source in sources:
+            pprint(source)
+
+
+    @handler('cli_events')
+    def events_list(self, *args):
+        """Prints a list of all registered events"""
+
+        events = {}
+        sources = {}
+        sources.update(self.authorized_events)
+        sources.update(self.anonymous_events)
+
+        for source, source_events in sources.items():
+            events[source] = []
+            for item in source_events:
+                events[source].append(item)
+
+        self.log(events, pretty=True)
 
     @handler('cli_who')
     def who(self, *args):
+        """Prints a table of connected users and clients"""
+        if len(self._users) == 0:
+            self.log('No users connected')
+            if len(self._clients) == 0:
+                self.log('No clients connected')
+                return
+
         Row = namedtuple("Row", ['User', 'Client', 'IP'])
         rows = []
 
@@ -144,6 +209,8 @@ class ClientManager(ConfigurableComponent):
 
     @handler('ready')
     def ready(self):
+        """Compile events"""
+
         self.authorized_events = get_user_events()
         self.anonymous_events = get_anonymous_events()
 
@@ -186,13 +253,15 @@ class ClientManager(ConfigurableComponent):
                      lvl=critical)
 
     def _logoutclient(self, useruuid, clientuuid):
+        """Log out a client and possibly associated user"""
+
         self.log("Cleaning up client of logged in user.")
         try:
             self._users[useruuid].clients.remove(clientuuid)
             if len(self._users[useruuid].clients) == 0:
                 self.log("Last client of user disconnected.")
 
-                self.fireEvent(userlogout(useruuid))
+                self.fireEvent(userlogout(useruuid, clientuuid))
                 del self._users[useruuid]
 
             self._clients[clientuuid].useruuid = None
@@ -361,6 +430,7 @@ class ClientManager(ConfigurableComponent):
                      type(e), lvl=critical, exc=True)
 
     def _handleAnonymousEvents(self, component, action, data, client):
+        """Handler for anonymous (public) events"""
         try:
             event = self.anonymous_events[component][action]['event']
 
@@ -375,6 +445,8 @@ class ClientManager(ConfigurableComponent):
 
     def _handleAuthenticationEvents(self, requestdata, requestaction,
                                     clientuuid, sock):
+        """Handler for authentication events"""
+
         # TODO: Move this stuff over to ./auth.py
         if requestaction in ("login", "autologin"):
             try:
@@ -430,18 +502,29 @@ class ClientManager(ConfigurableComponent):
 
     @handler('reset_flood_counters')
     def _reset_flood_counters(self, *args):
+        """Resets the flood counters on event trigger"""
+
         # self.log('Resetting flood counter')
         self._flood_counter = {}
 
     @handler('reset_flood_offenders')
     def _reset_flood_offenders(self, *args):
+        """Resets the list of flood offenders on event trigger"""
+
+        offenders = []
         # self.log('Resetting flood offenders')
+
         for offender, offence_time in self._flooding.items():
             if time() - offence_time < 10:
                 self.log('Removed offender from flood list:', offender)
-                del self._flooding[offender]
+                offenders.append(offender)
+
+        for offender in offenders:
+            del self._flooding[offender]
 
     def _check_flood_protection(self, component, action, clientuuid):
+        """Checks if any clients have been flooding the node"""
+
         if clientuuid not in self._flood_counter:
             self._flood_counter[clientuuid] = 0
 
@@ -461,6 +544,7 @@ class ClientManager(ConfigurableComponent):
     def read(self, *args):
         """Handles raw client requests and distributes them to the
         appropriate components"""
+
         self.log("Beginning new transaction: ", args, lvl=network)
         try:
             sock, msg = args[0], args[1]
@@ -497,7 +581,7 @@ class ClientManager(ConfigurableComponent):
         try:
             # TODO: Do not unpickle or decode anything from unsafe events
             requestdata = msg['data']
-            if 'raw' in requestdata:
+            if isinstance(requestdata, (dict, list)) and 'raw' in requestdata:
                 # self.log(requestdata['raw'], lvl=critical)
                 requestdata['raw'] = b64decode(requestdata['raw'])
                 # self.log(requestdata['raw'])
@@ -517,7 +601,7 @@ class ClientManager(ConfigurableComponent):
             return
 
         if requestcomponent in self.anonymous_events and requestaction in \
-                self.anonymous_events[requestcomponent]:
+            self.anonymous_events[requestcomponent]:
             self.log('Executing anonymous event:', requestcomponent,
                      requestaction)
             try:
@@ -554,6 +638,7 @@ class ClientManager(ConfigurableComponent):
     def authentication(self, event):
         """Links the client to the granted account and profile,
         then notifies the client"""
+
         try:
             self.log("Authorization has been granted by DB check:",
                      event.username, lvl=debug)
@@ -631,7 +716,7 @@ class ClientManager(ConfigurableComponent):
             self.fireEvent(write(event.sock, json.dumps(clientconfigpacket)),
                            "wsserver")
 
-            self.fireEvent(userlogin(clientuuid, useruuid))
+            self.fireEvent(userlogin(clientuuid, useruuid, clientconfig, signedinuser))
 
             self.log("User configured: Name",
                      signedinuser.account.name, "Profile",
@@ -642,3 +727,14 @@ class ClientManager(ConfigurableComponent):
         except Exception as e:
             self.log("Error (%s, %s) during auth grant: %s" % (
                 type(e), e, event), lvl=error)
+
+    @handler(ping)
+    def ping(self, event):
+        self.log('Client ping received:', event.data)
+        response = {
+            'component': 'hfos.ui.clientmanager',
+            'action': 'pong',
+            'data': [event.data, time() * 1000]
+        }
+
+        self.fire(send(event.client.uuid, response))

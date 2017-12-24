@@ -24,22 +24,17 @@ __license__ = "GPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Launcher
-==================
+Test HFOS Maintenance
+=====================
 
 
 
 """
 
 from circuits import Manager
-from circuits.net.events import write, read
-from json import loads, dumps
 import pytest
-from uuid import uuid4
 from hfos.database import Maintenance
 import hfos.logger as logger
-
-from pprint import pprint
 
 m = Manager()
 

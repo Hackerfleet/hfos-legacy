@@ -32,18 +32,24 @@ OM manager
 """
 
 from uuid import uuid4
+from circuits import Event
 
 from hfos.events.objectmanager import objectcreation, objectchange, \
-    objectdeletion, list, search, get, change, put, delete, subscribe, \
+    objectdeletion, getlist, search, get, change, put, delete, subscribe, \
     unsubscribe
 from hfos.events.client import send
+from hfos.debugger import cli_register_event
 from hfos.component import handler, ConfigurableComponent
 from hfos.database import objectmodels, ValidationError, schemastore
-from hfos.logger import verbose, debug, error, warn, critical, hilight
+from hfos.logger import verbose, debug, error, warn, critical  # , hilight
 
-from pprint import pprint
+# from pprint import pprint
 
 WARNSIZE = 500
+
+
+class cli_subscriptions(Event):
+    pass
 
 
 class ObjectManager(ConfigurableComponent):
@@ -60,7 +66,12 @@ class ObjectManager(ConfigurableComponent):
 
         self.subscriptions = {}
 
+        self.fireEvent(cli_register_event('om_subscriptions', cli_subscriptions))
         self.log("Started")
+
+    @handler("cli_subscriptions")
+    def cli_subscriptions(self, event):
+        self.log('Subscriptions', self.subscriptions, pretty=True)
 
     def _check_permissions(self, subject, action, obj):
         self.log('Roles of user:', subject.account.roles, lvl=verbose)
@@ -92,7 +103,8 @@ class ObjectManager(ConfigurableComponent):
         self.log('Access denied', lvl=verbose)
         return False
 
-    def _check_create_permission(self, subject, schema):
+    @staticmethod
+    def _check_create_permission(subject, schema):
         for role in subject.account.roles:
             if role in schemastore[schema]['schema']['roles_create']:
                 return True
@@ -133,7 +145,7 @@ class ObjectManager(ConfigurableComponent):
             return
 
         if 'schema' not in data or data['schema'] not in \
-                objectmodels.keys():
+            objectmodels.keys():
             self._cancel_by_error(event, 'invalid_schema')
             return
         else:
@@ -141,7 +153,8 @@ class ObjectManager(ConfigurableComponent):
 
         return schema
 
-    def _get_filter(self, event):
+    @staticmethod
+    def _get_filter(event):
         data = event.data
         if 'filter' in data:
             object_filter = data['filter']
@@ -179,6 +192,8 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(get)
     def get(self, event):
+        """Get a specified object"""
+
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
@@ -213,7 +228,7 @@ class ObjectManager(ConfigurableComponent):
 
         if not storage_object:
             self._cancel_by_error(event, uuid + ' of ' + schema +
-                                  'unavailable')
+                                  ' unavailable')
             return
 
         if storage_object:
@@ -244,6 +259,8 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(search)
     def search(self, event):
+        """Search for an object"""
+
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
@@ -251,7 +268,7 @@ class ObjectManager(ConfigurableComponent):
             return
 
         # object_filter['$text'] = {'$search': str(data['search'])}
-        if 'fulltext' in data:
+        if data.get('fulltext', False) is True:
             object_filter = {
                 'name': {
                     '$regex': str(data['search']),
@@ -268,6 +285,12 @@ class ObjectManager(ConfigurableComponent):
             fields = data['fields']
         else:
             fields = []
+
+        if 'subscribe' in data:
+            self.log('Subscription:', data['subscribe'], lvl=verbose)
+            do_subscribe = data['subscribe'] is True
+        else:
+            do_subscribe = False
 
         object_list = []
 
@@ -300,12 +323,15 @@ class ObjectManager(ConfigurableComponent):
 
                     for field in fields:
                         if field in item._fields and field not in \
-                                hidden:
+                            hidden:
                             list_item[field] = item._fields[field]
                         else:
                             list_item[field] = None
 
                     object_list.append(list_item)
+
+                if do_subscribe:
+                    self._add_subscription(item.uuid, event)
             except Exception as e:
                 self.log("Faulty object or field: ", e, type(e),
                          item._fields, fields, lvl=error, exc=True)
@@ -322,8 +348,10 @@ class ObjectManager(ConfigurableComponent):
 
         self._respond(None, result, event)
 
-    @handler(list)
+    @handler(getlist)
     def objectlist(self, event):
+        """Get a list of objects"""
+
         self.log('LEGACY LIST FUNCTION CALLED!', lvl=warn)
         try:
             data, schema, user, client = self._get_args(event)
@@ -393,6 +421,8 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(change)
     def change(self, event):
+        """Change an existing object"""
+
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
@@ -453,6 +483,8 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(put)
     def put(self, event):
+        """Put an object"""
+
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
@@ -469,14 +501,14 @@ class ObjectManager(ConfigurableComponent):
 
         try:
             model = objectmodels[schema]
+            created = False
 
             if uuid != 'create':
                 storage_object = model.find_one({'uuid': uuid})
-            if uuid == 'create' or model.count({
-                'uuid': uuid
-            }) == 0:
+            if uuid == 'create' or model.count({'uuid': uuid}) == 0:
                 if uuid == 'create':
                     uuid = str(uuid4())
+                created = True
                 clientobject['uuid'] = uuid
                 clientobject['owner'] = user.uuid
                 storage_object = model(clientobject)
@@ -507,18 +539,20 @@ class ObjectManager(ConfigurableComponent):
 
             storage_object.save()
 
-            self.log("Object stored.")
+            self.log("Object %s stored." % schema)
 
             # Notify backend listeners
 
-            if uuid == 'create':
-                notification = objectcreation(storage_object.uuid, schema,
-                                              client)
+            if created:
+                notification = objectcreation(
+                    storage_object.uuid, schema, client
+                )
             else:
-                notification = objectchange(storage_object.uuid, schema,
-                                            client)
+                notification = objectchange(
+                    storage_object.uuid, schema, client
+                )
 
-            self._update_subscribers(storage_object)
+            self._update_subscribers(schema, storage_object)
 
             result = {
                 'component': 'hfos.events.objectmanager',
@@ -538,6 +572,8 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(delete)
     def delete(self, event):
+        """Delete an existing object"""
+
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
@@ -600,20 +636,32 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(subscribe)
     def subscribe(self, event):
-        uuid = event.data
+        """Subscribe to an object's future changes"""
 
-        self._add_subscription(uuid, event)
+        if isinstance(event.data, []):
+            uuids = event.data
+        else:
+            uuids = [event.data]
+
+        subscribed = []
+        for uuid in uuids:
+            try:
+                self._add_subscription(uuids, event)
+                subscribed.append(uuid)
+            except KeyError:
+                continue
+
         result = {
             'component': 'hfos.events.objectmanager',
             'action': 'subscribe',
             'data': {
-                'uuid': uuid, 'success': True
+                'uuid': subscribed, 'success': True
             }
         }
         self._respond(None, result, event)
 
     def _add_subscription(self, uuid, event):
-        self.log('Adding subscription for', uuid, event.user, lvl=debug)
+        self.log('Adding subscription for', uuid, event.user, lvl=verbose)
         if uuid in self.subscriptions:
             if event.client.uuid not in self.subscriptions[uuid]:
                 self.subscriptions[uuid][event.client.uuid] = event.user
@@ -622,57 +670,67 @@ class ObjectManager(ConfigurableComponent):
 
     @handler(unsubscribe)
     def unsubscribe(self, event):
+        """Unsubscribe from an object's future changes"""
         # TODO: Automatic Unsubscription
-        uuid = event.data
+        uuids = event.data
 
-        if uuid in self.subscriptions:
-            self.subscriptions[uuid].pop(event.client.uuid)
+        if not isinstance(uuids, list):
+            uuids = [uuids]
 
-            if len(self.subscriptions[uuid]) == 0:
-                del (self.subscriptions[uuid])
+        result = []
+
+        for uuid in uuids:
+            if uuid in self.subscriptions:
+                self.subscriptions[uuid].pop(event.client.uuid)
+
+                if len(self.subscriptions[uuid]) == 0:
+                    del (self.subscriptions[uuid])
+
+                result.append(uuid)
 
         result = {
             'component': 'hfos.events.objectmanager',
             'action': 'unsubscribe',
             'data': {
-                'uuid': uuid, 'success': True
+                'uuid': result, 'success': True
             }
         }
 
         self._respond(None, result, event)
 
+    @handler('updatesubscriptions')
     def update_subscriptions(self, event):
         """OM event handler for to be stored and client shared objectmodels
         :param event: OMRequest with uuid, schema and object data
         """
 
-        self.log("Event: '%s'" % event.__dict__)
+        # self.log("Event: '%s'" % event.__dict__)
         try:
-            data = event.data
-            self._update_subscribers(data)
+            self._update_subscribers(event.schema, event.data)
 
         except Exception as e:
             self.log("Error during subscription update: ", type(e), e,
                      exc=True)
 
-    def _update_subscribers(self, update_object):
+    def _update_subscribers(self, update_schema, update_object):
         # Notify frontend subscribers
 
-        self.log('Notifying subscribers about update.', lvl=debug)
+        self.log('Notifying subscribers about update.', lvl=verbose)
         if update_object.uuid in self.subscriptions:
             update = {
                 'component': 'hfos.events.objectmanager',
                 'action': 'update',
-                'data': update_object.serializablefields()
+                'data': {
+                    'schema': update_schema,
+                    'uuid': update_object.uuid,
+                    'object': update_object.serializablefields()
+                }
             }
 
             # pprint(self.subscriptions)
 
-            for client, recipient in self.subscriptions[
-                update_object.uuid
-            ].items():
-                if not self._check_permissions(recipient, 'read',
-                                               update_object):
+            for client, recipient in self.subscriptions[update_object.uuid].items():
+                if not self._check_permissions(recipient, 'read', update_object):
                     continue
 
                 self.log('Notifying subscriber: ', client, recipient,

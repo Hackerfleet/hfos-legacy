@@ -31,18 +31,14 @@ Test HFOS Auth
 
 """
 
-from circuits import Manager, Event
-from circuits.net.events import write, read
-from json import loads, dumps
+from circuits import Manager
 import pytest
-from uuid import uuid4
 from hfos.ui.auth import Authenticator
 from hfos.events.client import authenticationrequest, authentication
 from hfos.tools import std_uuid
-from hfos.database import objectmodels
 import hfos.logger as logger
 
-from pprint import pprint
+# from pprint import pprint
 
 m = Manager()
 
@@ -57,6 +53,8 @@ def test_instantiate():
 
 
 def transmit(event_in, channel_in, event_out, channel_out):
+    """Fire an event and listen for a reply"""
+
     waiter = pytest.WaitEvent(m, event_in, channel_in)
 
     m.fire(event_out, channel_out)
@@ -67,6 +65,8 @@ def transmit(event_in, channel_in, event_out, channel_out):
 
 
 def test_invalid_user_auth():
+    """Test if login with invalid credentials fails"""
+
     log = logger.LiveLog
     logger.live = True
 
@@ -89,7 +89,11 @@ def test_invalid_user_auth():
 
 
 def test_createuser():
+    """Test if auth correctly creates a new user"""
+
     class createuser_event():
+        """Mock event to request creation of new user"""
+
         def __init__(self):
             self.username = 'test_user'
             self.password = 'test_password'

@@ -88,6 +88,7 @@ setup(name="hfos",
                 'hfos.schemata',
                 'hfos.ui',
                 'hfos.provisions'],
+      namespace_packages=['hfos'],
       scripts=[
           'hfos_launcher.py',
           'hfos_manage.py',
@@ -115,6 +116,7 @@ See https://github.com/hackerfleet/hfos""",
       entry_points="""[console_scripts]
     hfos_launcher=hfos.launcher:launch
     hfos_manage=hfos_manage:cli
+    
     [hfos.base]
     debugger=hfos.debugger:HFDebugger
     cli=hfos.debugger:CLI
@@ -126,12 +128,11 @@ See https://github.com/hackerfleet/hfos""",
     clientmanager=hfos.ui.clientmanager:ClientManager
     objectmanager=hfos.ui.objectmanager:ObjectManager
     schemamanager=hfos.ui.schemamanager:SchemaManager
+    tagmanager=hfos.ui.tagmanager:TagManager
     configurator=hfos.ui.configurator:Configurator
-
 
     [hfos.schemata]
     systemconfig=hfos.schemata.system:Systemconfig
-    systemstate=hfos.schemata.state:SystemState
     client=hfos.schemata.client:Client
     profile=hfos.schemata.profile:Profile
     user=hfos.schemata.user:User

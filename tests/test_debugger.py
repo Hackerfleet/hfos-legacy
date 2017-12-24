@@ -32,14 +32,14 @@ Test HFOS Launcher
 """
 
 from circuits import Manager
-import pytest
+# import pytest
 from hfos.debugger import HFDebugger
 from hfos.events.system import debugrequest
 from hfos.ui.clientobjects import User
 from hfos import logger
 from time import sleep
 
-from pprint import pprint
+# from pprint import pprint
 
 m = Manager()
 hfd = HFDebugger()

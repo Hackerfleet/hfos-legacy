@@ -31,7 +31,6 @@ Test HFOS Launcher
 
 """
 
-
 from circuits import Manager
 import pytest
 from uuid import uuid4
@@ -39,10 +38,12 @@ from uuid import uuid4
 from hfos.database import objectmodels
 from hfos.ui.clientobjects import User, Client
 from hfos.ui.objectmanager import ObjectManager
-from hfos.events.objectmanager import objectchange, objectcreation, \
-    objectdeletion, objectevent, updatesubscriptions, change, get, delete, \
-    put, list, search, subscribe, unsubscribe
-from hfos.events.client import send
+from hfos.events.objectmanager import change, get, delete, put, list, search, \
+    subscribe, unsubscribe
+# objectchange, objectcreation, objectdeletion, objectevent,
+# updatesubscriptions,
+
+# from hfos.events.client import send
 
 from pprint import pprint
 
@@ -79,6 +80,8 @@ def test_instantiate():
 
 
 def transmit(action, data, account=AccountMock()):
+    """Fire an event and listen for a reply"""
+
     profile = ProfileMock()
     user = User(account, profile, useruuid)
     client = Client(None, None, clientuuid, useruuid)

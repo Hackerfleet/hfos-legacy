@@ -21,6 +21,8 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
+from hfos.logger import hfoslog, warn
+
 """
 
 
@@ -74,10 +76,16 @@ readonlyform = [
 noform = []
 
 
-def lookup_field(key, lookup_type, placeholder=None, html_class="div",
+def lookup_field(key, lookup_type=None, placeholder=None, html_class="div",
                  select_type="strapselect", mapping="uuid"):
+    """Generates a lookup field for form definitions"""
+
+    if lookup_type is None:
+        lookup_type = key
+
     if placeholder is None:
         placeholder = "Select a " + lookup_type
+
     result = {
         'key': key,
         'htmlClass': html_class,
@@ -91,3 +99,101 @@ def lookup_field(key, lookup_type, placeholder=None, html_class="div",
     }
 
     return result
+
+
+def fieldset(title, items):
+    result = {
+        'title': title,
+        'type': 'fieldset',
+        'items': items
+    }
+    return result
+
+
+def section(rows, columns, items):
+    sections = []
+
+    column_class = "col-sm-%i" % (12 / columns)
+
+    for vertical in range(columns):
+        column_items = []
+        for horizontal in range(rows):
+            try:
+                item = items[horizontal][vertical]
+                column_items.append(item)
+            except IndexError:
+                hfoslog('Field omitted, due to missing row/column:', vertical, horizontal,
+                        lvl=warn, emitter='FORMS', tb=True, frame=2)
+
+        column = {
+            'type': 'section',
+            'htmlClass': column_class,
+            'items': column_items
+        }
+        sections.append(column)
+
+    result = {
+        'type': 'section',
+        'htmlClass': 'row',
+        'items': sections
+    }
+    return result
+
+
+def emptyArray(key, add_label=None):
+    result = {
+        'key': key,
+        'startEmpty': True
+    }
+    if add_label is not None:
+        result['add'] = add_label
+        result['style'] = {'add': 'btn-success'}
+    return result
+
+
+def tabset(titles, contents):
+    tabs = []
+    for no, title in enumerate(titles):
+        tab = {
+            'title': title,
+        }
+        content = contents[no]
+        if isinstance(content, list):
+            tab['items'] = content
+        else:
+            tab['items'] = [content]
+        tabs.append(tab)
+
+    result = {
+        'type': 'tabs',
+        'tabs': tabs
+    }
+
+    return result
+
+
+def test():
+    print('Hello')
+    from pprint import pprint
+
+    section_thing = section(2, 3, [['first', 'second', 'third'], ['fourth', 'fifth']])
+
+    pprint(section_thing)
+
+    fieldset_thing = fieldset('Fieldset', ['1', '2', '3'])
+
+    pprint(fieldset_thing)
+
+    thing = tabset(
+        ['First', 'Second'],
+        [
+            section_thing,
+            fieldset_thing
+        ]
+    )
+
+    pprint(thing)
+
+
+if __name__ == '__main__':
+    test()

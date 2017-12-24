@@ -33,7 +33,7 @@ Module NMEA
 
 from decimal import Decimal
 from hfos.component import ConfigurableComponent, handler
-from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
+from hfos.logger import hfoslog, events, verbose, debug, warn, critical, error, hilight
 from hfos.navdata.events import sensordata
 from hfos.navdata.bus import register_protocol
 
@@ -108,6 +108,7 @@ class NMEAParser(ConfigurableComponent):
         :param event: Raw sentences incoming data
         """
 
+        self.log('Received raw data from bus', lvl=events)
         if not parse:
             return
 
@@ -124,7 +125,7 @@ class NMEAParser(ConfigurableComponent):
 
         sensor_data_package = self._handle(parsed_data)
 
-        # self.log("Sensor data:", sensor_data_package, lvl=debug)
+        self.log("Sensor data:", sensor_data_package, lvl=verbose)
 
         if sensor_data_package:
             # pprint(sensor_data_package)

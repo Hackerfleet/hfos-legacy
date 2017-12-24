@@ -33,21 +33,27 @@ Authentication (and later Authorization) system
 
 from uuid import uuid4
 from hashlib import sha512
-from random import randint
 from circuits import Event
 
 from hfos.component import handler
 from hfos.events.client import authentication, send
+from hfos.events.system import authorizedevent
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels, makesalt
 from hfos.logger import error, warn, debug, verbose
 
 
 class add_auth_hook(Event):
+    """Allows for adding event hooks to the authentication process"""
+
     def __init__(self, authenticator_name, event, *args, **kwargs):
         super(add_auth_hook, self).__init__(*args, **kwargs)
         self.authenticator_name = authenticator_name
         self.event = event
+
+
+class changepassword(authorizedevent):
+    pass
 
 
 class Authenticator(ConfigurableComponent):
@@ -79,6 +85,9 @@ class Authenticator(ConfigurableComponent):
         self.auth_hooks = {}
 
     def makehash(self, word):
+        """Generates a cryptographically strong (sha512) hash with this nodes
+        salt added."""
+
         try:
             password = word.encode('utf-8')
         except UnicodeDecodeError:
@@ -92,6 +101,8 @@ class Authenticator(ConfigurableComponent):
 
     @handler("add_auth_hook")
     def add_auth_hook(self, event):
+        """Register event hook on reception of add_auth_hook-event"""
+
         self.log('Adding authentication hook for', event.authenticator_name)
         self.auth_hooks[event.authenticator_name] = event.event
 
@@ -106,6 +117,7 @@ class Authenticator(ConfigurableComponent):
         if event.auto:
             self.log("Verifying automatic login request")
 
+            # noinspection PyBroadException
             try:
                 clientconfig = objectmodels['client'].find_one({
                     'uuid': event.requestedclientuuid
@@ -263,6 +275,8 @@ class Authenticator(ConfigurableComponent):
                          'allow new users to be created', lvl=warn)
 
     def createuser(self, event):
+        """Create a new user and all initial data"""
+
         self.log("Creating user")
         try:
             newuser = objectmodels['user']({
@@ -354,3 +368,28 @@ class Authenticator(ConfigurableComponent):
         except Exception as e:
             self.log("General profile request error %s %s" % (type(e), e),
                      lvl=error)
+
+    @handler(changepassword)
+    def changepassword(self, event):
+        old = event.data['old']
+        new = event.data['new']
+        uuid = event.user.uuid
+
+        user = objectmodels['user'].find_one({'uuid': uuid})
+        if self.makehash(old) == user.passhash:
+            user.passhash = self.makehash(new)
+            packet = {
+                'component': 'hfos.ui.auth',
+                'action': 'changepassword',
+                'data': True
+            }
+            self.fireEvent(send(event.client.uuid, packet))
+            self.log('Successfully changed password for user', uuid)
+        else:
+            packet = {
+                'component': 'hfos.ui.auth',
+                'action': 'changepassword',
+                'data': False
+            }
+            self.fireEvent(send(event.client.uuid, packet))
+            self.log('User tried to change password without supplying old one', lvl=warn)

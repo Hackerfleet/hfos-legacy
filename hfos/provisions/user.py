@@ -48,6 +48,8 @@ Users = [{
 
 
 def provision(**kwargs):
+    """Provision a system user"""
+
     # TODO: Add a root user and make sure owner can access it later.
     # Setting up details and asking for a password here is not very useful,
     # since this process is usually run automated.

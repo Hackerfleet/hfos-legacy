@@ -102,7 +102,7 @@ color = True  # TODO: Make this switchable via args
 
 mute = []
 solo = []
-mark = ['serial']
+mark = []
 
 LiveLog = []
 
@@ -181,22 +181,14 @@ def hfoslog(*what, **kwargs):
     global count
     count += 1
 
-    if 'lvl' in kwargs:
-        lvl = kwargs['lvl']
-        if lvl < verbosity['global']:
-            return
-    else:
-        lvl = info
+    lvl = kwargs.get('lvl', info)
 
-    if 'emitter' in kwargs:
-        emitter = kwargs['emitter']
-    else:
-        emitter = 'UNKNOWN'
+    if lvl < verbosity['global']:
+        return
 
-    if 'exc' in kwargs:
-        exception = True
-    else:
-        exception = False
+    emitter = kwargs.get('emitter', 'UNKNOWN')
+    traceback = kwargs.get('tb', False)
+
 
     output = None
 
@@ -205,14 +197,22 @@ def hfoslog(*what, **kwargs):
 
     callee = None
 
-    if verbosity['global'] <= debug:
+    if verbosity['global'] <= debug or traceback:
         # Automatically log the current function details.
 
+        exception = kwargs.get('exc', False)
+
         if 'sourceloc' not in kwargs:
+            frame = kwargs.get('frame', 0)
 
             # Get the previous frame in the stack, otherwise it would
             # be this function
-            func = inspect.currentframe().f_back.f_code
+            current_frame = inspect.currentframe()
+            while frame > 0:
+                frame -= 1
+                current_frame = current_frame.f_back
+
+            func = current_frame.f_code
             # Dump the message + the name of this function to the log.
 
             if exception:

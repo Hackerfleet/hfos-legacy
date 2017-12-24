@@ -43,10 +43,10 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from circuits.web import Server, Static
-from circuits.web.errors import redirect
+# from circuits.web.errors import redirect
 # from circuits.app.daemon import Daemon
 from hfos.component import handler
-from circuits import reprhandler, Event
+from circuits import Event
 
 from hfos.ui.builder import install_frontend
 # from hfos.schemata.component import ComponentBaseConfigSchema
@@ -62,14 +62,17 @@ import pwd
 import grp
 import os
 
-from pprint import pprint
+# from pprint import pprint
 
 
 class ready(Event):
+    """Event fired to signal completeness of the local node's setup"""
     pass
 
 
 def drop_privileges(uid_name='hfos', gid_name='hfos'):
+    """Attempt to drop privileges and change user to 'hfos' user/group"""
+
     if os.getuid() != 0:
         hfoslog("Not root, cannot drop privileges. Probably opening "
                 "the web port failed as well", lvl=warn, emitter='CORE')
@@ -153,7 +156,7 @@ class Core(ConfigurableComponent):
 
         self.component_blacklist = [  # 'camera',
             # 'logger',
-            'debugger',
+            #'debugger',
             'recorder',
             'playback',
             # 'sensors',
@@ -187,6 +190,9 @@ class Core(ConfigurableComponent):
 
     @handler("started", channel="*")
     def ready(self, source):
+        """All components have initialized, set up the component
+        configuration schema-store, run the local server and drop privileges"""
+
         from hfos.database import configschemastore
         configschemastore[self.name] = self.configschema
 
@@ -197,18 +203,22 @@ class Core(ConfigurableComponent):
 
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
+        """Event hook to trigger a new frontend build"""
+
         install_frontend(forcerebuild=event.force,
                          install=event.install,
                          development=self.development
                          )
 
     def _start_server(self, *args):
+        """Run the node local server"""
+
         self.log("Starting server", args, lvl=warn)
         secure = self.certificate is not None
         if secure:
             self.log("Running SSL server with cert:", self.certificate)
         else:
-            self.log("Running insecure server without SSL!", lvl=warn)
+            self.log("Running insecure server without SSL. Do not use without SSL proxy in production!", lvl=warn)
 
         try:
             self.server = Server(
@@ -233,6 +243,8 @@ class Core(ConfigurableComponent):
 
     def update_components(self, forcereload=False, forcerebuild=False,
                           forcecopy=True, install=False):
+        """Check all known entry points for components. If necessary,
+        manage configuration updates"""
 
         # TODO: See if we can pull out major parts of the component handling.
         # They are also used in the manage tool to instantiate the
@@ -264,6 +276,7 @@ class Core(ConfigurableComponent):
 
                         self.log("Loaded: ", loaded, lvl=verbose)
                         comp = {
+                            'package': entry_point.dist.project_name,
                             'location': location,
                             'version': str(entry_point.dist.parsed_version),
                             'description': loaded.__doc__
@@ -349,7 +362,7 @@ class Core(ConfigurableComponent):
         for name, componentdata in self.loadable_components.items():
             if name in self.component_blacklist:
                 continue
-            self.log("Running component: ", name, lvl=debug)
+            self.log("Running component: ", name, lvl=verbose)
             try:
                 if name in self.runningcomponents:
                     self.log("Component already running: ", name,
@@ -369,7 +382,7 @@ class Core(ConfigurableComponent):
 
         from hfos.events.system import AuthorizedEvents
         self.log(len(AuthorizedEvents), "authorized event sources:",
-                 list(AuthorizedEvents.keys()), lvl=hilight)
+                 list(AuthorizedEvents.keys()), lvl=debug)
 
         self._instantiate_components()
         self._start_frontend()
@@ -387,9 +400,16 @@ def construct_graph(args):
         from circuits import Debugger
         hfoslog("Starting circuits debugger", lvl=warn, emitter='GRAPH')
         dbg = Debugger().register(app)
+        # TODO: Make these configurable from modules, navdata is _very_ noisy
+        # but should not be listed _here_
         dbg.IgnoreEvents.extend(["read", "_read", "write", "_write",
                                  "stream_success", "stream_complete",
-                                 "stream"])
+                                 "serial_packet", "raw_data",
+                                 "stream", "navdatapush",  "referenceframe",
+                                 "updateposition", "updatesubscriptions",
+                                 "generatevesseldata", "generatenavdata", "sensordata",
+                                 "reset_flood_offenders", "reset_flood_counters",
+                                 "task_success", "task_done"])
 
     hfoslog("Beginning graph assembly.", emitter='GRAPH')
 
@@ -435,6 +455,9 @@ def construct_graph(args):
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
 @click.option("--norun", help="Only assemble system, do not run", is_flag=True)
 def launch(run=True, **args):
+    """Bootstrap basics, assemble graph and hand over control to the Core
+    component"""
+
     verbosity['console'] = args['log'] if not args['quiet'] else 100
     verbosity['global'] = min(args['log'], args['logfileverbosity'])
     verbosity['file'] = args['logfileverbosity'] if args['dolog'] else 100

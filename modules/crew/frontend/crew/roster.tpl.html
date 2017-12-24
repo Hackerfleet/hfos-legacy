@@ -11,7 +11,8 @@
             <tr ng-repeat="user in $ctrl.usermenu">
                 <td ng-repeat="field in $ctrl.fieldnames">
                     <span ng-hide="field == 'image'">{{user[field]}}</span>
-                    <img class="profile-icon" ng-hide="field !== 'image'" ng-src="assets/images/icons/anonymous-icon.png" />
+                    <img class="profile-icon" ng-hide="field !== 'image'"
+                         ng-src="assets/images/icons/anonymous-icon.png"/>
                 </td>
                 <td>
                     <!-- Single button -->

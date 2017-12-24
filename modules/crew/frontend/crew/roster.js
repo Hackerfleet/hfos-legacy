@@ -8,7 +8,7 @@
  * Controller of the hfosFrontendApp
  */
 class Crew {
-    
+
     constructor(scope, rootscope, $modal, navdata, user, objectproxy, socket, menu) {
         this.scope = scope;
         this.rootscope = rootscope;
@@ -18,12 +18,12 @@ class Crew {
         this.op = objectproxy;
         this.socket = socket;
         this.menu = menu;
-        
+
         this.usermenu = {};
         this.fieldnames = ['name', 'fullname', 'location', 'text', 'image'];
-        
+
         let self = this;
-        
+
         this.requestusers = function () {
             console.log('[CREW] Login successful - fetching user data');
             this.op.searchItems('user', '*', ['name', 'description']).then(function (users) {
@@ -50,18 +50,18 @@ class Crew {
                 }
             });
         };
-        
+
         self.socket.listen('hfos.auth.login', self.handleNavdata);
-        
+
         this.loginupdate = this.rootscope.$on('User.Login', function () {
             self.requestusers();
         });
-        
+
         if (this.user.signedin === true) {
             self.requestusers();
         }
-        
-        
+
+
         self.scope.$on('$destroy', function () {
         });
     }

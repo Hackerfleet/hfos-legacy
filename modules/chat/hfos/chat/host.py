@@ -143,7 +143,8 @@ class Host(ConfigurableComponent):
         return msg
 
     def objectcreation(self, event):
-        self.log('Creation event!')
+        pass
+        #self.log('Creation event!')
 
     @handler('clientdisconnect')
     def clientdisconnect(self, event):

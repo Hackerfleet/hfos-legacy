@@ -35,17 +35,23 @@ from circuits import handler, BaseComponent, Debugger, Manager
 from hfos.component import ConfigurableComponent, ComponentConfigSchemaTemplate
 from warmongo import model_factory
 
+"""Basic Test suite bits and pieces"""
 
 class TestComponent(ConfigurableComponent):
+    """Very basic testing component"""
+
     configprops = {
         'test': {'type': 'string'}
     }
 
 
 class Watcher(BaseComponent):
-    def init(self):
-        self._lock = threading.Lock()
+    """Watches for incoming events"""
+
+    def __init__(self, *args, **kwargs):
+        super(Watcher).__init__(*args, **kwargs)
         self.events = deque()
+        self._lock = threading.Lock()
 
     @handler(channel="*", priority=999.9)
     def _on_event(self, event, *args, **kwargs):
@@ -53,9 +59,13 @@ class Watcher(BaseComponent):
             self.events.append(event)
 
     def clear(self):
+        """Reset caught events"""
+
         self.events.clear()
 
     def wait(self, name, channel=None, timeout=6.0):
+        """Linger and wait for specified incoming events"""
+
         for i in range(int(timeout / TIMEOUT)):
             with self._lock:
                 for event in self.events:
@@ -68,11 +78,14 @@ class Watcher(BaseComponent):
 
 
 class Flag(object):
+    """Flag object for Watcher component"""
     status = False
     event = None
 
 
 def call_event_from_name(manager, event, event_name, *channels):
+    """Fire a named event and wait for a specified response"""
+
     fired = False
     value = None
     for r in manager.waitEvent(event_name):
@@ -84,10 +97,13 @@ def call_event_from_name(manager, event, event_name, *channels):
 
 
 def call_event(manager, event, *channels):
+    """Simply fire and forget a specified event"""
+
     return call_event_from_name(manager, event, event.name, *channels)
 
 
 class WaitEvent(object):
+    """Simple component substitute that waits for a specified Event"""
     def __init__(self, manager, name, channel=None, timeout=1.0):
         if channel is None:
             channel = getattr(manager, "channel", None)
@@ -99,6 +115,8 @@ class WaitEvent(object):
 
         @handler(name, channel=channel)
         def on_event(self, event):
+            """An event has been received"""
+
             flag.status = True
             flag.event = event
 
@@ -106,6 +124,7 @@ class WaitEvent(object):
         self.flag = flag
 
     def wait(self):
+        """Wait for the (upon instantiation) specified timeout for an event"""
         try:
             for i in range(int(self.timeout / TIMEOUT)):
                 if self.flag.status:
@@ -116,6 +135,8 @@ class WaitEvent(object):
 
 
 def wait_for(obj, attr, value=True, timeout=3.0):
+    """Wait until timeout or an object acquires a specified attribute"""
+
     from circuits.core.manager import TIMEOUT
     for i in range(int(timeout / TIMEOUT)):
         if isinstance(value, collections.Callable):
@@ -128,9 +149,13 @@ def wait_for(obj, attr, value=True, timeout=3.0):
 
 @pytest.fixture
 def manager(request):
+    """Component testing manager/fixture"""
+
     manager = Manager()
 
     def finalizer():
+        """Stop the testing"""
+
         manager.stop()
 
     request.addfinalizer(finalizer)
@@ -151,9 +176,13 @@ def manager(request):
 
 @pytest.fixture
 def watcher(request, manager):
+    """Fixture that cleans up after unregistering"""
+
     watcher = Watcher().register(manager)
 
     def finalizer():
+        """Setup the manager and wait for completion, then unregister"""
+
         waiter = WaitEvent(manager, "unregistered")
         watcher.unregister()
         waiter.wait()
@@ -164,6 +193,8 @@ def watcher(request, manager):
 
 
 def clean_test_components():
+    """Removes test-generated component data"""
+
     print("Removing test components...")
     for item in model_factory(ComponentConfigSchemaTemplate).find({
         'componentclass': 'TestComponent'
@@ -173,10 +204,13 @@ def clean_test_components():
 
 @pytest.hookimpl()
 def pytest_unconfigure(config):
+    """Clear test generated data after test completion"""
     clean_test_components()
 
 
 def pytest_namespace():
+    """Setup the testing namespace"""
+
     return dict((
         ("TestComponent", TestComponent),
         ("clean_test_components", clean_test_components),

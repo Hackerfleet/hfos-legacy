@@ -58,5 +58,8 @@ LogOptions = {
     'disabled': True
 }
 
-LogMessage = {'schema': LogMessageSchema, 'form': readonlyform, 'options':
-    LogOptions}
+LogMessage = {
+    'schema': LogMessageSchema,
+    'form': readonlyform,
+    'options': LogOptions
+}

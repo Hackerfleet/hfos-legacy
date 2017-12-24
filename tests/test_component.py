@@ -103,6 +103,8 @@ def test_component_log():
 
 
 def test_unique_warning():
+    """Test for uniqueness of generated components"""
+
     log = logger.LiveLog
     logger.live = True
 
@@ -115,6 +117,8 @@ def test_unique_warning():
 
 
 def test_unregister():
+    """Test if component cleanly unregisters from namespace"""
+
     name = "test_unregister"
     m = Manager()
 
@@ -129,6 +133,8 @@ def test_unregister():
 
 
 def test_write_none_config():
+    """Test if writing a non existing configuration fails"""
+
     log = logger.LiveLog
     logger.live = True
 
@@ -142,12 +148,16 @@ def test_write_none_config():
 
 
 def test_configurable_controller():
+    """Test instantiation of the configurable controller"""
+
     c = hfos.component.ConfigurableController()
 
     assert type(c) == hfos.component.ConfigurableController
 
 
 def test_example_component():
+    """Test instantiation of the example component"""
+
     c = hfos.component.ExampleComponent()
 
     assert type(c) == hfos.component.ExampleComponent

@@ -29,12 +29,23 @@ Module: SchemaManager
 
 """
 
+from circuits import Event
+
 from hfos.events.client import send
 from hfos.events.schemamanager import get, all, configuration
+from hfos.debugger import cli_register_event
 from hfos.component import ConfigurableComponent
 from hfos.database import schemastore, configschemastore
-from hfos.logger import error, warn, debug, hilight
+from hfos.logger import warn, debug  # , error, hilight
 from hfos.component import handler
+
+
+class cli_schemata(Event):
+    pass
+
+
+class cli_form(Event):
+    pass
 
 
 class SchemaManager(ConfigurableComponent):
@@ -49,6 +60,21 @@ class SchemaManager(ConfigurableComponent):
     def __init__(self, *args):
         super(SchemaManager, self).__init__('SM', *args)
 
+        self.fireEvent(cli_register_event('schemata', cli_schemata))
+        self.fireEvent(cli_register_event('form', cli_form))
+
+    @handler('cli_schemata')
+    def cli_schemata_list(self, *args):
+        """Prints a list of registered schemata"""
+
+        self.log('Registered Schemata:', ",".join(sorted(schemastore.keys())), pretty=True)
+        if 'CONFIG' in args:
+            self.log('Registered Configuration Schemata:', ",".join(sorted(configschemastore.keys())), pretty=True)
+
+    @handler('cli_form')
+    def cli_form(self, *args):
+        self.log(schemastore[args[0]]['form'], pretty=True)
+
     @handler('ready')
     def ready(self):
         """Sets up the application after startup."""
@@ -60,6 +86,8 @@ class SchemaManager(ConfigurableComponent):
 
     @handler(all)
     def all(self, event):
+        """Return all known schemata to the requesting client"""
+
         self.log("Schemarequest for all schemata from",
                  event.user, lvl=debug)
         response = {
@@ -71,6 +99,7 @@ class SchemaManager(ConfigurableComponent):
 
     @handler(get)
     def get(self, event):
+        """Return a single schema"""
         self.log("Schemarequest for", event.data, "from",
                  event.user, lvl=debug)
         if event.data in schemastore:
@@ -85,6 +114,8 @@ class SchemaManager(ConfigurableComponent):
 
     @handler(configuration)
     def configuration(self, event):
+        """Return all configurable components' schemata"""
+
         try:
             self.log("Schemarequest for all configuration schemata from",
                      event.user.account.name, lvl=debug)

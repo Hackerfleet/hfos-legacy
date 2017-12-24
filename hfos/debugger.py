@@ -113,8 +113,9 @@ class HFDebugger(ConfigurableComponent):
 
             alert = {
                 'component': 'hfos.alert.manager',
-                'action': 'danger',
+                'action': 'notify',
                 'data': {
+                    'type': 'danger',
                     'message': "\n".join(s),
                     'title': 'Exception Monitor'
                 }
@@ -129,39 +130,45 @@ class HFDebugger(ConfigurableComponent):
 
     @handler(debugrequest)
     def debugrequest(self, event):
+        """Handler for client-side debug requests"""
         try:
             self.log("Event: ", event.__dict__, lvl=critical)
 
-            if event.action == "storejson":
+            if event.data == "storejson":
                 self.log("Storing received object to /tmp", lvl=critical)
                 fp = open('/tmp/hfosdebugger_' + str(
                     event.user.useruuid) + "_" + str(uuid4()), "w")
                 json.dump(event.data, fp, indent=True)
                 fp.close()
-            if event.action == "memdebug":
+            if event.data == "memdebug":
                 self.log("Memory hogs:", lvl=critical)
                 objgraph.show_most_common_types(limit=20)
-            if event.action == "growth":
+            if event.data == "growth":
                 self.log("Memory growth since last call:", lvl=critical)
                 objgraph.show_growth()
-            if event.action == "graph":
+            if event.data == "graph":
                 objgraph.show_backrefs([self.root], max_depth=42,
                                        filename='backref-graph.png')
                 self.log("Backref graph written.", lvl=critical)
-            if event.action == "exception":
+            if event.data == "exception":
                 class TestException(BaseException):
+                    """Generic exception to test exception monitoring"""
+
                     pass
 
                 raise TestException
-            if event.action == "heap":
+            if event.data == "heap":
                 self.log("Heap log:", self.heapy.heap(), lvl=critical)
-            if event.action == "buildfrontend":
+            if event.data == "buildfrontend":
                 self.log("Sending frontend build command")
 
                 self.fireEvent(frontendbuildrequest(force=True), "setup")
-            if event.action == "logtail":
+            if event.data == "logtail":
                 self.fireEvent(logtailrequest(event.user, None, None,
                                               event.client), "logger")
+            if event.data == "trigger_anchorwatch":
+                from hfos.anchor.anchorwatcher import cli_trigger_anchorwatch
+                self.fireEvent(cli_trigger_anchorwatch())
 
         except Exception as e:
             self.log("Exception during debug handling:", e, type(e),
@@ -182,6 +189,7 @@ class CLI(ConfigurableComponent):
 
         self.log("Started")
         stdin.register(self)
+        self.fire(cli_register_event('help', cli_help))
 
     @handler("read", channel="stdin")
     def stdin_read(self, data):
@@ -195,38 +203,57 @@ class CLI(ConfigurableComponent):
         self.log("Incoming:", data, lvl=verbose)
 
         if len(data) == 0:
+            self.log('Use /help to get a list of enabled cli hooks')
             return
 
         if data[0] == "/":
-            cmd = data[1:].upper()
+            cmd = data[1:]
             args = []
             if ' ' in cmd:
                 cmd, args = cmd.split(' ', maxsplit=1)
                 args = args.split(' ')
             if cmd in self.hooks:
                 self.log('Firing hooked event:', cmd, args, lvl=debug)
-                self.fireEvent(self.hooks[cmd](args))
+                self.fireEvent(self.hooks[cmd](*args))
             # TODO: Move these out, so we get a simple logic here
-            if cmd == 'FRONTEND':
-                self.log("Sending %s frontend rebuild event" % ("(forced)"
-                                                                if 'FORCE'
-                                                                   in args
-                                                                else ''))
-                self.fireEvent(frontendbuildrequest(force='FORCE' in args,
-                                                    install='INSTALL' in args),
-                               "setup")
-            if cmd == 'BACKEND':
+            elif cmd == 'frontend':
+                self.log("Sending %s frontend rebuild event" %
+                         ("(forced)" if 'force' in args else ''))
+                self.fireEvent(
+                    frontendbuildrequest(force='force' in args,
+                                         install='install' in args),
+                    "setup")
+            elif cmd == 'backend':
                 self.log("Sending backend reload event")
                 self.fireEvent(componentupdaterequest(force=False), "setup")
+            else:
+                self.log('Unknown Command. Use /help to get a list of enabled '
+                         'cli hooks')
+
+    @handler('cli_help')
+    def cli_help(self, *args):
+        self.log('Registered CLI hooks:')
+        # TODO: Use std_table for a pretty table
+        length = 5
+        for hook in self.hooks:
+            length = max(len(hook), length)
+
+        for hook in self.hooks:
+            self.log('/%s - %s' % (hook.ljust(length),
+                                   self.hooks[hook]))
 
     @handler('cli_register_event')
     def register_event(self, event):
+        """Registers a new command line interface event hook as command"""
+
         self.log('Registering event hook:', event.cmd, event.thing,
                  pretty=True, lvl=debug)
-        self.hooks[event.cmd.upper()] = event.thing
+        self.hooks[event.cmd] = event.thing
 
 
 class clicommand(Event):
+    """Event to execute previously registered CLI event hooks"""
+
     def __init__(self, cmd, cmdargs, *args, **kwargs):
         super(clicommand, self).__init__(*args, **kwargs)
         self.cmd = cmd
@@ -234,7 +261,13 @@ class clicommand(Event):
 
 
 class cli_register_event(Event):
+    """Event to register new command line interface event hooks"""
+
     def __init__(self, cmd, thing, *args, **kwargs):
         super(cli_register_event, self).__init__(*args, **kwargs)
         self.cmd = cmd
         self.thing = thing
+
+
+class cli_help(Event):
+    pass

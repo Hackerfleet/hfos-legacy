@@ -34,6 +34,7 @@ Hackerfleet Operating System installations.
 """
 
 import click
+import csv
 import getpass
 import grp
 import hashlib
@@ -45,10 +46,12 @@ import pwd
 import pymongo
 import time
 
+from click_plugins import with_plugins
 from click_didyoumean import DYMGroup
 from click_repl import repl
 from prompt_toolkit.history import FileHistory
 
+from pkg_resources import iter_entry_points
 from ast import literal_eval
 from distutils.dir_util import copy_tree
 from uuid import uuid4
@@ -299,6 +302,7 @@ def _get_system_configuration():
     return systemconfig
 
 
+@with_plugins(iter_entry_points('hfos.management'))
 @click.group(context_settings={'help_option_names': ['-h', '--help']},
              cls=DYMGroup)
 @click.option('--quiet', default=False, help="Suppress all output",
@@ -693,7 +697,7 @@ def install_var(clear, clear_all):
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
     target_paths = (
-        '/var/www/challenges'  # For LetsEncrypt acme certificate challenges
+        '/var/www/challenges',  # For LetsEncrypt acme certificate challenges
         '/var/lib/hfos',
         '/var/cache/hfos',
         '/var/cache/hfos/tilecache',
@@ -766,13 +770,14 @@ def install_provisions(provision, dbhost, clear=False, overwrite=False):
 
 
 @install.command(short_help='install modules')
-def modules():
+@click.option('--wip', help="Install Work-In-Progress (alpha/beta-state) modules as well", is_flag=True)
+def modules(wip):
     """Install the plugin modules"""
 
-    install_modules()
+    install_modules(wip)
 
 
-def install_modules():
+def install_modules(wip):
     """Install the plugin modules"""
 
     def install_module(hfos_module):
@@ -794,37 +799,54 @@ def install_modules():
             return False
         return True
 
-    installables = [
-        # Poor man's dependency management, as long as the modules are
+    modules_production = [
+        # TODO: Poor man's dependency management, as long as the modules are
         # installed from local sources and they're not available on pypi,
         # which would handle real dependency management for us:
         'navdata',
-        'robot',
 
         # Now all the rest:
         'alert',
+        'automat',
         'busrepeater',
         'camera',
         'chat',
-        'comms',
+        'calendar',
         'countables',
         'crew',
         'dash',
         # 'dev',
-        'garden',
-        'ldap',
-        'library',
-        'logbook',
+        'enrol',
         'maps',
-        'mesh',
         'nmea',
         'polls',
         'project',
-        'protocols',
         'shareables',
-        'switchboard',
+        'webguides',
         'wiki'
     ]
+
+    modules_wip = [
+        'calc',
+        'comms',
+        'contacts',
+        'equipment',
+        'filemanager',
+        'garden',
+        'heroic',
+        'ldap',
+        'library',
+        'logbook',
+        'mesh',
+        'protocols',
+        'robot',
+        'switchboard',
+    ]
+
+    installables = modules_production
+
+    if wip:
+        installables.extend(modules_wip)
 
     success = []
     failed = []
@@ -895,10 +917,6 @@ def install_nginx(hostname=None):
     _check_root()
 
     hfoslog("Installing nginx configuration", emitter="MANAGE")
-
-    global key_file
-    global cert_file
-    global combined_file
 
     if hostname is None:
         try:
@@ -1003,10 +1021,6 @@ def install_cert(selfsigned):
         except PermissionError:
             hfoslog("Need root (e.g. via sudo) to generate ssl certificate")
             sys.exit(1)
-
-        global key_file
-        global cert_file
-        global combined_file
 
         def create_self_signed_cert():
             """Create a simple self signed SSL certificate"""
@@ -1141,7 +1155,7 @@ def install_all(clear):
     install_cert(selfsigned=True)
 
     install_var(clear=clear, clear_all=clear)
-    install_modules()
+    install_modules(wip=False)
     install_provisions(provision=None, dbhost=db_host_default, clear=clear)
     install_docs(clear=clear)
 
@@ -1237,6 +1251,163 @@ def view(ctx, schema, uuid, filter):
 
     for item in obj:
         pprint(item._fields)
+
+
+@db.command(short_help='export objects to json')
+@click.option("--schema", "-s", default=None, help="Specify schema to export")
+@click.option("--uuid", "-u", default=None, help="Specify single object to export")
+@click.option("--filter", default=None, help="Find objects to export by filter")
+@click.option("--format", default='json', help="Currently only JSON is supported")
+@click.option("--filename", "-f", default=None, help="Export to given file; Overwrites!")
+@click.option("--pretty", "-p", default=False, is_flag=True, help="Indent output for human readability")
+@click.option("--all", default=False, is_flag=True, help="Agree to export all documents, if no schema specified")
+@click.option("--omit", "-o", multiple=True, default=[], help="Omit given fields (multiple, e.g. '-o _id -o perms')")
+@click.pass_context
+def export(ctx, schema, uuid, filter, format, filename, pretty, all, omit):
+    """Export stored objects
+
+    Warning! This functionality is work in progress and you may destroy live data by using it!
+    Be very careful when using the export/import functionality!"""
+
+    format = format.upper()
+
+    if pretty:
+        indent = 4
+    else:
+        indent = 0
+
+    f = None
+
+    if filename:
+        try:
+            f = open(filename, 'w')
+        except (IOError, PermissionError) as e:
+            hfoslog('Could not open output file for writing:', e, type(e), lvl=error)
+
+    def output(what, convert=False):
+        if convert:
+            if format == 'JSON':
+                data = json.dumps(what, indent=indent)
+            else:
+                data = ""
+        else:
+            data = what
+
+        if not filename:
+            print(data)
+        else:
+            f.write(data)
+
+    database = ctx.obj['db']
+
+    if schema is None:
+        if all is False:
+            hfoslog('No schema given. Read the help', lvl=warn, emitter='manage')
+            return
+        else:
+            schemata = database.objectmodels.keys()
+    else:
+        schemata = [schema]
+
+    all_items = {}
+
+    for schema_item in schemata:
+        model = database.objectmodels[schema_item]
+
+        if uuid:
+            obj = model.find({'uuid': uuid})
+        elif filter:
+            obj = model.find(literal_eval(filter))
+        else:
+            obj = model.find()
+
+        items = []
+        for item in obj:
+            fields = item.serializablefields()
+            for field in omit:
+                try:
+                    fields.pop(field)
+                except KeyError:
+                    pass
+            items.append(fields)
+
+        all_items[schema_item] = items
+
+        # if pretty is True:
+        #    output('\n// Objectmodel: ' + schema_item + '\n\n')
+        # output(schema_item + ' = [\n')
+
+    output(all_items, convert=True)
+
+    if f is not None:
+        f.flush()
+        f.close()
+
+
+@db.command('import', short_help='import objects from json')
+@click.option("--schema", default=None, help="Specify schema to import")
+@click.option("--uuid", default=None, help="Specify single object to import")
+@click.option("--filter", default=None, help="Specify objects to import by filter (Not implemented yet!)")
+@click.option("--format", default='json', help="Currently only JSON is supported")
+@click.option("--filename", default=None, help="Import from given file")
+@click.option("--all", default=False, is_flag=True, help="Agree to import all documents, if no schema specified")
+@click.option("--dry", default=False, is_flag=True, help="Do not write changes to the database")
+@click.pass_context
+def cli_import(ctx, schema, uuid, filter, format, filename, all, dry):
+    """Import objects from file
+
+    Warning! This functionality is work in progress and you may destroy live data by using it!
+    Be very careful when using the export/import functionality!"""
+
+    format = format.upper()
+
+    with open(filename, 'r') as f:
+        json_data = f.read()
+    data = json.loads(json_data)  # , parse_float=True, parse_int=True)
+
+    if schema is None:
+        if all is False:
+            hfoslog('No schema given. Read the help', lvl=warn, emitter='manage')
+            return
+        else:
+            schemata = data.keys()
+    else:
+        schemata = [schema]
+
+    database = ctx.obj['db']
+
+    all_items = {}
+    total = 0
+
+    for schema_item in schemata:
+        model = database.objectmodels[schema_item]
+
+        objects = data[schema_item]
+        if uuid:
+            for item in objects:
+                if item['uuid'] == uuid:
+                    items = [model(item)]
+        else:
+            items = []
+            for item in objects:
+                thing = model(item)
+                items.append(thing)
+
+        schema_total = len(items)
+        total += schema_total
+
+        if dry:
+            hfoslog('Would import', schema_total, 'items of', schema_item)
+        all_items[schema_item] = items
+
+    if dry:
+        hfoslog('Would import', total, 'objects.')
+    else:
+        hfoslog('Importing', total, 'objects.')
+        for schema_name, item_list in all_items.items():
+            hfoslog('Importing', len(item_list), 'objects of type', schema_name)
+            for item in item_list:
+                item.save()
 
 
 @db.command(short_help='find in object model fields')

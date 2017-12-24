@@ -43,7 +43,7 @@ import warmongo
 import pymongo
 import operator
 from os import statvfs, walk
-from os.path import join, getsize, isfile, isdir, splitext
+from os.path import join, getsize
 # noinspection PyUnresolvedReferences
 from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
@@ -67,6 +67,8 @@ collections = None
 
 
 def makesalt():
+    """Generates a cryptographically sane salt of 16 alphanumeric characters"""
+
     alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     chars = []
     for i in range(16):
@@ -167,6 +169,9 @@ def _build_collections(store):
 
 
 def initialize(address='127.0.0.1:27017', database_name='hfos'):
+    """Initializes the database connectivity, schemata and finally
+    object models"""
+
     global schemastore
     global objectmodels
     global collections
@@ -194,6 +199,8 @@ def initialize(address='127.0.0.1:27017', database_name='hfos'):
 
 
 def test_schemata():
+    """Validates all registered schemata"""
+
     objects = {}
 
     for schemaname in schemastore.keys():
@@ -210,6 +217,8 @@ def test_schemata():
 
 
 def profile(schemaname='sensordata', profiletype='pjs'):
+    """Profiles object model handling with a very simple benchmarking test"""
+
     hfoslog("Profiling ", schemaname, emitter='DB')
 
     schema = schemastore[schemaname]['schema']
@@ -228,6 +237,8 @@ def profile(schemaname='sensordata', profiletype='pjs'):
         except ImportError:
             hfoslog("PJS benchmark selected but not available. Install "
                     "python_jsonschema_objects (PJS)", emitter="DB")
+            return
+
         hfoslog()
         builder = pjs.ObjectBuilder(schema)
         ns = builder.build_classes()
@@ -248,6 +259,9 @@ def profile(schemaname='sensordata', profiletype='pjs'):
 # profile(schemaname='sensordata', profiletype='warmongo')
 
 class Maintenance(ConfigurableComponent):
+    """Regularly checks a few basic system maintenance tests like used
+    storage space of collections and other data"""
+
     configprops = {
         'locations': {
             'type': 'object',
@@ -324,11 +338,15 @@ class Maintenance(ConfigurableComponent):
 
     @handler('maintenance_check')
     def maintenance_check(self, *args):
+        """Perform a regular maintenance check"""
+
         self.log('Performing maintenance check')
         self._check_collections()
         self._check_free_space()
 
     def _check_collections(self):
+        """Checks node local collection storage sizes"""
+
         self.collection_sizes = {}
         self.collection_total = 0
         for col in self.db.collection_names(include_system_collections=False):
@@ -348,7 +366,11 @@ class Maintenance(ConfigurableComponent):
                                                       1024.0 / 1024))
 
     def _check_free_space(self):
+        """Checks used filesystem storage sizes"""
+
         def get_folder_size(path):
+            """Aggregates used size of a specified path, recursively"""
+
             total_size = 0
             for item in walk(path):
                 for file in item[2]:

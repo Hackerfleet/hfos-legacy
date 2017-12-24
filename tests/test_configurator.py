@@ -38,9 +38,9 @@ from circuits import Manager
 import pytest
 from uuid import uuid4
 from hfos.ui.configurator import Configurator, get, list, put
-from hfos.events.client import send
+# from hfos.events.client import send
 
-from pprint import pprint
+# from pprint import pprint
 
 m = Manager()
 c = Configurator()
@@ -51,12 +51,16 @@ clientuuid = str(uuid4())
 
 
 class AccountMock():
+    """Mock object for an account"""
+
     def __init__(self):
         self.name = 'TEST'
         self.roles = ['admin']
 
 
 class ProfileMock():
+    """Mock object for a profile"""
+
     def __init__(self):
         self.name = 'TEST'
 
@@ -68,6 +72,8 @@ def test_instantiate():
 
 
 def transmit(action, data, account=AccountMock()):
+    """Fire an event and listen for a reply"""
+
     profile = ProfileMock()
     user = User(account, profile, useruuid)
     client = Client(None, None, clientuuid, useruuid)

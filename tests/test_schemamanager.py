@@ -38,9 +38,9 @@ import pytest
 from uuid import uuid4
 from hfos.ui.schemamanager import SchemaManager
 from hfos.events.schemamanager import get, all, configuration
-from hfos.events.client import send
+# from hfos.events.client import send
 
-from pprint import pprint
+# from pprint import pprint
 
 m = Manager()
 sm = SchemaManager()

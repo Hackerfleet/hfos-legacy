@@ -32,18 +32,19 @@ Module: Configurator
 from hfos.events.client import send
 from hfos.component import ConfigurableComponent, authorizedevent, handler
 from hfos.schemata.component import ComponentConfigSchemaTemplate as Schema
-from hfos.database import configschemastore, ValidationError, objectmodels
-from hfos.logger import error, warn, verbose, hilight
+from hfos.database import ValidationError
+from hfos.logger import error, warn
 from warmongo import model_factory
 
 try:
     PermissionError
 except NameError:  # pragma: no cover
     class PermissionError(Exception):
+        """Not enough Permissions (2to3 substitute)"""
         pass
 
 
-class list(authorizedevent):
+class getlist(authorizedevent):
     """A client requires a schema to validate data or display a form"""
 
 
@@ -79,8 +80,8 @@ class Configurator(ConfigurableComponent):
             return False
         return True
 
-    @handler(list)
-    def list(self, event):
+    @handler(getlist)
+    def getlist(self, event):
         """Processes configuration list requests
 
         :param event:
@@ -112,6 +113,8 @@ class Configurator(ConfigurableComponent):
 
     @handler(put)
     def put(self, event):
+        """Store a given configuration"""
+
         self.log("Configuration put request ",
                  event.user)
 
@@ -147,6 +150,8 @@ class Configurator(ConfigurableComponent):
 
     @handler(get)
     def get(self, event):
+        """Get a stored configuration"""
+
         if self._check_permission(event) is False:
             response = {
                 'component': 'hfos.ui.configurator',

@@ -47,15 +47,11 @@
                     ng-show="$ctrl.reserve_from != '' && $ctrl.reserve_to != ''">Query
             </button>
         </div>
-
     </form>
 
-
     <div class="row">
-
-        <div class="col-md-6 text-center">
+        <div class="col-md-4 text-center">
             <div class="btn-group">
-
                 <button
                         class="btn btn-primary"
                         mwl-date-modifier
@@ -80,9 +76,13 @@
             </div>
         </div>
 
+        <div class="col-md-4 text-center">
+            {{$ctrl.moment($ctrl.calendarDate).format('LL')}}
+        </div>
+
         <br class="visible-xs visible-sm">
 
-        <div class="col-md-6 text-center">
+        <div class="col-md-4 text-center">
             <div class="btn-group">
                 <label class="btn btn-primary" ng-model="$ctrl.calendarView" uib-btn-radio="'year'">Year</label>
                 <label class="btn btn-primary" ng-model="$ctrl.calendarView" uib-btn-radio="'month'">Month</label>

@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Testsuite for HFOS"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 

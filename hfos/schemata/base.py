@@ -17,25 +17,46 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos.schemata.defaultform import lookup_field
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
 """
 
-Schema: User
+Schema: Base
 ============
 
-Account credentials and administrativa
+Basic HFOS object schema utilities
 
 Contains
 --------
 
-User: Useraccount object
+uuid_object: For inserting UUID fields
+base_object: For generating a basic HFOS object schema
 
 
 """
-from hfos.schemata.defaultform import noform
+
+
+def uuid_object(title="Reference", description="Select an object", display=True):
+    """Generates a regular expression controlled UUID field"""
+
+    uuid = {
+        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
+                   '4}-['
+                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+        'type': 'string',
+        'title': title,
+        'description': description
+    }
+
+    if not display:
+        uuid['x-schema-form'] = {
+            'condition': "false"
+        }
+
+    return uuid
 
 
 def base_object(name,
@@ -47,6 +68,7 @@ def base_object(name,
                 roles_list=None,
                 roles_create=None,
                 all_roles=None):
+    """Generates a basic object with RBAC properties"""
     base_schema = {
         'id': '#' + name,
         'type': 'object',
@@ -78,7 +100,7 @@ def base_object(name,
             roles_read = [roles_read]
         if isinstance(roles_list, str):
             roles_list = [roles_list]
-            
+
         if has_owner:
             roles_write.append('owner')
             roles_read.append('owner')
@@ -130,32 +152,14 @@ def base_object(name,
             # base_schema['required'] = base_schema.get('required', [])
             # base_schema['required'].append('owner')
             base_schema['properties'].update({
-                'owner': {
-                    'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                               '4}-['
-                               'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                    'type': 'string',
-                    'title': 'Unique Owner ID',
-                    'x-schema-form': {
-                        'condition': "false"
-                    }
-                }
+                'owner': uuid_object(title='Unique Owner ID', display=False)
             })
 
     # TODO: Using this causes all sorts of (obvious) problems with the object
     # manager
     if has_uuid:
         base_schema['properties'].update({
-            'uuid': {
-                'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                           '4}-['
-                           'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                'type': 'string',
-                'title': 'Unique ' + name + ' ID',
-                'x-schema-form': {
-                    'condition': "false"
-                }
-            }
+            'uuid': uuid_object(title='Unique ' + name + ' ID', display=False)
         })
         base_schema['required'] = ["uuid"]
 

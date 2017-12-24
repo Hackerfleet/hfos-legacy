@@ -49,6 +49,8 @@ systemconfig = {
 
 
 def provision(*args, **kwargs):
+    """Provision a basic system configuration"""
+
     clear = kwargs.get('clear', False)
     overwrite = kwargs.get('overwrite', False)
 

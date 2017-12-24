@@ -35,27 +35,34 @@ Major HFOS event declarations
 from circuits.core import Event
 
 from hfos.logger import hfoslog, critical, events
-from hfos.ui.clientobjects import User
+
+# from hfos.ui.clientobjects import User
 
 AuthorizedEvents = {}
 AnonymousEvents = {}
 
 
 def get_user_events():
-    global AuthorizedEvents
+    """Return all registered authorized events"""
+
     return AuthorizedEvents
 
 
 def get_anonymous_events():
-    global AnonymousEvents
+    """Return all registered anonymous events"""
+
     return AnonymousEvents
 
 
 def populate_user_events():
+    """Generate a list of all registered authorized and anonymous events"""
+
     global AuthorizedEvents
     global AnonymousEvents
 
     def inheritors(klass):
+        """Find inheritors of a specified object class"""
+
         subclasses = {}
         subclasses_set = set()
         work = [klass]
@@ -96,6 +103,8 @@ def populate_user_events():
 
 
 class hfosEvent(Event):
+    """Basic HFOS event class"""
+
     pass
 
 
@@ -122,6 +131,8 @@ class anonymousevent(hfosEvent):
 
     @classmethod
     def realname(cls):
+        """Return real name of an object class"""
+
         # For circuits manager to enable module/event namespaces
         return cls.__module__ + '.' + cls.__name__
 
@@ -141,7 +152,7 @@ class authorizedevent(hfosEvent):
         :return:
         """
 
-        assert isinstance(user, User)
+        # assert isinstance(user, User)
 
         self.name = self.__module__ + '.' + self.__class__.__name__
         super(authorizedevent, self).__init__(*args)
@@ -153,6 +164,8 @@ class authorizedevent(hfosEvent):
 
     @classmethod
     def realname(cls):
+        """Return real name of an object class"""
+
         # For circuits manager to enable module/event namespaces
         return cls.__module__ + '.' + cls.__name__
 
@@ -177,6 +190,8 @@ class profilerequest(authorizedevent):
 # Frontend assembly events
 
 class frontendbuildrequest(Event):
+    """Rebuild and/or install the frontend"""
+
     def __init__(self, force=False, install=False, *args):
         super(frontendbuildrequest, self).__init__(*args)
         self.force = force
@@ -184,12 +199,15 @@ class frontendbuildrequest(Event):
 
 
 class componentupdaterequest(frontendbuildrequest):
+    """Check for updated components"""
+
     pass
 
 
 # Debugger
 
 class logtailrequest(authorizedevent):
+    """Request the logger's latest output"""
     pass
 
 
@@ -199,4 +217,4 @@ class debugrequest(authorizedevent):
     def __init__(self, *args):
         super(debugrequest, self).__init__(*args)
 
-        hfoslog('CREATED.', lvl=critical, emitter="DEBUG-EVENT")
+        hfoslog('Created debugrequest', lvl=events, emitter="DEBUG-EVENT")

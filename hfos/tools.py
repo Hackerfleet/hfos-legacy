@@ -4,14 +4,20 @@ from uuid import uuid4
 
 
 def std_now():
+    """Return current timestamp in ISO format"""
+
     return datetime.now().isoformat()
 
 
 def std_uuid():
+    """Return string representation of a new UUID4"""
+
     return str(uuid4())
 
 
 def std_table(rows):
+    """Return a formatted table of given rows"""
+
     result = ""
     if len(rows) > 1:
         headers = rows[0]._fields
@@ -32,9 +38,9 @@ def std_table(rows):
         separator = "-+-".join(['-' * n for n in lens])
         result += hpattern % tuple(headers) + " \n"
         result += separator + "\n"
-        _u = lambda t: t if isinstance(t, str) else t
+
         for line in rows:
-            result += pattern % tuple(_u(t) for t in line) + "\n"
+            result += pattern % tuple(t for t in line) + "\n"
     elif len(rows) == 1:
         row = rows[0]
         hwidth = len(max(row._fields, key=lambda x: len(x)))
@@ -45,6 +51,8 @@ def std_table(rows):
 
 
 def format_template(template, content):
+    """Render a given pystache template with given content"""
+
     import pystache
     result = u""
     if True:  # try:
@@ -57,6 +65,8 @@ def format_template(template, content):
 
 
 def format_template_file(filename, content):
+    """Render a given pystache template file with given content"""
+
     with open(filename, 'r') as f:
         template = f.read()
         if type(template) != str:
@@ -66,6 +76,8 @@ def format_template_file(filename, content):
 
 
 def write_template_file(source, target, content):
+    """Write a new file from a given pystache template file and content"""
+
     # print(formatTemplateFile(source, content))
     print(target)
     data = format_template_file(source, content)
@@ -77,6 +89,8 @@ def write_template_file(source, target, content):
 
 
 def insert_nginx_service(definition):  # pragma: no cover
+    """Insert a new nginx service definition"""
+
     config_file = '/etc/nginx/sites-available/hfos.conf'
     splitter = "### SERVICE DEFINITIONS ###"
 
