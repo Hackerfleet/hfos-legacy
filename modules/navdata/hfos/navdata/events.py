@@ -56,6 +56,20 @@ class referenceframe(Event):
                 lvl=events)
 
 
+class updateposition(Event):
+    """This vessel's position has been updated"""
+
+    def __init__(self, vessel):
+        """
+
+        :param vessel: Vessel object (System Default Vessel)
+        """
+        super(updateposition, self).__init__()
+        self.vessel = vessel
+        hfoslog("[NAVDATA-EVENT] Vessel position has changed: ", vessel,
+                lvl=events)
+
+
 class updatevessel(Event):
     """Vessel has transmitted new coordinates"""
 
@@ -70,4 +84,3 @@ class updatevessel(Event):
         self.coords = coords
         self.data = data
         self.timestamp = timestamp
-

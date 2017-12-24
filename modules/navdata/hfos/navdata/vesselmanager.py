@@ -34,11 +34,13 @@ Module NavData
 from hfos.component import handler
 from hfos.database import objectmodels  # , ValidationError
 from hfos.events.objectmanager import updatesubscriptions
-from hfos.navdata.events import referenceframe, updatevessel
+from hfos.navdata.events import referenceframe, updatevessel, updateposition
 from hfos.logger import hfoslog, events, debug, verbose, critical, warn, \
     hilight
 from hfos.component import ConfigurableComponent
 from hfos.events.client import send, broadcast
+
+from math import copysign
 from uuid import uuid4
 
 from pprint import pprint
@@ -60,7 +62,9 @@ class VesselManager(ConfigurableComponent):
         super(VesselManager, self).__init__('VESSEL', *args)
 
         self.vessel_mapview = None
+        self.vessel = None
 
+        self._setup()
         self.log('Started')
 
     def _setup(self):
@@ -75,6 +79,8 @@ class VesselManager(ConfigurableComponent):
             self.log('No vessel configured in Systemconfig, stopping!',
                      lvl=warn)
             return
+
+        self.vessel = vessel
 
         mapview = None
 
@@ -118,7 +124,7 @@ class VesselManager(ConfigurableComponent):
             vessel.true_heading = event.data['true_heading'] % 360
             vessel.source = 'AIS'
 
-        #pprint(vessel.serializablefields())
+        # pprint(vessel.serializablefields())
 
         lat = max(-90, min(event.data['y'], 90))
         lon = max(-180, min(event.data['x'], 180))
@@ -152,28 +158,35 @@ class VesselManager(ConfigurableComponent):
 
     @handler('referenceframe', channel='navdata')
     def referenceframeupdate(self, event):
-        if self.vessel_mapview is None:
-            return
-
-        self.log('Updating system vessel mapview coordinates', event,
-                 self.vessel_mapview, lvl=verbose)
-        self.log('Data:', event.data, lvl=events)
+        self.log('Reference update:', event.data, lvl=verbose)
         frame = event.data['data']
 
         if 'GLL_lat' in frame and 'GLL_lon' in frame:
+            lat = float(frame['GLL_lat']) % (90 * copysign(1, float(frame['GLL_lat'])))
+            lon = float(frame['GLL_lon']) % (180 * copysign(1, float(frame['GLL_lon'])))
+
+            self.log('Updating position', lat, lon, lvl=verbose)
+
+            self.vessel.geojson['coordinates'] = [lon, lat]
+            self.vessel.save()
+            self.fireEvent(updateposition(self.vessel), 'hfosweb')
+
+            if self.vessel_mapview is None:
+                return
+
+            self.log('Updating system vessel mapview coordinates', event,
+                     self.vessel_mapview, lvl=verbose)
+            self.log('Data:', event.data, lvl=events)
+
             # pprint(frame['GLL_lat'])
             # pprint(self.vesselmapview._fields)
             coords = {
-                'lat': float(frame['GLL_lat']),
-                'lng': float(frame['GLL_lon']),
+                'lat': lat,
+                'lng': lon,
                 'zoom': 10,
                 'autoDiscover': False
             }
             self.vessel_mapview.coords = coords
             self.vessel_mapview.save()
 
-            self.fireEvent(updatesubscriptions(
-                uuid=self.vessel_mapview.uuid,
-                schema='mapview',
-                data=self.vessel_mapview
-            ), 'hfosweb')
+            self.fireEvent(updatesubscriptions('mapview', self.vessel_mapview), 'hfosweb')
