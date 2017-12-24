@@ -37,9 +37,5 @@ export function routing($stateProvider) {
         .state('app.invitation', {
             url: '/invitation/:uuid',
             template: '<invitation></invitation>'
-        })
-        .state('app.password', {
-            url: '/password',
-            template: '<password></password>'
         });
 }
