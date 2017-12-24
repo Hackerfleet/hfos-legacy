@@ -32,7 +32,7 @@
  * Controller of the hfosFrontendApp
  */
 class AutomatCtrl {
-    constructor($scope, $compile, ObjectProxy, alert, uuid, user, socket) {
+    constructor($scope, $compile, ObjectProxy, notification, uuid, user, socket) {
         this.scope = $scope;
         this.compile = $compile;
         this.op = ObjectProxy;
@@ -87,45 +87,13 @@ class AutomatCtrl {
             };
             return condition;
         };
-        
-        let demouuid = this.uuid.v4();
-        
-        this.demorule = {
-            uuid: demouuid,
-            input: {
-                event: {
-                    source: 'hfos.navdata.sensors',
-                    name: 'sensed'
-                },
-                logic: [{
-                    field: 'DBT_depth_meters',
-                    tool: 'compare_int',
-                    function: 'lower_equals',
-                    argument: 20
-                }]
-            },
-            output: {
-                event: {
-                    destination: 'hfos.alert.manager',
-                    name: 'broadcast'
-                },
-                data: {
-                    type: 'danger',
-                    title: 'Depth alert!',
-                    msg: 'Depth reached a critical minimum of 20m below keel!',
-                    duration: 10
-                }
-            },
-            enabled: true
-        };
-        
+
         this.debug = false;
         this.rules = {};
-        this.rules[demouuid] = this.demorule;
-        
+
         this.handleAutomatData = function (msg) {
             console.log('[AUTOMAT] Incoming:', msg);
-            if (msg.action = 'get_events') {
+            if (msg.action === 'get_events') {
                 self.events = msg.data;
             }
         };
@@ -134,7 +102,7 @@ class AutomatCtrl {
             console.log('[AUTOMAT] Logged in - fetching automat data');
             self.socket.send({
                 component: 'hfos.automat.manager',
-                action: 'get_events',
+                action: 'get_events'
             });
             self.op.searchItems('automatrule', '', '*').then(function(rules) {
                 console.log('[AUTOMAT] Got the rules:', rules.data);
@@ -207,6 +175,6 @@ class AutomatCtrl {
     }
 }
 
-AutomatCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'alert', 'uuid', 'user', 'socket'];
+AutomatCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'notification', 'uuid', 'user', 'socket'];
 
 export default AutomatCtrl;
