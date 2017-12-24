@@ -40,17 +40,12 @@ Provisions
 """
 
 from hfos.schemata.defaultform import defaultform
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 GeoObjectSchema = base_object('geoobject', all_roles='crew')
 
 GeoObjectSchema['properties'].update({
-    'layer': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Unique GeoObject Layer ID'
-    },
+    'layer': uuid_object('Unique GeoObject Layer ID'),
     'type': {
         'type': 'string',
         'title': 'Type',

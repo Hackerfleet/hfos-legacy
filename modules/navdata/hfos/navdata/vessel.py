@@ -32,18 +32,12 @@ Vessel: Vesselprofile to store Vessel specific settings
 
 
 """
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 VesselSchema = base_object('vessel')
 
 VesselSchema['properties'].update({
-    'mapviewuuid': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Unique Vessel Moving Mapview ID'
-    },
+    'mapviewuuid': uuid_object('Unique Vessel Moving Mapview ID'),
     'sog': {'type': 'number', 'title': 'SOG',
             'description': 'Speed over ground (kn)'},
     'cog': {'type': 'number', 'title': 'COG',

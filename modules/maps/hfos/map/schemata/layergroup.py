@@ -40,7 +40,7 @@ Provisions
 """
 
 from hfos.schemata.defaultform import editbuttons
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 LayerGroupSchema = base_object('layergroup',
                                roles_read=['crew'],
@@ -60,13 +60,7 @@ LayerGroupSchema['properties'].update({
               'description': 'Custom user notes'},
     'layers': {
         'type': 'array',
-        'items': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                       '12}$',
-            'type': 'string',
-            'title': 'Unique Layer ID'
-        }
+        'items': uuid_object('Unique Layer ID')
     }
 })
 
@@ -92,7 +86,7 @@ LayerGroupForm = [
             }
         ]
     },
-    editbuttons
+
 ]
 
 LayerGroup = {'schema': LayerGroupSchema, 'form': LayerGroupForm}

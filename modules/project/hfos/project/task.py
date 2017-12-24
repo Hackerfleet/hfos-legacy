@@ -41,27 +41,17 @@ Provisions
 
 from hfos.schemata.defaultform import editbuttons
 from hfos.schemata.tag import TagData, TagForm
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 TaskSchema = base_object('task', all_roles='crew')
 
 TaskSchema['properties'].update({
-    'project': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Project which this task is part of'},
+    'project': uuid_object('Project which this task is part of'),
     'creator': {'type': 'string', 'title': 'Creator',
                 'description': 'Creator of Task'},
     'assignee': {'type': 'string', 'title': 'Assignee',
                  'description': 'Assigned user'},
-    'taskgroup': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Task group',
-        'description': 'Group, this task belongs to'
-    },
+    'taskgroup': uuid_object(title='Task group', description='Group, this task belongs to'),
     'tags': TagData,
     'alert': {'type': 'string', 'title': 'Alert',
               'format': 'datetimepicker',
@@ -93,9 +83,7 @@ TaskSchema['properties'].update({
                         'Blocking'
                     ]
                 },
-                'task': {'type': 'string', 'minLength': 36,
-                         'title': 'Task UUID',
-                         'description': 'Referenced Task'},
+                'task': uuid_object(title='Task UUID', description='Referenced Task'),
             }
         }
     },
@@ -136,9 +124,7 @@ TaskSchema['properties'].update({
                     }
 
                 },
-                'creator': {'type': 'string', 'minLength': 36,
-                            'title': 'Unique Comment ID',
-                            'description': 'HIDDEN'}
+                'creator': uuid_object(title='Unique Creator ID')
             }
         }
     }

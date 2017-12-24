@@ -33,7 +33,7 @@ System: Global systemwide settings
 
 """
 from hfos.schemata.defaultform import savebutton, lookup_field
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 SystemconfigSchema = base_object('systemconfig')
 
@@ -57,30 +57,10 @@ SystemconfigSchema['properties'].update({
         'type': 'boolean', 'title': 'Registration open',
         'description': 'Allow self registration of new users'
     },
-    'vesseluuid': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Associated Vessel Unique ID'
-    },
-    'defaultmapviewuuid': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Default Mapview Unique ID'
-    },
-    'defaultdashboarduuid': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Default Dashboard Unique ID'
-    },
-    'defaulttaskgriduuid': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Default Taskgrid Unique ID'
-    },
+    'vesseluuid': uuid_object('Associated Vessel Unique ID'),
+    'defaultmapviewuuid': uuid_object('Default Mapview Unique ID'),
+    'defaultdashboarduuid': uuid_object('Default Dashboard Unique ID'),
+    'defaulttaskgriduuid': uuid_object('Default Taskgrid Unique ID'),
     'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
                      'description': 'Default theme used for user '
                                     'interface'},

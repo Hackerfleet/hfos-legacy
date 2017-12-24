@@ -33,8 +33,8 @@ Profile: Userprofile with general flags and fields
 
 
 """
-from hfos.schemata.defaultform import savebutton
-from hfos.schemata.base import base_object
+from hfos.schemata.defaultform import savebutton, lookup_field
+from hfos.schemata.base import base_object, uuid_object
 
 ProfileSchema = base_object('profile', roles_create='crew')
 
@@ -145,24 +145,9 @@ ProfileSchema['properties'].update({
                     }
                 }
             },
-            'mapviewuuid': {
-                'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                           '4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                'type': 'string',
-                'title': 'Default Unique Mapview ID'
-            },
-            'taskgriduuid': {
-                'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                           '4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                'type': 'string',
-                'title': 'Default Unique Taskgrid ID'
-            },
-            'dashboarduuid': {
-                'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                           '4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                'type': 'string',
-                'title': 'Default Unique Dashboard ID'
-            }
+            'mapviewuuid': uuid_object('Default Unique Mapview ID'),
+            'taskgriduuid': uuid_object('Default Unique Taskgrid ID'),
+            'dashboarduuid': uuid_object('Default Unique Dashboard ID')
         }
     },
     "alertconfig": {
@@ -242,39 +227,9 @@ ProfileForm = [
                 'type': 'help',
                 'helpvalue': '<h2>Default module configurations</h2>'
             },
-            {
-                'key': 'settings.dashboarduuid',
-                'htmlClass': 'col-xs-4',
-                'type': 'strapselect',
-                'placeholder': 'Select a Dashboard',
-                'options': {
-                    "type": "dashboardconfig",
-                    "asyncCallback": "$ctrl.getFormData",
-                    "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
-                }
-            },
-            {
-                'key': 'settings.taskgriduuid',
-                'htmlClass': 'col-xs-4',
-                'type': 'strapselect',
-                'placeholder': 'Select a Taskgrid Configuration',
-                'options': {
-                    "type": "taskgridconfig",
-                    "asyncCallback": "$ctrl.getFormData",
-                    "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
-                }
-            },
-            {
-                'key': 'settings.mapviewuuid',
-                'htmlClass': 'col-xs-4',
-                'type': 'strapselect',
-                'placeholder': 'Select a MapView',
-                'options': {
-                    "type": "mapview",
-                    "asyncCallback": "$ctrl.getFormData",
-                    "map": {'valueProperty': "uuid", 'nameProperty': 'name'}
-                }
-            }
+            lookup_field('settings.dashboarduuid', 'dashboardconfig', 'Select a Dashboard', 'col-xs-4'),
+            lookup_field('settings.taskgriduuid', 'taskgridconfig', 'Select a Dashboard', 'col-xs-4'),
+            lookup_field('settings.mapviewuuid', 'mapview', 'Select a Dashboard', 'col-xs-4'),
         ],
     },
     'alertconfig',

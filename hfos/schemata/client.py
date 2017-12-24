@@ -33,7 +33,7 @@ Client: Clientprofile to store client specific settings
 
 """
 from hfos.schemata.defaultform import savebutton, lookup_field
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 ScreenRotationSchema = {
     'id': '#screenrotation',
@@ -102,24 +102,9 @@ ClientconfigSchema['properties'].update({
         'type': 'array',
         'items': ScreenRotationSchema
     },
-    'mapviewuuid': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Associated Unique Mapview ID'
-    },
-    'dashboarduuid': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Associated Unique Dashboard ID'
-    },
-    'taskgriduuid': {
-        'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                   'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        'type': 'string',
-        'title': 'Associated Unique Task Grid ID'
-    },
+    'mapviewuuid': uuid_object('Associated Unique Mapview ID'),
+    'dashboarduuid': uuid_object('Associated Unique Dashboard ID'),
+    'taskgriduuid': uuid_object('Associated Unique Task Grid ID'),
 })
 
 ClientconfigForm = [

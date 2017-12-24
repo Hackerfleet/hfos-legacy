@@ -34,7 +34,7 @@ MapView: User generated Mapviews
 
 """
 from hfos.schemata.defaultform import lookup_field, editbuttons
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 MapViewSchema = base_object('mapview',
                             roles_read=['crew'],
@@ -55,13 +55,7 @@ MapViewSchema['properties'].update({
     'layergroups': {
         'type': 'array',
         'description': 'List of available Layergroups',
-        'items': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Layergroup',
-            'description': 'Select a Layergroup'
-        },
+        'items': uuid_object('Select a Layergroup'),
         'default': []
     },
     'coords': {

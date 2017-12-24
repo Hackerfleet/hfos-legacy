@@ -34,18 +34,16 @@ Shift: Stores shift information for timetables and assisted rotation
 """
 
 from hfos.schemata.defaultform import *
+from hfos.schemata.base import uuid_object
+
+# TODO: Convert to base_object
 
 ShiftSchema = {
     'id': '#shiftconfig',
     'type': 'object',
     'name': 'shiftconfig',
     'properties': {
-        'uuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique Shift ID'
-        },
+        'uuid': uuid_object('Unique Shift ID'),
         'name': {'type': 'string', 'minLength': 1, 'title': 'Name',
                  'description': 'Shift name'},
         'locked': {'type': 'boolean', 'title': 'Locked Shift',
@@ -54,12 +52,7 @@ ShiftSchema = {
         'description': {'type': 'string', 'format': 'html',
                         'title': 'Shift description',
                         'description': 'Shift description'},
-        'useruuid': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                       'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Associated Unique User ID'
-        }
+        'useruuid': uuid_object('Associated Unique User ID')
     },
     "required": [
         'uuid'

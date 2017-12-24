@@ -39,8 +39,8 @@ Provisions
 
 """
 
-from hfos.schemata.defaultform import editbuttons
-from hfos.schemata.base import base_object
+from hfos.schemata.defaultform import editbuttons, lookup_field
+from hfos.schemata.base import base_object, uuid_object
 
 # Basic Tag definitions
 
@@ -60,9 +60,7 @@ TagSchema['properties'].update({
                 'schema': {'type': 'string', 'minLength': 1,
                            'title': 'Schema reference',
                            'description': 'HIDDEN'},
-                'uuid': {'type': 'string', 'minLength': 36,
-                         'title': 'Unique ID reference',
-                         'description': 'HIDDEN'}
+                'uuid': uuid_object('Unique ID reference')
             }
         }
     }
@@ -85,15 +83,8 @@ TagData = {
     'items': {
         'type': 'object',
         'properties': {
-            'uuid': {
-                'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
-                           'a-fA-F0-9]{4}-['
-                           'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                'type': 'string',
-                'title': 'Referenced Tag'
-            }
+            'uuid': uuid_object('Referenced Tag')
         }
-
     }
 }
 
@@ -108,17 +99,7 @@ TagForm = {
                 'add': 'btn-success'
             },
             'items': [
-                {
-                    'key': 'tags[].uuid',
-                    'type': 'strapselect',
-                    'placeholder': 'Select a tag',
-                    'options': {
-                        "type": "tag",
-                        "asyncCallback": "$ctrl.getFormData",
-                        "map": {'valueProperty': "uuid",
-                                'nameProperty': 'name'}
-                    }
-                }
+                lookup_field('tags[].uuid', 'tag', 'Select a tag'),
             ]
         }
     ]

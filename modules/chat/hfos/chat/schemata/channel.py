@@ -34,7 +34,7 @@ ChatChannel: Definitions of chat rooms
 """
 
 from hfos.schemata.defaultform import editbuttons
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 ChannelSchema = base_object('chatchannel', all_roles='crew')
 
@@ -42,12 +42,7 @@ ChannelSchema['properties'].update({
     'users': {
         'type': 'array',
         'default': [],
-        'items': {
-            'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                       '4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-            'type': 'string',
-            'title': 'Unique User ID of participant'
-        }
+        'items': uuid_object('Unique User ID of participant')
     },
     'topic': {
         'type': 'string'

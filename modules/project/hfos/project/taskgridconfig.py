@@ -34,7 +34,7 @@ Taskgrid: Taskgrid config to store gridster settings
 """
 
 from hfos.schemata.defaultform import *
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 TaskGridConfigSchema = base_object('taskgridconfig', all_roles='crew')
 
@@ -55,14 +55,7 @@ TaskGridConfigSchema['properties'].update({
             'id': '#Card',
             'name': 'TaskGridCard',
             'properties': {
-                'taskgroup': {
-                    'pattern': '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{'
-                               '4}-['
-                               'a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-                    'type': 'string',
-                    'title': 'Associated Unique Task '
-                             'Group ID'
-                },
+                'taskgroup': uuid_object('Associated Unique Task Group ID'),
                 'position': {
                     'type': 'object',
                     'properties': {

@@ -35,7 +35,7 @@ Controller: Remote control input device to controllable mapping
 """
 
 from hfos.schemata.defaultform import defaultform
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 ControllerSchema = base_object('controller')
 
@@ -49,14 +49,7 @@ ControllerSchema['properties'].update({
                 'controltype': {'enum': ['analog', 'digital']},
                 'controlaxis': {'type': 'integer'},
                 'controlbutton': {'type': 'integer'},
-                'controluuid': {
-                    'pattern':
-                        '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-['
-                        'a-fA-F0-9]{4}-[a-fA-F0-9]{4}-['
-                        'a-fA-F0-9]{12}$',
-                    'type': 'string',
-                    'title': 'Associated uuid of Controllable'
-                },
+                'controluuid': uuid_object('Associated uuid of Controllable')
             }
         }
     }
