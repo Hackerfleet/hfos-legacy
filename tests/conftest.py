@@ -32,7 +32,8 @@ from collections import deque
 from circuits.core.manager import TIMEOUT
 from circuits import handler, BaseComponent, Debugger, Manager
 
-from hfos.component import ConfigurableComponent, ComponentConfigSchemaTemplate
+from hfos.component import ConfigurableComponent
+from hfos.schemata.component import ComponentConfigSchemaTemplate
 from warmongo import model_factory
 
 """Basic Test suite bits and pieces"""
