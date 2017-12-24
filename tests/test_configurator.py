@@ -37,7 +37,7 @@ from hfos.ui.clientobjects import User, Client
 from circuits import Manager
 import pytest
 from uuid import uuid4
-from hfos.ui.configurator import Configurator, get, list, put
+from hfos.ui.configurator import Configurator, get, getlist, put
 # from hfos.events.client import send
 
 # from pprint import pprint
@@ -83,7 +83,7 @@ def transmit(action, data, account=AccountMock()):
     events = {
         'put': put,
         'get': get,
-        'list': list,
+        'getlist': getlist,
     }
 
     waiter = pytest.WaitEvent(m, "send", "hfosweb")
@@ -101,9 +101,9 @@ def test_list():
     """Tests if the configurator returns a valid list of component
     configurations"""
 
-    packet = transmit('list', {})
+    packet = transmit('getlist', {})
 
-    assert packet['action'] == 'list'
+    assert packet['action'] == 'getlist'
     assert len(packet['data']) >= 1
 
 

@@ -38,7 +38,7 @@ from uuid import uuid4
 from hfos.database import objectmodels
 from hfos.ui.clientobjects import User, Client
 from hfos.ui.objectmanager import ObjectManager
-from hfos.events.objectmanager import change, get, delete, put, list, search, \
+from hfos.events.objectmanager import change, get, delete, put, getlist, search, \
     subscribe, unsubscribe
 # objectchange, objectcreation, objectdeletion, objectevent,
 # updatesubscriptions,
@@ -93,7 +93,7 @@ def transmit(action, data, account=AccountMock()):
         'get': get,
         'delete': delete,
         'change': change,
-        'list': list,
+        'getlist': getlist,
         'search': search,
         'subscribe': subscribe,
         'unsubscribe': unsubscribe
@@ -113,11 +113,11 @@ def transmit(action, data, account=AccountMock()):
 def test_unfiltered_list():
     """Tests if the objectmanager returns a valid list of objects"""
 
-    packet = transmit('list', {
+    packet = transmit('getlist', {
         'schema': 'systemconfig'
     })
 
-    assert packet['action'] == 'list'
+    assert packet['action'] == 'getlist'
     assert type(packet['data']) == dict
     assert 'schema' in packet['data']
     assert 'list' in packet['data']
@@ -128,12 +128,12 @@ def test_list_all_fields():
     """Tests if a list request with * fields returns at least a subset of
     all the default fields of a systemconfig"""
 
-    packet = transmit('list', {
+    packet = transmit('getlist', {
         'schema': 'systemconfig',
         'fields': '*'
     })
 
-    assert packet['action'] == 'list'
+    assert packet['action'] == 'getlist'
 
     obj = packet['data']['list'][0]
 
@@ -153,7 +153,7 @@ def test_no_schema():
 def test_invalid_schema():
     """Tests if an error is returned when a not existing schema is requested"""
 
-    packet = transmit('list', {
+    packet = transmit('getlist', {
         'schema': 'BERTRAM'
     })
 
@@ -205,7 +205,7 @@ def test_get_schema_invalid():
 def test_get_object():
     """Tests if a systemconfig can be retrieved"""
 
-    system_configs = transmit('list', {
+    system_configs = transmit('getlist', {
         'schema': 'systemconfig'
     })['data']['list']
     system_config_uuid = system_configs[0]['uuid']
@@ -227,7 +227,7 @@ def test_get_permission_error():
     """Tests if a systemconfig cannot be retrieved if the user has
     insufficient roles assigned"""
 
-    system_configs = transmit('list', {
+    system_configs = transmit('getlist', {
         'schema': 'systemconfig'
     })['data']['list']
     system_config_uuid = system_configs[0]['uuid']
@@ -256,13 +256,13 @@ def test_get_permission_error():
 def test_list_filtered():
     """Tests if a systemconfig can be retrieved by filter"""
 
-    packet = transmit('list', {
+    packet = transmit('getlist', {
         'schema': 'systemconfig',
         'filter': {'active': True},
         'fields': ['active']
     })
 
-    assert packet['action'] == 'list'
+    assert packet['action'] == 'getlist'
     assert 'data' in packet
     assert packet['data']['schema'] == 'systemconfig'
 
@@ -276,7 +276,7 @@ def test_list_filtered():
 def test_subscribe():
     """Tests if subscribing to an object works"""
 
-    system_configs = transmit('list', {
+    system_configs = transmit('getlist', {
         'schema': 'systemconfig'
     })['data']['list']
     system_config_uuid = system_configs[0]['uuid']
@@ -284,13 +284,13 @@ def test_subscribe():
     packet = transmit('subscribe', system_config_uuid)
     pprint(packet)
     assert packet['data']['success']
-    assert packet['data']['uuid'] == system_config_uuid
+    assert packet['data']['uuid'] == [system_config_uuid]
 
 
 def test_unsubscribe():
     """Tests if unsubscribing to an object works"""
 
-    system_configs = transmit('list', {
+    system_configs = transmit('getlist', {
         'schema': 'systemconfig'
     })['data']['list']
     system_config_uuid = system_configs[0]['uuid']
@@ -298,7 +298,7 @@ def test_unsubscribe():
     packet = transmit('unsubscribe', system_config_uuid)
     pprint(packet)
     assert packet['data']['success']
-    assert packet['data']['uuid'] == system_config_uuid
+    assert packet['data']['uuid'] == [system_config_uuid]
 
 
 def test_put_new():
