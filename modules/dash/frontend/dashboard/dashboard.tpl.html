@@ -7,6 +7,25 @@
         ng-style="{display: $ctrl.hideui && 'none' || 'block'}">
         <li class="active"><a role="tab" ng-click="$ctrl.opentab('dashboard')" data-toggle="tab">Dashboard</a></li>
         <li><a role="tab" ng-click="$ctrl.opentab('sensed')" data-toggle="tab">Received Sensordata</a></li>
+        <li class="pull-right">
+                <span class="fa fa-columns btn"
+                      ng-show="$ctrl.lockState"
+                      ng-click="$ctrl.showBoxes = !$ctrl.showBoxes"
+                      ng-class="{'btn-enabled':$ctrl.showBoxes,
+                                 'btn-disabled':!$ctrl.showBoxes}">
+                </span>
+                <span class="fa fa-arrow-circle-up btn"
+                      ng-show="$ctrl.lockState"
+                      ng-click="$ctrl.gridsterOptions.floating = !$ctrl.gridsterOptions.floating"
+                      ng-class="{'btn-enabled':$ctrl.gridsterOptions.floating,
+                                 'btn-disabled':!$ctrl.gridsterOptions.floating}">
+                    </span>
+
+                <span class="fa btn"
+                      ng-click="$ctrl.toggleLock()"
+                      ng-class="{'fa-lock':!$ctrl.lockState,'fa-unlock':$ctrl.lockState}"
+                      ng-model="$ctrl.lockState"></span>
+        </li>
     </ul>
 
     <!-- Tab panes -->
@@ -21,8 +40,8 @@
                         data-sizex="item.size.width"
                         data-sizey="item.size.height"
                         ng-repeat="item in $ctrl.dashboard.cards">
-                        <div class="box">
-                            <div class="box-header">
+                        <div class="box" ng-style="{'border-style': $ctrl.showBoxes ? 'solid' : 'none'}">
+                            <div class="box-header" ng-show="$ctrl.showBoxes">
                                 <h3>{{ item.title }} - {{item.widgettype}}</h3>
 
                                 <div class="hidden box-header-btns pull-right">

@@ -26,13 +26,21 @@ class Dashboard {
         this.humanize = humanizeDuration;
         
         this.now = new Date() / 1000;
-        
+        this.lockState = false;
+        this.showBoxes = true;
+
         this.gridsterOptions = {
             // any options that you can set for angular-gridster (see:  http://manifestwebdesign.github.io/angular-gridster/)
             columns: screen.width / 75,
             rowHeight: 75,
             colWidth: 75,
-            floating: false
+            floating: false,
+            draggable: {
+                enabled: false
+            },
+            resizable: {
+                enabled: false
+            }
         };
         
         this.changetimeout = null;
@@ -93,7 +101,9 @@ class Dashboard {
         
         this.switchDashboard = function (uuid) {
             self.dashboarduuid = uuid;
-            self.op.getObject('dashboardconfig', uuid);
+            self.op.getObject('dashboardconfig', uuid).then(function(msg) {
+                self.resetDashboard();
+            });
         };
     
         this.dashboardupdate = this.rootscope.$on('OP.Get', function (ev, uuid) {
@@ -141,9 +151,20 @@ class Dashboard {
                 self.menu.addMenu('Dashboards', dashboardmenu);
             }
         });
-        
+
+        this.handleGridChange = function (newVal, oldVal) {
+            if (newVal === oldVal) {
+                console.log('No actual change');
+                return;
+            }
+            if (self.changetimeout !== null) {
+                self.timeout.cancel(self.changetimeout);
+            }
+            self.changetimeout = self.timeout(self.storeMenuConfig, 2000);
+        };
+
         this.storeMenuConfig = function () {
-            console.log('[MENU] Pushing menu to profile:', menu);
+            console.log('[DASH] Pushing dashboard');
             for (let card of self.dashboard.cards) {
                 delete card['$$hashKey'];
             }
@@ -151,14 +172,7 @@ class Dashboard {
             
             self.changetimeout = null;
         };
-        
-        $scope.$watch('$ctrl.dashboard.cards', function (items) {
-            if (self.changetimeout !== null) {
-                $timeout.cancel(self.changetimeout);
-            }
-            self.changetimeout = $timeout(self.storeMenuConfig, 2000);
-        }, true);
-        
+
         this.requestDashboards = function () {
             console.log('[DASH] Getting list of dashboards');
             self.op.getList('dashboardconfig');
@@ -192,7 +206,7 @@ class Dashboard {
         this.observed = [];
         for (let card of this.dashboard.cards) {
             console.log('[DASH] Inspecting card:', this.observed, card.valuetype, this.observed.indexOf(card.valuetype));
-            if (this.observed.indexOf(card.valuetype) == -1) {
+            if (this.observed.indexOf(card.valuetype) === -1) {
                 console.log('[DASH] Adding: ', card.valuetype);
                 this.observed.push(card.valuetype);
             }
@@ -216,8 +230,7 @@ class Dashboard {
     
     getDashboard() {
         console.log('[DASH] Getting newly configured dashboard');
-        this.dashboarduuid = this.user.clientconfig.dashboarduuid;
-        this.op.getObject('dashboardconfig', this.dashboarduuid);
+        this.switchDashboard(this.user.clientconfig.dashboarduuid);
     }
     
     opentab(tabname) {
@@ -234,7 +247,19 @@ class Dashboard {
         $('.nav-pills .active, .tab-content .active').removeClass('active');
         $('#' + tabname).addClass('active');
     }
-    
+
+    toggleLock() {
+        this.lockState = !this.lockState;
+        this.gridsterOptions.draggable.enabled = this.lockState;
+        this.gridsterOptions.resizable.enabled = this.lockState;
+        if (this.lockState) {
+            console.log('Enabling gridwatcher');
+            this.gridChangeWatcher = this.scope.$watch('$ctrl.dashboard.cards', this.handleGridChange, true);
+        } else {
+            this.gridChangeWatcher();
+        }
+    }
+
     toggleDashboardItem(key) {
         let card;
         if (this.observed.indexOf(key) >= 0) {
