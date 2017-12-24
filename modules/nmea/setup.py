@@ -43,7 +43,7 @@ This software package is a plugin module for HFOS.
       install_requires=[
           'hfos>=1.2.0',
           'pynmea2>=1.5.1',
-          'libais>=0.16',
+          'libais==0.16',
           'pyserial>=3.1.1'
       ],
       entry_points="""[hfos.components]
