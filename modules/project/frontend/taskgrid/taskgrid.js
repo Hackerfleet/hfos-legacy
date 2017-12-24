@@ -39,6 +39,7 @@ class taskgridcomponent {
             columns: screen.width / 100,
             rowHeight: 400,
             colWidth: 100,
+            mobileBreakPoint: 200,
             draggable: {
                 enabled: false
             },
