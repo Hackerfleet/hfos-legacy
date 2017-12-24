@@ -115,7 +115,7 @@ class LDAPAdaptor(ConfigurableComponent):
             return
         self.log("Started")
 
-        self.ldap = ldap.Server(self.config.URI)
+        # self.ldap = ldap.Server(self.config.URI)
 
         self.log('Adding authentication hook', lvl=debug)
         self.fireEvent(add_auth_hook(self.uniquename, lmap_authenticate))
