@@ -31,6 +31,25 @@ it towards a more general application framework.
 A lot of the included modules are still Work in Progress, so help out, if you're interested
 in a powerful - cloud independent - collaboration tool suite.
 
+Installation
+============
+
+There is more than one way of installing HFOS, `see the quickstart instructions for those <http://hfos.readthedocs.io/en/latest/start/quick.html>`__.
+
+The simplest way is to use the supplied installation script:
+
+.. code-block:: sh
+
+    $ sudo ./install
+
+The installation produces a lot of output which is automatically piped into 'output.log'.
+It installs all dependencies then sets up a user account and the system's services.
+This assumes, that you're not running another web server on port 443 and that your firewall is
+configured to allow communications on that port.
+HFOS modules may require additional open ports, to find out about that, read their readme files.
+
+If you run into trouble or get any unexpected errors, contact us or `try the complex installation procedure <http://hfos.readthedocs.io/en/latest/start/installing.html>`__.
+
 Modules
 =======
 
@@ -55,10 +74,13 @@ comms          Communication package
 countables     Count arbitrary things
 dash           Dashboard information system
 enrol          Enrollment (new user) management
+equipment      Equipment management
+filemanager    File management
 garden         Garden automation tools
 ldap           LDAP user authorization
 library        Library management
 mesh           Mesh networking
+nodestate      Node wide status system
 polls          Tool for lightweight internet voting
 project        Project management tools
 protocols      Miscellaneous communication protocols
@@ -82,11 +104,13 @@ They are far from complete, see the WiP list below.
 ============== ==============================================================
   Name           Description
 ============== ==============================================================
+anchor         Automatic anchor safety watcher
 busrepeater    Tool to repeat navigation data bus frames to other media
 logbook        Displaying and manual logging of important (nautical) events
 maps           (Offline) moving maps with shareable views/layers
 navdata        Navigational data module
-nmea           NMEA-0183 Navigation data bus parser
+nmea           NMEA-0183 Navigation data and AIS bus parser
+webguides      Importer for skipperguide.de wiki content into the map
 ============== ==============================================================
 
 Work in progress
@@ -115,7 +139,6 @@ forum <https://github.com/hackerfleet/discussion/issues>`__
 You can also find us here:
 
 * `github.com/Hackerfleet <https://github.com/Hackerfleet>`__
-* `Waffle.io <https://waffle.io/hackerfleet/hfos>`__
 * `reddit <https://reddit.com/r/hackerfleet>`__
 * `Twitter <https://twitter.com/hackerfleet>`__
 * `Facebook <https://www.facebook.com/Hackerfleet>`__
@@ -124,21 +147,6 @@ You can also find us here:
 * `irc #hackerfleet on freenode <http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__
 
 .. note:: Please be patient when using IRC, responses might take a few hours!
-
-Installation
-============
-
-There is more than one way of installing HFOS, `see the quickstart instructions for those <http://hfos.readthedocs.io/en/latest/start/quick.html>`__.
-
-The simplest way is to use the new install script:
-
-.. code-block:: sh
-
-    $ sudo ./install
-
-It installs all dependencies then sets up a user account and the system's services.
-If you run into trouble or get any unexpected errors, `try the complex installation procedure <http://hfos.readthedocs.io/en/latest/start/installing.html>`__.
-
 
 Contributors
 ============
