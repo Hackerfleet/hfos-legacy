@@ -6,19 +6,37 @@
             <li><a role="button" href="#!/editor/taskgridconfig/{{$ctrl.taskgridconfiguuid}}/edit">
                 <i class="fa fa-gear"></i></a>
             </li>
+            <li><a role="button" ng-click="show_filters = !show_filters">
+                <i class="fa fa-filter"></i></a>
+            </li>
             <li><a role="button" href="#!/editor/taskgroup//create"><i class="fa fa-plus" aria-hidden="true"></i>
                 Taskgroup</a>
             </li>
             <li><a role="button" href="#!/editor/task//create"><i class="fa fa-plus" aria-hidden="true"></i>
                 Task</a>
             </li>
+
             <li class="pull-right">
-                <span class="taskGridLock fa"
+                <span class="fa btn"
                       ng-click="$ctrl.toggleLock()"
-                      ng-class="{'fa-lock':!$ctrl.lockState,'fa-unlock':$ctrl.lockState}"
-                      ng-model="$ctrl.lockState"></span>
+                      ng-class="{'fa-lock':!$ctrl.lockState,'fa-unlock':$ctrl.lockState}">
+                </span>
             </li>
         </ul>
+    </div>
+    <div class="container" ng-show="show_filters">
+        <h4>Filter tasks</h4>
+        <div class="row">
+            <div class="col-md4">
+                <div class="form-inline">
+                    <input class="form-control" type="checkbox" ng-model="show_filters_project">
+                    <label>By Project</label>
+                    <select ng-click="$ctrl.get_projects()" class="form-control" ng-show="show_filters_project" ng-model="$ctrl.filter_project">
+                        <option ng-repeat="(uuid, project) in $ctrl.projects" value="{{uuid}}">{{project.name}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Tab panes -->
@@ -79,9 +97,11 @@
                                           ng-show="task.alert != null"><span class="fa fa-bell-o"></span>{{::task.alert}}</span>
 
                                     <div class="taskIcons">
-                                        <span class="fa fa-paperclip" title="Has {{task.references.length}} reference{{task.references.length > 1 ? 's' : ''}}"
+                                        <span class="fa fa-paperclip"
+                                              title="Has {{task.references.length}} reference{{task.references.length > 1 ? 's' : ''}}"
                                               ng-show="task.references.length > 0"></span>
-                                        <span class="fa fa-comments" title="Has {{task.comments.length}} comment{{task.comments.length > 1 ? 's' : ''}}"
+                                        <span class="fa fa-comments"
+                                              title="Has {{task.comments.length}} comment{{task.comments.length > 1 ? 's' : ''}}"
                                               ng-show="task.comments.length > 0"></span>
                                     </div>
                                 </div>
