@@ -48,6 +48,8 @@ This software package is a plugin module for HFOS.
       taskgridconfig=hfos.project.taskgridconfig:TaskGridConfig
       [hfos.components]
       projectservice=hfos.project.projectservice:ProjectService
+      [hfos.management]
+      import-gh=hfos.project.importer.github:GithubImporter
     """,
       test_suite="tests.main.main",
       )
