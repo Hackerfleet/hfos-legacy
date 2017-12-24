@@ -103,7 +103,7 @@ class Configurator(ConfigurableComponent):
 
             response = {
                 'component': 'hfos.ui.configurator',
-                'action': 'list',
+                'action': 'getlist',
                 'data': data
             }
             self.fireEvent(send(event.client.uuid, response))
