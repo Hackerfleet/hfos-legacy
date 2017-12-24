@@ -136,10 +136,7 @@ class Manager(ConfigurableComponent):
 
     def _notify_result(self, event, book):
         if book:
-            self.fireEvent(updatesubscriptions(
-                uuid=book.uuid, schema='book',
-                data=book, client=event.client)
-            )
+            self.fireEvent(updatesubscriptions('book', book))
 
     def _augment_book(self, uuid, event):
         """
@@ -200,9 +197,11 @@ class Manager(ConfigurableComponent):
                                  new_book.isbn, lvl=error, exc=True)
                         error_response = {
                             'component': 'hfos.alert.manager',
-                            'action': 'error',
-                            'data': 'Could not look up metadata, sorry:' + str(
-                                e)
+                            'action': 'notify',
+                            'data': {
+                                'type': 'error',
+                                'message': 'Could not look up metadata, sorry:' + str(e)
+                            }
                         }
                         self.log(event, event.client, pretty=True)
                         self.fireEvent(send(event.client.uuid, error_response))
