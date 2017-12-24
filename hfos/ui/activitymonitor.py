@@ -65,7 +65,6 @@ class ActivityMonitor(ConfigurableComponent):
         self.log("Started")
 
         self.referenceframe = None
-        self.mobalert = False
         self.alertlist = []
 
     @handler('referenceframe', channel='navdata')
@@ -86,17 +85,6 @@ class ActivityMonitor(ConfigurableComponent):
         client, if so."""
 
         clientuuid = event.clientuuid
-
-        if self.mobalert:
-            alertpacket = {
-                'component': 'hfos.alert.manager',
-                'action': 'mob',
-                'data': True
-            }
-            self.fireEvent(send(clientuuid, alertpacket))
-
-    def _record_mobalert(self):
-        self.alertlist.append(self.referenceframe)
 
     def activityrequest(self, event):
         """ActivityMonitor event handler for incoming events
