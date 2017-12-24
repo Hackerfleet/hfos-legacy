@@ -35,7 +35,7 @@ from hfos.events.client import send
 from hfos.events.objectmanager import objectcreation, objectchange, \
     objectdeletion
 from circuits import Event, Timer
-from hfos.logger import warn, error, critical, hilight
+from hfos.logger import warn, error, critical, hilight, debug
 from copy import deepcopy
 import json
 from hfos.database import objectmodels
@@ -130,7 +130,8 @@ class Manager(ConfigurableComponent):
     def ready(self, event):
         from hfos.events.system import AuthorizedEvents
         self.authorized_events = AuthorizedEvents
-        self.log('Automat Started, event sources:', AuthorizedEvents.keys())
+        self.log('Automat Started.')
+        self.log('Event sources:', AuthorizedEvents.keys(), lvl=debug)
         self._load_rules()
 
     @handler("rule_reload")
