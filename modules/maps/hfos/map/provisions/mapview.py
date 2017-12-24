@@ -52,7 +52,8 @@ Mapviews = [
 
 
 def provision(**kwargs):
-    provisionList(Mapviews, objectmodels['mapview'], indices=['name'],
+    provisionList(Mapviews, objectmodels['mapview'],
+                  indices=['name'], indices_types=['text'], indices_unique=[False],
                   **kwargs)
     hfoslog('Provisioning: Mapviews: Done.', emitter='PROVISIONS')
 
