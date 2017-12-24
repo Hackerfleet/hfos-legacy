@@ -1,6 +1,8 @@
+# coding=utf-8
+from circuits import Event, Timer
+
 from hfos.component import ConfigurableComponent, handler
-from hfos.database import objectmodels
-from hfos.events.client import send, clientdisconnect
+from hfos.events.client import send # , clientdisconnect
 from hfos.events.system import authorizedevent
 from hfos.logger import error, debug
 
@@ -21,6 +23,15 @@ class Syslog(ConfigurableComponent):
 
     """
 
+    configprops = {
+        'log_file': {
+            'type': 'string',
+            'default': '/var/log/hfos.log',
+            'title': 'Filename',
+            'description': 'File path of logfile (usually /var/log/hfos.log)'
+        }
+    }
+
     def __init__(self, *args):
         super(Syslog, self).__init__('SYSLOG', *args)
 
@@ -28,26 +39,40 @@ class Syslog(ConfigurableComponent):
 
         self.subscribers = []
 
+        self.log_file = open(self.config.log_file)
+        self.log_position = 0
+
+        self.follow_timer = Timer(1, Event.create('syslog_follow'),
+                                  persist=True)
+
     @handler(subscribe)
     def subscribe(self, event):
         self.subscribers.append(event.client.uuid)
 
-    @handler(clientdisconnect)
+    @handler('clientdisconnect', priority=1000)
     def disconnect(self, event):
+        self.log('Disconnected: ', event.clientuuid, lvl=debug)
         if event.clientuuid in self.subscribers:
             self.subscribers.remove(event.clientuuid)
 
-    @handler("logupdate", channel='logger')
-    def logupdate(self, event):
-        self.log('Updating syslog viewers', lvl=debug)
+    def _logupdate(self, new_messages):
         packet = {
             'component': 'hfos.ui.syslog',
             'action': 'update',
-            'data': event.message.serializablefields()
+            'data': new_messages
         }
 
         for subscriber in self.subscribers:
-            self.fireEvent(send(subscriber, packet))
+            self.fireEvent(send(subscriber, packet, fail_quiet=True))
+
+    @handler('syslog_follow')
+    def follow(self):
+        where = self.log_file.tell()
+        line = self.log_file.readline()
+        if not line:
+            self.log_file.seek(where)
+        else:
+            self._logupdate(line)
 
     @handler(history)
     def history(self, event):
@@ -59,24 +84,9 @@ class Syslog(ConfigurableComponent):
                      lvl=error)
             return
 
-        self.log('History requested:', limit, end)
+        self.log('History requested:', limit, end, lvl=debug)
 
         messages = []
-
-        om = objectmodels['logmessage']
-        try:
-            for msg in om.find(
-                    {
-                        'timestamp': {'$lte': end}
-                    },
-                    sort=[('timestamp', -1)],
-                    limit=limit
-            ):
-                messages.insert(0, msg.serializablefields())
-        except Exception as e:
-            self.log('Error during history lookup:', e, type(e), exc=True,
-                     lvl=error)
-            return
 
         history_packet = {
             'component': 'hfos.ui.syslog',
@@ -88,4 +98,3 @@ class Syslog(ConfigurableComponent):
             }
         }
         self.fireEvent(send(event.client.uuid, history_packet))
-
