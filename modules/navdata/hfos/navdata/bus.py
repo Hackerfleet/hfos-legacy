@@ -197,6 +197,7 @@ class SerialBusManager(ConfigurableComponent):
     configprops = {
         'scanner': {
             'type': 'object',
+            'default': {'baud_rates': baudrates, 'timeout': 5},
             'properties': {
                 'baud_rates': {
                     'type': 'array',
@@ -336,7 +337,7 @@ class SerialBusManager(ConfigurableComponent):
 
     def __init__(self, *args, **kwargs):
         try:
-            super(SerialBusManager, self).__init__('SERIAL', *args, **kwargs)
+            super(SerialBusManager, self).__init__('SERIALBUS', *args, **kwargs)
         except ValidationError:
             self.log('Error during validation - no serialport available?',
                      lvl=warn)
@@ -359,7 +360,12 @@ class SerialBusManager(ConfigurableComponent):
 
         self.protocols = {}
 
+        if len(self.config.ports) == 0:
+            self.log('No ports configured, scanning for protocols')
+            self.start_scanner()
+
         for connection in self.config.ports:
+            self.log('Setting up existing connections')
             if connection['connectiontype'] == 'USB/Serial' and \
                             connection['serialfile'] == '':
                 self.log('No serial bus source specified', lvl=warn)
@@ -377,10 +383,10 @@ class SerialBusManager(ConfigurableComponent):
         return bus
 
     def _scan_serial_port(self, port):
-        analyser = SerialBus(port).register(self)
+        analyser = SerialBus({'serialfile': port, 'bus': port}).register(self)
 
         if port not in self.scan_rates:
-            self.scan_rates[port] = copy(self.config.baud_rates)
+            self.scan_rates[port] = copy(self.config.scanner['baud_rates'])
 
         try:
             baudrate = self.scan_rates[port].pop(0)
@@ -467,7 +473,7 @@ class SerialBusManager(ConfigurableComponent):
             del self.scan_rates[device]
 
         if len(self.scanning_ports) > 0:
-            Timer(self.config.timeout, restart_scan()).register(self)
+            Timer(self.config.scanner['timeout'], restart_scan()).register(self)
         else:
             self.log('Scan done. Found protocols:', self.scan_results)
             self.fireEvent(scan_results(self.scan_results))
@@ -489,9 +495,10 @@ class SerialBusManager(ConfigurableComponent):
                 self.log('Cannot yet scan non serial ports', lvl=warn)
 
         if scanning:
-            Timer(self.config.timeout, restart_scan()).register(self)
+            Timer(self.config.scanner['timeout'], restart_scan()).register(self)
 
     def _setup_connection(self, connection):
+        self.log('Connecting bus ports')
         port_up = False
         endpoint = None
         bus = connection['bus']
@@ -562,11 +569,12 @@ class SerialBusManager(ConfigurableComponent):
 
     def _broadcast(self, bus, sentences):
         try:
+            self.log('Broadcasting raw sensordata', lvl=verbose)
             for sentence in sentences:
                 for protocol, prefix in self.protocols.items():
-                    # self.log('sentence:', sentence[1], 'prefix:', prefix)
+                    self.log('sentence:', sentence[1], 'prefix:', prefix, lvl=verbose)
                     if sentence[1].startswith(prefix):
-                        # self.log('Distributing event')
+                        self.log('Distributing event', lvl=verbose)
                         self.fireEvent(raw_data(bus, sentence), protocol)
 
         except Exception as e:
@@ -578,12 +586,13 @@ class SerialBusManager(ConfigurableComponent):
         :param data: raw incoming data
         """
 
-        # self.log('Incoming serial packet:', event.__dict__)
+        self.log('Incoming serial packet:', event.__dict__, lvl=verbose)
 
         if self.scanning:
             pass
         else:
             # self.log("Incoming data: ", '%.50s ...' % event.data, lvl=debug)
             sanitized_data = self._parse(event.bus, event.data)
+            self.log('Sanitized data:', sanitized_data, lvl=verbose)
             if sanitized_data is not None:
                 self._broadcast(event.bus, sanitized_data)
