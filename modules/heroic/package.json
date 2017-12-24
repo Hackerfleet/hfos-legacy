@@ -1,0 +1,38 @@
+{
+  "name": "hfos-countables",
+  "version": "0.0.1",
+  "description": "A countables module for HFOS",
+  "preferGlobal": true,
+  "scripts": {
+    "build": "webpack --config webpack.build.js --bail -p",
+    "dev": "node node_modules/.bin/webpack-dev-server --history-api-fallback --hot --inline --progress",
+    "test": "karma start",
+    "test:live": "karma start --auto-watch --no-single-run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hackerfleet/hfos-countables.git"
+  },
+  "author": "Heiko 'riot' Weinen",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/hackerfleet/hfos-countables/issues"
+  },
+  "homepage": "https://github.com/hackerfleet/hfos-countables",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "angular-mocks": "^1.4.1",
+    "isparta-instrumenter-loader": "^0.2.1",
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.13.9",
+    "karma-coverage": "^0.4.2",
+    "karma-jasmine": "^0.3.5",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "karma-sourcemap-loader": "^0.3.5",
+    "karma-spec-reporter": "0.0.19",
+    "karma-webpack": "^1.5.1",
+    "null-loader": "^0.1.1",
+    "phantomjs": "^1.9.17"
+  }
+}
