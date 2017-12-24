@@ -1,0 +1,51 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div class="well">
+    <h2>File Manager</h2>
+    <div class="well" ui-tree>
+        <h3>lol</h3>
+        <!-- Nested node template -->
+        <script type="text/ng-template" id="nodes_renderer.html">
+            <span ng-click="$ctrl.click_node(node.uuid)" class="fa fa-{{node.type}}"></span>
+            <div ui-tree-handle>
+
+                <a>{{node.name}}</a>
+            </div>
+
+            <ol ui-tree-nodes="" ng-model="node.nodes">
+                <li ng-repeat="node in node.nodes" ui-tree-node ng-include="'nodes_renderer.html'">
+
+                </li>
+            </ol>
+        </script>
+
+        <div class="clt" ui-tree>
+            <ol ui-tree-nodes="" ng-model="$ctrl.nodes" id="tree-root">
+                <li ng-repeat="node in $ctrl.nodes" ui-tree-node ng-include="'nodes_renderer.html'">
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
