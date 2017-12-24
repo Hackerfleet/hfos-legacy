@@ -8,7 +8,7 @@
  * Controller of the hfosFrontendApp
  */
 class LogbookCtrl {
-    constructor($scope, $compile, ObjectProxy, moment, alert) {
+    constructor($scope, $compile, ObjectProxy, moment, notification) {
         this.scope = $scope;
         this.compile = $compile;
         this.moment = moment;
@@ -34,14 +34,14 @@ class LogbookCtrl {
         let editaction = {
             label: '<i class=\'glyphicon glyphicon-pencil\'></i>',
             onClick: function (args) {
-                alert.add('success', 'Edited', args.calendarEvent, 5);
+                notification.add('success', 'Edited', args.calendarEvent, 5);
             }
         };
         
         let delaction = {
             label: '<i class=\'glyphicon glyphicon-remove\'></i>',
             onClick: function (args) {
-                alert.add('success', 'Deleted', args.calendarEvent, 5);
+                notification.add('success', 'Deleted', args.calendarEvent, 5);
             }
         };
         
@@ -95,7 +95,7 @@ class LogbookCtrl {
         };
         
         this.eventClicked = function (event) {
-            alert.add('success', 'Clicked', String(event), 10);
+            notification.add('success', 'Clicked', String(event), 10);
         };
         
         
@@ -142,6 +142,6 @@ class LogbookCtrl {
     }
 }
 
-LogbookCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'moment', 'alert'];
+LogbookCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'moment', 'notification'];
 
 export default LogbookCtrl;

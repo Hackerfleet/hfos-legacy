@@ -33,10 +33,10 @@
  */
 class Enrol {
     
-    constructor($location, scope, rootscope, alert, user, objectproxy, socket) {
+    constructor($location, scope, rootscope, notification, user, objectproxy, socket) {
         this.scope = scope;
         this.rootscope = rootscope;
-        this.alert = alert;
+        this.notification = notification;
         this.user = user;
         this.op = objectproxy;
         this.socket = socket;
@@ -78,15 +78,15 @@ class Enrol {
                             email: ''
                         }];
                     }
-                    self.alert.add('success', 'Enrol', 'Invitations sent to ' + result.email, 3);
+                    self.notification.add('success', 'Enrol', 'Invitations sent to ' + result.email, 3);
                     self.update_badge();
                 }
             } else if (msg.action === 'change') {
                 let result = msg.data[true];
                 if (typeof result === 'undefined') {
-                    self.alert.add('warning', 'Enrol', 'Enrollment change failed', 3);
+                    self.notification.add('warning', 'Enrol', 'Enrollment change failed', 3);
                 } else if (result === 'Resent') {
-                    self.alert.add('info', 'Enrol', 'Resent invitation mail', 3);
+                    self.notification.add('info', 'Enrol', 'Resent invitation mail', 3);
                 } else {
                     console.log('[ENROL] Changed:', result);
                     self.enrollments[result.uuid] = result;
@@ -198,6 +198,6 @@ class Enrol {
     }
 }
 
-Enrol.$inject = ['$location', '$scope', '$rootScope', 'alert', 'user', 'objectproxy', 'socket'];
+Enrol.$inject = ['$location', '$scope', '$rootScope', 'notification', 'user', 'objectproxy', 'socket'];
 
 export default Enrol;

@@ -2,12 +2,12 @@
 
 class wikicomponent {
     
-    constructor($scope, objectproxy, $state, $rootScope, stateparams, user, alert) {
+    constructor($scope, objectproxy, $state, $rootScope, stateparams, user, notification) {
         this.$scope = $scope;
         this.op = objectproxy;
         this.state = $state;
         this.rootscope = $rootScope;
-        this.alert = alert;
+        this.notification = notification;
         
         if (stateparams.name === "*name") {
             this.pagename = 'Home';
@@ -104,7 +104,7 @@ class wikicomponent {
         if (this.selectedtemplate == 'empty') {
             this.state.go('app.editor', {schema: 'wikipage', action: 'create'})
         } else {
-            this.alert.add('warning', 'WiP', 'Sorry, this is Work in Progress.', 2);
+            this.notification.add('warning', 'WiP', 'Sorry, this is Work in Progress.', 2);
         }
     }
     
@@ -113,6 +113,6 @@ class wikicomponent {
     }
 }
 
-wikicomponent.$inject = ['$scope', 'objectproxy', '$state', '$rootScope', '$stateParams', 'user', 'alert'];
+wikicomponent.$inject = ['$scope', 'objectproxy', '$state', '$rootScope', '$stateParams', 'user', 'notification'];
 
 export default wikicomponent;

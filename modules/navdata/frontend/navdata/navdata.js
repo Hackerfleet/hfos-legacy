@@ -25,12 +25,12 @@
 
 class NavDataService {
 
-    constructor(rootscope, socket, objectproxy, alert, modal, systemconfig) { //$rootScope, $interval, socket, createDialog, $alert) {
+    constructor(rootscope, socket, objectproxy, notification, modal, systemconfig) {
         console.log('NavDataService constructing');
         this.rootscope = rootscope;
         this.socket = socket;
         this.op = objectproxy;
-        this.alert = alert;
+        this.notification = notification;
         this.modal = modal;
         this.systemconfig = systemconfig;
 
@@ -69,6 +69,6 @@ class NavDataService {
 
 }
 
-NavDataService.$inject = ['$rootScope', 'socket', 'objectproxy', '$alert', '$modal', 'systemconfig'];
+NavDataService.$inject = ['$rootScope', 'socket', 'objectproxy', 'notification', '$modal', 'systemconfig'];
 
 export default NavDataService;

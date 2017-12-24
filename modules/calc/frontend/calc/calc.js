@@ -34,13 +34,13 @@ import SocialCalc from 'socialcalc';
  * Controller of the hfosFrontendApp
  */
 class CalcCtrl {
-    constructor($scope, $rootScope, $compile, ObjectProxy, moment, alert, socket, user) {
+    constructor($scope, $rootScope, $compile, ObjectProxy, moment, notification, socket, user) {
         this.scope = $scope;
         this.rootscope = $rootScope;
         this.compile = $compile;
         this.moment = moment;
         this.op = ObjectProxy;
-        this.alert = alert;
+        this.notification = notification;
         this.socket = socket;
         this.user = user;
     
@@ -99,6 +99,6 @@ class CalcCtrl {
     }
 }
 
-CalcCtrl.$inject = ['$scope', '$rootScope', '$compile', 'objectproxy', 'moment', 'alert', 'socket', 'user'];
+CalcCtrl.$inject = ['$scope', '$rootScope', '$compile', 'objectproxy', 'moment', 'notification', 'socket', 'user'];
 
 export default CalcCtrl;

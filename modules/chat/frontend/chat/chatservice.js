@@ -10,9 +10,9 @@
 
 class chatservice {
     
-    constructor(user, alert, interval, socket, rootscope, $timeout, objectproxy) {
+    constructor(user, notification, interval, socket, rootscope, $timeout, objectproxy) {
         this.user = user;
-        this.alert = alert;
+        this.notification = notification;
         this.interval = interval;
         this.socket = socket;
         this.rootscope = rootscope;
@@ -29,14 +29,14 @@ class chatservice {
         
         this.joined_channels = [];
         
-        this.blinkstate = 0;
+        this.blink_state = 0;
         this.blinker = false;
         this.message_count = 0;
         
         let self = this;
         
-        this.blinkfunc = function () {
-            let state = self.blinkstate;
+        this.blink_func = function () {
+            let state = self.blink_state;
             console.log('Blinkstate:', state);
             
             if (state === 0) {
@@ -49,10 +49,10 @@ class chatservice {
                 return;
             } else if (state === 1) {
                 $('#btnchat').css('color', '#ff0');
-                self.blinkstate++;
+                self.blink_state++;
             } else if (state === 2) {
                 $('#btnchat').css('color', '');
-                self.blinkstate = 1;
+                self.blink_state = 1;
             }
         };
         
@@ -69,8 +69,8 @@ class chatservice {
                 self.rootscope.$broadcast('Chat.Message');
                 
                 if (self.channel !== chat_message.recipient) {
-                    self.blinkstate = 1;
-                    self.blinker = self.interval(self.blinkfunc, 1500, 5);
+                    self.blink_state = 1;
+                    self.blinker = self.interval(self.blink_func, 1500, 5);
                 }
             } else if (msg.action === 'join') {
                 console.log('[CHAT] Joined a channel:', msg.data);
@@ -277,6 +277,6 @@ class chatservice {
     
 }
 
-chatservice.$inject = ['user', 'alert', '$interval', 'socket', '$rootScope', '$timeout', 'objectproxy'];
+chatservice.$inject = ['user', 'notification', '$interval', 'socket', '$rootScope', '$timeout', 'objectproxy'];
 
 export default chatservice;

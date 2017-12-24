@@ -8,12 +8,12 @@
  * Controller of the hfosFrontendApp
  */
 class SharingCtrl {
-    constructor($scope, $compile, ObjectProxy, moment, alert, socket) {
+    constructor($scope, $compile, ObjectProxy, moment, notification, socket) {
         this.scope = $scope;
         this.compile = $compile;
         this.moment = moment;
         this.op = ObjectProxy;
-        this.alert = alert;
+        this.notification = notification;
         this.socket = socket;
         
         let now = new Date();
@@ -32,21 +32,21 @@ class SharingCtrl {
         this.reserve_from = '';
         this.reserve_to = '';
               
-        this.calendarView = 'week';
+        this.calendarView = 'month';
         this.calendarDate = new Date();
         this.calendarTitle = 'Shareables for %NAME';
         
         let editaction = {
             label: '<i class=\'glyphicon glyphicon-pencil\'></i>',
             onClick: function (args) {
-                alert.add('success', 'Edited', args.calendarEvent, 5);
+                notification.add('success', 'Edited', args.calendarEvent, 5);
             }
         };
         
         let delaction = {
             label: '<i class=\'glyphicon glyphicon-remove\'></i>',
             onClick: function (args) {
-                alert.add('success', 'Deleted', args.calendarEvent, 5);
+                notification.add('success', 'Deleted', args.calendarEvent, 5);
             }
         };
         
@@ -73,12 +73,12 @@ class SharingCtrl {
         };
         
         this.eventClicked = function (event) {
-            alert.add('success', 'Clicked', String(event), 10);
+            notification.add('success', 'Clicked', String(event), 10);
         };
         
         
         this.eventTimesChanged = function (event) {
-            alert.show('Dropped or resized', event);
+            notification.show('Dropped or resized', event);
         };
         
         this.toggle = function ($event, field, event) {
@@ -128,10 +128,10 @@ class SharingCtrl {
         this.socket.listen("hfos.shareables.manager", function(msg) {
              if (msg.action == 'reserve') {
                  if (msg.data == true) {
-                     self.alert.add('success', 'Reserved', 'Your reservation has been accepted.', 10);
+                     self.notification.add('success', 'Reserved', 'Your reservation has been accepted.', 10);
                      self.getReservations();
                  } else {
-                     self.alert.add('danger', 'Blocked', 'The shareable is already reserved during that time.', 10);
+                     self.notification.add('danger', 'Blocked', 'The shareable is already reserved during that time.', 10);
                  }
              }
         });
@@ -161,6 +161,6 @@ class SharingCtrl {
     }
 }
 
-SharingCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'moment', 'alert', 'socket'];
+SharingCtrl.$inject = ['$scope', '$compile', 'objectproxy', 'moment', 'notification', 'socket'];
 
 export default SharingCtrl;
