@@ -50,7 +50,9 @@ class CalcConfigCtrl {
 
 
         this.rootscope.$on('OP.ListUpdate', function (ev, schema) {
-            if (schema === 'she'
+            if (schema === 'sheet') {
+                console.log('Sheet list updated')
+            }
         });
     }
 
