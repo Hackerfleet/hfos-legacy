@@ -147,7 +147,7 @@ StatusChangeForm = {
                             'type': 'strapselect',
                             'placeholder': 'Select the old states',
                             'options': {
-                                "type": "systemstate",
+                                "type": "nodestate",
                                 "asyncCallback": "$ctrl.getFormData",
                                 "map": {
                                     'valueProperty': "uuid",
@@ -176,7 +176,7 @@ StatusChangeForm = {
                             'type': 'strapselect',
                             'placeholder': 'Select the new states',
                             'options': {
-                                "type": "systemstate",
+                                "type": "nodestate",
                                 "asyncCallback": "$ctrl.getFormData",
                                 "map": {
                                     'valueProperty': "uuid",

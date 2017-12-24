@@ -23,32 +23,28 @@ __license__ = "GPLv3"
 
 """
 
-Provisioning: Calcs
+Provisioning: Nodestates
 ========================
 
 Contains
 --------
 
-Calcs for ships
+NodeStates for various vessel types. 
+Choose a provision that matches your vessel. 
 
 
 """
+
+# TODO: Allow choosing of predefined provisions.
 
 from hfos.provisions.base import provisionList
 from hfos.database import objectmodels
 from hfos.logger import hfoslog
 
-Calcs = [
-    {
-        'name': 'Default',
-        'uuid': '7df83542-c1c1-4c70-b754-51174a53453a',
-        'description': 'Default blank calc',
-        'shared': True,
-        'locked': False,
-    }
+NodeStates = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(Calcs, objectmodels['calcconfig'], **kwargs)
-    hfoslog('[PROV] Provisioning: Calcs: Done.')
+def default_provision(**kwargs):
+    provisionList(NodeStates, objectmodels['nodestate'], **kwargs)
+    hfoslog('[PROV] Provisioning: Nodestates: Done.')

@@ -1,0 +1,34 @@
+@import '../../../colors.scss';
+
+.state-button {
+  border-style: solid;
+  border-radius: 5px;
+  border-width: 5px;
+  background: none;
+
+  position: absolute;
+  text-align: center;
+
+  right: 0;
+  left: 0;
+  height: 100%;
+}
+
+.state-button-disabled {
+  background: $color-gray-dark;
+}
+
+.state-button .fa {
+  position: absolute;
+  font-size: 50px;
+  top: calc(50% - 0.5em);
+  left: calc(50% - 0.5em);
+}
+
+.btn-enabled {
+  color: $color-primary-3;
+}
+
+.btn-disabled {
+  color: $color-gray-dark;
+}

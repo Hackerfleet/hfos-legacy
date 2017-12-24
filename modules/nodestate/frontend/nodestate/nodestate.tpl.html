@@ -1,0 +1,72 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div id="nodestatejumbo" class="jumbotron">
+    <ul class="nav nav-pills"
+        role="tablist"
+        ng-style="{display: $ctrl.hideui && 'none' || 'block'}">
+        <li><h2>Node State Management</h2></li>
+        <li class="pull-right">
+                <span class="fa fa-arrow-circle-up btn"
+                      ng-show="$ctrl.lockState"
+                      ng-click="$ctrl.gridsterOptions.floating = !$ctrl.gridsterOptions.floating"
+                      ng-class="{'btn-enabled':$ctrl.gridsterOptions.floating,
+                                 'btn-disabled':!$ctrl.gridsterOptions.floating}">
+                    </span>
+
+            <span class="fa btn"
+                  ng-click="$ctrl.toggleLock()"
+                  ng-class="{'fa-lock':!$ctrl.lockState,'fa-unlock':$ctrl.lockState}"
+                  ng-model="$ctrl.lockState"></span>
+        </li>
+    </ul>
+
+    <div id="nodestate">
+        <div gridster="$ctrl.gridsterOptions">
+            <ul>
+                <li data-gridster-item
+                    data-row="item.position.x"
+                    data-col="item.position.y"
+                    data-sizex="item.size.width"
+                    data-sizey="item.size.height"
+                    ng-repeat="(uuid, item) in $ctrl.nodestates">
+
+                    <div class="state-button"
+                         ng-click="$ctrl.toggle(uuid)"
+                         ng-style="{'background': item.active ? item.color : 'none',
+                                        'border-color': item.color}"
+                         ng-class="{'state-button-active': item.active,
+                                        'state-button-disabled': item.disabled}">
+
+                            <span class="fa {{item.icon}}"
+                                  ng-style="{'color': item.active ? 'white' : item.color}">
+                            </span>
+
+                        <span ng-style="{'color': item.active ? 'white' : 'black'}">{{item.name}}</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
