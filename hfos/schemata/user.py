@@ -50,12 +50,15 @@ UserSchema['properties'].update({
             'type': 'string'
         },
         'default': ['crew']
+    },
+    'needs_password_change': {
+        'type': 'boolean',
+        'default': True,
     }
-
 })
 
 UserOptions = {
-    'hidden': ['passhash', 'roles']
+    'hidden': ['passhash', 'roles', 'needs_password_change']
 }
 
 User = {'schema': UserSchema, 'form': noform, 'options': UserOptions}
