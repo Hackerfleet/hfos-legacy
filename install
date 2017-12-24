@@ -4,44 +4,54 @@
 if [ "$EUID" -ne 0 ]
 then
     echo "You need root privileges to install HFOS. Use su or sudo."
+    echo
+    echo "If you want to install in development mode, please read:"
+    echo "https://hfos.readthedocs.io/en/latest/dev/environment.html"
     exit
 fi
 
+echo "If you run into any trouble, please read the documentation at"
+echo
+echo "https://hfos.readthedocs.io/en/latest/start/index.html"
+
 # Find our package manager
 if VERB="$( which apt-get )" 2> /dev/null; then
-    echo "Debian-based"
+    echo "Proceeding with autodetected Debian based installation. Please be patient."
 
     if [ ! -f /etc/apt/sources.list.d/nodesource.list ]
     then
         echo "Adding node source Debian repository."
-        apt-get install apt-transport-https
+        apt-get install apt-transport-https &>> output.log
         echo "deb https://deb.nodesource.com/node_7.x jessie main
 deb-src https://deb.nodesource.com/node_7.x jessie main" > /etc/apt/sources.list.d/nodesource.list
         wget -qO- https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
-        apt-get update
+        apt-get update &>> output.log
     fi
 
     apt-get install mongodb python3.5 python3-pip python3-grib \
                     python3-bson python3-pymongo python3-serial \
                     python3-pymongo-ext python3-bson-ext \
                     npm nodejs enchant nginx virtualenv\
-                    gdal-bin python-gdal
+                    gdal-bin python-gdal &>> output.log
 
-    npm install -g npm@4.2.0
+    npm install -g npm@4.2.0 &>> output.log
 
-    git submodule init
-    git submodule update
+    git submodule init &>> output.log
+    git submodule update &>> output.log
 
-    virtualenv -p /usr/bin/python3.5 --system-site-packages venv
-    source venv/bin/activate
-    pip install -Ur requirements-dev.txt
-    python setup.py develop
+    virtualenv -p /usr/bin/python3.5 --system-site-packages venv &>> output.log
+    source venv/bin/activate &>> output.log
+    pip install -Ur requirements-dev.txt &>> output.log
+    python setup.py develop &>> output.log
 
-    systemctl start mongodb.service
+    systemctl start mongodb.service &>> output.log
 
-    venv/bin/python hfos_manage.py install all
+    venv/bin/python hfos_manage.py install all &>> output.log
 
-    echo "Done!"
+    echo "All Done! Visit your new Installation by opening a browser and surfing to:"
+    echo
+    echo "https://localhost"
+
 elif VERB="$( which yum )" 2> /dev/null; then
     echo "Modern Red Hat-based - NOT SUPPORTED YET"
 elif VERB="$( which portage )" 2> /dev/null; then
