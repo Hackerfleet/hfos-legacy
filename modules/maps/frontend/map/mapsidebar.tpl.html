@@ -170,6 +170,12 @@
                             </h4>
                             <ul uib-collapse="geoobjectDetailsCollapsed">
                                 <li>
+                                    <label>Object Color:</label>
+                                    <spectrum-colorpicker ng-model="$ctrl.default_color"
+                                                          options="{showInput: true, showAlpha: true, showInput: true}">
+                                    </spectrum-colorpicker>
+                                </li>
+                                <li>
                                     <label>Draw Markers:</label>
                                     <select class="pull-right" ng-model="$ctrl.default_marker">
                                         <option ng-repeat="(value, label) in $ctrl.default_options.marker"
