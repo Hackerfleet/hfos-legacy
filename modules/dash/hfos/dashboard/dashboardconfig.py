@@ -118,22 +118,10 @@ DashboardForm = [
         'items': [
             'cards[].title',
             'cards[].widgettype',
-            {
-                'key': 'cards[].valuetype',
-                'type': 'uiselect',
-                'placeholder': 'Select a Sensor Value',
-                'options': {
-                    "type": "sensordatatype",
-                    "asyncCallback": "$ctrl.getFormData",
-                    "map": {
-                        'valueProperty': "name", 'nameProperty': 'name'
-                    }
-                }
-            }
-
+            lookup_field('cards[].valuetype', 'sensordatatype', 'Select a Sensor Value', 'name',
+                         select_type='uiselect'),
         ],
         'startEmpty': True,
-
     },
     'description',
     editbuttons
