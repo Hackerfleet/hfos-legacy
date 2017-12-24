@@ -157,6 +157,7 @@ class GuideManager(ConfigurableComponent):
                 'uuid': std_uuid(),
                 'layer': layer_uuid,
                 'geojson': item,
+                'type': 'Skipperguide',
                 'name': 'Guide for %s' % (item['properties']['Name'])
             })
             locations.append(location)
