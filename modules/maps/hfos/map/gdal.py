@@ -35,13 +35,14 @@ Geospatial Data Abstraction Library support for HFOS.
 
 import os
 
-from uuid import uuid4
 # from circuits import Worker, task
+
 from hfos.component import ConfigurableComponent, handler
 from hfos.events.system import authorizedevent
 from hfos.events.client import send
 from hfos.database import objectmodels
 from hfos.logger import error, verbose, warn, hilight
+from hfos.tools import std_uuid
 import datetime
 import xml.etree.ElementTree
 
@@ -104,7 +105,7 @@ class GDAL(ConfigurableComponent):
         self.tiler_binary = '/usr/bin/gdal2tiles.py'
 
         if (not os.path.exists(self.translate_binary) or not os.path.exists(
-                self.tiler_binary)):
+            self.tiler_binary)):
             self.log('No gdal tools found, will not be able to generate '
                      'tiles from foreign chart formats.', lvl=warn)
 
@@ -170,13 +171,16 @@ class GDAL(ConfigurableComponent):
 
         self.log('Done tiling: ', filename, target, lvl=hilight)
 
-        newlayer = self._register_map(name.rstrip('.KAP'), target, event.client)
+        newlayer = self._register_map(name.rstrip('.KAP'), target.rstrip('.KAP'), event.client)
 
         notification = {
             'component': 'hfos.alert.manager',
-            'action': 'success',
-            'data': 'New rasterchart rendered: <a href="#!/editor/layer/' +
-                    str(newlayer.uuid) + '/edit">' + newlayer.name + '</a>'
+            'action': 'notify',
+            'data': {
+                'msg': 'New rasterchart rendered: <a href="#!/editor/layer/' + str(
+                    newlayer.uuid) + '/edit">' + newlayer.name + '</a>',
+                'type': 'success'
+            }
         }
         self.fireEvent(send(event.client.uuid, notification))
 
@@ -216,8 +220,11 @@ class GDAL(ConfigurableComponent):
 
         notification = {
             'component': 'hfos.alert.manager',
-            'action': 'warning' if count == 0 else 'success',
-            'data': data
+            'action': 'notify',
+            'data': {
+                'msg': data,
+                'type': 'warning' if count == 0 else 'success',
+            }
         }
         self.fireEvent(send(event.client.uuid, notification))
 
@@ -254,7 +261,9 @@ class GDAL(ConfigurableComponent):
             self.log('Problem during XML parsing:', e, type(e), exc=True)
             return
 
-        layer = objectmodels['layer']({'uuid': str(uuid4())})
+        uuid = std_uuid()
+
+        layer = objectmodels['layer']({'uuid': uuid})
         layer.name = name
         layer.path = name
         layer.owner = client.useruuid
@@ -280,6 +289,33 @@ class GDAL(ConfigurableComponent):
 
         gdal_layers.layers.append(layer.uuid)
         gdal_layers.save()
+
+        geojson = {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Polygon',
+                'coordinates': [[
+                    [bounding_box['miny'], bounding_box['minx']],
+                    [bounding_box['miny'], bounding_box['maxx']],
+                    [bounding_box['maxy'], bounding_box['maxx']],
+                    [bounding_box['maxy'], bounding_box['minx']]
+                ]]
+            }
+        }
+
+        geoobject = objectmodels['geoobject']({'uuid': uuid})
+        geoobject.name = name
+        geoobject.owner = client.useruuid
+        geoobject.notes = "Imported GDAL chart"
+        geoobject.type = "Chart"
+        geoobject.opacity = 0.7
+        geoobject.color = 'violet'
+        geoobject.geojson = geojson
+        geoobject.references = [
+            {'layer': uuid}
+        ]
+
+        geoobject.save()
 
         self.log('New GDAL layer stored:', layer._fields, lvl=hilight)
 
