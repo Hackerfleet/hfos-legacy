@@ -17,24 +17,42 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos.tools import insert_nginx_service
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "GPLv3"
 
 from setuptools import setup, find_packages
+from setuptools.command.install import install
+from setuptools.command.develop import develop
 
-# This snippet needs to be inserted into nginx' configuration
-# """
-# # EtherCalc Module
-# location /ethercalc/ {
-#       proxy_pass      http://127.0.0.1:8000/;
-# include         proxy_params;
-# }
-#
-# location /zappa/socket/__local/ {
-#       rewrite (.*) /ethercalc/$1;
-# }
-# """
+
+def insert_service():
+    definition = """# EtherCalc Module
+    location /ethercalc/ {
+        proxy_pass      http://127.0.0.1:8056/;
+        include         proxy_params;
+    }
+    
+    location /zappa/socket/__local/ {
+        rewrite (.*) /ethercalc/$1;
+    }
+"""
+
+    insert_nginx_service(definition)
+
+
+class PostInstall(install):
+    def run(self):
+        install.run(self)
+        insert_service()
+
+
+class PostDevelop(develop):
+    def run(self):
+        develop.run(self)
+        insert_service()
+
 
 setup(name="hfos-calc",
       version="0.0.1",
@@ -56,6 +74,10 @@ This software package is a plugin module for HFOS.
       install_requires=[
           'hfos>=1.2.0',
       ],
+      cmdclass={
+          'develop': PostDevelop,
+          'install': PostInstall
+      },
       entry_points="""[hfos.components]
     spreadsheetwatcher=hfos.calc.spreadsheetwatcher:SpreadsheetWatcher
     [hfos.schemata]
