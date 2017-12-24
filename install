@@ -31,7 +31,7 @@ deb-src https://deb.nodesource.com/node_7.x jessie main" > /etc/apt/sources.list
     apt-get install mongodb python3.5 python3-pip python3-grib \
                     python3-bson python3-pymongo python3-serial \
                     python3-pymongo-ext python3-bson-ext \
-                    npm nodejs enchant nginx virtualenv\
+                    nodejs enchant nginx virtualenv\
                     gdal-bin python-gdal &>> output.log
 
     npm install -g npm@4.2.0 &>> output.log
