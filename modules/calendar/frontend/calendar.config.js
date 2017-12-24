@@ -22,33 +22,16 @@
  * """
  */
 
-'use strict';
+import icon from './assets/iconmonstr-calendar-4.svg';
 
-/**
- * @ngdoc function
- * @name hfosFrontendApp.controller:PasswordChangeCtrl
- * @description
- * # PasswordChangeCtrl
- * Controller of the hfosFrontendApp
- */
-class PasswordChange {
-    
-    constructor(scope, user) {
-        this.scope = scope;
-        this.user = user;
-        
-        this.password_old = '';
-        this.password_new = '';
-        this.password_confirm = '';
-    
-        this.needs_old_password = true;
-    }
-    
-    update_password() {
-        this.user.changePassword(this.password_old, this.password_new, this.password_confirm);
-    }
+
+export function routing($stateProvider) {
+
+    $stateProvider
+        .state('app.calendar', {
+            url: '/calendar',
+            template: '<calendar></calendar>',
+            label: 'Calendar',
+            icon: icon
+        });
 }
-
-PasswordChange.$inject = ['$scope', 'user'];
-
-export default PasswordChange;
