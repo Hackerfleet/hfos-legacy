@@ -94,7 +94,7 @@ class ObjectManager(ConfigurableComponent):
             except AttributeError as e:
                 self.log('Schema has ownership permission but no owner:',
                          obj._schema['name'], obj._fields, e, type(e),
-                         lvl=warn, exc=True)
+                         lvl=verbose, exc=True)
         for role in subject.account.roles:
             if role in obj.perms[action]:
                 self.log('Access granted', lvl=verbose)
@@ -410,7 +410,7 @@ class ObjectManager(ConfigurableComponent):
 
         result = {
             'component': 'hfos.events.objectmanager',
-            'action': 'list',
+            'action': 'getlist',
             'data': {
                 'schema': schema,
                 'list': object_list
@@ -637,16 +637,15 @@ class ObjectManager(ConfigurableComponent):
     @handler(subscribe)
     def subscribe(self, event):
         """Subscribe to an object's future changes"""
+        uuids = event.data
 
-        if isinstance(event.data, []):
-            uuids = event.data
-        else:
-            uuids = [event.data]
+        if not isinstance(uuids, list):
+            uuids = [uuids]
 
         subscribed = []
         for uuid in uuids:
             try:
-                self._add_subscription(uuids, event)
+                self._add_subscription(uuid, event)
                 subscribed.append(uuid)
             except KeyError:
                 continue
