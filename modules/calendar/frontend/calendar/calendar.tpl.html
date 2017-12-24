@@ -1,0 +1,115 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+<button id="sidebargrab" type="button" ng-click="$ctrl.scope.$broadcast('Resize', '75%')">
+    <span id="sidebargrabicon" class="fa fa-arrow-left"></span>
+</button>
+
+<div class="well content">
+
+    <div id="leftpane">
+        <span class="pull-right fa btn"
+              ng-click="$ctrl.uiConfig.calendar.editable = !$ctrl.uiConfig.calendar.editable"
+              ng-class="{'fa-lock':!$ctrl.uiConfig.calendar.editable,
+                         'fa-unlock':$ctrl.uiConfig.calendar.editable}">
+        </span>
+
+        <span class="pull-right fa fa-bars btn"
+              ng-click="$ctrl.toggleButtons()">
+        </span>
+        <div id="calendar" class="calendar" ui-calendar="$ctrl.uiConfig.calendar"
+             ng-model="$ctrl.eventSources">
+        </div>
+
+    </div>
+
+    <!-- Vertical Resizer -->
+    <div id="vResizer" resizer="vertical" resizer-width="10" resizer-left="#leftpane" resizer-right="#rightpane"></div>
+
+    <div id="rightpane" class="sidebar">
+        <div class="sidebar-header">
+            <button type="button" class="close" ng-click="$ctrl.scope.$broadcast('Resize', '100%')">&times;</button>
+            <h4 class="aside-title">Calendar Sidebar</h4>
+        </div>
+
+        <uib-tabset active="$ctrl.active_tab" class="sidebar-body">
+            <uib-tab index="0" heading="Calendars">
+                <div id="calendar_selector">
+                    <h3>Calendars</h3>
+
+                    <ul class="calendar-overview">
+                        <li>
+                            <h4 ng-click="ownCollapsed = !ownCollapsed">
+                                        <span class="fa"
+                                              ng-class="{'fa-chevron-right': ownCollapsed,
+                                                         'fa-chevron-down': !ownCollapsed}">
+                                        </span>
+                                Your calendars
+                            </h4>
+                            <ul uib-collapse="ownCollapsed">
+                                <li ng-repeat="uuid in $ctrl.calendars_own"
+                                    ng-click="$ctrl.toggle_calendar(uuid)">
+                                            <span class="calendar-toggle"
+                                                  ng-style="$ctrl.calendars[uuid].enabled && {'background': $ctrl.calendars[uuid].color,
+                                                  'border': '1px solid '+ $ctrl.calendars[uuid].color } || {'border': '1px solid ' + $ctrl.calendars[uuid].color }">
+                                            </span>
+                                    <span>{{$ctrl.calendars[uuid].name}}</span>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4 ng-click="otherCollapsed = !otherCollapsed">
+                                        <span class="fa"
+                                              ng-class="{'fa-chevron-right': !otherCollapsed,
+                                                         'fa-chevron-down': otherCollapsed}">
+                                        </span>
+                                Other calendars
+                            </h4>
+                            <ul uib-collapse="!otherCollapsed">
+                                <li ng-repeat="uuid in $ctrl.calendars_other"
+                                    ng-click="$ctrl.toggle_calendar(uuid)">
+                                            <span class="calendar-toggle"
+                                                  ng-style="$ctrl.calendars[uuid].enabled && {'background': $ctrl.calendars[uuid].color,
+                                                  'border': '1px solid '+ $ctrl.calendars[uuid].color } || {'border': '1px solid ' + $ctrl.calendars[uuid].color }">
+                                            </span>
+                                    <span>{{$ctrl.calendars[uuid].name}}</span>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <a href="#!/editor/calendar//create" class="btn btn-default" role="button">Add
+                        calendar</a>
+                </div>
+            </uib-tab>
+            <uib-tab index="1" heading="Event">
+                <div class="sidebar-editor">
+                    <objecteditor schema="event" action="edit" uuid="{{$ctrl.selected_event}}"
+                                  ng-if="$ctrl.selected_event != null"></objecteditor>
+
+                    <objecteditor schema="event" action="create" initial="$ctrl.new_event"
+                                  ng-if="$ctrl.selected_event == null"></objecteditor>
+                </div>
+            </uib-tab>
+        </uib-tabset>
+    </div>
+</div>

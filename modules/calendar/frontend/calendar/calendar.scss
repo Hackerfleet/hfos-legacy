@@ -1,0 +1,163 @@
+/*!
+ * #!/usr/bin/env python
+ * # -*- coding: UTF-8 -*-
+ *
+ * __license__ = """
+ * Hackerfleet Operating System
+ * ============================
+ * Copyright (C) 2011- 2017 riot <riot@c-base.org> and others.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * """
+ */
+@import '../../../colors';
+
+.calendar-toggle {
+  display: inline-block;
+  border: 3px solid;
+  width: 15px;
+  height: 15px;
+}
+
+.calendar {
+  height: inherit;
+  padding: 5px;
+}
+
+#event_details .container {
+  max-width: inherit;
+}
+
+.fc-nonbusiness {
+  background: $color-primary-1;
+}
+.fc-bootstrap3 .fc-time-grid .fc-slats table {
+  background: $color-white;
+}
+
+.fc-toolbar {
+  margin-bottom: 0;
+}
+
+#sidebar {
+  height: inherit;
+  background: $color-white;
+}
+
+.sidebar {
+  //  float:right;
+  //  display: none;
+  padding: 0;
+  z-index: 101;
+}
+
+.sidebar ul {
+  list-style-type: none;
+}
+
+.content {
+  height: calc(100% - 20px);
+  padding: 5px 5px 5px 5px;
+}
+
+.sidebar-header {
+  background: $color-primary-0;
+  color: $color-white;
+  margin: 0;
+  padding: 2px 10px 2px 10px;
+}
+
+.sidebar-body {
+  background: $color-white;
+  padding: 10px 5px 10px 10px;
+  overflow: scroll;
+  height: calc(100% - 60px);
+}
+
+.sidebar-editor {
+  //background: hotpink;
+  overflow: auto;
+}
+
+.sidebar-header .close {
+  color: $color-white;
+  font-size: 2em;
+  opacity: 0.8;
+  padding: 5px;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+#leftpane {
+  position: absolute;
+  top: 50px;
+  bottom: 20px;
+  left: 0;
+  width: 75%;
+  overflow: hidden;
+}
+
+#rightpane {
+  position: absolute;
+  top: 50px;
+  bottom: 3px;
+  left: 75%;
+  right: 0;
+  overflow: auto;
+}
+
+#toppane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  overflow: auto;
+}
+
+#bottompane {
+  position: absolute;
+  height: 100px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: auto;
+}
+
+/* Vertical Resizer */
+#vResizer {
+  background-color: $color-gray-light;
+  position: absolute;
+  top: 51px;
+  bottom: 20px;
+  left: calc(75% - 10px);
+  width: 10px;
+  cursor: ew-resize;
+  z-index: 99;
+}
+
+/* Horizontal Resizer */
+#hResizer {
+  background-color: $color-gray-light;
+  position: absolute;
+  height: 10px;
+  bottom: 100px;
+  left: 0;
+  right: 0;
+  cursor: n-resize;
+}
+
+#vResizer:hover, #hResizer:hover {
+  background-color: $color-gray-dark;
+}
