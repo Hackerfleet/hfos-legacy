@@ -29,18 +29,21 @@ from uuid import uuid4
 systemvessel = {
     'name': 'Default System Vessel',
     'uuid': str(uuid4()),
-    'geojson': {
-        'type': 'Point',
-        'coordinates': [0.0, 0.0]
-    }
 }
 
 
 def provision(**kwargs):
-    # TODO: Handle the case with an already existing vessel (See also
-    # system-provision)
+
+    vessel = objectmodels['vessel'].find_one({'name': 'Default System Vessel'})
+    if vessel is not None:
+        if not kwargs.get('overwrite', False):
+            hfoslog('Default vessel already existing. Skipping provisions.')
+            return
+        else:
+            vessel.delete()
+
     provisionList([systemvessel], objectmodels['vessel'],
-                  indices=['geojson'], indices_types=['2dsphere'], **kwargs)
+                  indices=['geojson'], indices_types=['2dsphere'], indices_unique=[False], **kwargs)
 
     sysconfig = objectmodels['systemconfig'].find_one({'active': True})
     hfoslog('Adapting system config for default vessel:', sysconfig)
