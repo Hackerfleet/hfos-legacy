@@ -61,7 +61,7 @@ def test_exception_monitor():
     logger.live = True
     hfd.log('FOOBAR')
 
-    m.fireEvent(debugrequest(User(None, None, None), 'exception', None, None),
+    m.fireEvent(debugrequest(User(None, None, None), 'debugrequest', 'exception', None),
                 "hfosweb")
 
     sleep(0.2)
