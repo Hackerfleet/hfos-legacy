@@ -1,0 +1,201 @@
+{
+"nodestate": [
+{
+"color": "rgb(175, 48, 48)",
+"uuid": "d77db9e8-4e59-47d9-9594-2c797610ad5e",
+"excluded": [],
+"name": "Offline",
+"label-activated": "Online",
+"group": "network",
+"untrigger": []
+},
+{
+"color": "rgb(159, 106, 38)",
+"uuid": "b3949e02-4d4e-4765-a9aa-6a0bd3a6318d",
+"excluded": [
+"d77db9e8-4e59-47d9-9594-2c797610ad5e"
+],
+"name": "Online 2G",
+"label-activated": "Offline",
+"group": "network",
+"untrigger": [
+"d77db9e8-4e59-47d9-9594-2c797610ad5e"
+]
+},
+{
+"color": "rgb(189, 195, 47)",
+"uuid": "62b69316-7560-4333-b774-cdfd435c0428",
+"excluded": [
+"d77db9e8-4e59-47d9-9594-2c797610ad5e"
+],
+"name": "Online 3G",
+"label-activated": "Offline",
+"group": "network",
+"untrigger": [
+"d77db9e8-4e59-47d9-9594-2c797610ad5e"
+]
+},
+{
+"color": "rgb(60, 184, 53)",
+"uuid": "4e538440-5c1b-4fc8-a69f-a6090fbfefa7",
+"excluded": [
+"d77db9e8-4e59-47d9-9594-2c797610ad5e"
+],
+"name": "Online 4G",
+"label-activated": "Offline",
+"group": "network",
+"untrigger": [
+"d77db9e8-4e59-47d9-9594-2c797610ad5e"
+]
+},
+{
+"color": "rgb(0, 118, 209)",
+"uuid": "121d5144-9ce0-499f-9378-556efdb6b451",
+"excluded": [],
+"name": "Anchoring",
+"label-activated": "Pull Anchor",
+"group": "nautical",
+"untrigger": []
+},
+{
+"color": "rgb(51, 125, 170)",
+"uuid": "950a853b-a833-4eb0-a628-08a4273ae0e0",
+"excluded": [
+"121d5144-9ce0-499f-9378-556efdb6b451"
+],
+"name": "Moored",
+"label-activated": "Detach",
+"group": "nautical",
+"untrigger": [
+"121d5144-9ce0-499f-9378-556efdb6b451"
+]
+},
+{
+"color": "rgb(174, 47, 47)",
+"uuid": "44c060b0-6002-4a40-9e88-6266918a813a",
+"excluded": [
+"121d5144-9ce0-499f-9378-556efdb6b451",
+"950a853b-a833-4eb0-a628-08a4273ae0e0"
+],
+"name": "Adrift",
+"label-activated": "Under control",
+"group": "nautical",
+"untrigger": [
+"121d5144-9ce0-499f-9378-556efdb6b451",
+"950a853b-a833-4eb0-a628-08a4273ae0e0"
+]
+},
+{
+"color": "rgb(57, 170, 63)",
+"uuid": "002c18fd-e229-445b-a936-0de9ad39766d",
+"excluded": [
+"44c060b0-6002-4a40-9e88-6266918a813a",
+"121d5144-9ce0-499f-9378-556efdb6b451",
+"950a853b-a833-4eb0-a628-08a4273ae0e0"
+],
+"name": "Underway (Engine)",
+"label-activated": "Engine stopped",
+"group": "nautical",
+"untrigger": [
+"44c060b0-6002-4a40-9e88-6266918a813a",
+"950a853b-a833-4eb0-a628-08a4273ae0e0",
+"121d5144-9ce0-499f-9378-556efdb6b451"
+]
+},
+{
+"color": "rgb(66, 177, 83)",
+"uuid": "5b75df66-880f-4afb-9bb6-c26d2be35869",
+"excluded": [
+"44c060b0-6002-4a40-9e88-6266918a813a",
+"121d5144-9ce0-499f-9378-556efdb6b451",
+"950a853b-a833-4eb0-a628-08a4273ae0e0"
+],
+"name": "Underway (Sails)",
+"label-activated": "Unrig",
+"group": "nautical",
+"untrigger": [
+"44c060b0-6002-4a40-9e88-6266918a813a",
+"121d5144-9ce0-499f-9378-556efdb6b451",
+"950a853b-a833-4eb0-a628-08a4273ae0e0"
+]
+},
+{
+"color": "rgb(77, 168, 72)",
+"uuid": "6c5564ea-ce11-4d56-a2e2-28dfdcb40a11",
+"excluded": [
+"121d5144-9ce0-499f-9378-556efdb6b451",
+"950a853b-a833-4eb0-a628-08a4273ae0e0"
+],
+"name": "Underway (Littoral)",
+"label-activated": "Stop",
+"group": "nautical",
+"untrigger": [
+"121d5144-9ce0-499f-9378-556efdb6b451",
+"950a853b-a833-4eb0-a628-08a4273ae0e0"
+]
+},
+{
+"color": "rgb(168, 49, 49)",
+"uuid": "b2e34d04-c113-4fa5-9116-efeae76be4bf",
+"excluded": [],
+"name": "Heavy Conditions",
+"label-activated": "Calmed down",
+"group": "nautical",
+"untrigger": []
+},
+{
+"color": "rgb(75, 174, 69)",
+"uuid": "44a3d794-ca7f-43dd-b7ac-dd42bb362773",
+"excluded": [],
+"name": "Land Power",
+"label-activated": "Unplug",
+"group": "power",
+"untrigger": []
+},
+{
+"color": "rgb(175, 186, 67)",
+"uuid": "08a15567-a21e-49d3-b1c3-028b8c7a6eb7",
+"excluded": [],
+"name": "Generator",
+"label-activated": "Stop Generator",
+"group": "power",
+"untrigger": []
+},
+{
+"color": "rgb(226, 158, 50)",
+"uuid": "9df160d0-2853-45eb-801f-d82f8c1ced6f",
+"excluded": [
+"44a3d794-ca7f-43dd-b7ac-dd42bb362773"
+],
+"name": "Battery Power",
+"label-activated": "Disable Battery",
+"group": "power",
+"untrigger": [
+"44a3d794-ca7f-43dd-b7ac-dd42bb362773"
+]
+},
+{
+"color": "rgb(242, 41, 41)",
+"uuid": "1b7e659b-18b1-4215-9252-e05a1652f63d",
+"excluded": [],
+"name": "Short on power",
+"label-activated": "Recharged",
+"group": "power",
+"untrigger": []
+},
+{
+"color": "rgb(57, 91, 154)",
+"uuid": "840b8152-47e2-453b-a5b3-26681a966aea",
+"excluded": [
+"121d5144-9ce0-499f-9378-556efdb6b451",
+"950a853b-a833-4eb0-a628-08a4273ae0e0"
+],
+"name": "Underway (Offshore)",
+"label-activated": "Gone littoral",
+"group": "nautical",
+"untrigger": [
+"6c5564ea-ce11-4d56-a2e2-28dfdcb40a11"
+]
+}
+]
+}
