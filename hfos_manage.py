@@ -1253,6 +1253,38 @@ def view(ctx, schema, uuid, filter):
         pprint(item._fields)
 
 
+@db.command(short_help='Validates stored objects')
+@click.option("--schema", "-s", default=None, help="Specify object schema to validate")
+@click.option("--all", help="Agree to validate all objects, if no schema given", is_flag=True)
+@click.pass_context
+def validate(ctx, schema, all):
+    """Validates all objects or all objects of a given schema."""
+
+    database = ctx.obj['db']
+
+    if schema is None:
+        if all is False:
+            hfoslog('No schema given. Read the help', lvl=warn, emitter='manage')
+            return
+        else:
+            schemata = database.objectmodels.keys()
+    else:
+        schemata = [schema]
+
+    for schema in schemata:
+        try:
+            for obj in database.objectmodels[schema].find():
+                obj.validate()
+        except Exception as e:
+
+            hfoslog('Exception while validating:',
+                    schema, e, type(e),
+                    '\n\nFix this object and rerun validation!',
+                    emitter='MANAGE', lvl=error)
+
+    hfoslog('Done!', emitter='MANAGE')
+
+
 @db.command(short_help='export objects to json')
 @click.option("--schema", "-s", default=None, help="Specify schema to export")
 @click.option("--uuid", "-u", default=None, help="Specify single object to export")
