@@ -1,5 +1,5 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2011-2017, Hackerfleet
+# Hackerfleet Operating System Localization file
+# Copyright (C) 2011-2018, Hackerfleet
 # This file is distributed under the same license as the HFOS package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
@@ -531,18 +531,18 @@ msgid "License"
 msgstr "Lizenz"
 
 #: ../../../README.rst:169
-msgid "Copyright (C) 2011-2017 riot <riot@c-base.org> and others."
-msgstr "Copyright (C) 2011-2017 riot <riot@c-base.org> und Andere."
+msgid "Copyright (C) 2011-2018 riot <riot@c-base.org> and others."
+msgstr "Copyright (C) 2011-2018 riot <riot@c-base.org> und Andere."
 
 #: ../../../README.rst:171
 msgid ""
 "This program is free software: you can redistribute it and/or modify it "
-"under the terms of the GNU General Public License as published by the Free "
+"under the terms of the GNU Affero General Public License as published by the Free "
 "Software Foundation, either version 3 of the License, or (at your option) "
 "any later version."
 msgstr ""
 "Dieses Programm ist freie Software. Sie können es unter den Bedingungen der "
-"GNU General Public License, wie von der Free Software Foundation "
+"GNU Affero General Public License, wie von der Free Software Foundation "
 "veröffentlicht, weitergeben und/oder modifizieren, entweder gemäß Version 3 "
 "der Lizenz oder (nach Ihrer Option) jeder späteren Version."
 
@@ -550,20 +550,20 @@ msgstr ""
 msgid ""
 "This program is distributed in the hope that it will be useful, but WITHOUT "
 "ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
-"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for "
+"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for "
 "more details."
 msgstr ""
 "Die Veröffentlichung dieses Programms erfolgt in der Hoffnung, daß es Ihnen "
 "von Nutzen sein wird, aber OHNE IRGENDEINE GARANTIE, sogar ohne die "
 "implizite Garantie der MARKTREIFE oder der VERWENDBARKEIT FÜR EINEN "
-"BESTIMMTEN ZWECK. Details finden Sie in der GNU General Public License."
+"BESTIMMTEN ZWECK. Details finden Sie in der GNU Affero General Public License."
 
 #: ../../../README.rst:181
 msgid ""
-"You should have received a copy of the GNU General Public License along with"
+"You should have received a copy of the GNU Affero General Public License along with"
 " this program.  If not, see <http://www.gnu.org/licenses/>."
 msgstr ""
-"Sie sollten ein Exemplar der GNU General Public License zusammen mit diesem "
+"Sie sollten ein Exemplar der GNU Affero General Public License zusammen mit diesem "
 "Programm erhalten haben. Falls nicht, siehe <http://www.gnu.org/licenses/>."
 
 #: ../../../README.rst:185

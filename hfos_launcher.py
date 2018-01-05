@@ -18,7 +18,7 @@ IRC: #hackerfleet@irc.freenode.org
 Project repository: http://github.com/hackerfleet/hfos
 Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
-:copyright: © 2011-2017 riot@c-base.org
+:copyright: © 2011-2018 riot@c-base.org
 :license: GPLv3 (See LICENSE)
 
 """

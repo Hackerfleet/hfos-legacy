@@ -7,8 +7,8 @@ Package HFOS.web
 
 The backend package dealing with the web frontend interface.
 
-:copyright: (C) 2011-2016 riot@c-base.org
-:license: GPLv3 (See LICENSE)
+:copyright: (C) 2011-2018 riot@c-base.org
+:license: AGPLv3 (See LICENSE)
 
 """
 

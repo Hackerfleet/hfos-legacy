@@ -87,7 +87,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'HFOS'
-copyright = u'2011-2017, Hackerfleet '
+copyright = u'2011-2018, Hackerfleet '
 author = u'Hackerfleet Contributors'
 url = u'https://github.com/hackerfleet/hfos'
 

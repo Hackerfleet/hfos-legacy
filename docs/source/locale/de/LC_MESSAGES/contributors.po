@@ -1,7 +1,7 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2011-2017, Hackerfleet
+# Hackerfleet Operating System Localization file
+# Copyright (C) 2011-2018, Hackerfleet
 # This file is distributed under the same license as the HFOS package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+# Heiko 'riot' Weinen <riot@c-base.org>, 2017.
 #
 msgid ""
 msgstr ""
