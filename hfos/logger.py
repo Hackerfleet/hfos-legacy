@@ -230,7 +230,9 @@ def hfoslog(*what, **kwargs):
         else:
             callee = kwargs['sourceloc']
 
-    msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (time.asctime(),
+    now = time.asctime()
+
+    msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (now,
                                                lvldata[lvl][0],
                                                runtime,
                                                count,
@@ -283,7 +285,8 @@ def hfoslog(*what, **kwargs):
             hfoslog("Bad encoding encountered on previous message:", e,
                     lvl=error)
         except BlockingIOError:
-            hfoslog("Too long log line encountered:", output[:20], lvl=error)
+            hfoslog("Too long log line encountered:", output[:20], lvl=warn)
 
     if live:
-        LiveLog.append(output)
+        item = [now, lvl, runtime, count, emitter, content]
+        LiveLog.append(item)

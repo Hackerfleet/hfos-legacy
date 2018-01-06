@@ -450,6 +450,7 @@ def construct_graph(args):
 @click.option("--logfile", help="Logfile path",
               default='/tmp/hfos.log')
 @click.option("--dolog", help="Write to logfile", is_flag=True)
+@click.option("--livelog", help="Log to in memory structure as well", is_flag=True)
 @click.option("--debug", help="Run circuits debugger", is_flag=True)
 @click.option("--dev", help="Run development server", is_flag=True)
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
@@ -462,6 +463,11 @@ def launch(run=True, **args):
     verbosity['global'] = min(args['log'], args['logfileverbosity'])
     verbosity['file'] = args['logfileverbosity'] if args['dolog'] else 100
     set_logfile(args['logfile'])
+
+    if args['livelog'] is True:
+        from hfos import logger
+        logger.live = True
+
     print(args['dev'])
 
     hfoslog("Running with Python", sys.version.replace("\n", ""),
