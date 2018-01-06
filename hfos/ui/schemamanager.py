@@ -41,10 +41,12 @@ from hfos.component import handler
 
 
 class cli_schemata(Event):
+    """Display all registered schemata"""
     pass
 
 
 class cli_form(Event):
+    """Display all registered forms"""
     pass
 
 
@@ -65,7 +67,7 @@ class SchemaManager(ConfigurableComponent):
 
     @handler('cli_schemata')
     def cli_schemata_list(self, *args):
-        """Prints a list of registered schemata"""
+        """Display a list of registered schemata"""
 
         self.log('Registered Schemata:', ",".join(sorted(schemastore.keys())), pretty=True)
         if 'CONFIG' in args:

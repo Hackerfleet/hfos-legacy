@@ -73,7 +73,8 @@ class history(authorizedevent):
 
 # CLI events
 
-class user_list(Event):
+class cli_user_list(Event):
+    """Display current chat users"""
     pass
 
 
@@ -111,11 +112,11 @@ class Host(ConfigurableComponent):
         for userlog in objectmodels['chatlastlog'].find():
             self.lastlogs[userlog.owner] = userlog
 
-        self.fireEvent(cli_register_event('chat_users', user_list))
+        self.fireEvent(cli_register_event('chat_users', cli_user_list))
         self.log("Started")
 
-    @handler("user_list")
-    def user_list(self, *args):
+    @handler("cli_user_list")
+    def cli_user_list(self, *args):
         #self.log('Logged in users:', self.users, pretty=True)
         Row = namedtuple("User", ['Name', 'Attention'])
         rows = []

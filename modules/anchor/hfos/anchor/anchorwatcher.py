@@ -48,6 +48,7 @@ STATE_UUID_ADRIFT = '44c060b0-6002-4a40-9e88-6266918a813a'
 
 
 class cli_trigger_anchorwatch(Event):
+    """Test if the anchorwatch component triggering works"""
     pass
 
 

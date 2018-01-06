@@ -49,6 +49,7 @@ WARNSIZE = 500
 
 
 class cli_subscriptions(Event):
+    """Display a list of all registered subscriptions"""
     pass
 
 

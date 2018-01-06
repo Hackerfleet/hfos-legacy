@@ -115,6 +115,7 @@ class queue_remove(authorizedevent):
 
 
 class cli_test_maptile_Loader(Event):
+    """Test if the maptile cache loader works"""
     pass
 
 

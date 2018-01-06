@@ -43,7 +43,7 @@ from hfos.component import ConfigurableComponent, handler
 from hfos.events.client import send
 from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
     logtailrequest, debugrequest
-from hfos.logger import hfoslog, critical, warn, debug, verbose
+from hfos.logger import hfoslog, critical, error, warn, debug, verbose
 
 try:
     import objgraph
@@ -53,6 +53,34 @@ except ImportError:
     hpy = None
     hfoslog("Debugger couldn't import objgraph and/or guppy.", lvl=warn,
             emitter="DBG")
+
+
+class clicommand(Event):
+    """Event to execute previously registered CLI event hooks"""
+
+    def __init__(self, cmd, cmdargs, *args, **kwargs):
+        super(clicommand, self).__init__(*args, **kwargs)
+        self.cmd = cmd
+        self.args = cmdargs
+
+
+class cli_register_event(Event):
+    """Event to register new command line interface event hooks"""
+
+    def __init__(self, cmd, thing, *args, **kwargs):
+        super(cli_register_event, self).__init__(*args, **kwargs)
+        self.cmd = cmd
+        self.thing = thing
+
+
+class cli_help(Event):
+    """Display this command reference"""
+    pass
+
+
+class cli_errors(Event):
+    """Display errors in the live log"""
+    pass
 
 
 class HFDebugger(ConfigurableComponent):
@@ -85,8 +113,19 @@ class HFDebugger(ConfigurableComponent):
         else:
             self.log("Can't use heapy. guppy package missing?")
 
+        self.fire(cli_register_event('errors', cli_errors))
+
         self.log("Started. Notification users: ",
                  self.config.notificationusers)
+
+    @handler("cli_errors")
+    def cli_errors(self, *args):
+        self.log('All errors since startup:')
+        from hfos.logger import LiveLog
+        for logline in LiveLog:
+            if logline[1] >= error:
+                self.log(logline, pretty=True)
+
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback,
@@ -234,13 +273,22 @@ class CLI(ConfigurableComponent):
     def cli_help(self, *args):
         self.log('Registered CLI hooks:')
         # TODO: Use std_table for a pretty table
-        length = 5
+        command_length = 5
+        object_length = 5
         for hook in self.hooks:
-            length = max(len(hook), length)
+            command_length = max(len(hook), command_length)
+            object_length = max(len(str(self.hooks[hook])), object_length)
+
+        if '-v' not in args:
+            object_length = 0
 
         for hook in self.hooks:
-            self.log('/%s - %s' % (hook.ljust(length),
-                                   self.hooks[hook]))
+            self.log('/%s - %s: %s' % (
+                hook.ljust(command_length),
+                str(self.hooks[hook] if object_length != 0 else "").ljust(object_length),
+                self.hooks[hook].__doc__
+
+            ))
 
     @handler('cli_register_event')
     def register_event(self, event):
@@ -249,25 +297,3 @@ class CLI(ConfigurableComponent):
         self.log('Registering event hook:', event.cmd, event.thing,
                  pretty=True, lvl=debug)
         self.hooks[event.cmd] = event.thing
-
-
-class clicommand(Event):
-    """Event to execute previously registered CLI event hooks"""
-
-    def __init__(self, cmd, cmdargs, *args, **kwargs):
-        super(clicommand, self).__init__(*args, **kwargs)
-        self.cmd = cmd
-        self.args = cmdargs
-
-
-class cli_register_event(Event):
-    """Event to register new command line interface event hooks"""
-
-    def __init__(self, cmd, thing, *args, **kwargs):
-        super(cli_register_event, self).__init__(*args, **kwargs)
-        self.cmd = cmd
-        self.thing = thing
-
-
-class cli_help(Event):
-    pass

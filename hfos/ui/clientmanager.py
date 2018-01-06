@@ -56,26 +56,27 @@ from hfos.tools import std_table
 
 
 class cli_users(Event):
-    """Prints the list of connected users from the clientmanager"""
+    """Display the list of connected users from the clientmanager"""
     pass
 
 
 class cli_clients(Event):
-    """Prints the list of connected clients from the clientmanager"""
+    """Display the list of connected clients from the clientmanager"""
     pass
 
 
 class cli_events(Event):
-    """Prints the list of authorized and anonymous events"""
+    """Display the list of authorized and anonymous events"""
     pass
 
 
 class cli_sources(Event):
-    """Prints the list of authorized and anonymous events"""
+    """Display the list of authorized and anonymous events"""
     pass
 
 
 class cli_who(Event):
+    """Display the list of all users and clients"""
     pass
 
 
@@ -138,7 +139,7 @@ class ClientManager(ConfigurableComponent):
 
     @handler('cli_clients')
     def client_list(self, *args):
-        """Prints a list of connected users"""
+        """Display a list of connected users"""
         if len(self._clients) == 0:
             self.log('No clients connected')
         else:
@@ -146,7 +147,7 @@ class ClientManager(ConfigurableComponent):
 
     @handler('cli_users')
     def users_list(self, *args):
-        """Prints a list of connected users"""
+        """Display a list of connected users"""
         if len(self._users) == 0:
             self.log('No users connected')
         else:
@@ -154,7 +155,7 @@ class ClientManager(ConfigurableComponent):
 
     @handler('cli_sources')
     def sourcess_list(self, *args):
-        """Prints a list of all registered events"""
+        """Display a list of all registered events"""
 
         from pprint import pprint
 
@@ -168,7 +169,7 @@ class ClientManager(ConfigurableComponent):
 
     @handler('cli_events')
     def events_list(self, *args):
-        """Prints a list of all registered events"""
+        """Display a list of all registered events"""
 
         events = {}
         sources = {}
@@ -184,7 +185,7 @@ class ClientManager(ConfigurableComponent):
 
     @handler('cli_who')
     def who(self, *args):
-        """Prints a table of connected users and clients"""
+        """Display a table of connected users and clients"""
         if len(self._users) == 0:
             self.log('No users connected')
             if len(self._clients) == 0:

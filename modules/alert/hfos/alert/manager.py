@@ -77,6 +77,7 @@ class backend_notify(Event):
         self.duration = duration
 
 class cli_show_alerts(Event):
+    """Display current alert status"""
     pass
 
 class Manager(ConfigurableComponent):

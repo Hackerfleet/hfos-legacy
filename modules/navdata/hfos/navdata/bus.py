@@ -140,6 +140,7 @@ class scan_results(Event):
 
 
 class cli_bus_protocols(Event):
+    """Display known bus protocols"""
     pass
 
 
