@@ -16,13 +16,14 @@ class countablescomponent {
             {word: 'Another', size: 5, id: '80311540-5dc7-4dfa-9374-2c75984c7e26'},
             {word: 'Welt!', size: 3, id: 'ce9bef68-e548-4fa4-be1f-27917eb5a00c'}*/
         ];
-        
+
         this.getCountables = function () {
-            self.op.searchItems('countable', '', ['amount']).then(function(result){
+            self.op.search('countable', '', ['amount']).then(function(msg){
+                let countables = msg.data.list;
                 let tags = [];
                 let max = 0;
-                let item=null;
-                for (item of result.data) {
+                let item = null;
+                for (item of countables) {
                     tags.push({name: item.name + '(' + item.amount + ')', size: item.amount, uuid: item.uuid});
                     max = Math.max(max, item.amount);
                 }
@@ -32,7 +33,7 @@ class countablescomponent {
                 }
                 self.words = tags;
             });
-                
+
             //self.scope.$apply();
         };
 

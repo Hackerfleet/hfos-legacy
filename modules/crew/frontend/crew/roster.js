@@ -26,16 +26,18 @@ class Crew {
 
         this.requestusers = function () {
             console.log('[CREW] Login successful - fetching user data');
-            this.op.searchItems('user', '*', ['name', 'description']).then(function (users) {
+            this.op.search('user', '*', ['name', 'description']).then(function (msg) {
+                let users = msg.data.list;
                 console.log("[CREW] Users: ", users);
-                for (let user of users.data) {
+                for (let user of users) {
                     let user_entry = {
                         name: user.name,
                         uuid: user.uuid,
                         dropdown: false
                     };
-                    self.op.searchItems('profile', {owner: user.uuid}, '*').then(function (data) {
-                        let profile = data.data[0];
+                    self.op.search('profile', {owner: user.uuid}, '*').then(function (msg) {
+                        // TODO: Why is this a search? Should probably be a 'get'.
+                        let profile = msg.data.list[0];
                         console.log('[CREW] Profile:', profile);
                         if (typeof profile !== 'undefined') {
                             user_entry.fullname = profile.userdata.name + ' ' + profile.userdata.familyname;

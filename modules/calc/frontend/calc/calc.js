@@ -43,45 +43,46 @@ class CalcCtrl {
         this.notification = notification;
         this.socket = socket;
         this.user = user;
-    
+
         let self = this;
-    
+
         if (socket.protocol === 'wss') {
             this.protocol = 'https';
         } else {
             this.protocol = 'http';
         }
-        
+
         this.hostname =  this.protocol + '://' + socket.host;
-        
+
         if ((this.protocol === 'https' && socket.port !== 443) || (this.protocol === 'http' && socket.port !== 80)) {
             this.hostname += ':' + socket.port;
         }
-        
+
         this.hostname += '/ethercalc/';
         this.sheetname = 'INITIAL';
-        
+
         this.sheet = {
             'name': 'Initial',
             'notes': 'Select a sheet to the right!'
         };
-        
+
         this.sheets = {};
-    
+
         this.request_sheets = function () {
             console.log('[CALC] Getting sheets');
-            self.op.searchItems('spreadsheet', '*', '*').then(function (msg) {
-                for (let sheet of msg.data) {
+            self.op.search('spreadsheet', '*', '*').then(function (msg) {
+                let sheets = msg.data.list;
+                for (let sheet of sheets) {
                     self.sheets[sheet.uuid] = sheet;
                 }
-                
+
                 console.log('[CALC] Sheets:', self.sheets);
             })
         };
-    
-    
+
+
         this.iframe_url = this.hostname + this.sheetname;
-        
+
         this.rootscope.$on('User.Login', function() {
             self.request_sheets();
         });
@@ -90,7 +91,7 @@ class CalcCtrl {
             this.request_sheets();
         }
     }
-    
+
     select_sheet() {
         console.log('[CALC] Switching sheet to ', this.sheetname, this.sheets[this.sheetname]);
         this.iframe_url = this.hostname + this.sheetname;

@@ -9,7 +9,7 @@
  */
 
 class chatservice {
-    
+
     constructor(user, notification, interval, socket, rootscope, $timeout, objectproxy) {
         this.user = user;
         this.notification = notification;
@@ -17,28 +17,28 @@ class chatservice {
         this.socket = socket;
         this.rootscope = rootscope;
         this.op = objectproxy;
-        
+
         this.messages = {};
         this.channels = {};
         this.unjoined = {};
         this.unread = {};
-        
+
         this.users = {};
-        
+
         this.channel = '';
-        
+
         this.joined_channels = [];
-        
+
         this.blink_state = 0;
         this.blinker = false;
         this.message_count = 0;
-        
+
         let self = this;
-        
+
         this.blink_func = function () {
             let state = self.blink_state;
             console.log('Blinkstate:', state);
-            
+
             if (state === 0) {
                 //if($scope.chat.open === true) {
                 $('#btnchat').css('color', '#0f0');
@@ -55,7 +55,7 @@ class chatservice {
                 self.blink_state = 1;
             }
         };
-        
+
         socket.listen('hfos.chat.host', function (msg) {
             if (msg.action === 'say') {
                 console.log('Incoming chat data: ', msg);
@@ -63,11 +63,11 @@ class chatservice {
                 if (typeof self.messages[chat_message.recipient] === 'undefined') {
                     self.messages[chat_message.recipient] = {};
                 }
-                
+
                 self.messages[chat_message.recipient][chat_message.timestamp] = chat_message;
-                
+
                 self.rootscope.$broadcast('Chat.Message');
-                
+
                 if (self.channel !== chat_message.recipient) {
                     self.blink_state = 1;
                     self.blinker = self.interval(self.blink_func, 1500, 5);
@@ -89,19 +89,19 @@ class chatservice {
                 }
             } else if (msg.action === 'status') {
                 console.log('[CHAT] Got a status update', msg.data);
-                
+
                 self.joined_channels = msg.data.joined;
                 self.unread = msg.data.unread;
-                
+
                 self.message_count = 0;
                 for (let channel of Object.keys(self.unread)) {
                     self.message_count += self.unread[channel];
                 }
-                
+
                 self.sort_channels();
             }
         });
-        
+
         this.sort_channels = function () {
             console.log('[CHAT] Sorting channels', self.channels, self.joined_channels);
             self.joined = {};
@@ -112,7 +112,7 @@ class chatservice {
             }
             for (let uuid of Object.keys(self.channels)) {
                 //console.log('[CHAT] UUID:', uuid);
-                
+
                 let channel = self.channels[uuid];
                 //console.log('[CHAT] Channel:', channel);
                 //console.log('[CHAT] UUID indexof:', self.joined_channels.indexOf(uuid), uuid);
@@ -125,11 +125,12 @@ class chatservice {
                 }
             }
         };
-        
+
         this.request_channels = function () {
             console.log('[CHAT] Getting channels');
-            self.op.searchItems('chatchannel', '*', '*').then(function (msg) {
-                for (let channel of msg.data) {
+            self.op.search('chatchannel', '*', '*').then(function (msg) {
+                let channels = msg.data.list;
+                for (let channel of channels) {
                     self.channels[channel.uuid] = channel;
                 }
                 self.sort_channels();
@@ -140,12 +141,12 @@ class chatservice {
                     } catch (err) {
                         self.change(Object.keys(self.channels)[0]);
                     }
-                    
+
                 }
                 self.get_history();
             })
         };
-        
+
         this.request_profiles = function () {
             console.log('[CHAT] Getting current users ', self.channels[self.channel]);
             let filter = {
@@ -153,11 +154,12 @@ class chatservice {
                 },
                 fields = ['owner', 'name', 'userdata'];
             console.log('[CHAT] Looking for users:', filter);
-            self.op.searchItems('profile', filter, fields).then(function (msg) {
+            self.op.search('profile', filter, fields).then(function (msg) {
                 self.users[self.channel] = {};
-                console.log('[CHAT] Got user profiles:', msg.data);
-                
-                for (let profile of msg.data) {
+                let profiles = msg.data.list;
+                console.log('[CHAT] Got user profiles:', profiles);
+
+                for (let profile of profiles) {
                     console.log('PROFILE:', profile);
                     let user = {
                         profile: profile
@@ -168,7 +170,7 @@ class chatservice {
                         } else if (profile.userdata.name !== null || profile.userdata.familyname !== null) {
                             user.name = profile.userdata.name + ' ' + profile.userdata.familyname;
                         }
-                        
+
                         self.users[self.channel][profile.owner] = user;
                     } else {
                         self.op.get('user', profile.owner).then(function (account) {
@@ -181,23 +183,23 @@ class chatservice {
                 console.log('[CHAT] Userlist populated:', self.users[self.channel]);
             })
         };
-        
+
         this.logonwatcher = this.rootscope.$on('User.Login', function () {
             self.request_channels();
         });
-        
+
         if (this.user.signedin) {
             self.request_channels();
         }
-        
+
         console.log('[CHAT] CHAT LOADED');
     }
-    
+
     join(channel) {
         console.log('[CHAT] Joining channel ', channel);
         this.socket.send({component: 'hfos.chat.host', action: 'join', data: channel});
     }
-    
+
     get_history() {
         console.log('[CHAT] Requesting history');
         let timestamp = new Date() / 1000;
@@ -206,7 +208,7 @@ class chatservice {
             console.log('[CHAT] There are old messages in the list:', this.messages[this.channel]);
             timestamp = Math.min.apply(Math, Object.keys(this.messages[this.channel]));
         }
-        
+
         console.log('[CHAT] Earliest timestamp is:', timestamp);
         let packet = {
             component: 'hfos.chat.host',
@@ -219,7 +221,7 @@ class chatservice {
         };
         this.socket.send(packet);
     }
-    
+
     set_last_channel(channel) {
         if (typeof this.user.profile.settings.chat === 'undefined') {
             this.user.profile.settings.chat = {last_channel: channel};
@@ -228,7 +230,7 @@ class chatservice {
         }
         this.user.saveProfile();
     }
-    
+
     change(channel) {
         if (typeof channel === 'undefined') {
             console.log('[CHAT] Undefined channel:', channel, Object.keys(this.channels), this.channel);
@@ -239,29 +241,29 @@ class chatservice {
             console.log('[CHAT] Tried to join undefined channel');
             return
         }
-        
+
         console.log('[CHAT] Changing to channel ', channel);
         this.channel = channel;
         this.set_last_channel(channel);
-        
+
         let packet = {
             component: 'hfos.chat.host',
             action: 'change',
             data: channel
         };
         this.socket.send(packet);
-    
+
         this.request_profiles();
-    
+
         if (typeof this.messages[channel] === 'undefined' || this.messages[channel].length === 0) {
             this.get_history();
         }
     }
-    
+
     getMessages(channel) {
         return this.messages[channel];
     }
-    
+
     send(msg) {
         console.log('Transmitting chat message:', msg);
         let packet = {
@@ -274,7 +276,7 @@ class chatservice {
         };
         this.socket.send(packet);
     }
-    
+
 }
 
 chatservice.$inject = ['user', 'notification', '$interval', 'socket', '$rootScope', '$timeout', 'objectproxy'];

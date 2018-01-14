@@ -37,14 +37,14 @@ class equipmentcomponent {
         let self = this;
 
         self.equipment = {};
-        
+
         this.getEquipment = function () {
-            self.op.searchItems('equipment', '', '*').then(function(result){
-                for (let item of result.data) {
+            self.op.search('equipment', '', '*').then(function(msg){
+                for (let item of msg.data.list) {
                     self.equipment[item.uuid] = item;
                 }
             });
-    
+
         };
 
         if (this.user.signedin === true) {

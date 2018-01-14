@@ -39,18 +39,18 @@ class AutomatCtrl {
         this.uuid = uuid;
         this.user = user;
         this.socket = socket;
-        
+
         this.debug = true;
-        
+
         let self = this;
-        
+
         this.events = {};
-        
+
         this.tools = {
             'compare_int': 'compare a number',
             'find': 'find a string'
         };
-        
+
         this.emptyrule = function () {
             let rule = {
                 uuid: this.uuid.v4(),
@@ -77,7 +77,7 @@ class AutomatCtrl {
             };
             return rule;
         };
-        
+
         this.emptyCondition = function () {
             let condition = {
                 field: '',
@@ -97,45 +97,46 @@ class AutomatCtrl {
                 self.events = msg.data;
             }
         };
-        
+
         this.requestAutomatData = function () {
             console.log('[AUTOMAT] Logged in - fetching automat data');
             self.socket.send({
                 component: 'hfos.automat.manager',
                 action: 'get_events'
             });
-            self.op.searchItems('automatrule', '', '*').then(function(rules) {
-                console.log('[AUTOMAT] Got the rules:', rules.data);
-                for (let rule of rules.data) self.rules[rule.uuid] = rule
+            self.op.search('automatrule', '', '*').then(function(msg) {
+                let rules = msg.data.list;
+                console.log('[AUTOMAT] Got the rules:', rules);
+                for (let rule of rules) self.rules[rule.uuid] = rule
             })
         };
-        
+
         this.socket.listen('hfos.automat.manager', this.handleAutomatData);
-        
+
         this.scope.$on('User.Login', function () {
             self.requestAutomatData();
         });
-        
+
         this.rulewatch = this.scope.$watch('$ctrl.rules', function(oldVal, newVal) {
             if (newVal !== oldVal) self.modified = true;
         }, true);
-        
+
         if (this.user.signedin === true) {
             this.requestAutomatData();
         }
-        
+
         this.scope.$on('$destroy', function () {
             console.log('[AUTOMAT] Destroying controller');
             self.socket.unlisten('hfos.automat.manager', self.handleAutomatData);
             self.rulewatch();
         })
     }
-    
+
     removeRule(uuid) {
         console.log('[AUTO] Removing rule ', uuid);
         delete this.rules[uuid];
     }
-    
+
     addRule() {
         console.log('[AUTO] Pushing another rule');
         console.log(this.rules);
@@ -144,7 +145,7 @@ class AutomatCtrl {
         this.rules[rule.uuid] = rule;
         console.log(this.rules);
     }
-    
+
     addCondition(uuid) {
         let condition = this.emptyCondition();
         if (this.rules[uuid].input == null) this.rules[uuid].input = {
@@ -156,15 +157,15 @@ class AutomatCtrl {
         };
         this.rules[uuid].input.logic.push(condition);
     }
-    
+
     removeCondition(index, uuid) {
         this.rules[uuid].input.logic.splice(index, 1);
     }
-    
+
     storeRules() {
         for (let uuid of Object.keys(this.rules)) {
             let rule = this.rules[uuid];
-            
+
             delete rule['$$hashKey'];
             for (let logic of rule.input.logic) { delete logic['$$hashKey'] }
 

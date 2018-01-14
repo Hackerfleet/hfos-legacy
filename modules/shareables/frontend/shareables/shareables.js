@@ -15,52 +15,52 @@ class SharingCtrl {
         this.op = ObjectProxy;
         this.notification = notification;
         this.socket = socket;
-        
+
         let now = new Date();
-        
+
         this.shareables = [];
-    
+
         let self = this;
-        this.op.searchItems('shareable').then(function(result) {
-            console.log('[SHAREABLES] Got the list of shareables:', result, self.reservationlookup);
-            self.reservationlookup = result.data;
+        this.op.search('shareable').then(function(msg) {
+            console.log('[SHAREABLES] Got the list of shareables:', msg, self.reservationlookup);
+            self.reservationlookup = msg.data.list;
             self.reservationtarget = self.reservationlookup[0]['uuid'];
         });
-    
+
         this.reservationtarget = '';
-    
+
         this.reserve_from = '';
         this.reserve_to = '';
-              
+
         this.calendarView = 'month';
         this.calendarDate = new Date();
         this.calendarTitle = 'Shareables for %NAME';
-        
+
         let editaction = {
             label: '<i class=\'glyphicon glyphicon-pencil\'></i>',
             onClick: function (args) {
                 notification.add('success', 'Edited', args.calendarEvent, 5);
             }
         };
-        
+
         let delaction = {
             label: '<i class=\'glyphicon glyphicon-remove\'></i>',
             onClick: function (args) {
                 notification.add('success', 'Deleted', args.calendarEvent, 5);
             }
         };
-        
+
         let actions = [editaction, delaction];
-        
+
         const eventcolor = {
             primary: 'lightgray',
             secondary: 'darkgray'
         };
-        
+
         this.events = [];
-        
+
         this.isCellOpen = true;
-        
+
         this.addEvent = function () {
             this.events.push({
                 title: 'New event',
@@ -71,33 +71,33 @@ class SharingCtrl {
                 resizable: true
             });
         };
-        
+
         this.eventClicked = function (event) {
             notification.add('success', 'Clicked', String(event), 10);
         };
-        
-        
+
+
         this.eventTimesChanged = function (event) {
             notification.show('Dropped or resized', event);
         };
-        
+
         this.toggle = function ($event, field, event) {
             $event.preventDefault();
             $event.stopPropagation();
             event[field] = !event[field];
         };
-        
+
         this.getReservations = function() {
             this.op.getList('shareable', {'reservations': {'$elemMatch': {'endtime': {'$gt': now}}}}, ['*']);
         };
-        
+
         this.getReservations();
-        
+
         this.updateTimetable = function () {
             self.events = [];
             for (let shareable of self.shareables) {
                 console.log('Analyzing thing: ', shareable);
-                
+
                 for (let res of shareable.reservations) {
                     console.log('It has a reservation: ', res);
                     let calItem = {
@@ -109,16 +109,16 @@ class SharingCtrl {
                         draggable: true,
                         resizable: true
                     };
-                    
+
                     console.log(res.starttime, new Date(Date.parse(res.starttime)), new Date(res.starttime));
-                    
+
                     self.events.push(calItem);
                 }
             }
-            
+
             console.log('Calendar: ', self.events);
         };
-        
+
         this.scope.$on('OP.ListUpdate', function (ev, schema) {
             if (schema === 'shareable') {
                 self.shareables = self.op.list('shareable');
@@ -144,7 +144,7 @@ class SharingCtrl {
             self.compile(element)(self);
         };
     }
-    
+
     reserve() {
         let reservation = {
             component: 'hfos.shareables.manager',
@@ -155,7 +155,7 @@ class SharingCtrl {
                 to: this.reserve_to
             }
         };
-        
+
         console.log('[SHAREABLE] Requesting reservation:', reservation);
         this.socket.send(reservation);
     }

@@ -32,7 +32,7 @@
  * Controller of the hfosFrontendApp
  */
 class Enrol {
-    
+
     constructor($location, scope, rootscope, notification, user, objectproxy, socket) {
         this.scope = scope;
         this.rootscope = rootscope;
@@ -40,25 +40,25 @@ class Enrol {
         this.user = user;
         this.op = objectproxy;
         this.socket = socket;
-        
+
         this.enrollments = {};
-        
+
         this.invitations = [{
             name: '',
             email: ''
         }];
-        
+
         // TODO: Fix the url. Needs to be constructed from the public/internal hostname, should be switchable in ui
         this.invite_url = $location.protocol() + '://' + $location.host() + ":" + $location.port() + '/#!/invitation/';
-        
+
         this.checked_enrollments = {};
         this.all_enrollments = false;
         this.action_enrollments = '';
-        
+
         this.badge = false;
 
         let self = this;
-        
+
         this.socket.listen('hfos.enrol.manager', function (msg) {
             console.log('[ENROL] Message received');
             if (msg.action === 'invite') {
@@ -96,29 +96,30 @@ class Enrol {
                 console.log('[ENROL] Unkown action:', msg.action, msg.data);
             }
         });
-        
+
         this.get_data = function () {
             console.log('[ENROL] Getting data');
-            this.op.searchItems('enrollment', '*', '*').then(function (msg) {
-                console.log('[ENROL] Data received:', msg);
-                let enrollments = msg.data;
+            this.op.search('enrollment', '*', '*').then(function (msg) {
+                let enrollments = msg.data.list;
+                console.log('[ENROL] Data received:', enrollments);
+
                 for (let enrollment of enrollments) {
                     self.enrollments[enrollment.uuid] = enrollment;
                 }
                 self.update_badge();
             })
         };
-        
+
         if (this.user.signedin) {
             console.log('[ENROL] Already logged in - getting data');
             this.get_data();
         }
-        
+
         this.rootscope.$on('User.Login', function () {
             console.log('[ENROL] Login - getting data');
             self.get_data();
         });
-        
+
         this.rootscope.$on('OP.Deleted', function (event, schema, uuid) {
             console.log('Deletion!', schema, uuid);
             if (schema === 'enrollment') {
@@ -129,17 +130,17 @@ class Enrol {
             }
         })
     }
-    
+
     get_qr(uuid) {
         return this.invite_url + '/' + uuid;
     }
-    
+
     toggle_enrollments() {
         for (let enrollment of Object.keys(this.enrollments)) {
             this.checked_enrollments[enrollment] = this.all_enrollments;
         }
     }
-    
+
     act_enrollments() {
         for (let uuid of Object.keys(this.checked_enrollments)) {
             if (this.checked_enrollments[uuid] === true) {
@@ -151,7 +152,7 @@ class Enrol {
         }
         this.action_enrollments = null;
     }
-    
+
     set_status(uuid, status) {
         console.log('[ENROL] Changing enrollment status', uuid, 'to', status);
         if (status === 'Deleted') {
@@ -168,7 +169,7 @@ class Enrol {
             this.socket.send(request);
         }
     }
-    
+
     invite(method) {
         for (let item of this.invitations) {
             console.log('[ENROL] Inviting user:', item);
@@ -184,15 +185,15 @@ class Enrol {
             this.socket.send(request);
         }
     }
-    
+
     add_invitation_row() {
         this.invitations.push({name: '', email: ''});
     }
-    
+
     remove_invitation_row(index) {
         this.invitations.splice(index, 1);
     }
-    
+
     update_badge() {
         this.badge = Object.keys(this.enrollments).length > 0;
     }
