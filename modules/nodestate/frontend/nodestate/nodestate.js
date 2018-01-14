@@ -135,8 +135,9 @@ class Nodestate {
             console.log('[STATE] Getting list of nodestates');
             self.op.search('nodestate', '*', '*', null, true).then(function(msg) {
                 console.log('[STATE] States list incoming msg:', msg);
+                let states = msg.data.list;
 
-                for (let item of msg.data) {
+                for (let item of states) {
                     console.log('[STATE] Analysing ', item);
                     self.nodestates[item.uuid] = item;
                 }
