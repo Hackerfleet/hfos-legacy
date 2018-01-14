@@ -33,7 +33,7 @@
  */
 
 class CalendarCtrl {
-    constructor($scope, $rootScope, $compile, ObjectProxy, timeout, user, moment, notification, $aside, $modal, socket, $filter) {
+    constructor($scope, $rootScope, $compile, ObjectProxy, timeout, user, moment, notification, $aside, $modal, socket, $filter, state) {
         this.scope = $scope;
         this.rootscope = $rootScope;
         this.compile = $compile;
@@ -44,6 +44,7 @@ class CalendarCtrl {
         this.notification = notification;
         this.socket = socket;
         this.filter = $filter;
+        this.state = state;
 
         this.eventSources = [];
         let now = new Date();
@@ -65,7 +66,7 @@ class CalendarCtrl {
 
         this.active_tab = 0;
 
-        this.default_buttons = 'today month,agendaWeek,twoWeek,agendaDay prev,next hideButton';
+        this.default_buttons = 'today,upcoming month,agendaWeek,twoWeek,agendaDay prev,next hideButton';
 
         this.business_time = {
             dow: [1, 2, 3, 4, 5],
@@ -126,13 +127,14 @@ class CalendarCtrl {
         };
 
         this.getEvents = function (uuid) {
-            this.op.searchItems('event', {calendar: uuid}, '*').then(function (msg) {
-                console.log('[CALENDAR] Events for calendar ', uuid, ':', msg.data);
+            this.op.search('event', {calendar: uuid}, '*').then(function (msg) {
+                console.log('[CALENDAR] Events for calendar ', uuid, ':', msg);
+                let events = msg.data.list;
                 console.log(self.calendars[uuid].color);
 
                 self.popCalendar(uuid);
 
-                for (let event of msg.data) {
+                for (let event of events) {
                     self.pushEvent(event, uuid);
                 }
                 console.log('[CALENDAR] Event list for calendar:', self.calendar_events);
@@ -155,9 +157,10 @@ class CalendarCtrl {
         });
 
         this.getData = function () {
-            this.op.searchItems('calendar', '*', '*').then(function (result) {
-                console.log('[CALENDARS] Got the list of calendars:', result);
-                for (let item of result.data) {
+            this.op.search('calendar', '*', '*').then(function (msg) {;
+                console.log('[CALENDARS] Got the list of calendars:', msg);
+                let calendars = msg.data.list
+                for (let item of calendars) {
                     self.calendars[item.uuid] = item;
                     self.calendars[item.uuid].enabled = false;
                     self.enabled.push(item.uuid);
@@ -266,6 +269,14 @@ class CalendarCtrl {
                 height: 'parent',
                 editable: true,
                 weekNumbers: true,
+                customButtons: {
+                    upcoming: {
+                        text: 'Upcoming',
+                        click: function() {
+                            self.state.go('app.upcoming');
+                        }
+                    }
+                },
                 header: {
                     left: 'title',
                     center: '',
@@ -321,6 +332,6 @@ class CalendarCtrl {
     }
 }
 
-CalendarCtrl.$inject = ['$scope', '$rootScope', '$compile', 'objectproxy', '$timeout', 'user', 'moment', 'notification', '$aside', '$modal', 'socket', '$filter'];
+CalendarCtrl.$inject = ['$scope', '$rootScope', '$compile', 'objectproxy', '$timeout', 'user', 'moment', 'notification', '$aside', '$modal', 'socket', '$filter', '$state'];
 
 export default CalendarCtrl;
