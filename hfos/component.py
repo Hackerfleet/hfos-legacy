@@ -40,21 +40,22 @@ Provisions
 
 
 """
-from circuits.web.controllers import Controller
-
-from hfos.events.system import hfosEvent, authorizedevent, anonymousevent
-from hfos.schemata.component import ComponentBaseConfigSchema
-from hfos.logger import hfoslog, warn, critical, error, verbose
-from circuits import Component
-from jsonschema import ValidationError
-from warmongo import model_factory
-from pymongo.errors import ServerSelectionTimeoutError
-from random import randint
-from uuid import uuid4
-from copy import deepcopy
 import inspect
 import traceback
 from sys import exc_info
+from uuid import uuid4
+
+from circuits import Component
+from circuits.web.controllers import Controller
+from copy import deepcopy
+from jsonschema import ValidationError
+from pymongo.errors import ServerSelectionTimeoutError
+from random import randint
+from warmongo import model_factory
+
+from hfos.events.system import hfosEvent, authorizedevent, anonymousevent
+from hfos.logger import hfoslog, warn, critical, error, verbose
+from hfos.schemata.component import ComponentBaseConfigSchema
 
 
 # from pprint import pprint

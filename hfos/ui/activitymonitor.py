@@ -42,9 +42,7 @@ Should be user configurable and toggleable, at least most parts/bits.
 
 """
 
-from hfos.component import handler
-from hfos.events.client import send
-from hfos.component import ConfigurableComponent
+from hfos.component import handler, ConfigurableComponent
 from hfos.logger import error, verbose  # , warn, critical
 
 

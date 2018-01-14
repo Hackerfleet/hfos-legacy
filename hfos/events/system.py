@@ -34,7 +34,7 @@ Major HFOS event declarations
 
 from circuits.core import Event
 
-from hfos.logger import hfoslog, critical, events
+from hfos.logger import hfoslog, events
 
 # from hfos.ui.clientobjects import User
 

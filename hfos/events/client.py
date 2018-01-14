@@ -26,7 +26,7 @@ HFOS Client events
 """
 
 from circuits import Event
-from hfos.events.system import authorizedevent
+
 from hfos.logger import hfoslog, warn, events
 
 

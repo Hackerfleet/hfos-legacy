@@ -41,26 +41,26 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 
 """
 
-from circuits.web.websockets.dispatcher import WebSocketsDispatcher
-from circuits.web import Server, Static
-# from circuits.web.errors import redirect
-# from circuits.app.daemon import Daemon
-from hfos.component import handler
-from circuits import Event
-
-from hfos.ui.builder import install_frontend
-# from hfos.schemata.component import ComponentBaseConfigSchema
-from hfos.database import initialize  # , schemastore
-from hfos.component import ConfigurableComponent
-from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
-    setup_root, verbosity, hilight, set_logfile
-from hfos.events.system import populate_user_events
+import grp
+import pwd
+import sys
 
 import click
-import sys
-import pwd
-import grp
 import os
+from circuits import Event
+from circuits.web import Server, Static
+from circuits.web.websockets.dispatcher import WebSocketsDispatcher
+
+# from circuits.web.errors import redirect
+# from circuits.app.daemon import Daemon
+from hfos.component import handler, ConfigurableComponent
+# from hfos.schemata.component import ComponentBaseConfigSchema
+from hfos.database import initialize  # , schemastore
+from hfos.events.system import populate_user_events
+from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
+    setup_root, verbosity, set_logfile
+from hfos.ui.builder import install_frontend
+
 
 # from pprint import pprint
 
