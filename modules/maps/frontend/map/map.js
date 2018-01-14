@@ -277,6 +277,28 @@ class mapcomponent {
         this.terminator = null;
         this.grid = null;
 
+        this.tableParams = new NgTableParams({}, {
+          getData: function (params) {
+              // ajax request to api
+              let filter;
+
+              if (typeof filter === 'undefined') {
+                  filter = {'owner': self.user.useruuid};
+              }
+
+              console.log("MAP_TABLE1:", params);
+              let limit = params._params.count;
+              let skip = limit * (params._params.page - 1);
+
+              return self.op.search('geoobject', filter, '*', null, false, limit, skip).then(function(msg) {
+                  let geoobjects = msg.data.list;
+                  params.total(msg.data.size); // recal. page nav controls
+                  console.log("MAP_TABLE2:", params);
+                  self.geoobjects = geoobjects;
+                  return geoobjects;
+              });
+          }
+        });
         this.mapsidebar = $aside({scope: this.scope, template: sidebar, backdrop: false, show: false});
 
         this.showSidebar = function (event) {
@@ -679,7 +701,7 @@ class mapcomponent {
         });
 
         this.scope.$on('OP.ListUpdate', function (event, schema) {
-            if (schema === 'geoobject') {
+            /*if (schema === 'geoobject') {
                 let list = self.op.lists.geoobject;
 
                 console.log('[MAP] Map received a list of geoobjects: ', schema, list);
@@ -695,15 +717,15 @@ class mapcomponent {
                 /*for (let item of list) {
                  console.log('[MAP] Item:', item);
                  console.log('[MAP] Layer:', self.drawnLayer);
-                 
-                 
+
+
                  let myLayer = L.geoJson().addTo(self.map);
                  console.log('[MAP] This strange thing:', myLayer);
                  myLayer.addData(item.geojson);
-                 
+
                  //self.drawnLayer.addData(item.geojson);
-                 }*/
-            }
+                 }
+            }*/
             if (schema === 'layergroup') {
                 self.layergroups = self.op.lists.layergroup;
             }
@@ -749,11 +771,12 @@ class mapcomponent {
         };
 
         this.getGeoobjects = function (filter) {
-            console.log('[MAP] Getting geoobjects');
+            /*console.log('[MAP] Getting geoobjects');
             if (typeof filter === 'undefined') {
                 filter = {'owner': self.user.useruuid};
             }
             self.op.getList('geoobject', filter);
+            */
         };
 
         this.getMapview = function () {
@@ -777,9 +800,10 @@ class mapcomponent {
         };
 
         this.get_other_layers = function () {
-            this.op.searchItems('layer', '', '*').then(function (msg) {
+            this.op.search('layer', '', '*').then(function (msg) {
+                let other_layers = msg.data.list;
                 console.log('[MAP] Got a list of all layers');
-                for (let item of msg.data) {
+                for (let item of other_layers) {
                     // TODO: Kick out layers that are already in mapview?
                     self.other_layers[item.uuid] = item;
                 }
@@ -833,9 +857,9 @@ class mapcomponent {
                             }
                         };
                         console.log('[MAP] Vesselfilter:', filter);
-                        self.op.searchItems('vessel', filter, '*').then(function (msg) {
+                        self.op.search('vessel', filter, '*').then(function (msg) {
                             console.log('[MAP] Returned Vessel data:', msg);
-                            self.vessels = msg.data;
+                            self.vessels = msg.data.list;
                             self.map.UpdateVessels();
                         });
                     }
