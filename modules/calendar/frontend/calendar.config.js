@@ -33,5 +33,9 @@ export function routing($stateProvider) {
             template: '<calendar></calendar>',
             label: 'Calendar',
             icon: icon
+        })
+        .state('app.upcoming', {
+            url: '/upcoming',
+            template: '<upcoming></upcoming>'
         });
 }

@@ -32,8 +32,12 @@ import { routing } from './calendar.config.js';
 import calendarcomponent from './calendar/calendar.js';
 import template from './calendar/calendar.tpl.html';
 
+import upcomingcomponent from './calendar/upcoming.js';
+import upcomingtemplate from './calendar/upcoming.tpl.html';
+
 export default angular
     .module('main.app.calendar', [uirouter, 'mwl.calendar', 'ngAnimate'])
     .config(routing)
     .component('calendar', {controller: calendarcomponent, template: template})
+    .component('upcoming', {controller: upcomingcomponent, template: upcomingtemplate})
     .name;
