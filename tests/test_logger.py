@@ -52,7 +52,7 @@ def test_component_logging():
     logger.live = True
     component.log('FOOBAR')
 
-    lastlog = "".join(logger.LiveLog[-1:])
+    lastlog = logger.LiveLog[-1][-1]
 
     assert "FOOBAR" in lastlog
 
@@ -62,6 +62,6 @@ def test_script_logging():
 
     logger.hfoslog('FOOBAR')
 
-    lastlog = "".join(logger.LiveLog[-1:])
+    lastlog = logger.LiveLog[-1][-1]
 
     assert "FOOBAR" in lastlog

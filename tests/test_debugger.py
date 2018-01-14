@@ -66,6 +66,6 @@ def test_exception_monitor():
 
     sleep(0.2)
 
-    lastlog = "".join(logger.LiveLog[-1:])
+    lastlog = logger.LiveLog[-1][-1]
 
     assert "ERROR" in lastlog
