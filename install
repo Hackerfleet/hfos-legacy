@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Check if root
 if [ "$EUID" -ne 0 ]
 then
