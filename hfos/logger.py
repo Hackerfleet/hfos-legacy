@@ -288,5 +288,5 @@ def hfoslog(*what, **kwargs):
             hfoslog("Too long log line encountered:", output[:20], lvl=warn)
 
     if live:
-        item = [now, lvl, runtime, count, emitter, content]
+        item = [now, lvl, runtime, count, emitter, str(content)]
         LiveLog.append(item)
