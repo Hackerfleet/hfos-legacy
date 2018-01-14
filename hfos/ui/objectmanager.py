@@ -255,8 +255,7 @@ class ObjectManager(ConfigurableComponent):
                     'object': storage_object.serializablefields()
                 }
             }
-
-        self._respond(None, result, event)
+            self._respond(None, result, event)
 
     @handler(search)
     def search(self, event):
@@ -483,7 +482,7 @@ class ObjectManager(ConfigurableComponent):
         except ValidationError:
             self.log("Validation of changed object failed!",
                      storage_object, lvl=warn)
-            self._cancel_by_error('invalid_object')
+            self._cancel_by_error(event, 'invalid_object')
             return
 
         storage_object.save()
@@ -522,6 +521,7 @@ class ObjectManager(ConfigurableComponent):
         try:
             model = objectmodels[schema]
             created = False
+            storage_object = None
 
             if uuid != 'create':
                 storage_object = model.find_one({'uuid': uuid})
@@ -536,7 +536,7 @@ class ObjectManager(ConfigurableComponent):
                     self._cancel_by_permission(schema, data, client)
                     return
 
-            if storage_object:
+            if storage_object is not None:
                 if not self._check_permissions(user, 'write', storage_object):
                     self._cancel_by_permission(schema, data, client)
                     return
