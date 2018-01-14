@@ -1,1 +1,1 @@
-ethercalc@0.20180704.0
+ethercalc@0.20170704.0
