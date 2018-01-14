@@ -287,6 +287,15 @@ class ObjectManager(ConfigurableComponent):
         else:
             fields = []
 
+        skip = data.get('skip', 0)
+        limit = data.get('limit', 0)
+        # page = data.get('page', 0)
+        # count = data.get('count', 0)
+        #
+        # if page > 0 and count > 0:
+        #     skip = page * count
+        #     limit = count
+
         if 'subscribe' in data:
             self.log('Subscription:', data['subscribe'], lvl=verbose)
             do_subscribe = data['subscribe'] is True
@@ -295,8 +304,10 @@ class ObjectManager(ConfigurableComponent):
 
         object_list = []
 
-        if objectmodels[schema].count() > WARNSIZE:
-            self.log("Getting a very long list of items for ", schema,
+        size = objectmodels[schema].count(object_filter)
+
+        if size > WARNSIZE and (limit > 0 and limit > WARNSIZE):
+            self.log("Getting a very long (", size, ") list of items for ", schema,
                      lvl=warn)
 
         opts = schemastore[schema].get('options', {})
@@ -306,7 +317,15 @@ class ObjectManager(ConfigurableComponent):
                  "Fields: ", fields,
                  lvl=verbose)
 
-        for item in objectmodels[schema].find(object_filter):
+        options = {}
+        if skip > 0:
+            options['skip'] = skip
+        if limit > 0:
+            options['limit'] = limit
+
+        cursor = objectmodels[schema].find(object_filter, **options)
+
+        for item in cursor:
             if not self._check_permissions(user, 'list', item):
                 continue
             self.log("Search found item: ", item, lvl=verbose)
@@ -323,8 +342,7 @@ class ObjectManager(ConfigurableComponent):
                         list_item['name'] = item.name
 
                     for field in fields:
-                        if field in item._fields and field not in \
-                            hidden:
+                        if field in item._fields and field not in hidden:
                             list_item[field] = item._fields[field]
                         else:
                             list_item[field] = None
@@ -344,6 +362,7 @@ class ObjectManager(ConfigurableComponent):
             'data': {
                 'schema': schema,
                 'list': object_list,
+                'size': size
             }
         }
 
