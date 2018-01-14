@@ -113,7 +113,10 @@ class HFDebugger(ConfigurableComponent):
         else:
             self.log("Can't use heapy. guppy package missing?")
 
-        self.fire(cli_register_event('errors', cli_errors))
+        try:
+            self.fireEvent(cli_register_event('errors', cli_errors))
+        except AttributeError:
+            pass  # We're running in a test environment and root is not yet running
 
         self.log("Started. Notification users: ",
                  self.config.notificationusers)
@@ -125,7 +128,6 @@ class HFDebugger(ConfigurableComponent):
         for logline in LiveLog:
             if logline[1] >= error:
                 self.log(logline, pretty=True)
-
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback,
