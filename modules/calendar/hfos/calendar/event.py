@@ -58,6 +58,7 @@ EventSchema['properties'].update({
         "description": "Event ending time"
     },
     "summary": {"type": "string"},
+    "details": {"type": "string"},
     "location": {"type": "string"},
     "url": {"type": "string", "format": "uri"},
     "color": {'type': 'string', 'format': 'colorpicker'},
