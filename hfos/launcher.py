@@ -59,6 +59,7 @@ from hfos.database import initialize  # , schemastore
 from hfos.events.system import populate_user_events
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
     setup_root, verbosity, set_logfile
+from hfos.debugger import cli_register_event
 from hfos.ui.builder import install_frontend
 
 
@@ -67,6 +68,9 @@ from hfos.ui.builder import install_frontend
 
 class ready(Event):
     """Event fired to signal completeness of the local node's setup"""
+    pass
+
+class cli_components(Event):
     pass
 
 
@@ -201,6 +205,8 @@ class Core(ConfigurableComponent):
         if not self.insecure:
             self._drop_privileges()
 
+        self.fireEvent(cli_register_event('components', cli_components))
+
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
         """Event hook to trigger a new frontend build"""
@@ -209,6 +215,10 @@ class Core(ConfigurableComponent):
                          install=event.install,
                          development=self.development
                          )
+
+    @handler('cli_components')
+    def cli_components(self, event):
+        self.log('Running components: ', self.runningcomponents.keys())
 
     def _start_server(self, *args):
         """Run the node local server"""
