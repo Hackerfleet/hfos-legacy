@@ -74,7 +74,13 @@ class cli_register_event(Event):
 
 
 class cli_help(Event):
-    """Display this command reference"""
+    """Display this command reference
+
+    Additional arguments:
+        -v      Add detailed information about hook events in list
+
+        command Show complete documentation of a hook command
+    """
     pass
 
 
@@ -273,24 +279,28 @@ class CLI(ConfigurableComponent):
 
     @handler('cli_help')
     def cli_help(self, *args):
-        self.log('Registered CLI hooks:')
-        # TODO: Use std_table for a pretty table
-        command_length = 5
-        object_length = 5
-        for hook in self.hooks:
-            command_length = max(len(hook), command_length)
-            object_length = max(len(str(self.hooks[hook])), object_length)
+        if len(args) == 0 or args[0].startswith('-'):
+            self.log('Registered CLI hooks:')
+            # TODO: Use std_table for a pretty table
+            command_length = 5
+            object_length = 5
+            for hook in self.hooks:
+                command_length = max(len(hook), command_length)
+                object_length = max(len(str(self.hooks[hook])), object_length)
 
-        if '-v' not in args:
-            object_length = 0
+            if '-v' not in args:
+                object_length = 0
 
-        for hook in self.hooks:
-            self.log('/%s - %s: %s' % (
-                hook.ljust(command_length),
-                str(self.hooks[hook] if object_length != 0 else "").ljust(object_length),
-                self.hooks[hook].__doc__
+            for hook in self.hooks:
+                self.log('/%s - %s: %s' % (
+                    hook.ljust(command_length),
+                    str(self.hooks[hook] if object_length != 0 else "").ljust(object_length),
+                    str(self.hooks[hook].__doc__).split('\n', 1)[0]
 
-            ))
+                ))
+        else:
+            self.log('Help for command', args[0], ':')
+            self.log(self.hooks[args[0]].__doc__)
 
     @handler('cli_register_event')
     def register_event(self, event):
