@@ -171,6 +171,14 @@ Assets
 
 -  Fabulous icons by iconmonstr.com and Hackerfleet contributors
 
+Support
+-------
+
+-  `c-base e.V. <https://c-base.org>`__ our home base, the spacestation below Berlin Mitte
+-  `Github <https://github.com>`__ for hosting our code
+-  `Travis.CI <https://travis-ci.org>`__ for continuous integration services
+-  `BrowserStack <https://browserstack.com>`__ for cross device testing capabilities
+
 License
 =======
 
