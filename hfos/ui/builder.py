@@ -52,13 +52,13 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
                 if os.path.exists(dst_file):
                     if hardlink:
                         hfoslog('Removing frontend link:', dst_file,
-                                emitter='MANAGE', lvl=verbose)
+                                emitter='BUILDER', lvl=verbose)
                         os.remove(dst_file)
                     else:
                         hfoslog('Overwriting frontend file:', dst_file,
-                                emitter='MANAGE', lvl=verbose)
+                                emitter='BUILDER', lvl=verbose)
 
-                hfoslog('Hardlinking ', src_file, dst_dir, emitter='MANAGE',
+                hfoslog('Hardlinking ', src_file, dst_dir, emitter='BUILDER',
                         lvl=verbose)
 
                 if hardlink:
@@ -69,13 +69,13 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
                 hfoslog(
                     " No permission to remove/create target %s for "
                     "frontend:" % ('link' if hardlink else 'copy'),
-                    dst_dir, e, emitter='MANAGE', lvl=error)
+                    dst_dir, e, emitter='BUILDER', lvl=error)
             except Exception as e:
                 hfoslog("Error during", 'link' if hardlink else 'copy',
-                        "creation:", type(e), e, emitter='MANAGE',
+                        "creation:", type(e), e, emitter='BUILDER',
                         lvl=error)
 
-            hfoslog('Done linking', root_dst_dir, emitter='MANAGE',
+            hfoslog('Done linking', root_dst_dir, emitter='BUILDER',
                     lvl=verbose)
 
 
@@ -84,7 +84,7 @@ def install_frontend(forcereload=False, forcerebuild=False,
                      forcecopy=True, install=True, development=False):
     """Builds and installs the frontend"""
 
-    hfoslog("Updating frontend components", emitter='MANAGE')
+    hfoslog("Updating frontend components", emitter='BUILDER')
     components = {}
     loadable_components = {}
     # TODO: Fix this up, it is probably not a sane way to get at the real root
@@ -99,14 +99,14 @@ def install_frontend(forcereload=False, forcerebuild=False,
         cmdline = ["npm", "install"]
 
         hfoslog("Running", cmdline, lvl=verbose,
-                emitter='MANAGE')
+                emitter='BUILDER')
         npminstall = Popen(cmdline, cwd=frontendroot)
         out, err = npminstall.communicate()
 
         npminstall.wait()
 
         hfoslog("Frontend dependency installing done: ", out,
-                err, lvl=debug, emitter='MANAGE')
+                err, lvl=debug, emitter='BUILDER')
 
     if True:  # try:
         from pkg_resources import iter_entry_points
@@ -127,10 +127,10 @@ def install_frontend(forcereload=False, forcerebuild=False,
                     hfoslog("Entry point: ", entry_point,
                             name,
                             entry_point.resolve().__module__, lvl=debug,
-                            emitter='MANAGE')
+                            emitter='BUILDER')
                     component_name = entry_point.resolve().__module__.split('.')[1]
 
-                    hfoslog("Loaded: ", loaded, lvl=verbose, emitter='MANAGE')
+                    hfoslog("Loaded: ", loaded, lvl=verbose, emitter='BUILDER')
                     comp = {
                         'location': location,
                         'version': str(entry_point.dist.parsed_version),
@@ -139,35 +139,35 @@ def install_frontend(forcereload=False, forcerebuild=False,
 
                     frontend = os.path.join(location, 'frontend')
                     hfoslog("Checking component frontend parts: ",
-                            frontend, lvl=verbose, emitter='MANAGE')
+                            frontend, lvl=verbose, emitter='BUILDER')
                     if os.path.isdir(
                             frontend) and frontend != frontendroot:
                         comp['frontend'] = frontend
                     else:
                         hfoslog("Component without frontend "
                                 "directory:", comp, lvl=debug,
-                                emitter='MANAGE')
+                                emitter='BUILDER')
 
                     components[component_name] = comp
                     loadable_components[component_name] = loaded
 
                     hfoslog("Loaded component:", comp, lvl=verbose,
-                            emitter='MANAGE')
+                            emitter='BUILDER')
 
                 except Exception as e:
                     hfoslog("Could not inspect entrypoint: ", e,
                             type(e), entry_point, iterator, lvl=error,
-                            exc=True, emitter='MANAGE')
+                            exc=True, emitter='BUILDER')
 
     # except Exception as e:
-    #    hfoslog("Error: ", e, type(e), lvl=error, exc=True, emitter='MANAGE')
+    #    hfoslog("Error: ", e, type(e), lvl=error, exc=True, emitter='BUILDER')
     #    return
 
     hfoslog('COMPONENTS AFTER LOOKUP:', components.keys(), lvl=hilight)
 
     def _update_frontends(install=True):
         hfoslog("Checking unique frontend locations: ",
-                loadable_components, lvl=debug, emitter='MANAGE')
+                loadable_components, lvl=debug, emitter='BUILDER')
 
         importlines = []
         modules = []
@@ -185,30 +185,30 @@ def install_frontend(forcereload=False, forcerebuild=False,
 
                     if os.path.exists(reqfile):
                         hfoslog("Installing package dependencies", lvl=debug,
-                                emitter='MANAGE')
+                                emitter='BUILDER')
                         with open(reqfile, 'r') as f:
                             cmdline = ["npm", "install"]
                             for line in f.readlines():
                                 cmdline.append(line.replace("\n", ""))
 
                             hfoslog("Running", cmdline, lvl=verbose,
-                                    emitter='MANAGE')
+                                    emitter='BUILDER')
                             npminstall = Popen(cmdline, cwd=frontendroot)
                             out, err = npminstall.communicate()
 
                             npminstall.wait()
 
                             hfoslog("Frontend installing done: ", out,
-                                    err, lvl=debug, emitter='MANAGE')
+                                    err, lvl=debug, emitter='BUILDER')
 
                 # if target in ('/', '/boot', '/usr', '/home', '/root',
                 # '/var'):
                 #    hfoslog("Unsafe frontend deletion target path, "
                 #            "NOT proceeding! ", target, lvl=critical,
-                #            emitter='MANAGE')
+                #            emitter='BUILDER')
 
                 hfoslog("Copying:", origin, target, lvl=debug,
-                        emitter='MANAGE')
+                        emitter='BUILDER')
 
                 copytree(origin, target)
 
@@ -223,7 +223,7 @@ def install_frontend(forcereload=False, forcerebuild=False,
                         modules.append(modulename)
             else:
                 hfoslog("Module without frontend:", name, component,
-                        lvl=debug, emitter='MANAGE')
+                        lvl=debug, emitter='BUILDER')
 
         with open(os.path.join(frontendroot, 'src', 'main.tpl.js'),
                   "r") as f:
@@ -232,7 +232,7 @@ def install_frontend(forcereload=False, forcerebuild=False,
         parts = main.split("/* COMPONENT SECTION */")
         if len(parts) != 3:
             hfoslog("Frontend loader seems damaged! Please check!",
-                    lvl=critical, emitter='MANAGE')
+                    lvl=critical, emitter='BUILDER')
             return
 
         try:
@@ -246,36 +246,36 @@ def install_frontend(forcereload=False, forcerebuild=False,
                 f.write(parts[2])
         except Exception as e:
             hfoslog("Error during frontend package info writing. Check "
-                    "permissions! ", e, lvl=error, emitter='MANAGE')
+                    "permissions! ", e, lvl=error, emitter='BUILDER')
 
     def _rebuild_frontend():
-        hfoslog("Starting frontend build.", lvl=warn, emitter='MANAGE')
+        hfoslog("Starting frontend build.", lvl=warn, emitter='BUILDER')
         npmbuild = Popen(["npm", "run", "build"], cwd=frontendroot)
         out, err = npmbuild.communicate()
         try:
             npmbuild.wait()
         except Exception as e:
             hfoslog("Error during frontend build", e, type(e),
-                    exc=True, lvl=error, emitter='MANAGE')
+                    exc=True, lvl=error, emitter='BUILDER')
             return
 
-        hfoslog("Frontend build done: ", out, err, lvl=debug, emitter='MANAGE')
+        hfoslog("Frontend build done: ", out, err, lvl=debug, emitter='BUILDER')
         copytree(os.path.join(frontendroot, 'build'),
                  frontendtarget, hardlink=False)
         copytree(os.path.join(frontendroot, 'assets'),
                  os.path.join(frontendtarget, 'assets'),
                  hardlink=False)
 
-        hfoslog("Frontend deployed", emitter='MANAGE')
+        hfoslog("Frontend deployed", emitter='BUILDER')
 
     hfoslog("Checking component frontend bits in ", frontendroot,
-            lvl=verbose, emitter='MANAGE')
+            lvl=verbose, emitter='BUILDER')
 
     _update_frontends(install=install)
     if forcerebuild:
         _rebuild_frontend()
 
-    hfoslog("Done: Install Frontend", emitter='MANAGE')
+    hfoslog("Done: Install Frontend", emitter='BUILDER')
 
     # We have to find a way to detect if we need to rebuild (and
     # possibly wipe) stuff. This maybe the case, when a frontend
