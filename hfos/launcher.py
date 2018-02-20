@@ -70,7 +70,12 @@ class ready(Event):
     """Event fired to signal completeness of the local node's setup"""
     pass
 
+
 class cli_components(Event):
+    pass
+
+
+class cli_drop_privileges(Event):
     pass
 
 
@@ -160,7 +165,7 @@ class Core(ConfigurableComponent):
 
         self.component_blacklist = [  # 'camera',
             # 'logger',
-            #'debugger',
+            # 'debugger',
             'recorder',
             'playback',
             # 'sensors',
@@ -206,6 +211,7 @@ class Core(ConfigurableComponent):
             self._drop_privileges()
 
         self.fireEvent(cli_register_event('components', cli_components))
+        self.fireEvent(cli_register_event('drop_privileges', cli_drop_privileges))
 
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
@@ -216,9 +222,14 @@ class Core(ConfigurableComponent):
                          development=self.development
                          )
 
+    @handler('cli_drop_privileges')
+    def cli_drop_privileges(self, event):
+        self.log('Trying to drop privileges')
+        self._drop_privileges()
+
     @handler('cli_components')
     def cli_components(self, event):
-        self.log('Running components: ', self.runningcomponents.keys())
+        self.log('Running components: ', sorted(self.runningcomponents.keys()))
 
     def _start_server(self, *args):
         """Run the node local server"""
@@ -344,7 +355,7 @@ class Core(ConfigurableComponent):
     def _start_frontend(self, restart=False):
         self.log(self.config, self.config.frontendenabled, lvl=verbose)
         if self.config.frontendenabled and not self.frontendrunning \
-                or restart:
+            or restart:
             self.log("Restarting webfrontend services on",
                      self.config.frontendtarget)
 
@@ -415,7 +426,7 @@ def construct_graph(args):
         dbg.IgnoreEvents.extend(["read", "_read", "write", "_write",
                                  "stream_success", "stream_complete",
                                  "serial_packet", "raw_data",
-                                 "stream", "navdatapush",  "referenceframe",
+                                 "stream", "navdatapush", "referenceframe",
                                  "updateposition", "updatesubscriptions",
                                  "generatevesseldata", "generatenavdata", "sensordata",
                                  "reset_flood_offenders", "reset_flood_counters",
