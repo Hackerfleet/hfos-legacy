@@ -39,23 +39,24 @@ Schemastore and Objectstore builder functions.
 """
 
 import sys
-import warmongo
-import pymongo
+from pprint import pprint
+
 import operator
+import pymongo
+import warmongo
+from circuits import Timer, Event
 from os import statvfs, walk
 from os.path import join, getsize
+from pkg_resources import iter_entry_points, DistributionNotFound
 # noinspection PyUnresolvedReferences
 from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
-from circuits import Timer, Event
-from hfos.logger import hfoslog, debug, warn, error, critical, verbose
+
 from hfos.component import ConfigurableComponent, handler
 from jsonschema import ValidationError  # NOQA
-from pkg_resources import iter_entry_points, DistributionNotFound
-from pprint import pprint
-from random import choice
+from hfos.logger import hfoslog, debug, warn, error, critical, verbose
 
-try:  # 2/3
+try:  # PY 2/3
     PermissionError
 except NameError:
     PermissionError = IOError  # NOQA
@@ -65,16 +66,8 @@ configschemastore = {}
 objectmodels = None
 collections = None
 
-
-def makesalt():
-    """Generates a cryptographically sane salt of 16 alphanumeric characters"""
-
-    alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    chars = []
-    for i in range(16):
-        chars.append(choice(alphabet))
-
-    return "".join(chars)
+# Necessary against import de-optimizations
+ValidationError = ValidationError
 
 
 def clear_all():
