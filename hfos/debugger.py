@@ -291,10 +291,10 @@ class CLI(ConfigurableComponent):
             if '-v' not in args:
                 object_length = 0
 
-            for hook in self.hooks:
-                self.log('/%s - %s: %s' % (
+            for hook in sorted(self.hooks):
+                self.log('/%s %s: %s' % (
                     hook.ljust(command_length),
-                    str(self.hooks[hook] if object_length != 0 else "").ljust(object_length),
+                    (" - " + str(self.hooks[hook]) if object_length != 0 else "").ljust(object_length),
                     str(self.hooks[hook].__doc__).split('\n', 1)[0]
 
                 ))
