@@ -32,15 +32,19 @@ Authentication (and later Authorization) system
 """
 
 from uuid import uuid4
-from hashlib import sha512
 from circuits import Event
 
 from hfos.component import handler
 from hfos.events.client import authentication, send
-from hfos.events.system import authorizedevent
 from hfos.component import ConfigurableComponent
-from hfos.database import objectmodels, makesalt
-from hfos.logger import error, warn, debug, verbose
+from hfos.database import objectmodels
+from hfos.logger import error, warn, debug
+from hfos.tools import std_hash, std_salt
+
+
+class AuthenticationError(Exception):
+    """Something unspecified went wrong during authentication"""
+    pass
 
 
 class add_auth_hook(Event):
@@ -50,10 +54,6 @@ class add_auth_hook(Event):
         super(add_auth_hook, self).__init__(*args, **kwargs)
         self.authenticator_name = authenticator_name
         self.event = event
-
-
-class changepassword(authorizedevent):
-    pass
 
 
 class Authenticator(ConfigurableComponent):
@@ -77,27 +77,12 @@ class Authenticator(ConfigurableComponent):
             self.log('Using active systemconfig salt')
         except (KeyError, AttributeError):
             self.log('No active system configuration found!', lvl=error)
-            salt = makesalt().encode('ascii')
+            salt = std_salt().encode('ascii')
 
         self.salt = salt
         self.systemconfig = systemconfig
 
         self.auth_hooks = {}
-
-    def makehash(self, word):
-        """Generates a cryptographically strong (sha512) hash with this nodes
-        salt added."""
-
-        try:
-            password = word.encode('utf-8')
-        except UnicodeDecodeError:
-            password = word
-
-        hashword = sha512(password)
-        hashword.update(self.salt)
-        hex_hash = hashword.hexdigest()
-
-        return hex_hash
 
     @handler("add_auth_hook")
     def add_auth_hook(self, event):
@@ -106,238 +91,176 @@ class Authenticator(ConfigurableComponent):
         self.log('Adding authentication hook for', event.authenticator_name)
         self.auth_hooks[event.authenticator_name] = event.event
 
+    def _fail(self, event, message='Invalid credentials'):
+        """Sends a failure message to the requesting client"""
+
+        notification = {
+            'component': 'auth',
+            'action': 'fail',
+            'data': message
+        }
+        self.fireEvent(send(event.clientuuid, notification, sendtype='client'))
+
+    def _login(self, event, user_account, user_profile, client_config):
+        """Send login notification to client"""
+
+        user_account.passhash = ""
+        self.fireEvent(
+            authentication(user_account.name, (
+                user_account, user_profile, client_config),
+                           event.clientuuid,
+                           user_account.uuid,
+                           event.sock),
+            "auth")
+
     @handler("authenticationrequest", channel="auth")
     def authenticationrequest(self, event):
         """Handles authentication requests from clients
         :param event: AuthenticationRequest with user's credentials
         """
 
+        if event.auto:
+            self._handle_autologin(event)
+        else:
+            self._handle_login(event)
+
+    def _handle_autologin(self, event):
+        """Automatic logins for client configurations that allow it"""
+
+        self.log("Verifying automatic login request")
+
+        # TODO: Check for a common secret
+
+        # noinspection PyBroadException
+        try:
+            client_config = objectmodels['client'].find_one({
+                'uuid': event.requestedclientuuid
+            })
+        except Exception:
+            client_config = None
+
+        if client_config is None or client_config.autologin is False:
+            self.log("Autologin failed:", event.requestedclientuuid,
+                     lvl=error)
+            self._fail(event)
+            return
+
+        try:
+            user_account = objectmodels['user'].find_one({
+                'uuid': client_config.owner
+            })
+            if user_account is None:
+                raise AuthenticationError
+            self.log("Autologin for", user_account.name, lvl=debug)
+        except Exception as e:
+            self.log("No user object due to error: ", e, type(e),
+                     lvl=error)
+            self._fail(event)
+            return
+
+        user_profile = self._get_profile(user_account)
+
+        self._login(event, user_account, user_profile, client_config)
+
+        self.log("Autologin successful!", lvl=warn)
+
+    def _handle_login(self, event):
+        """Manual password based login"""
+
         # TODO: Refactor to simplify
 
-        if event.auto:
-            self.log("Verifying automatic login request")
+        self.log("Auth request for ", event.username, 'client:',
+                 event.clientuuid)
 
-            # noinspection PyBroadException
-            try:
-                clientconfig = objectmodels['client'].find_one({
-                    'uuid': event.requestedclientuuid
-                })
-            except Exception:
-                clientconfig = None
+        # TODO: Define the requirements for secure passwords etc.
 
-            if clientconfig is None or clientconfig.autologin is False:
-                self.log("Autologin failed:", event.requestedclientuuid,
-                         lvl=error)
-                return
+        if (len(event.username) < 3) or (len(event.password) < 3):
+            self.log("Illegal username or password received, login cancelled", lvl=warn)
+            self._fail(event, 'Password or username too short')
+            return
 
-            if clientconfig.autologin is True:
+        client_config = None
 
-                try:
-                    useraccount = objectmodels['user'].find_one({
-                        'uuid': clientconfig.owner
-                    })
-                    self.log("Autologin for", useraccount.name, lvl=debug)
-                except Exception as e:
-                    self.log("No user object due to error: ", e, type(e),
-                             lvl=error)
-
-                try:
-                    userprofile = objectmodels['profile'].find_one({
-                        'owner': str(useraccount.uuid)
-                    })
-                    self.log("Profile: ", userprofile,
-                             useraccount.uuid, lvl=debug)
-
-                    useraccount.passhash = ""
-                    self.fireEvent(
-                        authentication(useraccount.name, (
-                            useraccount, userprofile, clientconfig),
-                                       event.clientuuid,
-                                       useraccount.uuid,
-                                       event.sock),
-                        "auth")
-                    self.log("Autologin successful!", lvl=warn)
-                except Exception as e:
-                    self.log("No profile due to error: ", e, type(e),
-                             lvl=error)
-        else:
-            self.log("Auth request for ", event.username,
-                     event.clientuuid)
-
-            # TODO: Move registration to its own part
-            # TODO: Define the requirements for secure passwords etc.
-
-            if (len(event.username) < 3) or (len(event.password) < 3):
-                self.log("Illegal username or password received, "
-                         "login cancelled",
-                         lvl=warn)
-                notification = {
-                    'component': 'auth',
-                    'action': 'fail',
-                    'data': 'Password or username too short'
-                }
-                self.fireEvent(send(event.clientuuid, notification,
-                                    sendtype='client'))
-                return
-
-            useraccount = None
-            clientconfig = None
-            userprofile = None
-
-            # TODO: Notify problems here back to the frontend
-            try:
-                useraccount = objectmodels['user'].find_one({
-                    'name': event.username
-                })
-                self.log("Account: %s" % useraccount._fields, lvl=debug)
-            except Exception as e:
-                self.log("No userobject due to error: ", e, type(e),
-                         lvl=error)
-
-            if useraccount:
-                self.log("User found.", lvl=debug)
-
-                if self.makehash(event.password) == useraccount.passhash:
-                    self.log("Passhash matches, checking client and profile.",
-                             lvl=debug)
-
-                    requestedclientuuid = event.requestedclientuuid
-
-                    # Client requests to get an existing client
-                    # configuration or has none
-
-                    clientconfig = objectmodels['client'].find_one({
-                        'uuid': requestedclientuuid
-                    })
-
-                    if clientconfig:
-                        self.log("Checking client configuration permissions",
-                                 lvl=debug)
-                        if clientconfig.owner != useraccount.uuid:
-                            clientconfig = None
-                            self.log("Unauthorized client configuration "
-                                     "requested",
-                                     lvl=warn)
-                    else:
-                        self.log("Unknown client configuration requested: ",
-                                 requestedclientuuid, event.__dict__,
-                                 lvl=warn)
-
-                    if not clientconfig:
-                        self.log("Creating new default client configuration")
-                        # Either no configuration was found or requested
-                        # -> Create a new client configuration
-                        uuid = event.clientuuid if event.clientuuid is not \
-                                                   None else str(uuid4())
-
-                        clientconfig = objectmodels['client']({'uuid': uuid})
-
-                        clientconfig.name = "New client"
-                        clientconfig.description = "New client configuration" \
-                                                   " from " + useraccount.name
-                        clientconfig.owner = useraccount.uuid
-                        # TODO: Make sure the profile is only saved if the
-                        # client could store it, too
-                        clientconfig.save()
-
-                    try:
-                        userprofile = objectmodels['profile'].find_one(
-                            {'owner': str(useraccount.uuid)})
-                        self.log("Profile: ", userprofile,
-                                 useraccount.uuid, lvl=debug)
-
-                        useraccount.passhash = ""
-                        self.fireEvent(
-                            authentication(useraccount.name, (
-                                useraccount, userprofile, clientconfig),
-                                           event.clientuuid,
-                                           useraccount.uuid,
-                                           event.sock),
-                            "auth")
-                    except Exception as e:
-                        self.log("No profile due to error: ", e, type(e),
-                                 lvl=error)
-                else:
-                    self.log("Password was wrong!", lvl=warn)
-
-                    self.fireEvent(send(event.clientuuid, {
-                        'component': 'auth',
-                        'action': 'fail',
-                        'data': 'N/A'
-                    }, sendtype="client"), "hfosweb")
-
-                self.log("Done with Login request", lvl=debug)
-
-            elif self.systemconfig.allowregister:
-                self.createuser(event)
-            else:
-                self.log('User not found and system configuration does not '
-                         'allow new users to be created', lvl=warn)
-
-    def createuser(self, event):
-        """Create a new user and all initial data"""
-
-        self.log("Creating user")
         try:
-            newuser = objectmodels['user']({
-                'name': event.username,
-                'passhash': self.makehash(event.password),
-                'uuid': str(uuid4())
+            user_account = objectmodels['user'].find_one({
+                'name': event.username
             })
-            newuser.save()
+            # self.log("Account: %s" % user_account._fields, lvl=debug)
+            if user_account is None:
+                raise AuthenticationError
         except Exception as e:
-            self.log("Problem creating new user: ", type(e), e,
+            self.log("No userobject due to error: ", e, type(e),
                      lvl=error)
+            self._fail(event)
             return
-        try:
-            newprofile = objectmodels['profile']({
-                'uuid': str(uuid4()),
-                'owner': newuser.uuid
+
+        self.log("User found.", lvl=debug)
+
+        if not std_hash(event.password, self.salt) == user_account.passhash:
+            self.log("Password was wrong!", lvl=warn)
+            self._fail(event)
+            return
+
+        self.log("Passhash matches, checking client and profile.",
+                 lvl=debug)
+
+        requested_client_uuid = event.requestedclientuuid
+        if requested_client_uuid is not None:
+            client_config = objectmodels['client'].find_one({
+                'uuid': requested_client_uuid
             })
-            self.log("New profile uuid: ", newprofile.uuid,
-                     lvl=verbose)
 
-            # TODO: Fix this - yuk!
-            newprofile.components = {
-                'enabled': ["dashboard", "map", "weather", "settings"]}
-            newprofile.save()
-        except Exception as e:
-            self.log("Problem creating new profile: ", type(e),
-                     e, lvl=error)
-            return
+        if client_config:
+            self.log("Checking client configuration permissions",
+                     lvl=debug)
+            # TODO: Shareable client configurations?
+            if client_config.owner != user_account.uuid:
+                client_config = None
+                self.log("Unauthorized client configuration "
+                         "requested",
+                         lvl=warn)
+        else:
+            self.log("Unknown client configuration requested: ",
+                     requested_client_uuid, event.__dict__,
+                     lvl=warn)
+
+        if not client_config:
+            self.log("Creating new default client configuration")
+            # Either no configuration was found or not requested
+            # -> Create a new client configuration
+            uuid = event.clientuuid if event.clientuuid is not None else str(uuid4())
+
+            client_config = objectmodels['client']({'uuid': uuid})
+
+            client_config.name = "New client"
+            # TODO: Replace with std_human_uid(kind='places'):
+            client_config.description = "New client configuration from " + user_account.name
+            client_config.owner = user_account.uuid
+
+            # TODO: Get client configuration storage done right, this one is too simple
+            client_config.save()
+
+        user_profile = self._get_profile(user_account)
+
+        self._login(event, user_account, user_profile, client_config)
+        self.log("Done with Login request", lvl=debug)
+
+    def _get_profile(self, user_account):
+        """Retrieves a user's profile"""
 
         try:
-            # TODO: Clone or reference systemwide default configuration
-            uuid = event.clientuuid if event.clientuuid is not None else str(
-                uuid4())
-
-            newclientconfig = objectmodels['client']({'uuid': uuid})
-            newclientconfig.name = "New client"
-            newclientconfig.description = "New client configuration " \
-                                          "from " + newuser.name
-            newclientconfig.owner = newuser.uuid
-            newclientconfig.save()
+            # TODO: Load active profile, not just any
+            user_profile = objectmodels['profile'].find_one(
+                {'owner': str(user_account.uuid)})
+            self.log("Profile: ", user_profile,
+                     user_account.uuid, lvl=debug)
         except Exception as e:
-            self.log("Problem creating new clientconfig: ",
-                     type(e), e, lvl=error)
-            return
+            self.log("No profile due to error: ", e, type(e),
+                     lvl=error)
+            user_profile = objectmodels['profile']({'owner': user_account.uuid})
+            user_profile.save()
 
-        try:
-            self.fireEvent(
-                authentication(newuser.name,
-                               (newuser, newprofile, newclientconfig),
-                               event.clientuuid,
-                               newuser.uuid,
-                               event.sock),
-                "auth")
-            self.fireEvent(send(event.clientuuid, {
-                'component': 'auth',
-                'action': 'new',
-                'data': 'registration successful'
-            }, sendtype="client"), "hfosweb")
-        except Exception as e:
-            self.log("Error during new account confirmation transmission",
-                     e, lvl=error)
+        return user_profile
 
     def profilerequest(self, event):
         """Handles client profile actions
@@ -368,28 +291,3 @@ class Authenticator(ConfigurableComponent):
         except Exception as e:
             self.log("General profile request error %s %s" % (type(e), e),
                      lvl=error)
-
-    @handler(changepassword)
-    def changepassword(self, event):
-        old = event.data['old']
-        new = event.data['new']
-        uuid = event.user.uuid
-
-        user = objectmodels['user'].find_one({'uuid': uuid})
-        if self.makehash(old) == user.passhash:
-            user.passhash = self.makehash(new)
-            packet = {
-                'component': 'hfos.ui.auth',
-                'action': 'changepassword',
-                'data': True
-            }
-            self.fireEvent(send(event.client.uuid, packet))
-            self.log('Successfully changed password for user', uuid)
-        else:
-            packet = {
-                'component': 'hfos.ui.auth',
-                'action': 'changepassword',
-                'data': False
-            }
-            self.fireEvent(send(event.client.uuid, packet))
-            self.log('User tried to change password without supplying old one', lvl=warn)
