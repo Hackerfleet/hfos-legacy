@@ -20,6 +20,9 @@
 
 from __future__ import print_function
 
+import bson
+import deepdiff
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -143,12 +146,18 @@ See hfos_manage --help for more details.
 """
 
 
+def log(*args, **kwargs):
+    """Log as Emitter:MANAGE"""
+
+    hfoslog(*args, **kwargs, emitter='MANAGE')
+
+
 def _check_root():
     """Check if current user has root permissions"""
 
     if os.geteuid() != 0:
-        hfoslog("Need root access to install. Use sudo!", lvl=error)
-        hfoslog("If you installed into a virtual environment, don't forget to "
+        log("Need root access to install. Use sudo!", lvl=error)
+        log("If you installed into a virtual environment, don't forget to "
                 "specify the interpreter binary for sudo, e.g:\n"
                 "$ sudo /home/user/.virtualenv/hfos/bin/python3 "
                 "hfos_manage.py")
@@ -181,7 +190,7 @@ def _construct_module(info, target):
 
     for path in paths:
         real_path = os.path.abspath(os.path.join(target, path.format(**info)))
-        hfoslog("Making directory '%s'" % real_path, emitter='MANAGE')
+        log("Making directory '%s'" % real_path)
         os.makedirs(real_path)
 
     # pprint(info)
@@ -189,7 +198,7 @@ def _construct_module(info, target):
         source = os.path.join('dev/templates', item[0])
         filename = os.path.abspath(
             os.path.join(target, item[1].format(**info)))
-        hfoslog("Creating file from template '%s'" % filename,
+        log("Creating file from template '%s'" % filename,
                 emitter='MANAGE')
         write_template_file(source, filename, info)
 
@@ -220,6 +229,18 @@ def _ask(question, default=None, data_type=str, show_hint=False):
 
         if len(data) == 0:
             data = default
+    elif data_type == int:
+        if show_hint:
+            msg = "%s? [%s] (%s): " % (question, default, data_type)
+        else:
+            msg = question
+
+        data = input(msg)
+
+        if len(data) == 0:
+            data = int(default)
+        else:
+            data = int(data)
 
     return data
 
@@ -266,7 +287,7 @@ def _get_credentials(username=None, password=None, dbhost=None):
     try:
         salt = system_config.salt.encode('ascii')
     except (KeyError, AttributeError):
-        hfoslog('No systemconfig or it is without a salt! '
+        log('No systemconfig or it is without a salt! '
                 'Reinstall the system provisioning with'
                 'hfos_manage.py install provisions -p system')
         sys.exit(3)
@@ -307,24 +328,27 @@ def _get_system_configuration():
              cls=DYMGroup)
 @click.option('--quiet', default=False, help="Suppress all output",
               is_flag=True)
+@click.option('--verbose', '-v', default=False, help="Give verbose output",
+              is_flag=True)
 @click.option('--log', default=20, help='Log level to use (0-100)',
               metavar='<number>')
 @click.pass_context
-def cli(ctx, quiet, log):
+def cli(ctx, quiet, verbose, log):
     """HFOS Management Utility
 
     This utility supports various operations to manage HFOS installations.
     Most of the commands are grouped. To obtain more information about the
-    groups' available sub commands, try
+    groups' available sub commands/groups, try
 
-    hfos_manage group --help
+    hfos_manage group
 
-    To display details of a command, try
+    To display details of a command or its sub groups, try
 
-    hfos_manage group command --help
+    hfos_manage group [subgroup] [command] --help
     """
 
     ctx.obj['quiet'] = quiet
+    ctx.obj['verbose'] = verbose
     verbosity['console'] = log
     verbosity['global'] = log
 
@@ -341,7 +365,7 @@ def create_module(clear, target):
         if clear:
             shutil.rmtree(target)
         else:
-            hfoslog("Target exists! Use --clear to delete it first.",
+            log("Target exists! Use --clear to delete it first.",
                     emitter='MANAGE')
             sys.exit(2)
 
@@ -355,7 +379,7 @@ def create_module(clear, target):
 
     augmented_info = _augment_info(info)
 
-    hfoslog("Constructing module %(plugin_name)s" % info, emitter='MANAGE')
+    log("Constructing module %(plugin_name)s" % info)
     _construct_module(augmented_info, target)
 
 
@@ -393,7 +417,7 @@ def clear(schema):
         client = pymongo.MongoClient(host="localhost", port=27017)
         db = client["hfos"]
 
-        hfoslog("Clearing collection for", schema, lvl=warn,
+        log("Clearing collection for", schema, lvl=warn,
                 emitter='MANAGE')
         db.drop_collection(schema)
 
@@ -443,20 +467,20 @@ def delete(ctx, componentname):
     col = ctx.obj['col']
 
     if col.count({'name': componentname}) > 1:
-        hfoslog('More than one component configuration of this name! Try '
+        log('More than one component configuration of this name! Try '
                 'one of the uuids as argument. Get a list with "config '
-                'list"', emitter='MANAGE')
+                'list"')
         return
 
-    hfoslog('Deleting component configuration', componentname,
+    log('Deleting component configuration', componentname,
             emitter='MANAGE')
     config = col.find_one({'name': componentname})
     if config is None:
-        hfoslog('Component configuration not found:', componentname,
+        log('Component configuration not found:', componentname,
                 emitter='MANAGE')
         return
     config.delete()
-    hfoslog('Done', emitter='MANAGE')
+    log('Done')
 
 
 @config.command(short_help="Show component configurations")
@@ -468,15 +492,15 @@ def show(ctx, component):
     col = ctx.obj['col']
 
     if col.count({'name': component}) > 1:
-        hfoslog('More than one component configuration of this name! Try '
+        log('More than one component configuration of this name! Try '
                 'one of the uuids as argument. Get a list with "config '
-                'list"', emitter='MANAGE')
+                'list"')
         return
 
     if component is None:
         configurations = col.find()
         for configuration in configurations:
-            hfoslog("%-10s : %s" % (configuration.name,
+            log("%-10s : %s" % (configuration.name,
                                     configuration.uuid),
                     emitter='MANAGE')
     else:
@@ -518,9 +542,9 @@ def create_user(ctx):
     # pprint(user._fields)
     try:
         new_user.save()
-        hfoslog("Done!", emitter='MANAGE')
+        log("Done!")
     except DuplicateKeyError:
-        hfoslog('User already exists', lvl=warn, emitter='MANAGE')
+        log('User already exists', lvl=warn)
 
 
 @user.command(short_help='delete user')
@@ -537,7 +561,7 @@ def delete_user(ctx):
     # TODO: Verify back if not --yes in args
     del_user.delete()
 
-    hfoslog("Done!", emitter='MANAGE')
+    log("Done!")
 
 
 @user.command(short_help="change user's password")
@@ -553,13 +577,13 @@ def change_password(ctx):
         'name': username
     })
     if change_user is None:
-        hfoslog('No such user', lvl=warn, emitter='MANAGE')
+        log('No such user', lvl=warn)
         return
 
     change_user.passhash = passhash
     change_user.save()
 
-    hfoslog("Done!", emitter='MANAGE')
+    log("Done!")
 
 
 @user.command(short_help='list local users')
@@ -580,7 +604,7 @@ def list_users(ctx, search, uuid):
             if uuid:
                 print(found_user.uuid)
 
-    hfoslog("Done!", emitter='MANAGE')
+    log("Done!")
 
 
 @user.command(short_help='add role to user')
@@ -590,10 +614,10 @@ def add_role(ctx, role):
     """Grant a role to an existing user"""
 
     if role is None:
-        hfoslog('Specify the role with --role')
+        log('Specify the role with --role')
         return
     if ctx.obj['username'] is None:
-        hfoslog('Specify the username with --username')
+        log('Specify the username with --username')
         return
 
     change_user = ctx.obj['db'].objectmodels['user'].find_one({
@@ -602,9 +626,9 @@ def add_role(ctx, role):
     if role not in change_user.roles:
         change_user.roles.append(role)
         change_user.save()
-        hfoslog('Done', emitter='MANAGE')
+        log('Done')
     else:
-        hfoslog('User already has that role!', lvl=warn, emitter='MANAGE')
+        log('User already has that role!', lvl=warn)
 
 
 @click.group(cls=DYMGroup)
@@ -629,7 +653,7 @@ def install_docs(clear):
 
     def make_docs():
         """Trigger a Sphinx make command to build the documentation."""
-        hfoslog("Generating HTML documentation", emitter='MANAGE')
+        log("Generating HTML documentation")
 
         try:
             build = Popen(
@@ -642,14 +666,14 @@ def install_docs(clear):
 
             build.wait()
         except Exception as e:
-            hfoslog("Problem during documentation building: ", e, type(e),
-                    exc=True, emitter='MANAGE', lvl=error)
+            log("Problem during documentation building: ", e, type(e),
+                    exc=True, lvl=error)
             return False
         return True
 
     make_docs()
 
-    hfoslog("Updating documentation directory", emitter='MANAGE')
+    log("Updating documentation directory")
 
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
@@ -657,20 +681,20 @@ def install_docs(clear):
     source = 'docs/build/html'
 
     if not os.path.exists(os.path.join(os.path.curdir, source)):
-        hfoslog(
+        log(
             "Documentation not existing yet. Run python setup.py "
-            "build_sphinx first.", emitter='MANAGE', lvl=error)
+            "build_sphinx first.", lvl=error)
         return
 
     if os.path.exists(target):
-        hfoslog("Path already exists: " + target, emitter='MANAGE')
+        log("Path already exists: " + target)
         if clear:
-            hfoslog("Cleaning up " + target, emitter='MANAGE', lvl=warn)
+            log("Cleaning up " + target, lvl=warn)
             shutil.rmtree(target)
 
-    hfoslog("Copying docs to " + target, emitter='MANAGE')
+    log("Copying docs to " + target)
     copy_tree(source, target)
-    hfoslog("Done: Install Docs")
+    log("Done: Install Docs")
 
 
 @install.command(short_help='create structures in /var')
@@ -688,7 +712,7 @@ def install_var(clear, clear_all):
     """Install required folders in /var"""
     _check_root()
 
-    hfoslog("Checking frontend library and cache directories",
+    log("Checking frontend library and cache directories",
             emitter='MANAGE')
 
     uid = pwd.getpwnam("hfos").pw_uid
@@ -708,13 +732,13 @@ def install_var(clear, clear_all):
 
     for item in target_paths:
         if os.path.exists(item):
-            hfoslog("Path already exists: " + item, emitter='MANAGE')
+            log("Path already exists: " + item)
             if clear_all or (clear and 'cache' in item):
-                hfoslog("Cleaning up: " + item, emitter='MANAGE', lvl=warn)
+                log("Cleaning up: " + item, lvl=warn)
                 shutil.rmtree(item)
 
         if not os.path.exists(item):
-            hfoslog("Creating path: " + item, emitter='MANAGE')
+            log("Creating path: " + item)
             os.mkdir(item)
             os.chown(item, uid, gid)
 
@@ -722,7 +746,7 @@ def install_var(clear, clear_all):
     open(logfile, "a").close()
     os.chown(logfile, uid, gid)
 
-    hfoslog("Done: Install Var")
+    log("Done: Install Var")
 
 
 @install.command(short_help='install provisions')
@@ -733,17 +757,19 @@ def install_var(clear, clear_all):
               is_flag=True, default=False)
 @click.option('--overwrite', '-o', help='Overwrites existing provisions',
               is_flag=True, default=False)
+@click.option('--list-provisions', '-l', help='Only list available provisions',
+              is_flag=True, default=False)
 @click.option('--dbhost', default=db_host_default, help=db_host_help)
-def provisions(provision, dbhost, clear, overwrite):
+def provisions(provision, dbhost, clear, overwrite, list_provisions):
     """Install default provisioning data"""
 
-    install_provisions(provision, dbhost, clear, overwrite)
+    install_provisions(provision, dbhost, clear, overwrite, list_provisions)
 
 
-def install_provisions(provision, dbhost, clear=False, overwrite=False):
+def install_provisions(provision, dbhost, clear=False, overwrite=False, list_provisions=False):
     """Install default provisioning data"""
 
-    hfoslog("Installing HFOS default provisions", emitter='MANAGE')
+    log("Installing HFOS default provisions")
 
     # from hfos.logger import verbosity, events
     # verbosity['console'] = verbosity['global'] = events
@@ -752,21 +778,24 @@ def install_provisions(provision, dbhost, clear=False, overwrite=False):
 
     from hfos.provisions import provisionstore
 
+    if list_provisions:
+        exit()
+
     if provision is not None:
         if provision in provisionstore:
-            hfoslog("Provisioning ", provision, emitter="MANAGE")
+            log("Provisioning ", provision)
             provisionstore[provision](overwrite=overwrite, clear=clear)
         else:
-            hfoslog("Unknown provision: ", provision, "\nValid provisions are",
+            log("Unknown provision: ", provision, "\nValid provisions are",
                     list(provisionstore.keys()),
                     lvl=error,
                     emitter='MANAGE')
     else:
         for provision_name in provisionstore:
-            hfoslog("Provisioning " + provision_name, emitter='MANAGE')
+            log("Provisioning " + provision_name)
             provisionstore[provision_name](overwrite=overwrite, clear=clear)
 
-    hfoslog("Done: Install Provisions")
+    log("Done: Install Provisions")
 
 
 @install.command(short_help='install modules')
@@ -794,8 +823,8 @@ def install_modules(wip):
 
             setup.wait()
         except Exception as e:
-            hfoslog("Problem during module installation: ", hfos_module, e,
-                    type(e), exc=True, emitter='MANAGE', lvl=error)
+            log("Problem during module installation: ", hfos_module, e,
+                    type(e), exc=True, lvl=error)
             return False
         return True
 
@@ -852,16 +881,16 @@ def install_modules(wip):
     failed = []
 
     for installable in installables:
-        hfoslog('Installing module ', installable, emitter='MANAGE')
+        log('Installing module ', installable)
         if install_module(installable):
             success.append(installable)
         else:
             failed.append(installable)
 
-    hfoslog('Installed modules: ', success, emitter='MANAGE')
+    log('Installed modules: ', success)
     if len(failed) > 0:
-        hfoslog('Failed modules: ', failed, emitter='MANAGE')
-    hfoslog('Done: Install Modules', emitter='MANAGE')
+        log('Failed modules: ', failed)
+    log('Done: Install Modules')
 
 
 @install.command(short_help='install systemd service')
@@ -876,7 +905,7 @@ def install_service():
 
     _check_root()
 
-    hfoslog("Installing systemd service", emitter="MANAGE")
+    log("Installing systemd service")
 
     launcher = os.path.realpath(__file__).replace('manage', 'launcher')
     executable = sys.executable + " " + launcher
@@ -897,14 +926,21 @@ def install_service():
         'hfos.service'
     ])
 
-    hfoslog("Done: Install Service", emitter="MANAGE")
+    log('Launching service')
+
+    Popen([
+        'systemctl',
+        'start'
+        'hfos.service'
+    ])
+
+    log("Done: Install Service")
 
 
 @install.command(short_help='install nginx configuration')
-@click.option(
-    '--hostname', default=None,
-    help='Override public Hostname (FQDN) Default from active system '
-         'configuration')
+@click.option('--hostname', default=None,
+              help='Override public Hostname (FQDN) Default from active system '
+                   'configuration')
 def nginx(hostname):
     """Install nginx configuration"""
 
@@ -916,15 +952,15 @@ def install_nginx(hostname=None):
 
     _check_root()
 
-    hfoslog("Installing nginx configuration", emitter="MANAGE")
+    log("Installing nginx configuration")
 
     if hostname is None:
         try:
             config = _get_system_configuration()
             hostname = config.hostname
         except Exception as e:
-            hfoslog('Exception:', e, type(e), exc=True, lvl=error)
-            hfoslog("""Could not determine public fully qualified hostname!
+            log('Exception:', e, type(e), exc=True, lvl=error)
+            log("""Could not determine public fully qualified hostname!
 Check systemconfig (see db view and db modify commands) or specify
 manually with --hostname host.domain.tld
 
@@ -945,28 +981,28 @@ Using 'localhost' for now""", lvl=warn)
         configuration_file = '/etc/nginx/nginx.conf'
         configuration_link = None
     else:
-        hfoslog('Unsure how to proceed, you may need to specify your '
-                'distribution', lvl=error, emitter='MANAGE')
+        log('Unsure how to proceed, you may need to specify your '
+                'distribution', lvl=error)
         return
 
-    hfoslog('Writing nginx HFOS site definition')
+    log('Writing nginx HFOS site definition')
     write_template_file(os.path.join('dev/templates', nginx_configuration),
                         configuration_file,
                         definitions)
 
     if configuration_link is not None:
-        hfoslog('Enabling nginx HFOS site (symlink)')
+        log('Enabling nginx HFOS site (symlink)')
         if not os.path.exists(configuration_link):
             os.symlink(configuration_file, configuration_link)
 
-    hfoslog('Restarting nginx service')
+    log('Restarting nginx service')
     Popen([
         'systemctl',
         'restart',
         'nginx.service'
     ])
 
-    hfoslog("Done: Install nginx configuration", emitter="MANAGE")
+    log("Done: Install nginx configuration")
 
 
 @install.command(short_help='create system user')
@@ -974,7 +1010,7 @@ def system_user():
     """Install HFOS system user (hfos.hfos)"""
 
     install_system_user()
-    hfoslog("Done: Setup User")
+    log("Done: Setup User")
 
 
 def install_system_user():
@@ -1011,7 +1047,7 @@ def install_cert(selfsigned):
     _check_root()
 
     if selfsigned:
-        hfoslog('Generating self signed (insecure) certificate/key '
+        log('Generating self signed (insecure) certificate/key '
                 'combination')
 
         try:
@@ -1019,7 +1055,7 @@ def install_cert(selfsigned):
         except FileExistsError:
             pass
         except PermissionError:
-            hfoslog("Need root (e.g. via sudo) to generate ssl certificate")
+            log("Need root (e.g. via sudo) to generate ssl certificate")
             sys.exit(1)
 
         def create_self_signed_cert():
@@ -1036,7 +1072,7 @@ def install_cert(selfsigned):
                                                        certificate)
                     serial = old_cert.get_serial_number() + 1
                 except (crypto.Error, OSError) as e:
-                    hfoslog('Could not read old certificate to increment '
+                    log('Could not read old certificate to increment '
                             'serial:', type(e), e, exc=True, lvl=warn)
                     serial = 1
             else:
@@ -1073,7 +1109,7 @@ def install_cert(selfsigned):
 
         create_self_signed_cert()
 
-        hfoslog('Done: Install Cert')
+        log('Done: Install Cert')
     else:
 
         # # Account private key
@@ -1113,7 +1149,7 @@ def install_cert(selfsigned):
         # cat /tmp/signed.crt intermediate.pem > /path/to/chained.pem
         # service nginx reload
 
-        hfoslog('Not implemented yet. You can build your own certificate and '
+        log('Not implemented yet. You can build your own certificate and '
                 'store it in /etc/ssl/certs/hfos/server-cert.pem - it should '
                 'be a certificate with key, as this is used server side and '
                 'there is no way to enter a separate key.', lvl=error)
@@ -1163,7 +1199,7 @@ def install_all(clear):
     install_service()
     install_nginx()
 
-    hfoslog('Done')
+    log('Done')
 
 
 cli.add_command(install)
@@ -1204,26 +1240,26 @@ def modify(ctx, schema, uuid, filter, field, value):
     elif filter:
         obj = model.find_one(literal_eval(filter))
     else:
-        hfoslog('No object uuid or filter specified.',
-                lvl=error, emitter='manage')
+        log('No object uuid or filter specified.',
+                lvl=error)
 
     if obj is None:
-        hfoslog('No object found',
-                lvl=error, emitter='manage')
+        log('No object found',
+                lvl=error)
         return
 
-    hfoslog('Object found, modifying', lvl=debug, emitter='manage')
+    log('Object found, modifying', lvl=debug)
     try:
         new_value = literal_eval(value)
     except ValueError:
-        hfoslog('Interpreting value as string')
+        log('Interpreting value as string')
         new_value = str(value)
 
     obj._fields[field] = new_value
     obj.validate()
-    hfoslog('Changed object validated', lvl=debug, emitter='manage')
+    log('Changed object validated', lvl=debug)
     obj.save()
-    hfoslog('Done')
+    log('Done')
 
 
 @db.command(short_help='view objects')
@@ -1237,7 +1273,7 @@ def view(ctx, schema, uuid, filter):
     database = ctx.obj['db']
 
     if schema is None:
-        hfoslog('No schema given. Read the help', lvl=warn, emitter='manage')
+        log('No schema given. Read the help', lvl=warn)
         return
 
     model = database.objectmodels[schema]
@@ -1264,7 +1300,7 @@ def validate(ctx, schema, all):
 
     if schema is None:
         if all is False:
-            hfoslog('No schema given. Read the help', lvl=warn, emitter='manage')
+            log('No schema given. Read the help', lvl=warn)
             return
         else:
             schemata = database.objectmodels.keys()
@@ -1277,12 +1313,12 @@ def validate(ctx, schema, all):
                 obj.validate()
         except Exception as e:
 
-            hfoslog('Exception while validating:',
+            log('Exception while validating:',
                     schema, e, type(e),
                     '\n\nFix this object and rerun validation!',
                     emitter='MANAGE', lvl=error)
 
-    hfoslog('Done!', emitter='MANAGE')
+    log('Done!')
 
 
 @db.command(short_help='export objects to json')
@@ -1314,7 +1350,7 @@ def export(ctx, schema, uuid, filter, format, filename, pretty, all, omit):
         try:
             f = open(filename, 'w')
         except (IOError, PermissionError) as e:
-            hfoslog('Could not open output file for writing:', e, type(e), lvl=error)
+            log('Could not open output file for writing:', e, type(e), lvl=error)
 
     def output(what, convert=False):
         if convert:
@@ -1334,7 +1370,7 @@ def export(ctx, schema, uuid, filter, format, filename, pretty, all, omit):
 
     if schema is None:
         if all is False:
-            hfoslog('No schema given. Read the help', lvl=warn, emitter='manage')
+            log('No schema given. Read the help', lvl=warn)
             return
         else:
             schemata = database.objectmodels.keys()
@@ -1399,7 +1435,7 @@ def cli_import(ctx, schema, uuid, filter, format, filename, all, dry):
 
     if schema is None:
         if all is False:
-            hfoslog('No schema given. Read the help', lvl=warn, emitter='manage')
+            log('No schema given. Read the help', lvl=warn)
             return
         else:
             schemata = data.keys()
@@ -1429,23 +1465,24 @@ def cli_import(ctx, schema, uuid, filter, format, filename, all, dry):
         total += schema_total
 
         if dry:
-            hfoslog('Would import', schema_total, 'items of', schema_item)
+            log('Would import', schema_total, 'items of', schema_item)
         all_items[schema_item] = items
 
     if dry:
-        hfoslog('Would import', total, 'objects.')
+        log('Would import', total, 'objects.')
     else:
-        hfoslog('Importing', total, 'objects.')
+        log('Importing', total, 'objects.')
         for schema_name, item_list in all_items.items():
-            hfoslog('Importing', len(item_list), 'objects of type', schema_name)
+            log('Importing', len(item_list), 'objects of type', schema_name)
             for item in item_list:
+                item._fields['_id'] = bson.objectid.ObjectId(item._fields['_id'])
                 item.save()
 
 
 @db.command(short_help='find in object model fields')
 @click.option("--search", help="Argument to search for in object model "
                                "fields",
-              default=False, metavar='<text>')
+              default=None, metavar='<text>')
 @click.option("--by-type", help="Find all fields by type",
               default=False, is_flag=True)
 @click.option('--obj', default=None, help="Search in specified object "
@@ -1469,33 +1506,33 @@ def find_field(ctx, search, by_type, obj):
         if not by_type:
             if search in fields:
                 result.append(key)
-                # hfoslog("Found queried fieldname in ", model)
+                # log("Found queried fieldname in ", model)
         else:
             for field in fields:
                 try:
                     if "type" in fields[field]:
-                        # hfoslog(fields[field], field)
+                        # log(fields[field], field)
                         if fields[field]["type"] == search:
                             result.append((key, field))
-                            # hfoslog("Found field", field, "in", model)
+                            # log("Found field", field, "in", model)
                 except KeyError as e:
-                    hfoslog("Field access error:", e, type(e), exc=True,
+                    log("Field access error:", e, type(e), exc=True,
                             lvl=debug)
 
         if 'properties' in fields:
-            # hfoslog('Sub properties checking:', fields['properties'])
+            # log('Sub properties checking:', fields['properties'])
             result.append(find(fields['properties'], search, by_type,
                                result, key=fields['name']))
 
         for field in fields:
             if 'items' in fields[field]:
                 if 'properties' in fields[field]['items']:
-                    # hfoslog('Sub items checking:', fields[field])
+                    # log('Sub items checking:', fields[field])
                     result.append(find(fields[field]['items'], search,
                                        by_type, result, key=field))
                 else:
                     pass
-                    # hfoslog('Items without proper definition!')
+                    # log('Items without proper definition!')
 
         return result
 
@@ -1503,7 +1540,7 @@ def find_field(ctx, search, by_type, obj):
         schema = database.objectmodels[obj]._schema
         result = find(schema, search, by_type, [], key="top")
         if result:
-            # hfoslog(args.object, result)
+            # log(args.object, result)
             print(obj)
             pprint(result)
     else:
@@ -1513,8 +1550,179 @@ def find_field(ctx, search, by_type, obj):
             result = find(schema, search, by_type, [], key="top")
             if result:
                 print(model)
-                # hfoslog(model, result)
-                pprint(result)
+                # log(model, result)
+                print(result)
+
+
+@db.command(short_help='Find illegal _id fields')
+@click.option('--delete', default=False, is_flag=True, help='Delete found duplicates')
+@click.option('--fix', default=False, is_flag=True, help='Tries to fix faulty object ids')
+@click.option('--test', default=False, is_flag=True, help='Test if faulty objects have clones with correct ids')
+@click.option('--schema', default=None, help='Work on specified schema only')
+@click.pass_context
+def illegalcheck(ctx, schema, delete, fix, test):
+    database = ctx.obj['db']
+    verbose = ctx.obj['verbose']
+
+    if delete and fix:
+        log('Delete and fix operations are exclusive.')
+        return
+
+    if schema is None:
+        schemata = database.objectmodels.keys()
+    else:
+        schemata = [schema]
+
+    for thing in schemata:
+        log('Schema:', thing)
+        for item in database.objectmodels[thing].find():
+            if not isinstance(item._fields['_id'], bson.objectid.ObjectId):
+                if not delete or verbose:
+                    log(item.uuid)
+                    if verbose:
+                        log(item._fields, pretty=True)
+                if test:
+                    if database.objectmodels[thing].count({'uuid': item.uuid}) == 1:
+                        log('Only a faulty object exists.')
+                if delete:
+                    item.delete()
+                if fix:
+                    _id = item._fields['_id']
+                    item._fields['_id'] = bson.objectid.ObjectId(_id)
+                    assert isinstance(item._fields['_id'], bson.objectid.ObjectId)
+                    item.save()
+                    database.objectmodels[thing].find_one({'_id': _id}).delete()
+
+
+@db.command(short_help='Find duplicates by UUID')
+@click.option('--delete', default=False, is_flag=True, help='Delete found duplicates')
+@click.option('--merge', default=False, is_flag=True, help='Merge found duplicates')
+@click.option('--schema', default=None, help='Work on specified schema only')
+@click.pass_context
+def dupcheck(ctx, delete, merge, schema):
+    database = ctx.obj['db']
+    verbose = ctx.obj['verbose']
+
+    if schema is None:
+        schemata = database.objectmodels.keys()
+    else:
+        schemata = [schema]
+
+    for thing in schemata:
+        dupes = {}
+        dupe_count = 0
+        count = 0
+
+        for item in database.objectmodels[thing].find():
+            if item.uuid in dupes:
+                dupes[item.uuid].append(item)
+                dupe_count += 1
+            else:
+                dupes[item.uuid] = [item]
+            count += 1
+
+        if len(dupes) > 0:
+            log(dupe_count, 'duplicates of', count, 'items total of type', thing, 'found:')
+            if verbose:
+                log(dupes.keys(), pretty=True)
+
+        if delete:
+            log('Deleting duplicates')
+            for item in dupes:
+                database.objectmodels[thing].find_one({'uuid': item}).delete()
+
+            log('Done for schema', thing)
+        elif merge:
+
+            def merge(a, b, path=None):
+                "merges b into a"
+                if path is None: path = []
+                for key in b:
+                    if key in a:
+                        if isinstance(a[key], dict) and isinstance(b[key], dict):
+                            merge(a[key], b[key], path + [str(key)])
+                        elif a[key] == b[key]:
+                            pass  # same leaf value
+                        else:
+                            log('Conflict at', path, key, ':', a[key], '<->', b[key])
+                            resolve = ''
+                            while resolve not in ('a', 'b'):
+                                resolve = _ask('Choose? (a or b)')
+                            if resolve == 'a':
+                                b[key] = a[key]
+                            else:
+                                a[key] = b[key]
+                    else:
+                        a[key] = b[key]
+                return a
+
+            if verbose:
+                log(dupes, pretty=True)
+            for item in dupes:
+                if len(dupes[item]) == 1:
+                    continue
+                ignore = False
+                while len(dupes[item]) > 1 or ignore is False:
+                    log(len(dupes[item]), 'duplicates found:')
+                    for index, dupe in enumerate(dupes[item]):
+                        log('Candidate #', index, ':')
+                        log(dupe._fields, pretty=True)
+                    request = _ask('(d)iff, (m)erge, (r)emove, (i)gnore, (q)uit?')
+                    if request == 'q':
+                        log('Done')
+                        return
+                    elif request == 'i':
+                        ignore = True
+                        break
+                    elif request == 'r':
+                        delete_request = -2
+                        while delete_request == -2 or -1 > delete_request > len(dupes[item]):
+                            delete_request = _ask('Which one? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
+                                                  data_type=int)
+                        if delete_request == -1:
+                            continue
+                        else:
+                            log('Deleting candidate #', delete_request)
+                            dupes[item][delete_request].delete()
+                            break
+                    elif request in ('d', 'm'):
+                        merge_request_a = -2
+                        merge_request_b = -2
+
+                        while merge_request_a == -2 or -1 > merge_request_a > len(dupes[item]):
+                            merge_request_a = _ask('Merge from? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
+                                                   data_type=int)
+                        if merge_request_a == -1:
+                            continue
+
+                        while merge_request_b == -2 or -1 > merge_request_b > len(dupes[item]):
+                            merge_request_b = _ask('Merge into? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
+                                                   data_type=int)
+                        if merge_request_b == -1:
+                            continue
+
+                        log(deepdiff.DeepDiff(dupes[item][merge_request_a]._fields,
+                                                  dupes[item][merge_request_b]._fields), pretty=True)
+
+                        if request == 'm':
+                            log('Merging candidates', merge_request_a, 'and', merge_request_b)
+
+                            _id = dupes[item][merge_request_b]._fields['_id']
+                            if not isinstance(_id, bson.objectid.ObjectId):
+                                _id = bson.objectid.ObjectId(_id)
+
+                            dupes[item][merge_request_a]._fields['_id'] = _id
+                            merge(dupes[item][merge_request_b]._fields, dupes[item][merge_request_a]._fields)
+                            log('Candidate after merge:', dupes[item][merge_request_b]._fields, pretty=True)
+                            store = ''
+                            while store not in ('n', 'y'):
+                                store = _ask('Store?')
+                            if store == 'y':
+                                dupes[item][merge_request_b].save()
+                                dupes[item][merge_request_a].delete()
+                                break
+
+        log('Done')
 
 
 @cli.command(short_help='Start interactive management shell')
