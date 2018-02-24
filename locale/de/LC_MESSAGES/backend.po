@@ -1,0 +1,40 @@
+# Translations template for hfos.
+# Copyright (C) 2018 ORGANIZATION
+# This file is distributed under the same license as the hfos project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: hfos 1.2.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2018-02-16 21:24+0100\n"
+"PO-Revision-Date: 2018-02-16 21:26+0100\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+"X-Generator: Poedit 1.8.11\n"
+"Last-Translator: Hackerfleet German Translation Team <riot@c-base.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: de\n"
+
+#: modules/enrol/hfos/enrol/manager.py:317
+msgid "You have to supply all required fields."
+msgstr "Sie müssen alle notwendigen Felder ausfüllen."
+
+#: modules/enrol/hfos/enrol/manager.py:320
+msgid "Your mail address cannot be used."
+msgstr "Die angegebene Mail-Adresse kann nicht benutzt werden."
+
+#: modules/enrol/hfos/enrol/manager.py:325
+msgid "Your password is not long enough."
+msgstr "Ihr Passwort ist nicht lang genug."
+
+#: modules/enrol/hfos/enrol/manager.py:330
+msgid "Your username is not long enough."
+msgstr "Ihr Benutzername ist nicht lang genug."
+
+#: modules/enrol/hfos/enrol/manager.py:333
+msgid "The username you supplied is not available."
+msgstr "Der gewählte Benutzername kann nicht verwendet werden."
