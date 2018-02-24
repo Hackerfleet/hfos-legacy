@@ -38,8 +38,6 @@ from hfos.database import objectmodels
 from hfos.logger import verbose, debug, error, warn, critical, events, hilight
 from hfos.events.system import authorizedevent
 from hfos.tools import std_uuid
-from pprint import pprint
-
 from urllib import request
 
 try:
@@ -48,13 +46,36 @@ except ImportError:
     from subprocess32 import Popen  # NOQA
 
 
+class update_guide(authorizedevent):
+    """Triggers an update of specified web guides"""
+    pass
+
+
+class update_all(authorizedevent):
+    """Triggers an update of all web guides"""
+    pass
+
+
 class GuideManager(ConfigurableComponent):
     """
+    Manager for web guides, like skipperguide
     """
+
     channel = "hfosweb"
 
-    configprops = {
-    }
+    configprops = {}
+    configform = [
+        {
+            'type': 'button',
+            'title': 'Update skipperguide-german',
+            'onClick': "$ctrl.formAction('hfos.guides.guide_manager', 'update_guide', 'skipperguide_german')",
+        },
+        {
+            'type': 'button',
+            'title': 'Update all guides',
+            'onClick': "$ctrl.formAction('hfos.guides.guide_manager', 'update_all')",
+        }
+    ]
 
     def __init__(self, *args):
         """
@@ -75,9 +96,11 @@ class GuideManager(ConfigurableComponent):
                 'http://www.skipperguide.de/extension/GoogleEarthExport.php'
         }
 
-        #self._update_guides()
+        # self._update_guides()
 
     def _runcommand(self, command):
+        """Execute external GDAL tools"""
+
         self.log('Executing command: ', command, lvl=hilight)
         try:
             process = Popen(
@@ -93,6 +116,7 @@ class GuideManager(ConfigurableComponent):
         return True
 
     def _translate(self, input_filename, output_filename):
+        """Translate KML file to geojson for import"""
         command = [
             self.translate_binary,
             '-f', 'GeoJSON',
@@ -103,7 +127,15 @@ class GuideManager(ConfigurableComponent):
         result = self._runcommand(command)
         self.log('Result (Translate): ', result, lvl=hilight)
 
+    @handler(update_guide)
+    def update_guide(self, event):
+        """Event handler to update a specified guide"""
+
+        self._update_guide(event.data)
+
     def _update_guide(self, guide, update=False, clear=True):
+        """Update a single specified guide"""
+
         kml_filename = os.path.join(self.cache_path, guide + '.kml')
         geojson_filename = os.path.join(self.cache_path, guide + '.geojson')
 
@@ -146,7 +178,7 @@ class GuideManager(ConfigurableComponent):
 
         if clear:
             for item in objectmodels['geoobject'].find({'layer': layer_uuid}):
-                self.log('Deleting old guide location',lvl=debug)
+                self.log('Deleting old guide location', lvl=debug)
                 item.delete()
 
         locations = []
@@ -162,9 +194,17 @@ class GuideManager(ConfigurableComponent):
             })
             locations.append(location)
 
-        self.log('Bulk inserting guide locations',lvl=debug)
+        self.log('Bulk inserting guide locations', lvl=debug)
         objectmodels['geoobject'].bulk_create(locations)
 
+    @handler(update_all)
+    def update_all(self, event):
+        """Event handler to update all guides"""
+
+        self._update_guides()
+
     def _update_guides(self):
+        """Updates all available guides"""
+
         for guide in self.guides:
             self._update_guide(guide)
