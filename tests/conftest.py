@@ -38,6 +38,7 @@ from warmongo import model_factory
 
 """Basic Test suite bits and pieces"""
 
+
 class TestComponent(ConfigurableComponent):
     """Very basic testing component"""
 
@@ -105,6 +106,7 @@ def call_event(manager, event, *channels):
 
 class WaitEvent(object):
     """Simple component substitute that waits for a specified Event"""
+
     def __init__(self, manager, name, channel=None, timeout=1.0):
         if channel is None:
             channel = getattr(manager, "channel", None)
