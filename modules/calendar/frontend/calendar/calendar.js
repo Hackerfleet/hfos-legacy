@@ -157,9 +157,9 @@ class CalendarCtrl {
         });
 
         this.getData = function () {
-            this.op.search('calendar', '*', '*').then(function (msg) {;
+            this.op.search('calendar', '*', '*').then(function (msg) {
                 console.log('[CALENDARS] Got the list of calendars:', msg);
-                let calendars = msg.data.list
+                let calendars = msg.data.list;
                 for (let item of calendars) {
                     self.calendars[item.uuid] = item;
                     self.calendars[item.uuid].enabled = false;
