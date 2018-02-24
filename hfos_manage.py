@@ -149,7 +149,8 @@ See hfos_manage --help for more details.
 def log(*args, **kwargs):
     """Log as Emitter:MANAGE"""
 
-    hfoslog(*args, **kwargs, emitter='MANAGE')
+    kwargs.update({'emitter': 'MANAGE'})
+    hfoslog(*args, **kwargs)
 
 
 def _check_root():
