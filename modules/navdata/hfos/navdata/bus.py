@@ -198,7 +198,7 @@ class SerialBusManager(ConfigurableComponent):
     configprops = {
         'scanner': {
             'type': 'object',
-            'default': {'baud_rates': baudrates, 'timeout': 5},
+            'default': {'baud_rates': baudrates, 'timeout': 5, 'enabled': False},
             'properties': {
                 'baud_rates': {
                     'type': 'array',
@@ -210,6 +210,10 @@ class SerialBusManager(ConfigurableComponent):
                 'timeout': {
                     'type': 'integer',
                     'default': 5
+                },
+                'enabled': {
+                    'type': 'boolean',
+                    'default': False
                 }
             }
         },
@@ -229,8 +233,7 @@ class SerialBusManager(ConfigurableComponent):
                                        'bus.',
                         'default': 'USB/Serial',
                         # TODO: Find out what causes this to be required (Form
-                        # throws
-                        # undecipherable errors without this)
+                        # throws undecipherable errors without this)
                         # Same problem with the serialfile, below
 
                     },
@@ -248,7 +251,6 @@ class SerialBusManager(ConfigurableComponent):
                     },
                     'serialfile': {
                         'type': 'string',
-                        'enum': ports + [''],
                         'title': 'Serial port device',
                         'description': 'File descriptor to access serial port',
                         'default': '',
@@ -337,13 +339,7 @@ class SerialBusManager(ConfigurableComponent):
     channel = "serial"
 
     def __init__(self, *args, **kwargs):
-        try:
-            super(SerialBusManager, self).__init__('SERIALBUS', *args, **kwargs)
-        except ValidationError:
-            self.log('Error during validation - no serialport available?',
-                     lvl=warn)
-            # TODO: This was meant for catching unavailable serial-devices.
-            # Needs a better way of handling that.
+        super(SerialBusManager, self).__init__('SERIALBUS', *args, **kwargs)
 
         self.log("Started")
 
@@ -361,19 +357,21 @@ class SerialBusManager(ConfigurableComponent):
 
         self.protocols = {}
 
+        self.fireEvent(cli_register_event('bus_protocols', cli_bus_protocols))
+
         if len(self.config.ports) == 0:
-            self.log('No ports configured, scanning for protocols')
-            self.start_scanner()
+            self.log('No ports configured')
+            if self.config.scanner['enabled']:
+                self.log('Scanning for protocols')
+                self.start_scanner()
 
         for connection in self.config.ports:
             self.log('Setting up existing connections')
             if connection['connectiontype'] == 'USB/Serial' and \
-                            connection['serialfile'] == '':
+                    connection['serialfile'] == '':
                 self.log('No serial bus source specified', lvl=warn)
             else:
                 self._setup_connection(connection)
-
-        self.fireEvent(cli_register_event('bus_protocols', cli_bus_protocols))
 
     def cli_bus_protocols(self, *args):
         self.log(self.protocols, pretty=True)
