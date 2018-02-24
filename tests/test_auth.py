@@ -86,26 +86,3 @@ def test_invalid_user_auth():
 
     assert result is None
     assert "No userobject due to error" in str(log)
-
-
-def test_createuser():
-    """Test if auth correctly creates a new user"""
-
-    class createuser_event():
-        """Mock event to request creation of new user"""
-
-        def __init__(self):
-            self.username = 'test_user'
-            self.password = 'test_password'
-            self.clientuuid = std_uuid()
-            self.sock = None
-
-    m.start()
-
-    waiter = pytest.WaitEvent(m, 'authentication', 'auth')
-
-    auth.createuser(createuser_event())
-
-    result = waiter.wait()
-
-    assert type(result) == authentication

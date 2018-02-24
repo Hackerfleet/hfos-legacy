@@ -53,7 +53,10 @@ UserSchema['properties'].update({
     },
     'needs_password_change': {
         'type': 'boolean',
-        'default': True,
+        'default': False,
+    },
+    'mail': {
+        'type': 'string'
     }
 })
 

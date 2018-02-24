@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 from setuptools import setup, find_packages
 
 setup(name="hfos-enrol",
-      version="0.0.1",
+      version="0.0.2",
       description="hfos-enrol",
       author="Hackerfleet Community",
       author_email="riot@c-base.org",
@@ -42,7 +42,7 @@ This software package is a plugin module for HFOS.
       ],
       install_requires=[
           'hfos>=1.2.0',
-          'hfos-navdata>=0.0.1'
+          'captcha>=0.2.4'
       ],
       entry_points="""[hfos.components]
     enrol=hfos.enrol.manager:Manager

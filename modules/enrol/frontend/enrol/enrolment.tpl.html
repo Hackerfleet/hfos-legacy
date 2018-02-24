@@ -1,0 +1,136 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2018 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div class="well" style="padding-top: 5px">
+    <h1>Enrol Account</h1>
+
+    <div class="text-warning" ng-hide="$ctrl.registration_open">
+        <span>Sorry, but enrolling is currently not possible.</span>
+    </div>
+
+    <div ng-show="$ctrl.user.signedin && ($ctrl.registration_open === true)">
+        <span>You're already logged in. Please <a ng-click="$ctrl.logout()">log out</a> to enrol another account.</span>
+    </div>
+
+    <div ng-hide="$ctrl.user.signedin || ($ctrl.registration_open !== true) || ($ctrl.success === true)">
+        <span>Enrol a new account with this form</span>
+
+        <form name="enrolment" class="form-horizontal" novalidate>
+            <div class="form-group" ng-class="{hasError: $ctrl.username.length < 4}">
+                <label for="username" class="col-sm-2 control-label">Username:</label>
+                <div class="col-sm-offset-1 col-sm-2">
+                    <input id="username" name="username" type="text" ng-model="$ctrl.username" class="form-control"
+                           autofocus required/>
+                </div>
+                <div ng-show="enrolment.$submitted || enrolment.username.$touched">
+                    <div class="help-block" ng-show="$ctrl.username.length < 4">Please use at least 4 characters</div>
+                    <div class="help-block" ng-show="enrolment.username.$error.required">Please enter a username
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" ng-class="{hasError: $ctrl.password_new.length < 5}">
+                <label for="password_new" class="col-sm-2 control-label">Password:</label>
+                <div class="col-sm-offset-1 col-sm-2">
+                    <input type="password" name="password_new" ng-model="$ctrl.password_new" class="form-control"
+                           id="password_new" required/>
+                </div>
+                <div ng-show="enrolment.$submitted || enrolment.password_new.$touched">
+                    <div class="help-block" ng-show="enrolment.password_new.$error.required">Please enter a
+                        password
+                    </div>
+                    <div class="help-block" ng-show="$ctrl.password_new.length < 5">Enter at least 5 characters</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirm" class="col-sm-2 control-label">Confirm:</label>
+                <div class="col-sm-offset-1 col-sm-2" ng-class="{hasError: $ctrl.password_new !== $ctrl.password_confirm}">
+                    <input type="password" name="password_confirm" ng-model="$ctrl.password_confirm"
+                           class="form-control"
+                           id="password_confirm"
+                           required/>
+                </div>
+                <div ng-show="enrolment.$submitted || enrolment.password_confirm.$touched">
+                    <div class="help-block"
+                         ng-show="enrolment.password_confirm.$error.required || $ctrl.password_new !== $ctrl.password_confirm">
+                        Enter the same password for confirmation
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="mail" class="col-sm-2 control-label">Mail Address</label>
+                <div class="col-sm-offset-1 col-sm-3">
+                    <input id="mail" name="mail" type="email" ng-model="$ctrl.mail" class="form-control" required>
+                </div>
+                <div ng-show="enrolment.$submitted || enrolment.mail.$touched">
+                    <div class="help-block" ng-show="enrolment.mail.$error.required">E-Mail address is required</div>
+                    <div class="help-block" ng-show="enrolment.mail.$error.email">E-Mail address is not valid</div>
+                </div>
+            </div>
+
+            <div class="form-group" ng-show="$ctrl.tos">
+                <label class="col-sm-2 control-label" for="accept_tos">Accept <a href="{{$ctrl.tos}}">terms of
+                    service</a></label>
+                <div class="col-sm-offset-1 col-sm-2">
+                    <input id="accept_tos" name="accept_tos" type="checkbox" ng-model="$ctrl.accept_tos"/>
+                </div>
+                <div ng-show="enrolment.$submitted || enrolment.accept_tos.$touched">
+                    <div class="help-block" ng-show="!$ctrl.accept_tos">Acceptance of Terms is
+                        required
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="captcha">Are you a conscious being?</label>
+                <div class="col-sm-2 col-sm-offset-1">
+                    <div ng-show="$ctrl.captcha_image !== null">
+                        <img class="captcha" data-ng-src="data:image/png;base64,{{$ctrl.captcha_image}}"
+                             data-err-src="/assets/images/error.png"/>
+                        <a ng-click="$ctrl.get_captcha()">Illegible?</a>
+                    </div>
+                    <span ng-show="$ctrl.captcha_image === null" us-spinner="{color: '#0C5392'}"></span>
+                </div>
+                <div class="col-sm-1">
+                    <input type="text" ng-model="$ctrl.captcha" class="form-control" name="captcha" id="captcha"
+                           required/>
+                </div>
+                <div ng-show="enrolment.$submitted || enrolment.captcha.$touched">
+                    <div class="help-block" ng-show="enrolment.captcha.$error.required">Please type in the characters
+                        you see in the image next to the input
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-offset-4 col-sm-2">
+                    <button type="submit" class="btn btn-lg btn-default pull-right" ng-click="$ctrl.enrol()">Enrol
+                        Account
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

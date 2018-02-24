@@ -27,3 +27,8 @@
 table.user-list tr {
   height: 4em;
 }
+
+.captcha {
+  border-radius: 5px;
+  border-style: 1px solid $color-gray-light;
+}

@@ -51,10 +51,13 @@ EnrollmentSchema['properties'].update({
         'title': 'Enrollment description',
         'description': 'Enrollment description'
     },
+    'password': {'type': 'string', 'title': 'Password',
+                 'description': 'Optional, user pre-assigned password',
+                 'default': ''},
     'method': {
         'type': 'string',
         'enum': [
-            'Invited', 'Registered', 'Manual'
+            'Invited', 'Enrolled', 'Manual'
         ]
     },
     'changes': {

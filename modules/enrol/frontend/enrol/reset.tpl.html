@@ -1,0 +1,52 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2018 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div class="well" style="padding-top: 5px">
+    <h1>Reset account</h1>
+
+    <span>Request a new password with this form</span>
+
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label for="username" class="col-sm-2 control-label">Username:</label>
+            <div class="col-sm-3">
+                <input ng-model="$ctrl.username" class="form-control" id="username" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="email" class="col-sm-2 control-label">Email:</label>
+            <div class="col-sm-3">
+                <input ng-model="$ctrl.email" class="form-control" id="email" />
+            </div>
+        </div>
+        <span class="help-block" ng-show="$ctrl.username.length < 5 && $ctrl.email === ''">Enter your username or email address</span>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-3">
+                <button ng-class="{disabled: $ctrl.username.length < 5 && $ctrl.email === ''}"
+                        class="btn btn-default" ng-click="$ctrl.request_reset()">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>

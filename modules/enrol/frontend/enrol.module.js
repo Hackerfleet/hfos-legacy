@@ -35,9 +35,21 @@ import enroltemplate from './enrol/enrol.tpl.html';
 import invitationcomponent from './enrol/invitation';
 import invitationtemplate from './enrol/invitation.tpl.html';
 
+import passwordcomponent from './enrol/password';
+import passwordtemplate from './enrol/password.tpl.html';
+
+import enrolmentcomponent from './enrol/enrolment';
+import enrolmenttemplate from './enrol/enrolment.tpl.html';
+
+import resetcomponent from './enrol/reset';
+import resettemplate from './enrol/reset.tpl.html';
+
 export default angular
     .module('main.app.enrol', [uirouter])
     .config(routing)
     .component('enrol', {controller: enrolcomponent, template: enroltemplate})
     .component('invitation', {controller: invitationcomponent, template: invitationtemplate})
+    .component('password', {controller: passwordcomponent, template: passwordtemplate})
+    .component('enrolment', {controller: enrolmentcomponent, template: enrolmenttemplate})
+    .component('resetaccount', {controller: resetcomponent, template: resettemplate})
     .name;

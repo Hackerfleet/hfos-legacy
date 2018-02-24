@@ -137,7 +137,7 @@
                             </td>
                             <td>
                                 <button ng-click="$ctrl.set_status(uuid, 'Resend')"
-                                        ng-show="item.status === 'Open' && item.method === 'Invited'"
+                                        ng-show="item.status === 'Open' && item.method !== 'Manual'"
                                         class="btn btn-info btn-sm">Resend email
                                 </button>
 

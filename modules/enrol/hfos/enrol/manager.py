@@ -30,12 +30,18 @@ Module: Enrolmanager
 
 """
 
+from socket import timeout
+from base64 import b64encode
+from time import time
+from captcha.image import ImageCaptcha
+from circuits import Timer, Event
+
 from hfos.component import ConfigurableComponent, handler
 from hfos.events.system import authorizedevent, anonymousevent
 from hfos.events.client import send
 from hfos.database import objectmodels
-from hfos.logger import warn, debug, verbose
-from hfos.tools import std_uuid, std_now
+from hfos.logger import warn, debug, verbose, error
+from hfos.tools import std_uuid, std_now, std_hash, std_salt, _
 from pystache import render
 from email.mime.text import MIMEText
 from smtplib import SMTP
@@ -58,6 +64,22 @@ class accept(anonymousevent):
     pass
 
 
+class changepassword(authorizedevent):
+    pass
+
+
+class enrol(anonymousevent):
+    pass
+
+
+class captcha(anonymousevent):
+    pass
+
+
+class status(anonymousevent):
+    pass
+
+
 class Manager(ConfigurableComponent):
     """
     The Enrol-Manager handles enrollment requests, invitations and user
@@ -66,6 +88,12 @@ class Manager(ConfigurableComponent):
     channel = "hfosweb"
 
     configprops = {
+        'mail_send': {
+            'type': 'boolean',
+            'title': 'Send emails',
+            'description': 'Generally toggle email sending (for Debugging)',
+            'default': True
+        },
         'mail_server': {
             'type': 'string',
             'title': 'Mail server',
@@ -73,25 +101,44 @@ class Manager(ConfigurableComponent):
                            'password resets',
             'default': 'localhost'
         },
-        'registration': {
+        'allow_registration': {
             'type': 'boolean',
             'title': 'Open registration',
             'description': 'Offer registration for new users',
             'default': True
         },
-        'auto_accept': {
+        'auto_accept_invited': {
             'type': 'boolean',
             'title': 'Auto accept invited',
             'description': 'Automatically accept invited users after they '
                            'verify',
             'default': True
         },
+        'auto_accept_enrolled': {
+            'type': 'boolean',
+            'title': 'Auto accept self enrolled',
+            'description': 'Automatically accept users that enrolled themselves after they '
+                           'verify',
+            'default': False
+        },
+        'group_accept_invited': {
+            'type': 'string',
+            'description': 'Group to add invited and accepted users to - use commas to specify more than one',
+            'title': 'Group Invited',
+            'default': 'crew'
+        },
+        'group_accept_enrolled': {
+            'type': 'string',
+            'description': 'Group to add self enrolled and accepted users to - use commas to specify more than one',
+            'title': 'Group Enrolled',
+            'default': 'crew'
+        },
         'mail_from': {
             'type': 'string',
             'title': 'Mail from address',
             'description': 'From mail address to send to new invitees',
             # TODO: Get a better default here:
-            'default': 'enrol@localhost'
+            'default': 'enrol@{{hostname}}'
         },
         'invitation_subject': {
             'type': 'string',
@@ -123,18 +170,179 @@ the friendly robot of {{node_name}}
 
         super(Manager, self).__init__("ENROL", *args, **kwargs)
 
-        # TODO: Get those from Systemconfig:
-        self.node_name = 'HFOS DEFAULT NODENAME'
-        protocol = 'https'
-        hostname = 'localhost:443'
-        self.invitation_url = protocol + '://' + hostname + '/#!/invitation/'
+        self.image_captcha = ImageCaptcha(fonts=['/usr/share/fonts/truetype/freefont/FreeSerif.ttf'])
+
+        self.captchas = {}
 
         self.send_mail = True
 
+        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
+
+        try:
+            salt = systemconfig.salt.encode('ascii')
+            self.log('Using active systemconfig salt')
+        except (KeyError, AttributeError):
+            self.log('No system salt found! Check your configuration. This can happen upon first start.', lvl=error)
+            self.unregister()
+            return
+
+        protocol = "https"
+        hostname = systemconfig.hostname
+
+        self.hostname = hostname
+        self.node_name = systemconfig.name
+        self.invitation_url = protocol + '://' + hostname + '/#!/invitation/'
+        self.salt = salt
+        self.systemconfig = systemconfig
+
         self.log("Started")
+
+    @handler(change)
+    def change(self, event):
+        """A user requests a change to an enrolment"""
+
+        uuid = event.data['uuid']
+        status = event.data['status']
+
+        if status not in ['Open', 'Pending', 'Accepted', 'Denied', 'Resend']:
+            self.log('Erroneous status for enrollment requested!', lvl=warn)
+            return
+
+        self.log('Changing status of an enrollment', uuid, 'to', status)
+
+        enrollment = objectmodels['enrollment'].find_one({'uuid': uuid})
+        if enrollment is not None:
+            self.log('Enrollment found', lvl=debug)
+        else:
+            return
+
+        if status == 'Resend':
+            enrollment.timestamp = std_now()
+            enrollment.save()
+            self._send_invitation(enrollment)
+            reply = {True: 'Resent'}
+        else:
+            enrollment.status = status
+            enrollment.save()
+            reply = {True: enrollment.serializablefields()}
+
+        if status == 'Accepted':
+            self._create_user(enrollment.username, enrollment.password, enrollment.email)
+
+        packet = {
+            'component': 'hfos.enrol.manager',
+            'action': 'change',
+            'data': reply
+        }
+        self.log('packet:', packet, lvl=verbose)
+        self.fireEvent(send(event.client.uuid, packet))
+        self.log('Enrollment changed', lvl=debug)
+
+    @handler(changepassword)
+    def changepassword(self, event):
+        """An enrolled user wants to change their password"""
+
+        old = event.data['old']
+        new = event.data['new']
+        uuid = event.user.uuid
+
+        # TODO: Write email to notify user of password change
+
+        user = objectmodels['user'].find_one({'uuid': uuid})
+        if std_hash(old, self.salt) == user.passhash:
+            user.passhash = std_hash(new, self.salt)
+            packet = {
+                'component': 'hfos.enrol.manager',
+                'action': 'changepassword',
+                'data': True
+            }
+            self.fireEvent(send(event.client.uuid, packet))
+            self.log('Successfully changed password for user', uuid)
+        else:
+            packet = {
+                'component': 'hfos.enrol.manager',
+                'action': 'changepassword',
+                'data': False
+            }
+            self.fireEvent(send(event.client.uuid, packet))
+            self.log('User tried to change password without supplying old one', lvl=warn)
+
+    @handler(invite)
+    def invite(self, event):
+        """A new user has been invited to enrol by a crew member"""
+
+        self.log('Inviting new user to enrol')
+        name = event.data['name']
+        email = event.data['email']
+        method = event.data['method']
+
+        self._invite(name, method, email, event.client.uuid)
+
+    @handler(enrol)
+    def enrol(self, event):
+        """A user tries to self-enrol with the enrolment form"""
+
+        if self.systemconfig.allowregister is False:
+            self.log('Someone tried to register although enrolment is closed.')
+            return
+
+        self.log('Client trying to register a new account:', event, pretty=True)
+        # self.log(event.data, pretty=True)
+
+        uuid = event.client.uuid
+
+        def fail(reason):
+            """Reports failure to the enrol form module"""
+
+            self.log('Enrolment request failed:', reason)
+
+            response = {
+                'component': 'hfos.enrol.manager',
+                'action': 'enrol',
+                'data': (False, reason)
+            }
+            self.fire(send(uuid, response))
+
+        if uuid in self.captchas and event.data.get('captcha', None) == self.captchas[uuid]['text']:
+            self.log('Captcha solved!')
+        else:
+            self.log('Captcha failed!')
+            fail('You did not solve the captcha correctly.')
+            self._generate_captcha(event)
+
+            return
+
+        mail = event.data.get('mail', None)
+        if mail is None:
+            fail(_('You have to supply all required fields.'))
+            return
+        elif objectmodels['user'].count({'mail': mail}) > 0:
+            fail(_('Your mail address cannot be used.'))
+            return
+
+        password = event.data.get('password', None)
+        if password is None or len(password) < 5:
+            fail(_('Your password is not long enough.'))
+            return
+
+        username = event.data.get('username', None)
+        if username is None or len(username) < 4:
+            fail(_('Your username is not long enough.'))
+            return
+        elif objectmodels['user'].count({'name': username}) > 0:
+            fail(_('The username you supplied is not available.'))
+            return
+
+        self.log('Provided data is good to enrol.')
+        if self.config.auto_accept_enrolled:
+            self._create_user(username, password, mail)
+        else:
+            self._invite(username, 'Enrolled', mail, uuid)
 
     @handler(accept)
     def accept(self, event):
+        """A challenge/response for an enrolment has been accepted"""
+
         def fail(uuid):
             self.log('Sending failure feedback to', uuid, lvl=debug)
             fail_msg = {
@@ -155,13 +363,14 @@ the friendly robot of {{node_name}}
                 if enrollment.status == 'Open':
                     self.log('Enrollment is still open', lvl=debug)
                     if enrollment.method in ('Invited', 'Manual') and \
-                            self.config.auto_accept:
+                        self.config.auto_accept_invited:
                         enrollment.status = 'Accepted'
                         data = 'You can now log in to the system and start to use it.'
-                        # TODO: Actually create account
+                        self._create_user(enrollment.name, enrollment.password, enrollment.email, enrollment.method)
+                        # TODO: add account to self.config.group_accept group
                     else:
                         enrollment.status = 'Pending'
-                        data = 'Someone has to confirm your registration ' \
+                        data = 'Someone has to confirm your enrollment ' \
                                'first. Thank you, for your patience.'
                         # TODO: Alert admin users
 
@@ -182,48 +391,56 @@ the friendly robot of {{node_name}}
             self.log('Error during invitation accept handling:', e, type(e),
                      lvl=warn, exc=True)
 
-    @handler(change)
-    def change(self, event):
-        uuid = event.data['uuid']
-        status = event.data['status']
+    @handler(status)
+    def status(self, event):
+        """An anonymous client wants to know if we're open for enrollment"""
 
-        if status not in ['Open', 'Pending', 'Accepted', 'Denied', 'Resend']:
-            self.log('Erroneous status for enrollment requested!', lvl=warn)
-            return
+        self.log('Registration status requested')
 
-        self.log('Changing status of an enrollment', uuid, 'to', status)
-
-        enrollment = objectmodels['enrollment'].find_one({'uuid': uuid})
-        if enrollment is not None:
-            self.log('Enrollment found', lvl=debug)
-        else:
-            return
-
-        if status == 'Resend':
-            enrollment.timestamp = std_now()
-            enrollment.save()
-            self._send_mail(enrollment)
-            reply = {True: 'Resent'}
-        else:
-            enrollment.status = status
-            enrollment.save()
-            reply = {True: enrollment.serializablefields()}
-
-        packet = {
+        response = {
             'component': 'hfos.enrol.manager',
-            'action': 'change',
-            'data': reply
+            'action': 'status',
+            'data': self.config.allow_registration
         }
-        self.log('packet:', packet, lvl=verbose)
-        self.fireEvent(send(event.client.uuid, packet))
-        self.log('Enrollment changed', lvl=debug)
 
-    @handler(invite)
-    def invite(self, event):
-        self.log('Inviting new user to enrol')
-        name = event.data['name']
-        email = event.data['email']
-        method = event.data['method']
+        self.fire(send(event.client.uuid, response))
+
+    @handler(captcha)
+    def captcha(self, event):
+        """An anonymous client requests a captcha challenge"""
+
+        self._generate_captcha(event)
+
+    def _generate_captcha(self, event):
+        self.log('Generating requested captcha')
+
+        text = std_salt(length=6, lowercase=False)
+        now = time()
+
+        captcha = {
+            'text': text,
+            'image': self.image_captcha.generate(text),
+            'time': now
+        }
+        # self.image_captcha.write(text, '/tmp/captcha.png')
+        self.captchas[event.client.uuid] = captcha
+
+        Timer(3, Event.create('captcha_transmit', captcha, event.client.uuid)).register(self)
+
+    def captcha_transmit(self, captcha, uuid):
+        """Delayed transmission of a requested captcha"""
+
+        self.log('Transmitting captcha')
+
+        response = {
+            'component': 'hfos.enrol.manager',
+            'action': 'captcha',
+            'data': b64encode(captcha['image'].getvalue()).decode('utf-8')
+        }
+        self.fire(send(uuid, response))
+
+    def _invite(self, name, method, email, uuid):
+        """Actually invite a given user"""
 
         props = {
             'uuid': std_uuid(),
@@ -238,17 +455,66 @@ the friendly robot of {{node_name}}
 
         self.log('Enrollment stored', lvl=debug)
 
-        if method == 'Invited':
-            self._send_mail(enrollment)
+        self._send_invitation(enrollment)
 
         packet = {
             'component': 'hfos.enrol.manager',
             'action': 'invite',
-            'data': {True: enrollment.serializablefields()}
+            'data': [True, email]
         }
-        self.fireEvent(send(event.client.uuid, packet))
+        self.fireEvent(send(uuid, packet))
 
-    def _send_mail(self, enrollment):
+    def _create_user(self, username, password, mail, method):
+        """Create a new user and all initial data"""
+
+        try:
+            if method == 'Invited':
+                config_role = self.config.group_accept_invited
+            else:
+                config_role = self.config.group_accept_enrolled
+
+            roles = []
+            if ',' in config_role:
+                for item in config_role.split(','):
+                    roles.append(item.lstrip().rstrip())
+            else:
+                roles = [config_role]
+
+            newuser = objectmodels['user']({
+                'name': username,
+                'passhash': std_hash(password, self.salt),
+                'mail': mail,
+                'uuid': std_uuid(),
+                'roles': roles
+            })
+            if password == '':
+                newuser.needs_password_change = True
+                newuser.passhash = ''
+            newuser.save()
+        except Exception as e:
+            self.log("Problem creating new user: ", type(e), e,
+                     lvl=error)
+            return
+
+        try:
+            newprofile = objectmodels['profile']({
+                'uuid': std_uuid(),
+                'owner': newuser.uuid
+            })
+            self.log("New profile uuid: ", newprofile.uuid,
+                     lvl=verbose)
+
+            newprofile.save()
+
+            # TODO: Notify new owner
+            # TODO: Notify crew-admins
+        except Exception as e:
+            self.log("Problem creating new profile: ", type(e),
+                     e, lvl=error)
+
+    def _send_invitation(self, enrollment):
+        """Send an invitation mail to an open enrolment"""
+
         self.log('Sending enrollment status mail to user')
 
         context = {
@@ -261,12 +527,19 @@ the friendly robot of {{node_name}}
         self.log('Mail:', mail, lvl=verbose)
         mime_mail = MIMEText(mail)
         mime_mail['Subject'] = render(self.config.invitation_subject, context)
-        mime_mail['From'] = self.config.mail_from
+        mime_mail['From'] = render(self.config.mail_from, {'hostname': self.hostname})
         mime_mail['To'] = enrollment.email
 
         self.log('MimeMail:', mime_mail, lvl=verbose)
         if self.send_mail:
             self.log('Sending mail to', enrollment.email)
-            server = SMTP(self.config.mail_server)
-            server.send_message(mime_mail)
-            server.quit()
+            try:
+                server = SMTP(timeout=5)
+                response_connect = server.connect(self.config.mail_server)
+                response_send = server.send_message(mime_mail)
+                server.quit()
+
+            except timeout as e:
+                self.log('Could not send email to enrollee, mailserver timeout:', e, lvl=error)
+                return
+            self.log('Server response:', response_connect, response_send)

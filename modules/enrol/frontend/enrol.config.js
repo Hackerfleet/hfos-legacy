@@ -29,7 +29,7 @@ export function routing($stateProvider) {
 
     $stateProvider
         .state('app.enrol', {
-            url: '/enrol/',
+            url: '/enrol',
             template: '<enrol></enrol>',
             label: 'Enrol',
             icon: icon
@@ -37,5 +37,17 @@ export function routing($stateProvider) {
         .state('app.invitation', {
             url: '/invitation/:uuid',
             template: '<invitation></invitation>'
+        })
+        .state('app.password', {
+            url: '/password',
+            template: '<password></password>'
+        })
+        .state('app.resetaccount', {
+            url: '/resetaccount',
+            template: '<resetaccount></resetaccount>'
+        })
+        .state('app.enrolment', {
+            url: '/enrolment',
+            template: '<enrolment></enrolment>'
         });
 }
