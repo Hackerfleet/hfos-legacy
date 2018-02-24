@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -33,7 +34,7 @@ Module: Nodestate
 from circuits import Event
 
 from hfos.component import ConfigurableComponent, handler, authorizedevent
-from hfos.events.objectmanager import updatesubscriptions
+from hfos.events.objectmanager import updatesubscriptions, objectchange
 from hfos.logger import warn, verbose
 from hfos.database import objectmodels
 
@@ -75,6 +76,12 @@ class Nodestate(ConfigurableComponent):
             self.nodestates[item.uuid] = item
 
         self.log("Started with", len(self.nodestates), "nodestate(s)")
+
+    @handler("objectchange")
+    def objectchange(self, event):
+        if event.schema == 'nodestate':
+            self.log('Nodestate updated:', event.uuid)
+            self.nodestates[event.uuid] = objectmodels['nodestate'].find_one({'uuid': event.uuid})
 
     @handler(toggle)
     def nodestate_toggle(self, event):

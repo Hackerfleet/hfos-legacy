@@ -51,6 +51,7 @@
                     data-sizex="item.size.width"
                     data-sizey="item.size.height"
                     ng-repeat="(uuid, item) in $ctrl.nodestates">
+                    <div class="state-button-overlay" ng-show="$ctrl.lockState"></div>
 
                     <div class="state-button"
                          ng-click="$ctrl.toggle(uuid)"

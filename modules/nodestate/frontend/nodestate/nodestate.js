@@ -72,6 +72,7 @@ class Nodestate {
         this.changetimeout = null;
 
         this.nodestates = {};
+        this.old_states = {};
 
         let self = this;
 
@@ -117,15 +118,24 @@ class Nodestate {
             if (self.changetimeout !== null) {
                 self.timeout.cancel(self.changetimeout);
             }
-            self.changetimeout = self.timeout(self.storeMenuConfig, 5000);
+            self.changetimeout = self.timeout(function() {
+                self.storeMenuConfig(newVal, oldVal)}, 5000
+            );
         };
 
-        this.storeMenuConfig = function () {
+        this.storeMenuConfig = function (newVal, oldVal) {
             console.log('[STATE] Pushing nodestate');
-
-            for (let state of Object.values(self.nodestates)) {
-                delete state['$$hashKey'];
-                self.op.putObject('nodestate', state);
+            console.log('oldVal', oldVal, newVal);
+            for (let uuid of Object.keys(oldVal)) {
+                console.log('uuid:', uuid);
+                let oldState = oldVal[uuid];
+                let newState = newVal[uuid];
+                console.log('old/new:', oldState, newState);
+                console.log('comp:', oldState === newState);
+                if (JSON.stringify(oldState) !== JSON.stringify(newState)) {
+                    delete newVal[uuid]['$$hashKey'];
+                    self.op.putObject('nodestate', newVal[uuid]);
+                }
             }
 
             self.changetimeout = null;
@@ -156,6 +166,10 @@ class Nodestate {
         console.log('[STATE] Starting');
     }
     toggle(uuid) {
+        if (this.lockState) {
+            console.log('[STATE] Not toggling');
+            return
+        }
         console.log('[STATE] Toggling ', uuid);
         let state = this.nodestates[uuid];
         if (!state.disabled) {
@@ -177,9 +191,10 @@ class Nodestate {
         this.gridsterOptions.resizable.enabled = this.lockState;
         if (this.lockState) {
             console.log('Enabling gridwatcher');
-            this.gridChangeWatcher = this.scope.$watch('$ctrl.nodestates', this.handleGridChange, true);
+            //this.gridChangeWatcher = this.scope.$watch('$ctrl.nodestates', this.handleGridChange, true);
+            this.old_states = JSON.parse(JSON.stringify(this.nodestates));
         } else {
-            this.gridChangeWatcher();
+            this.storeMenuConfig(this.nodestates, this.old_states);
         }
     }
 }
