@@ -1,0 +1,77 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+
+#: src/app/app-component/app-component.tpl.html:134
+msgid "About"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:23
+msgid "Create new"
+msgstr ""
+
+#: src/objects/editor/editor.tpl.html:34
+msgid "Debug"
+msgstr ""
+
+#: src/app/app-component/app-component.tpl.html:133
+msgid "Documentation"
+msgstr ""
+
+#: src/objects/editor/editor.tpl.html:25
+msgid "Edit Live"
+msgstr ""
+
+#: src/objects/editor/editor.tpl.html:29
+msgid "Keep History"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:22
+msgid "List:"
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:40
+msgid "Logging in..."
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:30
+msgid "Login required"
+msgstr ""
+
+#: src/objects/editor/editor.tpl.html:38
+msgid "Modified"
+msgstr ""
+
+#: src/app/app-component/app-component.tpl.html:98
+msgid "Modules"
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:46
+msgid "No connection"
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:32
+msgid "Please"
+msgstr ""
+
+#: src/app/app-component/app-component.tpl.html:155
+msgid "Starting HFOS client"
+msgstr ""
+
+#: src/objects/editor/editor.tpl.html:37
+msgid "Stored"
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:47
+msgid "Your client is not connected to the node."
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:34
+msgid "login or register your account"
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:36
+msgid "to use this node."
+msgstr ""
