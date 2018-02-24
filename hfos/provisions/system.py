@@ -34,14 +34,15 @@ System: Global systemwide settings
 """
 
 from hfos.provisions.base import provisionList
-from hfos.database import objectmodels, makesalt
+from hfos.database import objectmodels
+from hfos.tools import std_salt
 from hfos.logger import hfoslog, warn
 from uuid import uuid4
 
 systemconfig = {
     'uuid': str(uuid4()),
     'allowregister': True,
-    'salt': makesalt(),
+    'salt': std_salt(),
     'active': True,
     'name': 'Default System Configuration',
     'description': 'Default System description'
