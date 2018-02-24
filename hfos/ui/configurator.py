@@ -47,13 +47,19 @@ except NameError:  # pragma: no cover
 class getlist(authorizedevent):
     """A client requires a schema to validate data or display a form"""
 
+    roles = ['admin']
+
 
 class get(authorizedevent):
     """A client requires a schema to validate data or display a form"""
 
+    roles = ['admin']
+
 
 class put(authorizedevent):
     """A client requires a schema to validate data or display a form"""
+
+    roles = ['admin']
 
 
 class Configurator(ConfigurableComponent):
@@ -69,16 +75,6 @@ class Configurator(ConfigurableComponent):
 
     def __init__(self, *args):
         super(Configurator, self).__init__('CONF', *args)
-
-    def _check_permission(self, event):
-        account = event.user.account
-
-        if 'admin' not in account.roles:
-            self.log('Missing permission to configure components',
-                     lvl=warn)
-
-            return False
-        return True
 
     @handler(getlist)
     def getlist(self, event):
@@ -119,9 +115,6 @@ class Configurator(ConfigurableComponent):
                  event.user)
 
         try:
-            if self._check_permission(event) is False:
-                raise PermissionError
-
             component = model_factory(Schema).find_one({
                 'uuid': event.data['uuid']
             })
@@ -151,18 +144,6 @@ class Configurator(ConfigurableComponent):
     @handler(get)
     def get(self, event):
         """Get a stored configuration"""
-
-        if self._check_permission(event) is False:
-            response = {
-                'component': 'hfos.ui.configurator',
-                'action': 'get',
-                'data': False
-            }
-            self.log('No permission to access configuration', event.user,
-                     lvl=warn)
-
-            self.fireEvent(send(event.client.uuid, response))
-            return
 
         try:
             comp = event.data['uuid']

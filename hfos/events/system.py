@@ -140,6 +140,8 @@ class anonymousevent(hfosEvent):
 class authorizedevent(hfosEvent):
     """Base class for events for logged in users."""
 
+    roles = ['admin', 'crew']
+
     def __init__(self, user, action, data, client, *args):
         """
         Sets up an authorized event.

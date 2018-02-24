@@ -49,7 +49,7 @@ from hfos.events.client import authenticationrequest, send, clientdisconnect, \
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, critical, debug, info, network, \
-    verbose
+    verbose, hilight
 from hfos.ui.clientobjects import Socket, Client, User
 from hfos.debugger import cli_register_event
 from hfos.tools import std_table
@@ -62,6 +62,11 @@ class cli_users(Event):
 
 class cli_clients(Event):
     """Display the list of connected clients from the clientmanager"""
+    pass
+
+
+class cli_client(Event):
+    """Display detailed info about a connected client"""
     pass
 
 
@@ -126,6 +131,7 @@ class ClientManager(ConfigurableComponent):
 
         self.fireEvent(cli_register_event('users', cli_users))
         self.fireEvent(cli_register_event('clients', cli_clients))
+        self.fireEvent(cli_register_event('client', cli_client))
         self.fireEvent(cli_register_event('events', cli_events))
         self.fireEvent(cli_register_event('sources', cli_sources))
         self.fireEvent(cli_register_event('who', cli_who))
@@ -137,9 +143,16 @@ class ClientManager(ConfigurableComponent):
             10, Event.create('reset_flood_offenders'), persist=True
         ).register(self)
 
+    @handler('cli_client')
+    def client_details(self, *args):
+        """Display known details about a given client"""
+        client = self._clients[args[0]]
+
+        self.log(client.uuid, client.ip, client.name, client.useruuid, pretty=True)
+
     @handler('cli_clients')
     def client_list(self, *args):
-        """Display a list of connected users"""
+        """Display a list of connected clients"""
         if len(self._clients) == 0:
             self.log('No clients connected')
         else:
@@ -166,15 +179,27 @@ class ClientManager(ConfigurableComponent):
         for source in sources:
             pprint(source)
 
-
     @handler('cli_events')
     def events_list(self, *args):
         """Display a list of all registered events"""
 
+        def merge(a, b, path=None):
+            "merges b into a"
+            if path is None: path = []
+            for key in b:
+                if key in a:
+                    if isinstance(a[key], dict) and isinstance(b[key], dict):
+                        merge(a[key], b[key], path + [str(key)])
+                    elif a[key] == b[key]:
+                        pass  # same leaf value
+                    else:
+                        raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+                else:
+                    a[key] = b[key]
+            return a
+
         events = {}
-        sources = {}
-        sources.update(self.authorized_events)
-        sources.update(self.anonymous_events)
+        sources = merge(self.authorized_events, self.anonymous_events)
 
         for source, source_events in sources.items():
             events[source] = []
@@ -406,6 +431,17 @@ class ClientManager(ConfigurableComponent):
         except Exception as e:
             self.log("Error during broadcast: ", e, type(e), lvl=critical)
 
+    def _checkPermissions(self, user, event):
+        """Checks if the user has in any role that allows to fire the event."""
+
+        for role in user.account.roles:
+            if role in event.roles:
+                self.log('Access granted', lvl=verbose)
+                return True
+
+        self.log('Access denied', lvl=verbose)
+        return False
+
     def _handleAuthorizedEvents(self, component, action, data, user, client):
         """Isolated communication link for authorized events."""
 
@@ -421,8 +457,18 @@ class ClientManager(ConfigurableComponent):
 
             event = self.authorized_events[component][action]['event']
 
+            self.log('Authorized event roles:', event.roles, lvl=hilight)
+            if not self._checkPermissions(user, event):
+                result = {
+                    'component': 'hfos.ui.clientmanager',
+                    'action': 'Permission',
+                    'data': 'You have no role that allows this action.'
+                }
+                self.fireEvent(send(event.uuid, result))
+                return
+
             self.log("Firing authorized event: ", component, action,
-                     str(data)[:20], lvl=network)
+                     str(data)[:100], lvl=debug)
             # self.log("", (user, action, data, client), lvl=critical)
             self.fireEvent(event(user, action, data, client))
         except Exception as e:
@@ -602,7 +648,7 @@ class ClientManager(ConfigurableComponent):
             return
 
         if requestcomponent in self.anonymous_events and requestaction in \
-            self.anonymous_events[requestcomponent]:
+                self.anonymous_events[requestcomponent]:
             self.log('Executing anonymous event:', requestcomponent,
                      requestaction)
             try:
@@ -625,7 +671,8 @@ class ClientManager(ConfigurableComponent):
             try:
                 user = self._users[useruuid]
             except KeyError:
-                self.log("User not logged in.", lvl=warn)
+                if not requestaction == 'ping' and requestcomponent == 'hfos.ui.clientmanager':
+                    self.log("User not logged in.", lvl=warn)
                 return
 
             try:
@@ -634,6 +681,8 @@ class ClientManager(ConfigurableComponent):
             except Exception as e:
                 self.log("User request failed: ", e, type(e), lvl=warn,
                          exc=True)
+        else:
+            self.log('Invalid event received:', requestcomponent, requestaction, lvl=warn)
 
     @handler("authentication", channel="auth")
     def authentication(self, event):

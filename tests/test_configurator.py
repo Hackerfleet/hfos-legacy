@@ -38,6 +38,7 @@ from circuits import Manager
 import pytest
 from uuid import uuid4
 from hfos.ui.configurator import Configurator, get, getlist, put
+
 # from hfos.events.client import send
 
 # from pprint import pprint
@@ -46,8 +47,8 @@ m = Manager()
 c = Configurator()
 c.register(m)
 
-useruuid = str(uuid4())
-clientuuid = str(uuid4())
+user_uuid = str(uuid4())
+client_uuid = str(uuid4())
 
 
 class AccountMock():
@@ -75,8 +76,8 @@ def transmit(action, data, account=AccountMock()):
     """Fire an event and listen for a reply"""
 
     profile = ProfileMock()
-    user = User(account, profile, useruuid)
-    client = Client(None, None, clientuuid, useruuid)
+    user = User(account, profile, user_uuid)
+    client = Client(None, None, client_uuid, user_uuid)
 
     m.start()
 
@@ -108,7 +109,7 @@ def test_list():
 
 
 def test_get_object():
-    """Tests if a systemconfig can be retrieved"""
+    """Tests if a component config can be retrieved"""
 
     test_component = pytest.TestComponent()
     test_uuid = test_component.config.uuid
@@ -125,26 +126,9 @@ def test_get_object():
     assert obj['uuid'] == test_uuid
 
 
-def test_get_permission_error():
-    """Tests if a systemconfig cannot be retrieved if the user has
-    insufficient roles assigned"""
-
-    test_component = pytest.TestComponent()
-    test_uuid = test_component.config.uuid
-
-    account = AccountMock()
-    account.roles.remove('admin')
-
-    packet = transmit('get', {
-        'uuid': test_uuid
-    }, account)
-
-    assert packet['action'] == 'get'
-    assert 'data' in packet
-    assert packet['data'] is False
-
-
 def test_put():
+    """Tests if storing a new component config works"""
+
     test_component = pytest.TestComponent()
     test_uuid = test_component.config.uuid
 
@@ -155,23 +139,3 @@ def test_put():
     })
 
     assert packet['data']
-
-
-def test_put_new_permission_error():
-    uuid = str(uuid4())
-    obj = objectmodels['systemconfig']({'uuid': uuid})
-    obj.active = False
-    obj.name = 'TEST SYSTEMCONFIG'
-
-    account = AccountMock()
-    account.roles.remove('admin')
-
-    packet = transmit('put', {
-        'schema': 'systemconfig',
-        'obj': obj.serializablefields(),
-        'uuid': uuid
-    }, account)
-
-    assert packet['action'] == 'put'
-    assert 'data' in packet
-    assert packet['data'] is False
