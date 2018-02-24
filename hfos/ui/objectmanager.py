@@ -617,11 +617,12 @@ class ObjectManager(ConfigurableComponent):
                     self._cancel_by_permission(schema, data, client)
                     return
 
-                self.log("Fields:", storage_object._fields, "\n\n\n",
-                         storage_object.__dict__)
+                #self.log("Fields:", storage_object._fields, "\n\n\n",
+                #         storage_object.__dict__)
+
                 storage_object.delete()
 
-                self.log("Preparing notification.", lvl=debug)
+                self.log("Deleted. Preparing notification.", lvl=debug)
                 notification = objectdeletion(uuid, schema, client)
 
                 if uuid in self.subscriptions:
