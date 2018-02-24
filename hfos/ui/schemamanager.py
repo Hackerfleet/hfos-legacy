@@ -46,7 +46,12 @@ class cli_schemata(Event):
 
 
 class cli_form(Event):
-    """Display all registered forms"""
+    """Display a specified form"""
+    pass
+
+
+class cli_forms(Event):
+    """List all registered forms"""
     pass
 
 
@@ -64,6 +69,7 @@ class SchemaManager(ConfigurableComponent):
 
         self.fireEvent(cli_register_event('schemata', cli_schemata))
         self.fireEvent(cli_register_event('form', cli_form))
+        self.fireEvent(cli_register_event('forms', cli_forms))
 
     @handler('cli_schemata')
     def cli_schemata_list(self, *args):
@@ -76,6 +82,20 @@ class SchemaManager(ConfigurableComponent):
     @handler('cli_form')
     def cli_form(self, *args):
         self.log(schemastore[args[0]]['form'], pretty=True)
+
+    @handler('cli_forms')
+    def cli_forms(self, *args):
+        forms = []
+        missing = []
+
+        for key, item in schemastore.items():
+            if 'form' in item and len(item['form']) > 0:
+                forms.append(key)
+            else:
+                missing.append(key)
+
+        self.log('Schemata with form:', forms)
+        self.log('Missing forms:', missing)
 
     @handler('ready')
     def ready(self):
