@@ -35,6 +35,8 @@ User:
 
 """
 
+from hfos.tools import std_human_uid
+
 
 class Socket(object):
     """
@@ -72,7 +74,7 @@ class Client(object):
         self.uuid = clientuuid
         self.useruuid = useruuid
         if name == '':
-            self.name = clientuuid
+            self.name = std_human_uid(kind='place')
         else:
             self.name = name
         self.config = config
