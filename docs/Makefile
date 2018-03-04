@@ -4,8 +4,11 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+SPHINXAPIDOC  = sphinx-apidoc
 PAPER         =
 BUILDDIR      = build
+MODULEDIR     = source/dev/packages
+SUBDIRS       := $(wildcard ../modules/*)
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -48,9 +51,14 @@ help:
 	@echo "  spellcheck to run spelling checks"
 	@echo "  coverage   to run coverage check of the documentation (if enabled)"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
+	@echo "  modules    to generate all api documentation for autodoc"
 
 clean:
 	rm -rf $(BUILDDIR)/*
+
+modules:
+	for dir in $(SUBDIRS) ; do  ( $(SPHINXAPIDOC) --implicit-namespaces -o $(MODULEDIR)/`basename $$dir` $$dir/hfos ) ; done
+	@echo "Done."
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
