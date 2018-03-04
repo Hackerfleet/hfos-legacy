@@ -75,7 +75,7 @@ Writing new Code
 
 - Ensure any new or modified code does not break existing unit tests.
 - Update any relevant doc strings or documentation.
-- Update the `Change Log <https://github.com/hackerfleet/hfos/tree/master/CHANGES.rst>`_ updated.
+- Update the `Change Log <https://github.com/hackerfleet/hfos/tree/master/CHANGES.rst>`_ appropriately.
 - Submit a `New Pull Request <https://github.com/hackerfleet/hfos/compare/>`_.
 
 
@@ -89,9 +89,9 @@ To run the tests you will need the following installed:
 - `pytest-cov <http://pypi.python.org/pypi/pytest-cov>`_
 - `pytest <http://pytest.org/latest/>`_
 
-All of these can be installed via ``pip``.
+All of these can be installed via ``pip install -r requirements-dev.txt``.
 
-Please also ensure that you you have all supported versions of Python
+Please also ensure - if you can - that you you have all supported versions of Python
 that HFOS supports installed in your local environment.
 
 To run the tests::
