@@ -65,6 +65,8 @@ We use the following tools to develop HFOS and share code:
   `Landscape <https://landscape.io/github/Hackerfleet/hfos/>`_
 - **Frontend Testing:**
   `Browserstack <https://browserstack.com>`_
+- **Translations:**
+  `Transifex <https://www.transifex.com/hackerfleet-community/hfos/>`__
 
 We strongly suggest familiarizing with all of them, to make sure you understand our CI.
 
