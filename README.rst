@@ -29,7 +29,7 @@ we saw the potential for other 'classic' areas of collaboration and started exte
 it towards a more general application framework.
 
 A lot of the included modules are still Work in Progress, so help out, if you're interested
-in a powerful - cloud independent - collaboration tool suite.
+in a powerful - **cloud independent** - collaboration tool suite.
 
 Installation
 ============
