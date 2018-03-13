@@ -31,6 +31,8 @@ class taskgridcomponent {
         this.tags = {};
         this.projects = {};
 
+        this.search_string = '';
+
         this.changetimeout = null;
         this.lockState = false;
 
@@ -184,6 +186,11 @@ class taskgridcomponent {
         this.op.getObject('taskgridconfig', this.taskgridconfiguuid);
     }
 
+    new_task(group_uuid) {
+        console.log('[TASKGRID] Adding new task to group:', group_uuid);
+        this.state.go('app.editor', {schema: 'task', action: 'create', initial: {taskgroup: group_uuid}})
+    }
+
     opentab(tabname) {
         console.log('[TASKGRID] Switching tab to ', tabname);
         $('.nav-pills .active, .tab-content .active').removeClass('active');
@@ -204,6 +211,8 @@ class taskgridcomponent {
 
         this.op.changeObject('task', task.uuid, {'field': 'taskgroup', 'value': newgroup});
     }
+
+
 }
 
 taskgridcomponent.$inject = ['$scope', '$rootScope', '$timeout', 'user', 'objectproxy', '$state', 'menu'];
