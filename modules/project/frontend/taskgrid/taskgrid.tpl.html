@@ -1,22 +1,32 @@
 <div class="well">
     <div class="taskgrid-nav navbar">
-        <ul class="nav nav-pills" role="tablist">
+        <ul class="nav navbar-nav" role="tablist">
             <!-- <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>-->
             <!--<li><a role="tab" ng-click="$ctrl.opentab('tasklist')" data-toggle="tab">Task List</a></li>-->
-            <li><a role="button" href="#!/editor/taskgridconfig/{{$ctrl.taskgridconfiguuid}}/edit">
+            <li><a role="button" ng-click="show_setup = !show_setup">
                 <i class="fa fa-gear"></i></a>
             </li>
             <li><a role="button" ng-click="show_filters = !show_filters">
-                <i class="fa fa-filter"></i></a>
-            </li>
-            <li><a role="button" href="#!/editor/taskgroup//create"><i class="fa fa-plus" aria-hidden="true"></i>
-                Taskgroup</a>
+                <i class="fa fa-filter hidden"></i></a>
             </li>
             <li><a role="button" href="#!/editor/task//create"><i class="fa fa-plus" aria-hidden="true"></i>
                 Task</a>
             </li>
-
-            <li class="pull-right">
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <form class="navbar-form">
+                    <div class="form-group clearable" style="display:inline;">
+                        <input type="search" class="form-control"
+                               ng-model="$ctrl.search_string">
+                        <span class="clearable__clear fa"
+                              ng-click="$ctrl.search_string = ''"
+                              ng-class="{'fa-search': $ctrl.search_string === '',
+                                         'fa-times': $ctrl.search_string !== ''}"></span>
+                    </div>
+                </form>
+            </li>
+            <li>
                 <span class="fa btn"
                       ng-click="$ctrl.toggleLock()"
                       ng-class="{'fa-lock':!$ctrl.lockState,'fa-unlock':$ctrl.lockState}">
@@ -24,14 +34,32 @@
             </li>
         </ul>
     </div>
-    <div class="container" ng-show="show_filters">
+    <div class="well" ng-show="show_setup">
+        <h4>Setup Taskgrid</h4>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-inline">
+                    <a role="button" class="btn btn-default"
+                       href="#!/editor/taskgridconfig/{{$ctrl.taskgridconfiguuid}}/edit">
+                        <i class="fa fa-gear"></i>Edit Taskgrid</a>
+                    <a role="button" class="btn btn-default" href="#!/editor/taskgrid//create">
+                        <i class="fa fa-plus" aria-hidden="true"></i>Add Taskgrid</a>
+                    <a role="button" class="btn btn-default" href="#!/editor/taskgroup//create">
+                        <i class="fa fa-plus" aria-hidden="true"></i>Add Taskgroup</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="well" ng-show="show_filters">
         <h4>Filter tasks</h4>
         <div class="row">
-            <div class="col-md4">
+            <div class="col-md-4">
                 <div class="form-inline">
                     <input class="form-control" type="checkbox" ng-model="show_filters_project">
                     <label>By Project</label>
-                    <select ng-click="$ctrl.get_projects()" class="form-control" ng-show="show_filters_project" ng-model="$ctrl.filter_project">
+                    <select ng-click="$ctrl.get_projects()" class="form-control" ng-show="show_filters_project"
+                            ng-model="$ctrl.filter_project">
                         <option ng-repeat="(uuid, project) in $ctrl.projects" value="{{uuid}}">{{project.name}}</option>
                     </select>
                 </div>
@@ -58,6 +86,9 @@
                         <div class="taskBoxOverlay" ng-show="$ctrl.lockState"></div>
                         <div class="taskHeader">
                             <h3>{{$ctrl.taskgroups[item.taskgroup].name }}
+                                <a class="pull-right" ng-click="$ctrl.new_task(item.taskgroup)">
+                                    <span class="fa fa-plus"></span>
+                                </a>
                                 <a class="pull-right" href="#!/editor/taskgroup/{{item.taskgroup}}/edit">
                                     <span class="fa fa-edit"></span>
                                 </a>
@@ -65,14 +96,15 @@
 
                             <div class="hidden box-header-btns pull-right">
                                 <a title="settings" ng-click="$ctrl.openSettings(item)"><i
-                                        class="glyphicon glyphicon-cog"></i></a>
+                                    class="glyphicon glyphicon-cog"></i></a>
                                 <a title="Remove widget" ng-click="$ctrl.remove(item)"><i
-                                        class="glyphicon glyphicon-trash"></i></a>
+                                    class="glyphicon glyphicon-trash"></i></a>
                             </div>
                         </div>
                         <ul class="taskGridlist">
                             <li class="taskBoxHeader"
                                 ng-drag="!$ctrl.lockState" ng-drag-data="task"
+                                ng-show="task.name.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1 || task.description.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1"
                                 ng-repeat="task in $ctrl.tasksByGroup[item.taskgroup]">
                                 <ul class="tagList">
                                     <li class="tagPill"
@@ -88,7 +120,7 @@
                                       ng-model="task.showDescription"></span>
 
                                 <div ng-show="task.showDescription" class="taskDescription"
-                                     ng-bind-html="$ctrl.tasklist[task.uuid].notes"></div>
+                                     ng-bind-html="$ctrl.tasklist[task.uuid].notes | embed:$ctrl.user.embed_options"></div>
                                 <div class="taskLabels">
                                     <span class="taskProjectName"
                                           ng-show="task.project != null"
@@ -107,6 +139,11 @@
                                 </div>
                             </li>
                         </ul>
+                        <div class="taskBoxHeader" ng-drag-clone="">
+                            {{clonedData.name}}
+                            <br>
+                            Was in: {{$ctrl.taskgroups[clonedData.taskgroup].name}}
+                        </div>
                     </li>
                 </ul>
             </div>
