@@ -416,6 +416,7 @@ NodeStates = [
             "width": 3
         },
         "icon": "fa-globe",
+        "readonly": True,
         "excluded": []
     }
 ]
