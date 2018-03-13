@@ -46,10 +46,12 @@ class toggle(authorizedevent):
 class backend_nodestate_toggle(Event):
     """Toggles a Nodestate from backend components"""
 
-    def __init__(self, uuid, off=False, *args):
+    def __init__(self, uuid, off=False, on=False, force=False, *args):
         super(backend_nodestate_toggle, self).__init__(*args)
         self.uuid = uuid
         self.off = off
+        self.on = on
+        self.force = force
 
 
 class Nodestate(ConfigurableComponent):
@@ -96,15 +98,21 @@ class Nodestate(ConfigurableComponent):
         self.log("Backend toggle of a nodestate:", event, lvl=verbose)
 
         uuid = event.uuid
-        self._toggle_state(uuid, off=event.off, force=True)
+        self._toggle_state(uuid, off=event.off, on=event.on, force=event.force)
 
-    def _toggle_state(self, uuid, off=False, force=False):
+    def _toggle_state(self, uuid, off=False, on=False, force=False):
         state = self.nodestates[uuid]
         untrigger = []
+
+        if state.readonly and not force:
+            self.log('Readonly state cannot be triggered by users', lvl=warn)
+            return
 
         self.log('Trying to toggle state:', state, lvl=verbose)
         if off:
             state.active = True
+        elif on:
+            state.active = False
 
         if state.active is True:
             state.active = False
