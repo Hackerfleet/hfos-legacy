@@ -6,4 +6,4 @@ All client and user requests run through the ClientManager.
 
 Legitimate requests are fired off to their according request managers.
 
-It delegates authentication requests seperately to the Auth Component.
+It delegates authentication requests separately to the Auth Component.
