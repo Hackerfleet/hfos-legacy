@@ -23,15 +23,15 @@ __license__ = "AGPLv3"
 
 """
 
-Schema: System State
+Schema: Node State
 ====================
 
-System state objects
+Node state objects
 
 Contains
 --------
 
-SystemState: systemstate object
+NodeState: Nodestate object
 
 
 """
@@ -49,6 +49,11 @@ NodeStateSchema['properties'].update({
     'color': {
         'type': 'string',
         'format': 'color'
+    },
+    'readonly': {
+        'type': 'boolean',
+        'default': False,
+        'description': 'Not user-toggleable when checked'
     },
     'excluded': {
         'type': 'array',
@@ -95,6 +100,7 @@ NodeStateForm = [
     'color',
     'active',
     'label-activated',
+    'readonly',
     'group',
     {
         'key': 'excluded',
