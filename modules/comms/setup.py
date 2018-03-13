@@ -24,9 +24,8 @@ __license__ = "AGPLv3"
 from setuptools import setup, find_packages
 
 setup(name="hfos-comms",
-      version="0.0.1",
+      version="0.0.2",
       description="hfos-comms",
-
       author="Hackerfleet Community",
       author_email="riot@c-base.org",
       url="https://github.com/hackerfleet/hfos-comms",
@@ -43,6 +42,8 @@ This software package is a plugin module for HFOS.
       install_requires=['hfos>=1.2.0'],
       entry_points="""[hfos.schemata]
     radioconfig=hfos.comms.radio:RadioConfig
+    [hfos.components]
+    connectivitymonitor=hfos.comms.connectivity:ConnectivityMonitor
     """,
       test_suite="tests.main.main",
       )
