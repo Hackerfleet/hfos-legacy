@@ -40,6 +40,12 @@ savebutton = {
     'onClick': '$ctrl.submitObject()'
 }
 
+createnewbutton = {
+    'type': 'button',
+    'title': 'Save & Create new',
+    'onClick': '$ctrl.save_createObject()'
+}
+
 deletebutton = {
     'type': 'button',
     'title': 'Delete Object',
@@ -50,6 +56,7 @@ editbuttons = {
     'type': 'actions',
     'items': [
         savebutton,
+        createnewbutton,
         deletebutton
     ]
 }
