@@ -81,7 +81,7 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
 
 # TODO: Installation of frontend requirements is currently disabled
 def install_frontend(forcereload=False, forcerebuild=False,
-                     forcecopy=True, install=True, development=False):
+                     forcecopy=True, install=True, development=False, build_type='dist'):
     """Builds and installs the frontend"""
 
     hfoslog("Updating frontend components", emitter='BUILDER')
@@ -250,7 +250,8 @@ def install_frontend(forcereload=False, forcerebuild=False,
 
     def _rebuild_frontend():
         hfoslog("Starting frontend build.", lvl=warn, emitter='BUILDER')
-        npmbuild = Popen(["npm", "run", "build"], cwd=frontendroot)
+
+        npmbuild = Popen(["npm", "run", build_type], cwd=frontendroot)
         out, err = npmbuild.communicate()
         try:
             npmbuild.wait()
@@ -260,7 +261,8 @@ def install_frontend(forcereload=False, forcerebuild=False,
             return
 
         hfoslog("Frontend build done: ", out, err, lvl=debug, emitter='BUILDER')
-        copytree(os.path.join(frontendroot, 'build'),
+
+        copytree(os.path.join(frontendroot, build_type),
                  frontendtarget, hardlink=False)
         copytree(os.path.join(frontendroot, 'assets'),
                  os.path.join(frontendtarget, 'assets'),

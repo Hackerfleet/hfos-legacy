@@ -1161,10 +1161,12 @@ def install_cert(selfsigned):
               default=False, is_flag=True)
 @click.option('--rebuild', help="Rebuild frontend before installation",
               default=False, is_flag=True)
-def frontend(dev, rebuild):
+@click.option('--build-type', help="Specify frontend build type. Either dist(default) or build",
+              default='dist')
+def frontend(dev, rebuild, build_type):
     """Build and install frontend"""
 
-    install_frontend(forcerebuild=rebuild, development=dev)
+    install_frontend(forcerebuild=rebuild, development=dev, build_type=build_type)
 
 
 @install.command('all', short_help='install everything')
