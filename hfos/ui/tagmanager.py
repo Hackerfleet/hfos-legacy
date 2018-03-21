@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 """
 
 Module: TagManager
-=====================
+==================
 
 
 """
@@ -41,7 +41,7 @@ from hfos.component import handler
 
 class TagManager(ConfigurableComponent):
     """
-    Handles schemata requests from clients.
+    Various tag related operations.
     """
 
     channel = "hfosweb"
@@ -81,7 +81,7 @@ class TagManager(ConfigurableComponent):
 
     @handler(get)
     def get_tagged(self, event):
-        """Return a single schema"""
+        """Return a list of tagged objects for a schema"""
         self.log("Tagged objects request for", event.data, "from",
                  event.user, lvl=debug)
         if event.data in self.tags:
