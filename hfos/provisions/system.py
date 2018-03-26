@@ -45,7 +45,8 @@ systemconfig = {
     'salt': std_salt(),
     'active': True,
     'name': 'Default System Configuration',
-    'description': 'Default System description'
+    'description': 'Default System description',
+    'hostname': 'localhost'
 }
 
 
