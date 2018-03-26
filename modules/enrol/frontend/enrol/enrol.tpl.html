@@ -149,7 +149,7 @@
                                     <span class="glyphicon glyphicon-qrcode"></span>
                                 </button>
                                 <button ng-click="$ctrl.set_status(uuid, 'Accepted')"
-                                        ng-show="item.status === 'Pending'"
+                                        ng-show="item.status === 'Pending' || item.status === 'Open'"
                                         class="btn btn-success btn-sm">Accept
                                 </button>
                                 <button  ng-click="$ctrl.set_status(uuid, 'Denied')"
