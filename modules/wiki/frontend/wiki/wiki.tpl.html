@@ -36,7 +36,7 @@
                 </div>
             </div>
         </div>
-        <div ng-bind-html="$ctrl.html"></div>
+        <div ng-bind-html="$ctrl.html | embed:$ctrl.user.embed_options"></div>
     </div>
     <div class="well" ng-show="$ctrl.edithere">
         <objecteditor schema="wikipage" uuid="$ctrl.pageuuid" action="edit"></objecteditor>

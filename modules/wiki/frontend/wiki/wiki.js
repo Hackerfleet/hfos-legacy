@@ -7,6 +7,7 @@ class wikicomponent {
         this.op = objectproxy;
         this.state = $state;
         this.rootscope = $rootScope;
+        this.user = user;
         this.notification = notification;
         
         if (stateparams.name === "*name") {
