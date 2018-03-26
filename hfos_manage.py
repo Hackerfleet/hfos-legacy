@@ -159,9 +159,9 @@ def _check_root():
     if os.geteuid() != 0:
         log("Need root access to install. Use sudo!", lvl=error)
         log("If you installed into a virtual environment, don't forget to "
-                "specify the interpreter binary for sudo, e.g:\n"
-                "$ sudo /home/user/.virtualenv/hfos/bin/python3 "
-                "hfos_manage.py")
+            "specify the interpreter binary for sudo, e.g:\n"
+            "$ sudo /home/user/.virtualenv/hfos/bin/python3 "
+            "hfos_manage.py")
 
         sys.exit(1)
 
@@ -200,7 +200,7 @@ def _construct_module(info, target):
         filename = os.path.abspath(
             os.path.join(target, item[1].format(**info)))
         log("Creating file from template '%s'" % filename,
-                emitter='MANAGE')
+            emitter='MANAGE')
         write_template_file(source, filename, info)
 
 
@@ -289,8 +289,8 @@ def _get_credentials(username=None, password=None, dbhost=None):
         salt = system_config.salt.encode('ascii')
     except (KeyError, AttributeError):
         log('No systemconfig or it is without a salt! '
-                'Reinstall the system provisioning with'
-                'hfos_manage.py install provisions -p system')
+            'Reinstall the system provisioning with'
+            'hfos_manage.py install provisions -p system')
         sys.exit(3)
 
     if username is None:
@@ -367,7 +367,7 @@ def create_module(clear, target):
             shutil.rmtree(target)
         else:
             log("Target exists! Use --clear to delete it first.",
-                    emitter='MANAGE')
+                emitter='MANAGE')
             sys.exit(2)
 
     done = False
@@ -419,7 +419,7 @@ def clear(schema):
         db = client["hfos"]
 
         log("Clearing collection for", schema, lvl=warn,
-                emitter='MANAGE')
+            emitter='MANAGE')
         db.drop_collection(schema)
 
 
@@ -469,16 +469,16 @@ def delete(ctx, componentname):
 
     if col.count({'name': componentname}) > 1:
         log('More than one component configuration of this name! Try '
-                'one of the uuids as argument. Get a list with "config '
-                'list"')
+            'one of the uuids as argument. Get a list with "config '
+            'list"')
         return
 
     log('Deleting component configuration', componentname,
-            emitter='MANAGE')
+        emitter='MANAGE')
     config = col.find_one({'name': componentname})
     if config is None:
         log('Component configuration not found:', componentname,
-                emitter='MANAGE')
+            emitter='MANAGE')
         return
     config.delete()
     log('Done')
@@ -494,16 +494,16 @@ def show(ctx, component):
 
     if col.count({'name': component}) > 1:
         log('More than one component configuration of this name! Try '
-                'one of the uuids as argument. Get a list with "config '
-                'list"')
+            'one of the uuids as argument. Get a list with "config '
+            'list"')
         return
 
     if component is None:
         configurations = col.find()
         for configuration in configurations:
             log("%-10s : %s" % (configuration.name,
-                                    configuration.uuid),
-                    emitter='MANAGE')
+                                configuration.uuid),
+                emitter='MANAGE')
     else:
         configuration = col.find_one({'name': component})
 
@@ -526,11 +526,7 @@ def user(ctx, username, password):
 db.add_command(user)
 
 
-@user.command(short_help='create new user')
-@click.pass_context
-def create_user(ctx):
-    """Creates a new local user"""
-
+def _create_user(ctx):
     username, passhash = _get_credentials(ctx.obj['username'],
                                           ctx.obj['password'],
                                           ctx.obj['db'])
@@ -540,12 +536,36 @@ def create_user(ctx):
     new_user.name = username
     new_user.passhash = passhash
 
-    # pprint(user._fields)
+    return new_user
+
+
+@user.command(short_help='create new user')
+@click.pass_context
+def create_user(ctx):
+    """Creates a new local user"""
+
+    new_user = _create_user(ctx)
+
     try:
         new_user.save()
         log("Done!")
     except DuplicateKeyError:
         log('User already exists', lvl=warn)
+
+    return new_user
+
+
+@user.command(short_help='create new admin')
+@click.pass_context
+def create_admin(ctx):
+    """Creates a new local user and assigns admin role"""
+
+    admin = _create_user(ctx)
+    admin.roles.append('admin')
+
+    admin.save()
+
+    log("Done!")
 
 
 @user.command(short_help='delete user')
@@ -668,7 +688,7 @@ def install_docs(clear):
             build.wait()
         except Exception as e:
             log("Problem during documentation building: ", e, type(e),
-                    exc=True, lvl=error)
+                exc=True, lvl=error)
             return False
         return True
 
@@ -714,7 +734,7 @@ def install_var(clear, clear_all):
     _check_root()
 
     log("Checking frontend library and cache directories",
-            emitter='MANAGE')
+        emitter='MANAGE')
 
     uid = pwd.getpwnam("hfos").pw_uid
     gid = grp.getgrnam("hfos").gr_gid
@@ -788,9 +808,9 @@ def install_provisions(provision, dbhost, clear=False, overwrite=False, list_pro
             provisionstore[provision](overwrite=overwrite, clear=clear)
         else:
             log("Unknown provision: ", provision, "\nValid provisions are",
-                    list(provisionstore.keys()),
-                    lvl=error,
-                    emitter='MANAGE')
+                list(provisionstore.keys()),
+                lvl=error,
+                emitter='MANAGE')
     else:
         for provision_name in provisionstore:
             log("Provisioning " + provision_name)
@@ -825,7 +845,7 @@ def install_modules(wip):
             setup.wait()
         except Exception as e:
             log("Problem during module installation: ", hfos_module, e,
-                    type(e), exc=True, lvl=error)
+                type(e), exc=True, lvl=error)
             return False
         return True
 
@@ -931,7 +951,7 @@ def install_service():
 
     Popen([
         'systemctl',
-        'start'
+        'start',
         'hfos.service'
     ])
 
@@ -983,7 +1003,7 @@ Using 'localhost' for now""", lvl=warn)
         configuration_link = None
     else:
         log('Unsure how to proceed, you may need to specify your '
-                'distribution', lvl=error)
+            'distribution', lvl=error)
         return
 
     log('Writing nginx HFOS site definition')
@@ -1049,7 +1069,7 @@ def install_cert(selfsigned):
 
     if selfsigned:
         log('Generating self signed (insecure) certificate/key '
-                'combination')
+            'combination')
 
         try:
             os.mkdir('/etc/ssl/certs/hfos')
@@ -1074,7 +1094,7 @@ def install_cert(selfsigned):
                     serial = old_cert.get_serial_number() + 1
                 except (crypto.Error, OSError) as e:
                     log('Could not read old certificate to increment '
-                            'serial:', type(e), e, exc=True, lvl=warn)
+                        'serial:', type(e), e, exc=True, lvl=warn)
                     serial = 1
             else:
                 serial = 1
@@ -1151,9 +1171,9 @@ def install_cert(selfsigned):
         # service nginx reload
 
         log('Not implemented yet. You can build your own certificate and '
-                'store it in /etc/ssl/certs/hfos/server-cert.pem - it should '
-                'be a certificate with key, as this is used server side and '
-                'there is no way to enter a separate key.', lvl=error)
+            'store it in /etc/ssl/certs/hfos/server-cert.pem - it should '
+            'be a certificate with key, as this is used server side and '
+            'there is no way to enter a separate key.', lvl=error)
 
 
 @install.command(short_help='build and install frontend')
@@ -1195,6 +1215,7 @@ def install_all(clear):
 
     install_var(clear=clear, clear_all=clear)
     install_modules(wip=False)
+    install_provisions(provision='user', dbhost=db_host_default, clear=clear)
     install_provisions(provision=None, dbhost=db_host_default, clear=clear)
     install_docs(clear=clear)
 
@@ -1244,11 +1265,11 @@ def modify(ctx, schema, uuid, filter, field, value):
         obj = model.find_one(literal_eval(filter))
     else:
         log('No object uuid or filter specified.',
-                lvl=error)
+            lvl=error)
 
     if obj is None:
         log('No object found',
-                lvl=error)
+            lvl=error)
         return
 
     log('Object found, modifying', lvl=debug)
@@ -1317,9 +1338,9 @@ def validate(ctx, schema, all):
         except Exception as e:
 
             log('Exception while validating:',
-                    schema, e, type(e),
-                    '\n\nFix this object and rerun validation!',
-                    emitter='MANAGE', lvl=error)
+                schema, e, type(e),
+                '\n\nFix this object and rerun validation!',
+                emitter='MANAGE', lvl=error)
 
     log('Done!')
 
@@ -1520,7 +1541,7 @@ def find_field(ctx, search, by_type, obj):
                             # log("Found field", field, "in", model)
                 except KeyError as e:
                     log("Field access error:", e, type(e), exc=True,
-                            lvl=debug)
+                        lvl=debug)
 
         if 'properties' in fields:
             # log('Sub properties checking:', fields['properties'])
@@ -1705,7 +1726,7 @@ def dupcheck(ctx, delete, merge, schema):
                             continue
 
                         log(deepdiff.DeepDiff(dupes[item][merge_request_a]._fields,
-                                                  dupes[item][merge_request_b]._fields), pretty=True)
+                                              dupes[item][merge_request_b]._fields), pretty=True)
 
                         if request == 'm':
                             log('Merging candidates', merge_request_a, 'and', merge_request_b)
