@@ -56,16 +56,15 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
 
     def get_system_user():
         """Retrieves the node local system user"""
-        global system_user
 
-        if system_user is None:
-            system_user = objectmodels['user'].find_one({'name': 'System'})
-            try:
-                hfoslog('System user uuid: ', system_user.uuid, lvl=verbose)
-                return True
-            except AttributeError:
-                hfoslog('No system user found.')
-                return False
+        user = objectmodels['user'].find_one({'name': 'System'})
+
+        try:
+            hfoslog('System user uuid: ', system_user.uuid, lvl=verbose)
+            return user
+        except AttributeError:
+            hfoslog('No system user found.')
+            return False
 
     # TODO: Do not check this on specific objects but on the model (i.e. once)
     def needs_owner(obj):
@@ -83,7 +82,9 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
     client = pymongo.MongoClient(host="localhost", port=27017)
     db = client["hfos"]
 
-    if not get_system_user():
+    system_user = get_system_user()
+
+    if not system_user:
         return
 
     col_name = dbobject.collection_name()
