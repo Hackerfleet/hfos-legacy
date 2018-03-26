@@ -38,8 +38,6 @@ from jsonschema import ValidationError
 from hfos.logger import hfoslog, debug, verbose, warn, error
 from hfos.database import objectmodels
 
-system_user = None
-
 
 def provisionList(items, dbobject, overwrite=False, clear=False,
                   indices=None, indices_types=None, indices_unique=None):
@@ -54,6 +52,8 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
     :return:
     """
 
+    system_user = None
+
     def get_system_user():
         """Retrieves the node local system user"""
         global system_user
@@ -62,10 +62,10 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
             system_user = objectmodels['user'].find_one({'name': 'System'})
             try:
                 hfoslog('System user uuid: ', system_user.uuid, lvl=verbose)
+                return True
             except AttributeError:
                 hfoslog('No system user found.')
-
-        return system_user
+                return False
 
     # TODO: Do not check this on specific objects but on the model (i.e. once)
     def needs_owner(obj):
@@ -82,6 +82,9 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
 
     client = pymongo.MongoClient(host="localhost", port=27017)
     db = client["hfos"]
+
+    if not get_system_user():
+        return
 
     col_name = dbobject.collection_name()
 
@@ -114,7 +117,7 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
                 if needs_owner(new_object):
                     if not hasattr(new_object, 'owner'):
                         hfoslog('Adding system owner to object.', lvl=verbose)
-                        new_object.owner = get_system_user().uuid
+                        new_object.owner = system_user.uuid
             except Exception as e:
                 hfoslog('Error during ownership test:', e, type(e),
                         exc=True, lvl=error)
