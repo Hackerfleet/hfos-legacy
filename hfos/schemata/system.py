@@ -66,7 +66,8 @@ SystemconfigSchema['properties'].update({
                                     'interface'},
     'hostname': {'type': 'string', 'title': 'Public hostname',
                  'description': 'Public FQDN hostname to use for internet '
-                                'based services (host.domain.tld)'}
+                                'based services (host.domain.tld)',
+                 'default': 'localhost'}
 })
 
 SystemconfigForm = [
@@ -78,7 +79,7 @@ SystemconfigForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'name'
+                    'name', 'hostname'
                 ]
             },
             {
