@@ -37,23 +37,27 @@ A default form listing all object elements with submit button.
 savebutton = {
     'type': 'button',
     'title': 'Save Object',
+    'condition': '$ctrl.readonly === false',
     'onClick': '$ctrl.submitObject()'
 }
 
 createnewbutton = {
     'type': 'button',
     'title': 'Save & Create new',
+    'condition': '$ctrl.readonly === false',
     'onClick': '$ctrl.save_createObject()'
 }
 
 deletebutton = {
     'type': 'button',
     'title': 'Delete Object',
+    'condition': '$ctrl.readonly === false',
     'onClick': '$ctrl.deleteObject()'
 }
 
 editbuttons = {
     'type': 'actions',
+    'condition': '$ctrl.readonly === false',
     'items': [
         savebutton,
         createnewbutton,
@@ -70,6 +74,7 @@ changeonlyform = [
     '*',
     {
         'type': 'actions',
+        'condition': '$ctrl.readonly === false',
         'items': [
             savebutton
         ]
