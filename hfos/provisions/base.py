@@ -40,7 +40,8 @@ from hfos.database import objectmodels
 
 
 def provisionList(items, dbobject, overwrite=False, clear=False,
-                  indices=None, indices_types=None, indices_unique=None):
+                  indices=None, indices_types=None, indices_unique=None,
+                  skip_user_check=False):
     """Provisions a list of items according to their schema
 
     :param items: A list of provisionable items.
@@ -58,12 +59,13 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
         """Retrieves the node local system user"""
 
         user = objectmodels['user'].find_one({'name': 'System'})
+        hfoslog('System user:', user._fields, pretty=True, lvl=debug)
 
         try:
-            hfoslog('System user uuid: ', system_user.uuid, lvl=verbose)
-            return user
-        except AttributeError:
-            hfoslog('No system user found.')
+            hfoslog('System user uuid: ', user.uuid, lvl=verbose)
+            return user.uuid
+        except AttributeError as e:
+            hfoslog('No system user found:', e, lvl=error)
             return False
 
     # TODO: Do not check this on specific objects but on the model (i.e. once)
@@ -82,10 +84,17 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
     client = pymongo.MongoClient(host="localhost", port=27017)
     db = client["hfos"]
 
-    system_user = get_system_user()
+    if not skip_user_check:
+        system_user = get_system_user()
 
-    if not system_user:
-        return
+        if not system_user:
+            return
+    else:
+        # TODO: Evaluate what to do instead of using a hardcoded UUID
+        # This is ususally only here for provisioning the system user
+        # One way to avoid this, is to create (instead of provision)
+        # this one upon system installation.
+        system_user = '0ba87daa-d315-462e-9f2e-6091d768fd36'
 
     col_name = dbobject.collection_name()
 
@@ -118,7 +127,7 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
                 if needs_owner(new_object):
                     if not hasattr(new_object, 'owner'):
                         hfoslog('Adding system owner to object.', lvl=verbose)
-                        new_object.owner = system_user.uuid
+                        new_object.owner = system_user
             except Exception as e:
                 hfoslog('Error during ownership test:', e, type(e),
                         exc=True, lvl=error)
