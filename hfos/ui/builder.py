@@ -163,7 +163,7 @@ def install_frontend(forcereload=False, forcerebuild=False,
     #    hfoslog("Error: ", e, type(e), lvl=error, exc=True, emitter='BUILDER')
     #    return
 
-    hfoslog('COMPONENTS AFTER LOOKUP:', components.keys(), lvl=hilight)
+    hfoslog('Components after lookup:', sorted(list(components.keys())), emitter='BUILDER')
 
     def _update_frontends(install=True):
         hfoslog("Checking unique frontend locations: ",

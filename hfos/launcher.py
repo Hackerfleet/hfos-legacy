@@ -72,10 +72,17 @@ class ready(Event):
 
 
 class cli_components(Event):
+    """List registered and running components"""
+    pass
+
+
+class cli_reload_db(Event):
+    """Reload database and schemata (Dangerous!)"""
     pass
 
 
 class cli_drop_privileges(Event):
+    """Try to drop possible root privileges"""
     pass
 
 
@@ -83,23 +90,26 @@ def drop_privileges(uid_name='hfos', gid_name='hfos'):
     """Attempt to drop privileges and change user to 'hfos' user/group"""
 
     if os.getuid() != 0:
-        hfoslog("Not root, cannot drop privileges. Probably opening "
-                "the web port failed as well", lvl=warn, emitter='CORE')
+        hfoslog("Not root, cannot drop privileges", lvl=warn, emitter='CORE')
         return
 
-    # Get the uid/gid from the name
-    running_uid = pwd.getpwnam(uid_name).pw_uid
-    running_gid = grp.getgrnam(gid_name).gr_gid
+    try:
+        # Get the uid/gid from the name
+        running_uid = pwd.getpwnam(uid_name).pw_uid
+        running_gid = grp.getgrnam(gid_name).gr_gid
 
-    # Remove group privileges
-    os.setgroups([])
+        # Remove group privileges
+        os.setgroups([])
 
-    # Try setting the new uid/gid
-    os.setgid(running_gid)
-    os.setuid(running_uid)
+        # Try setting the new uid/gid
+        os.setgid(running_gid)
+        os.setuid(running_uid)
 
-    # Ensure a very conservative umask
-    # old_umask = os.umask(22)
+        # Ensure a very conservative umask
+        # old_umask = os.umask(22)
+        hfoslog('Privileges dropped', emitter='CORE')
+    except Exception as e:
+        hfoslog('Could not drop privileges:', e, type(e), exc=True, lvl=error, emitter='CORE')
 
 
 class Core(ConfigurableComponent):
@@ -212,6 +222,7 @@ class Core(ConfigurableComponent):
 
         self.fireEvent(cli_register_event('components', cli_components))
         self.fireEvent(cli_register_event('drop_privileges', cli_drop_privileges))
+        self.fireEvent(cli_register_event('reload_db', cli_reload_db))
 
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
@@ -224,17 +235,23 @@ class Core(ConfigurableComponent):
 
     @handler('cli_drop_privileges')
     def cli_drop_privileges(self, event):
-        self.log('Trying to drop privileges')
+        self.log('Trying to drop privileges', lvl=debug)
         self._drop_privileges()
 
     @handler('cli_components')
     def cli_components(self, event):
         self.log('Running components: ', sorted(self.runningcomponents.keys()))
 
+    @handler('cli_reload_db')
+    def cli_reload_db(self, event):
+        self.log('Reloading database.')
+
+        initialize()
+
     def _start_server(self, *args):
         """Run the node local server"""
 
-        self.log("Starting server", args, lvl=warn)
+        self.log("Starting server", args)
         secure = self.certificate is not None
         if secure:
             self.log("Running SSL server with cert:", self.certificate)
@@ -253,7 +270,7 @@ class Core(ConfigurableComponent):
                      'permissions!', lvl=critical)
 
     def _drop_privileges(self, *args):
-        self.log("Dropping privileges", args, lvl=warn)
+        self.log("Dropping privileges", lvl=debug)
         drop_privileges()
 
     # Moved to manage tool, maybe of interest later, though:

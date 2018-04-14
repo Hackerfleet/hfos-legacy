@@ -375,5 +375,5 @@ class ExampleComponent(ConfigurableComponent):
         adding a log statement."""
         super(ExampleComponent, self).__init__("EXAMPLE", *args, **kwargs)
 
-        self.log("Example component started.")
+        self.log("Example component started")
         # self.log(self.config)

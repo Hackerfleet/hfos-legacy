@@ -35,7 +35,7 @@ class Syslog(ConfigurableComponent):
     def __init__(self, *args):
         super(Syslog, self).__init__('SYSLOG', *args)
 
-        self.log("Started.")
+        self.log("Started")
 
         self.subscribers = []
 

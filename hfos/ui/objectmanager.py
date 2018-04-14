@@ -111,20 +111,20 @@ class ObjectManager(ConfigurableComponent):
                 return True
         return False
 
-    def _cancel_by_permission(self, schema, data, client):
-        self.log('No permission:', schema, data, client.useruuid,
+    def _cancel_by_permission(self, schema, data, event):
+        self.log('No permission:', schema, data, event.user.uuid,
                  lvl=error)
 
         msg = {
             'component': 'hfos.events.objectmanager',
-            'action': 'fail',
+            'action': event.action,
             'data': {
                 'reason': 'No permission',
                 'data': data,
                 'req': data.get('req')
             }
         }
-        self.fire(send(client.uuid, msg))
+        self.fire(send(event.client.uuid, msg))
 
     def _cancel_by_error(self, event, reason="malformed"):
         self.log('Bad request:', reason, lvl=error)
@@ -145,14 +145,14 @@ class ObjectManager(ConfigurableComponent):
         except AttributeError:
             return
 
-        if 'schema' not in data or data['schema'] not in \
-            objectmodels.keys():
-            self._cancel_by_error(event, 'invalid_schema')
+        if 'schema' not in data:
+            self._cancel_by_error(event, 'no_schema')
             return
-        else:
-            schema = data['schema']
+        if data['schema'] not in objectmodels.keys():
+            self._cancel_by_error(event, 'invalid_schema:' + data['schema'])
+            return
 
-        return schema
+        return data['schema']
 
     @staticmethod
     def _get_filter(event):
@@ -237,7 +237,7 @@ class ObjectManager(ConfigurableComponent):
 
             if not self._check_permissions(user, 'read',
                                            storage_object):
-                self._cancel_by_permission(schema, data, event.client)
+                self._cancel_by_permission(schema, data, event)
                 return
 
             for field in hidden:
@@ -470,7 +470,7 @@ class ObjectManager(ConfigurableComponent):
             return
 
         if not self._check_permissions(user, 'write', storage_object):
-            self._cancel_by_permission(schema, data, client)
+            self._cancel_by_permission(schema, data, event)
             return
 
         self.log("Changing object:", storage_object._fields, lvl=debug)
@@ -533,12 +533,12 @@ class ObjectManager(ConfigurableComponent):
                 clientobject['owner'] = user.uuid
                 storage_object = model(clientobject)
                 if not self._check_create_permission(user, schema):
-                    self._cancel_by_permission(schema, data, client)
+                    self._cancel_by_permission(schema, data, event)
                     return
 
             if storage_object is not None:
                 if not self._check_permissions(user, 'write', storage_object):
-                    self._cancel_by_permission(schema, data, client)
+                    self._cancel_by_permission(schema, data, event)
                     return
 
                 self.log("Updating object:", storage_object._fields, lvl=debug)
@@ -547,7 +547,7 @@ class ObjectManager(ConfigurableComponent):
             else:
                 storage_object = model(clientobject)
                 if not self._check_permissions(user, 'write', storage_object):
-                    self._cancel_by_permission(schema, data, client)
+                    self._cancel_by_permission(schema, data, event)
                     return
 
                 self.log("Storing object:", storage_object._fields, lvl=debug)
@@ -614,7 +614,7 @@ class ObjectManager(ConfigurableComponent):
                 self.log("Found object.", lvl=debug)
 
                 if not self._check_permissions(user, 'write', storage_object):
-                    self._cancel_by_permission(schema, data, client)
+                    self._cancel_by_permission(schema, data, event)
                     return
 
                 #self.log("Fields:", storage_object._fields, "\n\n\n",

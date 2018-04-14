@@ -244,7 +244,7 @@ class ClientManager(ConfigurableComponent):
     def disconnect(self, sock):
         """Handles socket disconnections"""
 
-        self.log("Disconnect ", sock)
+        self.log("Disconnect ", sock, lvl=debug)
 
         try:
             if sock in self._sockets:
@@ -281,11 +281,11 @@ class ClientManager(ConfigurableComponent):
     def _logoutclient(self, useruuid, clientuuid):
         """Log out a client and possibly associated user"""
 
-        self.log("Cleaning up client of logged in user.")
+        self.log("Cleaning up client of logged in user.", lvl=debug)
         try:
             self._users[useruuid].clients.remove(clientuuid)
             if len(self._users[useruuid].clients) == 0:
-                self.log("Last client of user disconnected.")
+                self.log("Last client of user disconnected.", lvl=verbose)
 
                 self.fireEvent(userlogout(useruuid, clientuuid))
                 del self._users[useruuid]
@@ -457,7 +457,7 @@ class ClientManager(ConfigurableComponent):
 
             event = self.authorized_events[component][action]['event']
 
-            self.log('Authorized event roles:', event.roles, lvl=hilight)
+            self.log('Authorized event roles:', event.roles, lvl=debug)
             if not self._checkPermissions(user, event):
                 result = {
                     'component': 'hfos.ui.clientmanager',
@@ -663,18 +663,22 @@ class ClientManager(ConfigurableComponent):
             try:
                 useruuid = client.useruuid
                 self.log("Authenticated operation requested by ",
-                         client.config, lvl=network)
+                         useruuid, client.config, lvl=network)
             except Exception as e:
                 self.log("No useruuid!", e, type(e), lvl=critical)
                 return
 
+            self.log('Checking if user is logged in', lvl=debug)
+
             try:
                 user = self._users[useruuid]
             except KeyError:
-                if not requestaction == 'ping' and requestcomponent == 'hfos.ui.clientmanager':
+                if not (requestaction == 'ping' and requestcomponent == 'hfos.ui.clientmanager'):
                     self.log("User not logged in.", lvl=warn)
+
                 return
 
+            self.log('Handling event:', requestcomponent, requestaction, lvl=debug)
             try:
                 self._handleAuthorizedEvents(requestcomponent, requestaction,
                                              requestdata, user, client)
@@ -780,7 +784,7 @@ class ClientManager(ConfigurableComponent):
 
     @handler(ping)
     def ping(self, event):
-        self.log('Client ping received:', event.data)
+        self.log('Client ping received:', event.data, lvl=debug)
         response = {
             'component': 'hfos.ui.clientmanager',
             'action': 'pong',
