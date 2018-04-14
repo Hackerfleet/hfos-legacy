@@ -1,0 +1,141 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2018 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+
+<div class="well" style="padding-top: 5px">
+    <h1>Session Management</h1>
+
+    <button class="btn btn-success" ng-click="$ctrl.addSession()">
+        <span class="fa fa-plus"></span>Add a new session
+    </button>
+
+    <div class="panel-group" ng-model="panel.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        Existing Sessions
+                        <span class="badge"
+                              ng-show="$ctrl.sessions.length > 0">{{$ctrl.sessions.length}}</span>
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
+                <div class="panel-body">
+                    <table class="table table-condensed table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tr ng-repeat="session in $ctrl.sessions">
+                            <td>
+                                {{session.name}}
+                            </td>
+                            <td>
+                                {{session.duration}}
+                            </td>
+                            <td>
+                                <span>{{session.status}}</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-success"
+                                        ng-click="$ctrl.editSession(session.uuid)">
+                                    <span class="fa fa-pencil"></span>Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger"
+                                        ng-click="$ctrl.deleteSession(session.uuid)">
+                                    <span class="fa fa-times"></span>Delete
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        <span ng-hide="$ctrl.editing">Add a new session</span>
+                        <span ng-show="$ctrl.editing">Edit session {{$ctrl.model.name}}</span>
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
+                <div class="panel-body">
+                    <div ng-show="$ctrl.schema !== null">
+
+                        <form sf-schema="$ctrl.schema" sf-form="$ctrl.form" sf-model="$ctrl.model">
+                        </form>
+
+                        <form class="form form-inline">
+                            <div class="form-group">
+                                <input class="form-control" type="file" id="upload_file">
+                                <button class="btn btn-default" ng-click="$ctrl.uploadFile()"><span class="fa fa-chain"></span>Attach file</button>
+                            </div>
+                            <div class="form-group pull-right">
+                                <button class="btn btn-success" ng-click="$ctrl.submitSession()"><span class="fa fa-floppy-o"></span>Save session</button>
+                            </div>
+                        </form>
+
+                        <div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="$ctrl.user.debug === true">
+        <span class="fa" ng-click="modelCollapsed = !modelCollapsed" ng-class="{'fa-chevron-right': modelCollapsed,
+            'fa-chevron-down': !modelCollapsed}"></span>Model:
+        <pre uib-collapse="modelCollapsed">{{$ctrl.model | json}}</pre>
+
+        <hr>
+
+        <span class="fa" ng-click="schemaCollapsed = !schemaCollapsed" ng-class="{'fa-chevron-right': schemaCollapsed,
+            'fa-chevron-down': !schemaCollapsed}"></span>Schema:
+        <pre uib-collapse="schemaCollapsed">{{$ctrl.schema | json}}</pre>
+        </span>
+
+        <hr>
+
+        <span class="fa" ng-click="formCollapsed = !formCollapsed" ng-class="{'fa-chevron-right': formCollapsed,
+            'fa-chevron-down': !formCollapsed}"></span>Form:
+        <pre uib-collapse="formCollapsed">{{$ctrl.form | json}}</pre>
+        </span>
+
+        <hr>
+
+        <span class="fa" ng-click="sessionsCollapsed = !sessionsCollapsed" ng-class="{'fa-chevron-right': sessionsCollapsed,
+            'fa-chevron-down': !sessionsCollapsed}"></span>Form:
+        <pre uib-collapse="sessionsCollapsed">{{$ctrl.sessions | json}}</pre>
+        </span>
+    </div>
+</div>
