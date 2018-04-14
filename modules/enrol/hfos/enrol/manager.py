@@ -40,7 +40,7 @@ from hfos.component import ConfigurableComponent, handler
 from hfos.events.system import authorizedevent, anonymousevent
 from hfos.events.client import send
 from hfos.database import objectmodels
-from hfos.logger import warn, debug, verbose, error
+from hfos.logger import warn, debug, verbose, error, hilight
 from hfos.tools import std_uuid, std_now, std_hash, std_salt, _
 from pystache import render
 from email.mime.text import MIMEText
@@ -77,6 +77,10 @@ class captcha(anonymousevent):
 
 
 class status(anonymousevent):
+    pass
+
+
+class request_reset(anonymousevent):
     pass
 
 
@@ -158,6 +162,26 @@ Click this link to join the crew:
 Have fun,
 the friendly robot of {{node_name}}
 '''
+        },
+        'acceptance_subject': {
+            'type': 'string',
+            'title': 'Acceptance mail subject',
+            'description': 'Mail subject to send to accepted invitees',
+            'default': 'Your account on {{node_name}} is now active'
+        },
+
+        'acceptance_mail': {
+            'type': 'string',
+            'title': 'Acceptance mail text',
+            'description': 'Mail body to send to accepted invitees',
+            'default': '''Hello {{name}}!
+You can now use the HFOS node at {{node_name}}!
+Click this link to login: 
+{{node_url}}
+
+Have fun,
+the friendly robot of {{node_name}}
+'''
         }
     }
 
@@ -191,7 +215,9 @@ the friendly robot of {{node_name}}
 
         self.hostname = hostname
         self.node_name = systemconfig.name
-        self.invitation_url = protocol + '://' + hostname + '/#!/invitation/'
+        self.node_url = protocol + '://' + hostname
+        self.invitation_url = self.node_url + '/#!/invitation/'
+
         self.salt = salt
         self.systemconfig = systemconfig
 
@@ -227,7 +253,8 @@ the friendly robot of {{node_name}}
             reply = {True: enrollment.serializablefields()}
 
         if status == 'Accepted':
-            self._create_user(enrollment.username, enrollment.password, enrollment.email)
+            self._create_user(enrollment.name, enrollment.password, enrollment.email, 'Invited')
+            self._send_acceptance(enrollment)
 
         packet = {
             'component': 'hfos.enrol.manager',
@@ -251,6 +278,8 @@ the friendly robot of {{node_name}}
         user = objectmodels['user'].find_one({'uuid': uuid})
         if std_hash(old, self.salt) == user.passhash:
             user.passhash = std_hash(new, self.salt)
+            user.save()
+
             packet = {
                 'component': 'hfos.enrol.manager',
                 'action': 'changepassword',
@@ -367,23 +396,31 @@ the friendly robot of {{node_name}}
                         enrollment.status = 'Accepted'
                         data = 'You can now log in to the system and start to use it.'
                         self._create_user(enrollment.name, enrollment.password, enrollment.email, enrollment.method)
+                        self._send_acceptance(enrollment)
                         # TODO: add account to self.config.group_accept group
                     else:
                         enrollment.status = 'Pending'
                         data = 'Someone has to confirm your enrollment ' \
                                'first. Thank you, for your patience.'
                         # TODO: Alert admin users
-
                     enrollment.save()
-                    packet = {
-                        'component': 'hfos.enrol.manager',
-                        'action': 'accept',
-                        'data': {True: data}
-                    }
-                    self.fireEvent(send(event.client.uuid, packet))
+
+                # Reaffirm acceptance to end user, when clicking on the link multiple times
+                elif enrollment.status == 'Accepted':
+                    data = 'You can now log in to the system and start to use it.'
+                elif enrollment.status == 'Pending':
+                    data = 'Someone has to confirm your enrollment ' \
+                           'first. Thank you, for your patience.'
                 else:
                     self.log('Enrollment has been closed already!', lvl=warn)
                     fail(event.client.uuid)
+                    return
+                packet = {
+                    'component': 'hfos.enrol.manager',
+                    'action': 'accept',
+                    'data': {True: data}
+                }
+                self.fireEvent(send(event.client.uuid, packet))
             else:
                 self.log('No enrollment available.', lvl=warn)
                 fail(event.client.uuid)
@@ -410,6 +447,25 @@ the friendly robot of {{node_name}}
         """An anonymous client requests a captcha challenge"""
 
         self._generate_captcha(event)
+
+    @handler(request_reset)
+    def request_reset(self, event):
+        """An anonymous client requests a password reset"""
+
+        self.log('Password reset request received:', event.__dict__, lvl=hilight)
+
+        user_object = objectmodels['user']
+
+        username = event.data.get('username', None)
+        email = event.data.get('email', None)
+
+        if email is not None and user_object.count({'mail': email}) > 0:
+            email_user = user_object.find_one({'mail': email})
+        if username is not None and user_object.count({'name': username}) > 0:
+            named_user = user_object.find_one({'name': username})
+
+
+
 
     def _generate_captcha(self, event):
         self.log('Generating requested captcha')
@@ -517,16 +573,30 @@ the friendly robot of {{node_name}}
 
         self.log('Sending enrollment status mail to user')
 
+        self._send_mail(self.config.invitation_subject, self.config.invitation_mail, enrollment)
+
+    def _send_acceptance(self, enrollment):
+        """Send an acceptance mail to an open enrolment"""
+
+        self.log('Sending acceptance status mail to user')
+
+        self._send_mail(self.config.acceptance_subject, self.config.acceptance_mail, enrollment)
+
+    def _send_mail(self, subject, template, enrollment):
+        """Connect to mail server and send actual email"""
+
         context = {
             'name': enrollment.name,
             'invitation_url': self.invitation_url,
             'node_name': self.node_name,
+            'node_url': self.node_url,
             'uuid': enrollment.uuid
         }
-        mail = render(self.config.invitation_mail, context)
+
+        mail = render(template, context)
         self.log('Mail:', mail, lvl=verbose)
         mime_mail = MIMEText(mail)
-        mime_mail['Subject'] = render(self.config.invitation_subject, context)
+        mime_mail['Subject'] = render(subject, context)
         mime_mail['From'] = render(self.config.mail_from, {'hostname': self.hostname})
         mime_mail['To'] = enrollment.email
 
