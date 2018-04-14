@@ -39,23 +39,24 @@ Provisions
 
 """
 
-from hfos.schemata.defaultform import editbuttons
+from hfos.schemata.defaultform import editbuttons, section, lookup_field
 from hfos.schemata.tag import TagData, TagForm
 from hfos.schemata.base import base_object, uuid_object
 
 TaskSchema = base_object('task', all_roles='crew')
 
 TaskSchema['properties'].update({
-    'project': uuid_object('Project which this task is part of'),
-    'creator': {'type': 'string', 'title': 'Creator',
-                'description': 'Creator of Task'},
-    'assignee': {'type': 'string', 'title': 'Assignee',
-                 'description': 'Assigned user'},
+    'project': uuid_object('Project which this task is part of', 'Select a project'),
+    'creator': uuid_object('Creator', 'Select a creator'),
+    'assignee': uuid_object('Assignee', 'Select an assignee'),
     'taskgroup': uuid_object(title='Task group', description='Group, this task belongs to'),
     'tags': TagData,
-    'alert': {'type': 'string', 'title': 'Alert',
-              'format': 'datetimepicker',
-              'description': 'Alert time'},
+    'alert_date': {'type': 'string', 'title': 'Alert',
+                   'format': 'datepicker',
+                   'description': 'Alert date'},
+    'alert_time': {'type': 'string', 'title': 'Alert',
+                   'format': 'timepicker',
+                   'description': 'Alert time'},
     'priority': {'type': 'number', 'title': 'Priority',
                  'description': '1 is Highest priority', 'minimum': 1},
     'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
@@ -131,75 +132,77 @@ TaskSchema['properties'].update({
 })
 
 TaskForm = [
-    {
-        'type': 'section',
-        'htmlClass': 'row',
-        'items': [
-            {
-                'type': 'section',
-                'htmlClass': 'col-xs-6',
-                'items': [
-                    'name', {
-                        'key': 'project',
-                        'type': 'strapselect',
-                        'placeholder': 'Select a Project',
-                        'options': {
-                            "type": "project",
-                            "asyncCallback": "$ctrl.getFormData",
-                            "map": {'valueProperty': "uuid",
-                                    'nameProperty': 'name'}
-                        }
-                    }
-                ]
-            },
-            {
-                'type': 'section',
-                'htmlClass': 'col-xs-6',
-                'items': [
-                    {
-                        'key': 'owner',
-                        'type': 'strapselect',
-                        'placeholder': 'Select a new Owner',
-                        'options': {
-                            "type": "user",
-                            "asyncCallback": "$ctrl.getFormData",
-                            "map": {'valueProperty': "uuid",
-                                    'nameProperty': 'name'}
-                        }
-                    }, {
-                        'key': 'assignee',
-                        'type': 'strapselect',
-                        'placeholder': 'Select an Assignee',
-                        'options': {
-                            "type": "user",
-                            "asyncCallback": "$ctrl.getFormData",
-                            "map": {'valueProperty': "uuid",
-                                    'nameProperty': 'name'}
-                        }
-                    }
-                ]
-            },
-            {
-                'type': 'section',
-                'htmlClass': 'col-xs-6',
-                'items': [
-                    'priority', {
-                        'key': 'taskgroup',
-                        'type': 'strapselect',
-                        'placeholder': 'Select a Task Group',
-                        'options': {
-                            "type": "taskgroup",
-                            "asyncCallback": "$ctrl.getFormData",
-                            "map": {'valueProperty': "uuid",
-                                    'nameProperty': 'name'}
-                        }
-                    }
-                ]
-            },
-        ]
-    },
+    section(2, 3, [['name', lookup_field('assignee', 'user'), 'priority'],
+                   [lookup_field('project'), lookup_field('taskgroup'), 'creator']]),
+    section(1, 2, [['alert_date', 'alert_time']]),
+    # {
+    #     'type': 'section',
+    #     'htmlClass': 'row',
+    #     'items': [
+    #         {
+    #             'type': 'section',
+    #             'htmlClass': 'col-xs-6',
+    #             'items': [
+    #                 'name', {
+    #                     'key': 'project',
+    #                     'type': 'strapselect',
+    #                     'placeholder': 'Select a Project',
+    #                     'options': {
+    #                         "type": "project",
+    #                         "asyncCallback": "$ctrl.getFormData",
+    #                         "map": {'valueProperty': "uuid",
+    #                                 'nameProperty': 'name'}
+    #                     }
+    #                 }
+    #             ]
+    #         },
+    #         {
+    #             'type': 'section',
+    #             'htmlClass': 'col-xs-6',
+    #             'items': [
+    #                 {
+    #                     'key': 'owner',
+    #                     'type': 'strapselect',
+    #                     'placeholder': 'Select a new Owner',
+    #                     'options': {
+    #                         "type": "user",
+    #                         "asyncCallback": "$ctrl.getFormData",
+    #                         "map": {'valueProperty': "uuid",
+    #                                 'nameProperty': 'name'}
+    #                     }
+    #                 }, {
+    #                     'key': 'assignee',
+    #                     'type': 'strapselect',
+    #                     'placeholder': 'Select an Assignee',
+    #                     'options': {
+    #                         "type": "user",
+    #                         "asyncCallback": "$ctrl.getFormData",
+    #                         "map": {'valueProperty': "uuid",
+    #                                 'nameProperty': 'name'}
+    #                     }
+    #                 }
+    #             ]
+    #         },
+    #         {
+    #             'type': 'section',
+    #             'htmlClass': 'col-xs-6',
+    #             'items': [
+    #                 'priority', {
+    #                     'key': 'taskgroup',
+    #                     'type': 'strapselect',
+    #                     'placeholder': 'Select a Task Group',
+    #                     'options': {
+    #                         "type": "taskgroup",
+    #                         "asyncCallback": "$ctrl.getFormData",
+    #                         "map": {'valueProperty': "uuid",
+    #                                 'nameProperty': 'name'}
+    #                     }
+    #                 }
+    #             ]
+    #         },
+    #     ]
+    # },
     TagForm,
-    'alert',
     {
         'key': 'notes',
         "tinymceOptions": {
