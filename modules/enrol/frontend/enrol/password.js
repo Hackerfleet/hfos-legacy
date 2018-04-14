@@ -33,14 +33,30 @@
  */
 class PasswordChange {
 
-    constructor(scope, user, socket) {
+    constructor(scope, user, socket, notification, state) {
         this.scope = scope;
         this.user = user;
         this.socket = socket;
+        this.notification = notification;
+        this.state = state;
 
         this.password_old = '';
         this.password_new = '';
         this.password_confirm = '';
+
+        let self = this;
+
+        this.socket.listen('hfos.enrol.manager', function(msg) {
+            console.log('[PASSWORD]', msg);
+            if (msg.action === 'changepassword') {
+                if (msg.data === true) {
+                    self.notification.add('success', 'Password changed!', 'Your password has been changed successfully.', 5);
+                    self.state.go('app.menu');
+                } else {
+                    self.notification.add('danger', 'Password not changed', 'Your password has not been changed!', 5);
+                }
+            }
+        })
     }
 
     update_password() {
@@ -71,6 +87,6 @@ class PasswordChange {
 
 }
 
-PasswordChange.$inject = ['$scope', 'user', 'socket'];
+PasswordChange.$inject = ['$scope', 'user', 'socket', 'notification', '$state'];
 
 export default PasswordChange;
