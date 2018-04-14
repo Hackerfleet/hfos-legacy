@@ -40,11 +40,11 @@
                 <input ng-model="$ctrl.email" class="form-control" id="email" />
             </div>
         </div>
-        <span class="help-block" ng-show="$ctrl.username.length < 5 && $ctrl.email === ''">Enter your username or email address</span>
+        <span class="help-block" ng-show="$ctrl.username.length < 4 && $ctrl.email === ''">Enter your username or email address</span>
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-3">
-                <button ng-class="{disabled: $ctrl.username.length < 5 && $ctrl.email === ''}"
+                <button ng-class="{disabled: $ctrl.username.length < 4 && $ctrl.email === ''}"
                         class="btn btn-default" ng-click="$ctrl.request_reset()">Submit</button>
             </div>
         </div>
