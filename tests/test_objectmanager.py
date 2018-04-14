@@ -199,7 +199,7 @@ def test_get_schema_invalid():
     })
 
     assert packet['action'] == 'fail'
-    assert packet['data']['reason'] is 'invalid_schema'
+    assert packet['data']['reason'] is 'no_schema'
 
 
 def test_get_object():
@@ -240,7 +240,7 @@ def test_get_permission_error():
         'uuid': system_config_uuid
     }, account)
 
-    assert packet['action'] == 'fail'
+    assert packet['action'] == 'get'
     assert 'data' in packet
 
     data = packet['data']
@@ -333,7 +333,7 @@ def test_put_new_permission_error():
         'uuid': uuid
     }, account)
     pprint(packet)
-    assert packet['action'] == 'fail'
+    assert packet['action'] == 'put'
     assert 'data' in packet
 
     data = packet['data']
