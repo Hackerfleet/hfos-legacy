@@ -37,7 +37,6 @@ Hackerfleet Operating System installations.
 """
 
 import click
-import csv
 import getpass
 import grp
 import hashlib
@@ -69,6 +68,7 @@ from hfos.ui.builder import install_frontend
 from hfos.migration import make_migrations
 from hfos.logger import debug, warn, error, verbosity, hfoslog
 from hfos.tools import write_template_file
+from hfos.database import backup
 
 # 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
 try:
@@ -80,8 +80,7 @@ except NameError:
 try:
     from subprocess import Popen, PIPE
 except ImportError:
-    # noinspection PyUnresolvedReferences,PyUnresolvedReferences,
-    # PyUnresolvedReferences
+    # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
     from subprocess32 import Popen, PIPE  # NOQA
 
 try:
@@ -744,6 +743,7 @@ def install_var(clear, clear_all):
     target_paths = (
         '/var/www/challenges',  # For LetsEncrypt acme certificate challenges
         '/var/lib/hfos',
+        '/var/local/hfos/backup',
         '/var/cache/hfos',
         '/var/cache/hfos/tilecache',
         '/var/cache/hfos/rastertiles',
@@ -1361,79 +1361,7 @@ def export(ctx, schema, uuid, filter, format, filename, pretty, all, omit):
     Warning! This functionality is work in progress and you may destroy live data by using it!
     Be very careful when using the export/import functionality!"""
 
-    format = format.upper()
-
-    if pretty:
-        indent = 4
-    else:
-        indent = 0
-
-    f = None
-
-    if filename:
-        try:
-            f = open(filename, 'w')
-        except (IOError, PermissionError) as e:
-            log('Could not open output file for writing:', e, type(e), lvl=error)
-
-    def output(what, convert=False):
-        if convert:
-            if format == 'JSON':
-                data = json.dumps(what, indent=indent)
-            else:
-                data = ""
-        else:
-            data = what
-
-        if not filename:
-            print(data)
-        else:
-            f.write(data)
-
-    database = ctx.obj['db']
-
-    if schema is None:
-        if all is False:
-            log('No schema given. Read the help', lvl=warn)
-            return
-        else:
-            schemata = database.objectmodels.keys()
-    else:
-        schemata = [schema]
-
-    all_items = {}
-
-    for schema_item in schemata:
-        model = database.objectmodels[schema_item]
-
-        if uuid:
-            obj = model.find({'uuid': uuid})
-        elif filter:
-            obj = model.find(literal_eval(filter))
-        else:
-            obj = model.find()
-
-        items = []
-        for item in obj:
-            fields = item.serializablefields()
-            for field in omit:
-                try:
-                    fields.pop(field)
-                except KeyError:
-                    pass
-            items.append(fields)
-
-        all_items[schema_item] = items
-
-        # if pretty is True:
-        #    output('\n// Objectmodel: ' + schema_item + '\n\n')
-        # output(schema_item + ' = [\n')
-
-    output(all_items, convert=True)
-
-    if f is not None:
-        f.flush()
-        f.close()
+    backup(schema, uuid, filter, format, filename, pretty, all, omit)
 
 
 @db.command('import', short_help='import objects from json')
