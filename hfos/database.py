@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -39,6 +40,9 @@ Schemastore and Objectstore builder functions.
 """
 
 import sys
+import time
+import json
+from ast import literal_eval
 from pprint import pprint
 
 import operator
@@ -296,6 +300,25 @@ class Maintenance(ConfigurableComponent):
                         }
                     },
                     'default': {}
+                },
+                'backup': {
+                    'type': 'object',
+                    'properties': {
+                        'minimum': {
+                            'type': 'integer',
+                            'description': 'Minimum backup free space to '
+                                           'alert on',
+                            'title': 'Minimum backup space',
+                            'default': 50 * 1024 * 1024
+                        },
+                        'location': {
+                            'type': 'string',
+                            'description': 'Location of backup data',
+                            'title': 'Backup location',
+                            'default': '/var/local/hfos'
+                        }
+                    },
+                    'default': {}
                 }
             },
             'default': {}
@@ -391,3 +414,127 @@ class Maintenance(ConfigurableComponent):
                 self.log('Short of free space on %s: %.2f MB left' % (
                     name, free_space / 1024.0 / 1024 / 1024),
                          lvl=warn)
+
+
+class BackupManager(ConfigurableComponent):
+    """Regularly creates backups of collections"""
+
+    configprops = {
+        'location': {
+            'type': 'string',
+            'description': 'Location of library data',
+            'title': 'Library location',
+            'default': '/var/local/hfos'
+        },
+        'interval': {
+            'type': 'integer',
+            'title': 'Backup interval',
+            'description': 'Interval in seconds to create Backup',
+            'default': 86400
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(BackupManager, self).__init__("BACKUP", *args, **kwargs)
+        self.log("Backup manager started")
+
+        self.timer = Timer(
+            self.config.interval,
+            Event.create('backup'), persist=True
+        ).register(self)
+
+    @handler('backup')
+    def backup(self, *args):
+        """Perform a regular backup"""
+
+        self.log('Performing backup')
+        self._create_backup()
+
+    def _create_backup(self):
+        self.log('Backing up all data')
+
+        filename = time.strftime("%Y-%m-%d_%H%M%S.json")
+        filename = join(self.config.location, filename)
+
+        backup(None, None, None, 'json', filename, False, True, [])
+
+
+def backup(schema, uuid, export_filter, export_format, filename, pretty, export_all, omit):
+    """Exports all collections to (JSON-) files."""
+
+    # TODO: Allow export of non-default database
+
+    export_format = export_format.upper()
+
+    if pretty:
+        indent = 4
+    else:
+        indent = 0
+
+    f = None
+
+    if filename:
+        try:
+            f = open(filename, 'w')
+        except (IOError, PermissionError) as e:
+            hfoslog('Could not open output file for writing:', e, type(e), lvl=error, emitter='BACKUP')
+            return
+
+    def output(what, convert=False):
+        """Output the backup in a specified format."""
+
+        if convert:
+            if export_format == 'JSON':
+                data = json.dumps(what, indent=indent)
+            else:
+                data = ""
+        else:
+            data = what
+
+        if not filename:
+            print(data)
+        else:
+            f.write(data)
+
+    if schema is None:
+        if export_all is False:
+            hfoslog('No schema given.', lvl=warn, emitter='BACKUP')
+            return
+        else:
+            schemata = objectmodels.keys()
+    else:
+        schemata = [schema]
+
+    all_items = {}
+
+    for schema_item in schemata:
+        model = objectmodels[schema_item]
+
+        if uuid:
+            obj = model.find({'uuid': uuid})
+        elif export_filter:
+            obj = model.find(literal_eval(export_filter))
+        else:
+            obj = model.find()
+
+        items = []
+        for item in obj:
+            fields = item.serializablefields()
+            for field in omit:
+                try:
+                    fields.pop(field)
+                except KeyError:
+                    pass
+            items.append(fields)
+
+        all_items[schema_item] = items
+
+        # if pretty is True:
+        #    output('\n// Objectmodel: ' + schema_item + '\n\n')
+        # output(schema_item + ' = [\n')
+
+    output(all_items, convert=True)
+
+    if f is not None:
+        f.flush()
+        f.close()
