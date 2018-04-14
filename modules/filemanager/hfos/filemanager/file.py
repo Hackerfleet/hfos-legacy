@@ -40,7 +40,7 @@ Provisions
 """
 
 from hfos.schemata.defaultform import editbuttons
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 # Basic File definitions
 
@@ -52,7 +52,8 @@ FileSchema['properties'].update({
     'hash': {'type': 'string'},
     'size': {'type': 'number'},
     'mtime': {'type': 'number'},
-    #'path': {'type': 'string'}
+    'path': {'type': 'string'},
+    'volume': uuid_object(display=False)
 })
 
 FileEditForm = [

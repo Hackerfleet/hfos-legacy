@@ -42,15 +42,49 @@ from hfos.schemata.base import base_object
 VolumeSchema = base_object('volume', all_roles='crew')
 
 VolumeSchema['properties'].update({
+    'description': {'type': 'string'},
     'hash': {'type': 'string'},
-    'path': {'type': 'string'}
+    'path': {'type': 'string'},
+    'flags': {
+        'type': 'array',
+        'items': {'type': 'string'}
+    },
+    'default_permissions': {
+        'type': 'object',
+        'properties': {
+            'read': {
+                'type': 'array',
+                'items': {
+                    'type': 'string'
+                },
+                'default': ['admin']
+            },
+            'write': {
+                'type': 'array',
+                'items': {
+                    'type': 'string'
+                },
+                'default': ['admin']
+            },
+            'list': {
+                'type': 'array',
+                'items': {
+                    'type': 'string'
+                },
+                'default': ['admin']
+            }
+        }
+    },
 })
+
+VolumeSchema['required'].append('path')
 
 VolumeEditForm = [
     'name',
-    'directory',
+    'path',
+    'description',
+    'permissions',
     editbuttons
 ]
-
 
 Volume = {'schema': VolumeSchema, 'form': VolumeEditForm}

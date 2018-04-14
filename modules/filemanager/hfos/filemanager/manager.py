@@ -113,21 +113,20 @@ def filewalk(top, component, links=None):
     return data, log
 
 
-
 class get(authorizedevent):
-    """A client requires a schema to validate data or display a form"""
+    """FileManager Event"""
 
 
 class get_directory(authorizedevent):
-    """A client requires a schema to validate data or display a form"""
+    """FileManager Event"""
 
 
 class get_volumes(authorizedevent):
-    """A client requires a schema to validate data or display a form"""
+    """FileManager Event"""
 
 
 class put(authorizedevent):
-    """A client requires a schema to validate data or display a form"""
+    """FileManager Event"""
 
 
 class FileManager(ConfigurableComponent):
@@ -146,15 +145,23 @@ class FileManager(ConfigurableComponent):
         self.file_object = objectmodels['file']
 
         self.volumes = {}
+        self.volumes_lookup = {}
 
         for item in objectmodels['volume'].find():
             self.volumes[item.uuid] = item
+            self.volumes_lookup[item.name] = item
+
+            if not os.path.exists(item.path):
+                self.log('Target volume does not exist. Creating path', item.path, lvl=warn)
+                try:
+                    os.makedirs(item.path)
+                except Exception as e:
+                    self.log('Could not create volume path:', e, type(e), exc=True, lvl=error)
 
         self.worker = Worker(process=False, workers=1,
                              channel="filemanagerworkers").register(self)
 
-        self._scan_filesystem('/tmp/foo')
-        # self._get_directory('/mnt/cx3/MUSIC/PLAID')
+        # self._scan_filesystem('/tmp/foo')
 
     def _scan_filesystem(self, path):
         self.log('Scanning path:', path)
@@ -236,3 +243,104 @@ class FileManager(ConfigurableComponent):
         self.log('Count', count, 'find', find)
 
         # self.log(items, pretty=True)
+
+    def _check_permissions(self, user, permissions):
+        for role in user.account.roles:
+            if role in permissions:
+                return True
+
+        return False
+
+    def _notify_failure(self, event, reason='Internal Error'):
+        self.log('Cancelling request', event.action, 'for user', event.user.uuid, ', reason:', reason)
+
+        result = {
+            'component': 'hfos.filemanager.manager',
+            'action': event.action,
+            'data': {
+                'req': event.data.get('req', None),
+                'success': False,
+                'reason': reason
+            }
+        }
+
+        self.fireEvent(send(event.client.uuid, result))
+
+    @handler(put)
+    def put_file(self, event):
+        self.log('File put event received:', event.__dict__.keys())
+
+        volume_id = event.data.get('volume')
+        raw = event.data.get('raw')
+        filename = os.path.normpath(event.data.get('name'))
+        path = os.path.normpath(event.data.get('path', ''))
+
+        if not volume_id or not raw or not filename:
+            self.log('Erroneous put file request:', event.__dict__, lvl=error)
+            self._notify_failure(event)
+            return
+
+        if volume_id in self.volumes:
+            volume = self.volumes[volume_id]
+        elif volume_id in self.volumes_lookup:
+            volume = self.volumes_lookup[volume_id]
+        else:
+            self.log('Unknown volume for put file request specified:', volume_id, lvl=error)
+            self._notify_failure(event)
+            return
+
+        if not self._check_permissions(event.user, volume.default_permissions['write']):
+            self._notify_failure(event, 'User ' + event.user.account.name + ' is not allowed to write to ' + volume.name)
+            return
+
+        if 'uservolume' in volume.flags:
+            path = os.path.join(event.user.uuid, path)
+            user_path = os.path.join(volume.path, path)
+            if not os.path.exists(user_path):
+                os.makedirs(user_path)
+
+        destination = os.path.normpath(os.path.join(volume.path, path, filename))
+
+        if not destination.startswith(volume.path):
+            self.log('Client tried to write outside of volume:',
+                     path, filename,
+                     ' - resulting in:', destination, lvl=warn)
+            self._notify_failure(event)
+            return
+
+        self.log('Writing to', destination)
+
+        try:
+            with open(destination, 'wb') as f:
+                f.write(raw)
+        except Exception as e:
+            self.log('Error during writing:', e, type(e), lvl=error, exc=True)
+            self._notify_failure(event)
+            return
+
+        uuid = std_uuid()
+
+        fileobject = objectmodels['file']({'uuid': uuid})
+        fileobject.owner = event.user.uuid
+        fileobject.name = filename
+        fileobject.volume = volume.uuid
+        fileobject.path = path
+        fileobject.type = 'file'
+        fileobject.hash = md5(filename.encode('utf-8')).hexdigest()
+        fileobject.size = len(raw)
+        fileobject.mtime = time.time()
+
+        fileobject.save()
+
+        response = {
+            'component': 'hfos.filemanager.manager',
+            'action': 'put',
+            'data': {
+                'success': True,
+                'req': event.data.get('req'),
+                'uuid': uuid,
+                'filename': filename
+            }
+        }
+
+        self.fireEvent(send(event.client.uuid, response))
