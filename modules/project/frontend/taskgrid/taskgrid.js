@@ -31,6 +31,9 @@ class taskgridcomponent {
         this.tags = {};
         this.projects = {};
 
+        this.filter_tag = "";
+        this.filter_project = "";
+
         this.search_string = '';
 
         this.changetimeout = null;
@@ -39,7 +42,7 @@ class taskgridcomponent {
         this.gridsterOptions = {
             // any options that you can set for angular-gridster (see:  http://manifestwebdesign.github.io/angular-gridster/)
             columns: screen.width / 100,
-            rowHeight: 400,
+            rowHeight: 100,
             colWidth: 100,
             mobileBreakPoint: 200,
             draggable: {

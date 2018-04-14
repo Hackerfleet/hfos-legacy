@@ -21,7 +21,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * """
  */
-
 @import '../../../colors.scss';
 
 .taskgrid-nav {
@@ -107,7 +106,7 @@
 
 .tagPill {
   display: inline-block;
-  padding: 4px 20px;
+  padding: 2px 20px;
   border-radius: 2px;
 }
 
@@ -149,4 +148,34 @@
 .gridster-mobile .gridster-item {
   position: relative;
   min-height: 25vh;
+}
+
+@media (max-width: 460px) {
+  taskgrid .well {
+    padding: 0;
+  }
+
+  taskgrid .nav {
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  #toolbar ul li form {
+    margin: 0;
+  }
+}
+
+#taskgrid {
+  overflow: auto;
+}
+
+#taskgrid .handle-e,
+#taskgrid .handle-w {
+  width: 30px;
+}
+
+#taskgrid .handle-n,
+#taskgrid .handle-s {
+  height: 30px;
 }
