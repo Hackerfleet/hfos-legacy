@@ -61,7 +61,7 @@ def provision(**kwargs):
 
     system_user_count = objectmodels['user'].count({'name': 'System'})
     if system_user_count == 0 or kwargs.get('clear', False):
-        provisionList(Users, objectmodels['user'], **kwargs)
+        provisionList(Users, objectmodels['user'], skip_user_check=True, **kwargs)
         hfoslog('Provisioning: Users: Done.', emitter="PROVISIONS")
     else:
         hfoslog('System user already present.', lvl=warn, emitter='PROVISIONS')
