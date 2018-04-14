@@ -41,6 +41,7 @@ class Enrol {
 
         this.registration_open = null;
         this.success = false;
+        this.submitting = false;
 
         this.password_new = '';
         this.password_confirm = '';
@@ -65,7 +66,7 @@ class Enrol {
                     self.success = true;
                 } else {
                     console.log('[ENROL] Error during enrolment');
-                    self.notification.add('danger', 'Error', 'Your enrolment did not succeed. You may want to check the form for errors and try again.', 10);
+                    self.notification.add('danger', 'Error', 'Your enrolment did not succeed. You may want to check the form for errors and try again.', 5);
                 }
             } else if (msg.action === 'status') {
                 self.registration_open = msg.data;
@@ -73,9 +74,10 @@ class Enrol {
                 if (msg.data === true) self.get_captcha();
             } else if (msg.action === 'enrol') {
                 if (msg.data[0] === false) {
-                    self.notification.add('danger', 'Unsuccessful', msg.data[1], 20);
+                    self.notification.add('danger', 'Unsuccessful', msg.data[1], 5);
+                    self.submitting = false;
                 } else {
-                    self.notification.add('success', 'Success', msg.data[1], 20);
+                    self.notification.add('success', 'Success', msg.data[1], 5);
                 }
             }
         });
@@ -121,6 +123,7 @@ class Enrol {
             }
         };
         this.socket.send(packet);
+        this.submitting = true;
     }
 
     logout() {
