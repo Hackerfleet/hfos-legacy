@@ -33,6 +33,17 @@
         <span>You're already logged in. Please <a ng-click="$ctrl.logout()">log out</a> to enrol another account.</span>
     </div>
 
+    <div ng-show="$ctrl.success === true">
+        <span>
+            Thanks for enrolling, {{$ctrl.username}}!
+            <br/>
+            An email with a confirmation link has been sent to you.
+            Please open this link in your browser to confirm your account.
+
+            If you do not receive this mail, contact an administrator of this system.
+        </span>
+    </div>
+
     <div ng-hide="$ctrl.user.signedin || ($ctrl.registration_open !== true) || ($ctrl.success === true)">
         <span>Enrol a new account with this form</span>
 
@@ -126,8 +137,11 @@
 
             <div class="row">
                 <div class="col-sm-offset-4 col-sm-2">
-                    <button type="submit" class="btn btn-lg btn-default pull-right" ng-click="$ctrl.enrol()">Enrol
-                        Account
+                    <button type="submit"
+                            class="btn btn-lg btn-default pull-right"
+                            ng-click="$ctrl.enrol()"
+                            ng-disabled="$ctrl.submitting">
+                        Enrol Account
                     </button>
                 </div>
             </div>
