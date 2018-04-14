@@ -80,12 +80,7 @@ TagData = {
     'title': 'Tags',
     'description': 'Attached tags',
     'default': [],
-    'items': {
-        'type': 'object',
-        'properties': {
-            'uuid': uuid_object('Referenced Tag')
-        }
-    }
+    'items': uuid_object('Referenced Tag')
 }
 
 TagForm = {
