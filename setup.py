@@ -122,6 +122,7 @@ See https://github.com/hackerfleet/hfos""",
     cli=hfos.debugger:CLI
     syslog=hfos.ui.syslog:Syslog
     maintenance=hfos.database:Maintenance
+    backup=hfos.database:BackupManager
 
     [hfos.sails]
     auth=hfos.ui.auth:Authenticator
