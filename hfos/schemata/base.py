@@ -61,6 +61,7 @@ def uuid_object(title="Reference", description="Select an object", display=True)
 def base_object(name,
                 no_perms=False,
                 has_owner=True,
+                hide_owner=True,
                 has_uuid=True,
                 roles_write=None,
                 roles_read=None,
@@ -140,18 +141,18 @@ def base_object(name,
                 }
             },
             'name': {
-                'type': 'string'
+                'type': 'string',
+                'description': 'Name of ' + name
             }
         })
 
         if has_owner:
             # TODO: Schema should allow specification of non-local owners as
-            #  well
-            # as special accounts like admin or even system perhaps
+            #  well as special accounts like admin or even system perhaps
             # base_schema['required'] = base_schema.get('required', [])
             # base_schema['required'].append('owner')
             base_schema['properties'].update({
-                'owner': uuid_object(title='Unique Owner ID', display=False)
+                'owner': uuid_object(title='Unique Owner ID', display=hide_owner)
             })
 
     # TODO: Using this causes all sorts of (obvious) problems with the object
