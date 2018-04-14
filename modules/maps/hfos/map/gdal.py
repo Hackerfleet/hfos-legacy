@@ -41,7 +41,7 @@ from hfos.component import ConfigurableComponent, handler
 from hfos.events.system import authorizedevent
 from hfos.events.client import send
 from hfos.database import objectmodels
-from hfos.logger import error, verbose, warn, hilight
+from hfos.logger import error, verbose, warn, debug
 from hfos.tools import std_uuid
 import datetime
 import xml.etree.ElementTree
@@ -112,7 +112,7 @@ class GDAL(ConfigurableComponent):
         self.log('Started')
 
     def _runcommand(self, command):
-        self.log('Executing command: ', command, lvl=hilight)
+        self.log('Executing command: ', command, lvl=debug)
         try:
             process = Popen(
                 command,
@@ -136,7 +136,7 @@ class GDAL(ConfigurableComponent):
         ]
 
         result = self._runcommand(command)
-        self.log('Result (Translate): ', result, lvl=hilight)
+        self.log('Result (Translate): ', result, lvl=debug)
 
     def _tile(self, filename, target):
 
@@ -147,11 +147,11 @@ class GDAL(ConfigurableComponent):
         ]
 
         result = self._runcommand(command)
-        self.log('Result (Tiler): ', result, lvl=hilight)
+        self.log('Result (Tiler): ', result, lvl=debug)
 
     @handler(mapimport)
     def mapimport(self, event):
-        self.log('Map import request!', lvl=hilight)
+        self.log('Map import request!', lvl=debug)
 
         name = event.data['name']
         self.log(name)
@@ -169,7 +169,7 @@ class GDAL(ConfigurableComponent):
         self._translate(filename, temp_file)
         self._tile(temp_file, target)
 
-        self.log('Done tiling: ', filename, target, lvl=hilight)
+        self.log('Done tiling: ', filename, target, lvl=debug)
 
         newlayer = self._register_map(name.rstrip('.KAP'), target.rstrip('.KAP'), event.client)
 
@@ -193,7 +193,7 @@ class GDAL(ConfigurableComponent):
             charts.extend(dirnames)
             break
 
-        self.log('Found folders:', charts, lvl=hilight)
+        self.log('Found folders:', charts)
 
         count = 0
 
@@ -246,15 +246,15 @@ class GDAL(ConfigurableComponent):
                 self.log('Irregular bounding box definitions found:',
                          target, lvl=warn)
             for thing in e.findall('BoundingBox'):
-                self.log('XMLBB:', thing, pretty=True, lvl=hilight)
+                self.log('XMLBB:', thing, pretty=True, lvl=verbose)
                 for key in bounding_box:
                     bounding_box[key] = float(thing.get(key))
 
-            self.log('BOUNDING BOX:', bounding_box, pretty=True, lvl=hilight)
+            self.log('BOUNDING BOX:', bounding_box, pretty=True, lvl=verbose)
 
             zoomlevels = []
             for level in e.findall('TileSets')[0].findall('TileSet'):
-                self.log("XMLTS:", level, pretty=True, lvl=hilight)
+                self.log("XMLTS:", level, pretty=True, lvl=verbose)
                 zoomlevels.append(int(level.get('order')))
 
         except Exception as e:
@@ -317,6 +317,6 @@ class GDAL(ConfigurableComponent):
 
         geoobject.save()
 
-        self.log('New GDAL layer stored:', layer._fields, lvl=hilight)
+        self.log('New GDAL layer stored:', layer._fields, lvl=debug)
 
         return layer

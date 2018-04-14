@@ -54,7 +54,7 @@ class MQTTGateway(ConfigurableComponent):
 
     def __init__(self, **kwargs):
         super(MQTTGateway, self).__init__('MQTT', **kwargs)
-        self.log("Started.")
+        self.log("Started")
 
         self.client = mqtt.Client()
         self.host = 'localhost'

@@ -93,13 +93,13 @@ class ZMQHandle(threading.Thread):
                 hfoslog("Unknown route, adding: ", uuid, emitter="ZMQThread")
 
                 self.routes[uuid] = src
-                hfoslog("Calling Callback", lvl=hilight, emitter="ZMQThread")
+                hfoslog("Calling Callback", lvl=debug, emitter="ZMQThread")
 
                 self.callback({
                     'state': ZMQHELLO,
                     'uuid': uuid
                 })
-                hfoslog("Callback called.", lvl=hilight, emitter="ZMQThread")
+                hfoslog("Callback called.", lvl=debug, emitter="ZMQThread")
             else:
                 hfoslog("Duplicate Hello received", emitter="ZMQThread")
                 if uuid not in self.routes.items():
@@ -147,7 +147,7 @@ class ZMQMesh(ConfigurableComponent):
 
     def __init__(self, **kwargs):
         super(ZMQMesh, self).__init__('ZMQ', **kwargs)
-        self.log("Started.")
+        self.log("Started")
 
         self.nodes = []
         self.hubs = []

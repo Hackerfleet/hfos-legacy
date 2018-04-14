@@ -130,7 +130,7 @@ class Manager(ConfigurableComponent):
     def ready(self, event):
         from hfos.events.system import AuthorizedEvents
         self.authorized_events = AuthorizedEvents
-        self.log('Automat Started.')
+        self.log('Automat Started')
         self.log('Event sources:', AuthorizedEvents.keys(), lvl=debug)
         self._load_rules()
 

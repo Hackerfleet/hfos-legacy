@@ -76,9 +76,11 @@ class backend_notify(Event):
         self.role = role
         self.duration = duration
 
+
 class cli_show_alerts(Event):
     """Display current alert status"""
     pass
+
 
 class Manager(ConfigurableComponent):
     """
@@ -154,7 +156,7 @@ class Manager(ConfigurableComponent):
 
         client_uuid = event.clientuuid
 
-        self.log(event.user, pretty=True)
+        self.log(event.user, pretty=True, lvl=verbose)
 
         self.log('Adding client')
         self.clients[event.clientuuid] = event.user

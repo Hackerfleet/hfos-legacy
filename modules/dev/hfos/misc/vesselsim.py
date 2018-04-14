@@ -36,7 +36,7 @@ from circuits import Timer, Event
 from hfos.navdata.events import updatevessel
 
 from hfos.component import ConfigurableComponent
-from hfos.logger import error, warn, verbose, hilight
+from hfos.logger import error, warn, verbose, debug
 from hfos.component import handler
 from time import time
 from pyproj import Geod
@@ -90,7 +90,7 @@ class VesselSim(ConfigurableComponent):
             self.vesselplan = json.load(f)
 
         for name, item in self.vesselplan.items():
-            self.log(item, lvl=hilight)
+            self.log(item, lvl=debug)
             self.vessels[item['uuid']] = item
 
         pprint(self.vessels)

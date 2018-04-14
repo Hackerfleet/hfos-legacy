@@ -101,7 +101,7 @@ class GuideManager(ConfigurableComponent):
     def _runcommand(self, command):
         """Execute external GDAL tools"""
 
-        self.log('Executing command: ', command, lvl=hilight)
+        self.log('Executing command: ', command, lvl=debug)
         try:
             process = Popen(
                 command,
@@ -125,7 +125,7 @@ class GuideManager(ConfigurableComponent):
         ]
 
         result = self._runcommand(command)
-        self.log('Result (Translate): ', result, lvl=hilight)
+        self.log('Result (Translate): ', result, lvl=debug)
 
     @handler(update_guide)
     def update_guide(self, event):

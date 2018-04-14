@@ -68,7 +68,7 @@ class NMEAParser(ConfigurableComponent):
         super(NMEAParser, self).__init__('NMEA', *args, **kwargs)
 
         if not parse:
-            self.log("NOT started.", lvl=warn)
+            self.log("NOT started", lvl=warn)
             return
         self.log("Started")
 

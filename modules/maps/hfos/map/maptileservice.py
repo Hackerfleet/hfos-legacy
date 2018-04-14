@@ -457,7 +457,7 @@ class MaptileService(ConfigurableController):
         """Checks and caches a requested tile to disk, then delivers it to
         client"""
         request, response = event.args[:2]
-        self.log(request.path, lvl=hilight)
+        self.log(request.path, lvl=verbose)
         try:
             filename, url = self._split_cache_url(request.path, 'tilecache')
         except UrlError:

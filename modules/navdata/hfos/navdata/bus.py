@@ -25,8 +25,8 @@ __license__ = "AGPLv3"
 """
 
 
-Module NMEA
-===========
+Module NavData
+==============
 
 
 """
@@ -360,7 +360,7 @@ class SerialBusManager(ConfigurableComponent):
         self.fireEvent(cli_register_event('bus_protocols', cli_bus_protocols))
 
         if len(self.config.ports) == 0:
-            self.log('No ports configured')
+            self.log('No ports configured', lvl=warn)
             if self.config.scanner['enabled']:
                 self.log('Scanning for protocols')
                 self.start_scanner()

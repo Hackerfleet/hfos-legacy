@@ -314,7 +314,7 @@ class Host(ConfigurableComponent):
                      lvl=error)
             return
 
-        self.log('History requested:', channel, limit, end)
+        self.log('History requested:', channel, limit, end, lvl=debug)
 
         messages = []
 
