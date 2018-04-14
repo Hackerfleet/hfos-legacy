@@ -43,7 +43,7 @@ from hfos.component import ConfigurableComponent, handler
 from hfos.events.client import send
 from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
     logtailrequest, debugrequest
-from hfos.logger import hfoslog, critical, error, warn, debug, verbose
+from hfos.logger import hfoslog, critical, error, warn, debug, verbose, verbosity
 
 try:
     import objgraph
@@ -89,6 +89,15 @@ class cli_errors(Event):
     pass
 
 
+class cli_log_level(Event):
+    """Adjust log level
+
+    Argument:
+        [int]   New logging level (0-100)
+    """
+    pass
+
+
 class HFDebugger(ConfigurableComponent):
     """
     Handles various debug requests.
@@ -121,6 +130,7 @@ class HFDebugger(ConfigurableComponent):
 
         try:
             self.fireEvent(cli_register_event('errors', cli_errors))
+            self.fireEvent(cli_register_event('log_level', cli_log_level))
         except AttributeError:
             pass  # We're running in a test environment and root is not yet running
 
@@ -134,6 +144,16 @@ class HFDebugger(ConfigurableComponent):
         for logline in LiveLog:
             if logline[1] >= error:
                 self.log(logline, pretty=True)
+
+
+    @handler("cli_log_level")
+    def cli_log_level(self, *args):
+        new_level = int(args[0])
+        self.log('Adjusting logging level to', new_level)
+
+        verbosity['global'] = new_level
+        verbosity['console'] = new_level
+        verbosity['file'] = new_level
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback,

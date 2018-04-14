@@ -179,6 +179,8 @@ def hfoslog(*what, **kwargs):
 
     # Count all messages (missing numbers give a hint at too high log level)
     global count
+    global verbosity
+
     count += 1
 
     lvl = kwargs.get('lvl', info)
