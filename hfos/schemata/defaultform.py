@@ -114,6 +114,7 @@ def lookup_field(key, lookup_type=None, placeholder=None, html_class="div",
 
 
 def fieldset(title, items):
+    """A field set with a title and sub items"""
     result = {
         'title': title,
         'type': 'fieldset',
@@ -122,10 +123,14 @@ def fieldset(title, items):
     return result
 
 
-def section(rows, columns, items):
+def section(rows, columns, items, label=None):
+    """A section consisting of rows and columns"""
+
+    # TODO: Integrate label
+
     sections = []
 
-    column_class = "col-sm-%i" % (12 / columns)
+    column_class = "section-column col-sm-%i" % (12 / columns)
 
     for vertical in range(columns):
         column_items = []
@@ -134,7 +139,7 @@ def section(rows, columns, items):
                 item = items[horizontal][vertical]
                 column_items.append(item)
             except IndexError:
-                hfoslog('Field omitted, due to missing row/column:', vertical, horizontal,
+                hfoslog('Field in', label, 'omitted, due to missing row/column:', vertical, horizontal,
                         lvl=warn, emitter='FORMS', tb=True, frame=2)
 
         column = {
@@ -149,10 +154,13 @@ def section(rows, columns, items):
         'htmlClass': 'row',
         'items': sections
     }
+
     return result
 
 
 def emptyArray(key, add_label=None):
+    """An array that starts empty"""
+
     result = {
         'key': key,
         'startEmpty': True
@@ -164,6 +172,8 @@ def emptyArray(key, add_label=None):
 
 
 def tabset(titles, contents):
+    """A tabbed container widget"""
+
     tabs = []
     for no, title in enumerate(titles):
         tab = {
@@ -184,7 +194,26 @@ def tabset(titles, contents):
     return result
 
 
+def rating_widget(key='rating', maximum=10):
+    """A customizable star rating widget"""
+    widget = {
+        'key': 'rating',
+        'type': 'template',
+        'template':
+            '<div class="rating">'
+            '   <span class="fa fa-star-o" ng-repeat="rating in []|range: {1} - model.{0}"'
+            '         ng-click="model.{0} = {1} - rating"></span>'
+            '   <span class="fa fa-star" ng-repeat="rating in []|range: model.{0}"'
+            '         ng-click="model.{0} = model.{0} - rating"></span>'
+            '</div>'
+            '<span>{{model.{0}}} out of 10</span>'.format(key, maximum)
+    }
+
+    return widget
+
+
 def test():
+    """Development function to manually test all widgets"""
     print('Hello')
     from pprint import pprint
 
