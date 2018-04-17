@@ -24,6 +24,9 @@ Supporters
   `Browserstack <https://browserstack.com>`_
 - **Initial project conception phase funding:**
   Kenny Bentley
+- **Hosting and nix expertise:**
+  Lassulus
+
 
 
 .. todo:: Remove/Merge original list and asset docs to this document

@@ -175,6 +175,7 @@ Support
 -------
 
 -  `c-base e.V. <https://c-base.org>`__ our home base, the spacestation below Berlin Mitte
+-  Lassulus for hosting and nix expertise
 -  `Github <https://github.com>`__ for hosting our code
 -  `Travis.CI <https://travis-ci.org>`__ for continuous integration services
 -  `BrowserStack <https://browserstack.com>`__ for cross device testing capabilities
