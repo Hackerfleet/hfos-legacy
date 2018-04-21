@@ -32,7 +32,8 @@ export function routing($stateProvider) {
             url: '/enrol',
             template: '<enrol></enrol>',
             label: 'Enrol',
-            icon: icon
+            icon: icon,
+            roles: ['admin']
         })
         .state('app.invitation', {
             url: '/invitation/:uuid',
