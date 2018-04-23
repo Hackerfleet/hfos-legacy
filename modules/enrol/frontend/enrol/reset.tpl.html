@@ -25,28 +25,37 @@
 <div class="well" style="padding-top: 5px">
     <h1>Reset account</h1>
 
-    <span>Request a new password with this form</span>
+    <span>
+        <span class="big fa fa-warning"></span>This functionality is not yet ready.
+        <br/>
+        In the meantime, please contact a node administrator to reset your password.
+    </span>
 
-    <form class="form-horizontal">
-        <div class="form-group">
-            <label for="username" class="col-sm-2 control-label">Username:</label>
-            <div class="col-sm-3">
-                <input ng-model="$ctrl.username" class="form-control" id="username" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="email" class="col-sm-2 control-label">Email:</label>
-            <div class="col-sm-3">
-                <input ng-model="$ctrl.email" class="form-control" id="email" />
-            </div>
-        </div>
-        <span class="help-block" ng-show="$ctrl.username.length < 4 && $ctrl.email === ''">Enter your username or email address</span>
+    <div class="hidden">
+        <span>Request a new password with this form</span>
 
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-3">
-                <button ng-class="{disabled: $ctrl.username.length < 4 && $ctrl.email === ''}"
-                        class="btn btn-default" ng-click="$ctrl.request_reset()">Submit</button>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="username" class="col-sm-2 control-label">Username:</label>
+                <div class="col-sm-3">
+                    <input ng-model="$ctrl.username" class="form-control" id="username"/>
+                </div>
             </div>
-        </div>
-    </form>
+            <div class="form-group">
+                <label for="email" class="col-sm-2 control-label">Email:</label>
+                <div class="col-sm-3">
+                    <input ng-model="$ctrl.email" class="form-control" id="email"/>
+                </div>
+            </div>
+            <span class="help-block" ng-show="$ctrl.username.length < 4 && $ctrl.email === ''">Enter your username or email address</span>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-3">
+                    <button ng-class="{disabled: $ctrl.username.length < 4 && $ctrl.email === ''}"
+                            class="btn btn-default" ng-click="$ctrl.request_reset()">Submit
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
