@@ -143,11 +143,9 @@ class ObjectManager(ConfigurableComponent):
         if 'schema' not in data:
             self._cancel_by_error(event, 'no_schema')
             raise AttributeError
-            return
         if data['schema'] not in objectmodels.keys():
             self._cancel_by_error(event, 'invalid_schema:' + data['schema'])
             raise AttributeError
-            return
 
         return data['schema']
 
@@ -162,10 +160,15 @@ class ObjectManager(ConfigurableComponent):
         return object_filter
 
     def _get_args(self, event):
-        data = event.data
         schema = self._get_schema(event)
-        user = event.user
-        client = event.client
+        try:
+            data = event.data
+            user = event.user
+            client = event.client
+        except (KeyError, AttributeError) as e:
+            self.log('Error during argument extraction:', e, type(e), exc=True, lvl=error)
+            self._cancel_by_error(event, 'Invalid arguments')
+            raise AttributeError
 
         return data, schema, user, client
 
@@ -195,7 +198,6 @@ class ObjectManager(ConfigurableComponent):
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
-            self._cancel_by_error(event)
             return
 
         object_filter = self._get_filter(event)
@@ -261,7 +263,6 @@ class ObjectManager(ConfigurableComponent):
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
-            self._cancel_by_error(event)
             return
 
         # object_filter['$text'] = {'$search': str(data['search'])}
@@ -372,7 +373,6 @@ class ObjectManager(ConfigurableComponent):
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
-            self._cancel_by_error(event)
             return
 
         object_filter = self._get_filter(event)
@@ -442,7 +442,6 @@ class ObjectManager(ConfigurableComponent):
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
-            self._cancel_by_error(event, 'missing_args')
             return
 
         try:
@@ -504,7 +503,6 @@ class ObjectManager(ConfigurableComponent):
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
-            self._cancel_by_error(event)
             return
 
         try:
@@ -594,7 +592,6 @@ class ObjectManager(ConfigurableComponent):
         try:
             data, schema, user, client = self._get_args(event)
         except AttributeError:
-            self._cancel_by_error(event)
             return
 
         try:
