@@ -60,6 +60,5 @@ Volumes = [
 
 
 def provision(*args, **kwargs):
-    hfoslog(Volumes[0])
     provisionList(Volumes, objectmodels['volume'], **kwargs)
     hfoslog('[PROV] Provisioning: Volumes: Done.')
