@@ -101,8 +101,10 @@ class Dashboard {
         
         this.switchDashboard = function (uuid) {
             self.dashboarduuid = uuid;
-            self.op.getObject('dashboardconfig', uuid).then(function(msg) {
-                self.resetDashboard();
+            self.op.get('dashboardconfig', uuid).then(function(msg) {
+                if (msg.action === 'get') {
+                    self.resetDashboard();
+                }
             });
         };
     
