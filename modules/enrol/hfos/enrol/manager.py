@@ -185,7 +185,11 @@ class Manager(ConfigurableComponent):
             'type': 'string',
             'title': 'Invitation mail text',
             'description': 'Mail body to send to new invitees',
+            'x-schema-form': {
+                'type': 'textarea'
+            },
             'default': '''Hello {{name}}!
+            
 You are being invited to join the HFOS crew at {{node_name}}!
 Click this link to join the crew: 
 {{invitation_url}}{{uuid}}
@@ -205,6 +209,9 @@ the friendly robot of {{node_name}}
             'type': 'string',
             'title': 'Acceptance mail text',
             'description': 'Mail body to send to accepted invitees',
+            'x-schema-form': {
+                'type': 'textarea'
+            },
             'default': '''Hello {{name}}!
 You can now use the HFOS node at {{node_name}}!
 Click this link to login: 
@@ -225,7 +232,7 @@ the friendly robot of {{node_name}}
 
         super(Manager, self).__init__("ENROL", *args, **kwargs)
 
-        self.image_captcha = ImageCaptcha(fonts=['/usr/share/fonts/truetype/freefont/FreeSerif.ttf'])
+        self.image_captcha = ImageCaptcha(fonts=['/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf'])
 
         self.captchas = {}
 
