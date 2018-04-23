@@ -33,8 +33,7 @@ def _build_provisionstore():
         #            provision_entrypoint.name, exc=True, lvl=warn,
         #            emitter='PROVISIONS')
 
-    hfoslog("Found provisions: ", available.keys(),
-            emitter='PROVISIONS')
+    hfoslog("Found provisions: ", sorted(list(available.keys())), emitter='PROVISIONS')
     # pprint(available)
 
     return available
