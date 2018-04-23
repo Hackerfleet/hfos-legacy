@@ -36,7 +36,14 @@ Basic functionality around provisioning.
 
 from jsonschema import ValidationError
 from hfos.logger import hfoslog, debug, verbose, warn, error
-from hfos.database import objectmodels
+from hfos.database import objectmodels, dbhost, dbport, dbname
+
+
+def log(*args, **kwargs):
+    """Log as Emitter:MANAGE"""
+
+    kwargs.update({'emitter': 'PROVISIONS'})
+    hfoslog(*args, **kwargs)
 
 
 def provisionList(items, dbobject, overwrite=False, clear=False,
@@ -59,13 +66,14 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
         """Retrieves the node local system user"""
 
         user = objectmodels['user'].find_one({'name': 'System'})
-        hfoslog('System user:', user._fields, pretty=True, lvl=debug)
 
         try:
-            hfoslog('System user uuid: ', user.uuid, lvl=verbose)
+            log('System user uuid: ', user.uuid, lvl=verbose)
             return user.uuid
         except AttributeError as e:
-            hfoslog('No system user found:', e, lvl=error)
+            log('No system user found:', e, lvl=warn)
+            log('Please install the user provision to setup a system user or check your database configuration',
+                lvl=error)
             return False
 
     # TODO: Do not check this on specific objects but on the model (i.e. once)
@@ -81,8 +89,8 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
 
     # TODO: Fix this to make use of the dbhost
 
-    client = pymongo.MongoClient(host="localhost", port=27017)
-    db = client["hfos"]
+    client = pymongo.MongoClient(dbhost, dbport)
+    db = client[dbname]
 
     if not skip_user_check:
         system_user = get_system_user()
@@ -99,24 +107,21 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
     col_name = dbobject.collection_name()
 
     if clear is True:
-        hfoslog("Clearing collection for", col_name, lvl=warn,
-                emitter='PROVISIONS')
+        log("Clearing collection for", col_name, lvl=warn)
         db.drop_collection(col_name)
     counter = 0
 
     for no, item in enumerate(items):
         new_object = None
         item_uuid = item['uuid']
-        hfoslog("Validating object (%i/%i):" % (no + 1, len(items)), item_uuid,
-                emitter='PROVISIONS', lvl=debug)
+        log("Validating object (%i/%i):" % (no + 1, len(items)), item_uuid, lvl=debug)
 
         if dbobject.count({'uuid': item_uuid}) > 0:
-            hfoslog('Object already present', lvl=warn)
+            log('Object already present', lvl=warn)
             if overwrite is False:
-                hfoslog("Not updating item", item, lvl=warn,
-                        emitter='PROVISIONS')
+                log("Not updating item", item, lvl=warn)
             else:
-                hfoslog("Overwriting item: ", item_uuid, lvl=warn)
+                log("Overwriting item: ", item_uuid, lvl=warn)
                 new_object = dbobject.find_one({'uuid': item_uuid})
                 new_object._fields.update(item)
         else:
@@ -126,11 +131,11 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
             try:
                 if needs_owner(new_object):
                     if not hasattr(new_object, 'owner'):
-                        hfoslog('Adding system owner to object.', lvl=verbose)
+                        log('Adding system owner to object.', lvl=verbose)
                         new_object.owner = system_user
             except Exception as e:
-                hfoslog('Error during ownership test:', e, type(e),
-                        exc=True, lvl=error)
+                log('Error during ownership test:', e, type(e),
+                    exc=True, lvl=error)
             try:
                 new_object.validate()
                 new_object.save()
@@ -146,13 +151,10 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
                 index_type = pymongo.TEXT
             elif index_name == '2dsphere':
                 index_type = pymongo.GEOSPHERE
-            hfoslog('Enabling index of type', index_type, 'on', index,
-                    emitter='PROVISIONS')
+            log('Enabling index of type', index_type, 'on', index)
             col.ensure_index([(index, index_type)], unique=unique)
 
             # for index in col.list_indexes():
-            #    hfoslog("Index: ", index, emitter='PROVISIONS')
+            #    log("Index: ", index)
 
-    hfoslog("Provisioned %i out of %i items successfully." % (counter,
-                                                              len(items)),
-            emitter='PROVISIONS')
+    log("Provisioned %i out of %i items successfully." % (counter, len(items)))
