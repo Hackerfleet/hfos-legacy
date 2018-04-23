@@ -22,7 +22,7 @@
  * """
  */
 
-import icon from './assets/iconmonstr-user-24-icon.svg';
+import icon from './assets/lecture.svg';
 
 
 export function routing($stateProvider) {
