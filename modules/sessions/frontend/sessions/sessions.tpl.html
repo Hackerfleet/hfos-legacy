@@ -46,7 +46,7 @@
                         <thead>
                         <tr>
                             <th>Title</th>
-                            <th>Duration</th>
+                            <th>Type</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -56,7 +56,7 @@
                                 {{session.name}}
                             </td>
                             <td>
-                                {{session.duration}}
+                                {{$ctrl.sessiontypes[session.sessiontype].name}}
                             </td>
                             <td>
                                 <span>{{session.status}}</span>

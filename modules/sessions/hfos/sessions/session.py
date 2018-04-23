@@ -34,21 +34,18 @@ Session: Generic object to store data about lectures, lightning talks etc.
 
 """
 
-from hfos.schemata.defaultform import editbuttons, section
+from hfos.schemata.defaultform import editbuttons, section, lookup_field
 from hfos.schemata.base import base_object, uuid_object
 
 SessionSchema = base_object('session', roles_create='crew')
 
 SessionSchema['properties'].update({
-    'sessiontype': {'type': 'string', 'title': 'Type',
-                    'description': 'Type of session'},
+    'sessiontype': uuid_object('Session Type', 'Select a session type'),
     'name': {'type': 'string', 'title': 'Title',
              'description': 'Title of session'},
     'abstract': {'type': 'string', 'title': 'Abstract',
                  'format': 'html',
                  'description': 'Abstract description'},
-    'duration': {'type': 'string', 'title': 'Duration',
-                 'description': 'Duration of session'},
     'keywords': {'type': 'string', 'title': 'Keywords',
                  'description': 'Descriptive keywords'},
     'files': {
@@ -64,14 +61,13 @@ SessionSchema['properties'].update({
 
         }
     },
-    #'status': {'type': 'string'},
     #'calendar_reference': uuid_object(title='Calendar')
 })
 
 SessionForm = [
     'name',
     'abstract',
-    section(1, 2, [['duration', 'keywords']]), #, ['status', 'calendar_reference']]),
+    section(1, 2, [[lookup_field('sessiontype', 'sessiontype'), 'keywords']]), #, ['status', 'calendar_reference']]),
     {
         'key': 'files',
         'add': None,

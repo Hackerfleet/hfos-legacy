@@ -44,6 +44,7 @@ This software package is a plugin module for HFOS.
       sessionmanager=hfos.sessions.sessionmanager:SessionManager
       [hfos.schemata]
     session=hfos.sessions.session:Session
+    sessiontype=hfos.sessions.sessiontype:SessionType
     review=hfos.sessions.review:Review
       [hfos.provisions]
     sessions=hfos.sessions.provisions.sessions_volume:provision
