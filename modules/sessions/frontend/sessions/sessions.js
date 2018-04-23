@@ -41,8 +41,25 @@ class Sessions {
         this.editing = false;
 
         this.sessions = {};
+        this.sessiontypes = {};
 
         let self = this;
+
+
+        this.get_sessiontypes = function () {
+            console.log('[SESSIONS] Login successful - fetching session data');
+
+            self.op.search('sessiontype', '*', '*').then(function (msg) {
+                if (typeof msg.data.list !== 'undefined') {
+                    self.sessiontypes = {};
+                    for (let sessiontype of msg.data.list){
+                        self.sessiontypes[sessiontype.uuid] = sessiontype;
+                    }
+                } else {
+                    self.sessiontypes = {};
+                }
+            });
+        };
 
         this.get_sessions = function () {
             console.log('[SESSIONS] Login successful - fetching session data');
@@ -65,6 +82,7 @@ class Sessions {
             self.model = {};
 
             self.get_sessions();
+            self.get_sessiontypes();
 
             if (schemata.schemata !== null) {
                 self.get_schema();
@@ -76,6 +94,23 @@ class Sessions {
             console.log('[SESSIONS] Requesting schema');
             self.schema = self.schemata.schema('session');
             self.form = self.schemata.form('session');
+        };
+
+
+        this.getFormData = function (options, search) {
+            console.log('[OE] Trying to obtain proxy list.', options, search);
+            if (search === '') {
+                console.log("INSIDEMODEL:", options.scope.insidemodel);
+            }
+
+            let result = self.op.search(options.type, search).then(function (msg) {
+                console.log('OE-Data', msg);
+                return msg.data.list;
+
+            });
+            console.log('[OE] Result: ', result);
+            return result;
+
         };
 
 
@@ -128,8 +163,8 @@ class Sessions {
         if (this.editing !== true) { model.uuid = 'create'; }
 
         console.log('[SESSIONS] Object update initiated with ', model);
-        this.op.put('session', model).then(function (result) {
-            if (typeof result.uuid !== 'undefined') {
+        this.op.put('session', model).then(function (msg) {
+            if (msg.action !== 'fail') {
                 self.notification.add('success', 'Submission stored', 'Your session has been submitted successfully.', 5);
                 self.get_sessions();
             } else {
@@ -142,8 +177,8 @@ class Sessions {
         let self = this;
 
         console.log('[SESSIONS] Requesting session deletion: ', uuid);
-        this.op.deleteObject('session', uuid).then(function (result) {
-            if (typeof result.uuid !== 'undefined') {
+        this.op.deleteObject('session', uuid).then(function (msg) {
+            if (msg.action !== 'fail') {
                 self.notification.add('success', 'Submission deleted', 'Your session has been deleted successfully.', 5);
                 delete self.sessions[uuid];
             } else {
