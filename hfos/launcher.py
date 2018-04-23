@@ -77,7 +77,7 @@ class cli_components(Event):
 
 
 class cli_reload_db(Event):
-    """Reload database and schemata (Dangerous!)"""
+    """Reload database and schemata (Dangerous!) WiP - does nothing right now"""
     pass
 
 
@@ -244,9 +244,9 @@ class Core(ConfigurableComponent):
 
     @handler('cli_reload_db')
     def cli_reload_db(self, event):
-        self.log('Reloading database.')
+        self.log('This command is WiP.')
 
-        initialize()
+        #initialize()
 
     def _start_server(self, *args):
         """Run the node local server"""
@@ -475,6 +475,8 @@ def construct_graph(args):
               type=str, default=None)
 @click.option("--dbhost", help="Define hostname for database server",
               type=str, default='127.0.0.1:27017')
+@click.option('--dbname', default='hfos', help='Define name of database (default: hfos)',
+              metavar='<name>')
 @click.option("--profile", help="Enable profiler", is_flag=True)
 @click.option("--opengui", help="Launch webbrowser for GUI inspection after "
                                 "startup", is_flag=True)
@@ -516,7 +518,7 @@ def launch(run=True, **args):
                 lvl=critical, emitter='CORE')
 
     hfoslog("Initializing database access", emitter='CORE')
-    initialize(args['dbhost'])
+    initialize(args['dbhost'], args['dbname'])
 
     server = construct_graph(args)
     if run and not args['norun']:
