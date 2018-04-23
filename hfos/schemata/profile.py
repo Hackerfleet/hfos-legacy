@@ -42,6 +42,7 @@ ProfileSchema['properties'].update({
     'name': {'type': 'string', 'title': 'Name',
              'description': 'Profile name'},
     "userdata": {
+        "default": {},
         "id": "#profile.userdata",
         "type": "object",
         "properties": {
@@ -78,6 +79,7 @@ ProfileSchema['properties'].update({
     "components": {
         "id": "#profile.components",
         "type": "object",
+        "default": {},
         "properties": {
             "enabled": {
                 "type": "array",
@@ -101,6 +103,7 @@ ProfileSchema['properties'].update({
     "settings": {
         "id": "#profile.settings",
         "type": "object",
+        "default": {},
         "properties": {
             'color': {'type': 'string', 'title': 'User Color',
                       'format': 'color',
@@ -153,6 +156,7 @@ ProfileSchema['properties'].update({
     "alertconfig": {
         "id": "#profile.alertconfig",
         "type": "object",
+        "default": {},
         "properties": {
             'ontime': {'type': 'string', 'title': 'Active',
                        'description': 'Active alert times'}
@@ -232,7 +236,7 @@ ProfileForm = [
             lookup_field('settings.mapviewuuid', 'mapview', 'Select a Dashboard', 'col-xs-4'),
         ],
     },
-    'alertconfig',
+    #'alertconfig',
     'userdata.notes',
     savebutton
 ]
