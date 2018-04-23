@@ -322,7 +322,7 @@ class Maintenance(ConfigurableComponent):
                             'type': 'string',
                             'description': 'Location of backup data',
                             'title': 'Backup location',
-                            'default': '/var/local/hfos'
+                            'default': '/var/local/hfos/backup'
                         }
                     },
                     'default': {}
@@ -430,7 +430,7 @@ class BackupManager(ConfigurableComponent):
             'type': 'string',
             'description': 'Location of library data',
             'title': 'Library location',
-            'default': '/var/local/hfos'
+            'default': '/var/local/hfos/backup'
         },
         'interval': {
             'type': 'integer',
