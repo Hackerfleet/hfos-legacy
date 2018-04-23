@@ -250,13 +250,8 @@ def test_get_permission_error():
     data = packet['data']
 
     assert data['reason'] == 'No permission'
-    assert type(data['data']) == dict
 
     assert data['req'] == request_id
-
-    query = packet['data']['data']
-    assert query['schema'] == 'systemconfig'
-    assert query['uuid'] == system_config_uuid
 
 
 def test_list_filtered():
@@ -341,14 +336,12 @@ def test_put_new_permission_error():
         'req': request_id
     }, account)
 
-    #pprint(packet)
     assert packet['action'] == 'fail'
     assert 'data' in packet
 
     data = packet['data']
 
     assert data['reason'] == 'No permission'
-    assert type(data['data']) == dict
     assert data['req'] == request_id
 
 
