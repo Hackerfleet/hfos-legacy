@@ -39,7 +39,7 @@ from hfos.events.client import authentication, send
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, debug
-from hfos.tools import std_hash, std_salt
+from hfos.tools import std_hash, std_salt, std_uuid
 
 
 class AuthenticationError(Exception):
@@ -257,37 +257,17 @@ class Authenticator(ConfigurableComponent):
         except Exception as e:
             self.log("No profile due to error: ", e, type(e),
                      lvl=error)
-            user_profile = objectmodels['profile']({'owner': user_account.uuid})
+            user_profile = None
+
+        if not user_profile:
+            default = {
+                'uuid': std_uuid(),
+                'owner': user_account.uuid,
+                'userdata': {
+                    'notes': 'Default profile of ' + user_account.name
+                }
+            }
+            user_profile = objectmodels['profile'](default)
             user_profile.save()
 
         return user_profile
-
-    def profilerequest(self, event):
-        """Handles client profile actions
-        :param event:
-        """
-
-        self.log("Profile update %s" % event)
-
-        if event.action != "update":
-            self.log("Unsupported profile action: ", event, lvl=warn)
-            return
-
-        try:
-            newprofile = event.data
-            self.log("Updating with %s " % newprofile, lvl=debug)
-
-            userprofile = objectmodels['profile'].find_one({
-                'uuid': event.user.uuid
-            })
-
-            self.log("Updating %s" % userprofile, lvl=debug)
-
-            userprofile.update(newprofile)
-            userprofile.save()
-
-            self.log("Profile stored.")
-            # TODO: Give client feedback
-        except Exception as e:
-            self.log("General profile request error %s %s" % (type(e), e),
-                     lvl=error)
