@@ -4,9 +4,8 @@ set -e
 
 DEBIAN_PKGS="mongodb python3.5 python3-pip python3-grib \
 python3-bson python3-pymongo python3-serial \
-python3-pymongo-ext python3-bson-ext \
-nodejs enchant nginx-full virtualenv
-\
+python3-pymongo-ext python3-bson-ext python3-dev\
+nodejs npm enchant nginx-full virtualenv \
 gdal-bin python-gdal"
 
 if [ ${1^^} == "-Y" ]
@@ -34,19 +33,9 @@ echo -e "\nhttps://hfos.readthedocs.io/en/latest/start/index.html\n"
 if VERB="$( which apt-get )" 2> /dev/null; then
     echo "Proceeding with autodetected Debian based installation. Please be patient."
 
-    if [ ! -f /etc/apt/sources.list.d/nodesource.list ]
-    then
-        echo "Adding node source Debian repository."
-        apt-get install apt-transport-https &>> output.log
-        echo "deb https://deb.nodesource.com/node_7.x jessie main
-deb-src https://deb.nodesource.com/node_7.x jessie main" > /etc/apt/sources.list.d/nodesource.list
-        wget -qO- https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
-        apt-get update &>> output.log
-    fi
-
     if [ -n $AUTO ]
     then
-        echo -e "\nAbout to install Debian packages: $DEBIAN_PKGS"
+        echo -e "\nAbout to update apt and install Debian packages: $DEBIAN_PKGS"
         echo -n "Ok? [Y/N] "
         read confirmation
 
@@ -57,7 +46,19 @@ deb-src https://deb.nodesource.com/node_7.x jessie main" > /etc/apt/sources.list
         echo "Installing"
     fi
 
+    if [ ! -f /etc/apt/sources.list.d/nodesource.list ]
+    then
+        echo "Adding node source Debian repository."
+        apt-get install -y apt-transport-https &>> output.log
+        echo "deb https://deb.nodesource.com/node_7.x jessie main deb-src https://deb.nodesource.com/node_7.x jessie main" > /etc/apt/sources.list.d/nodesource.list
+        wget -qO- https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
+        apt-get update &>> output.log
+    fi
+
     apt-get install -y $DEBIAN_PKGS &>> output.log
+
+    # This one doesn't run nicely, so we get it via pip:
+    apt-get remove -y python3-crypto python3-cffi-backend
 
     npm install -g npm@4.2.0 &>> output.log
 
@@ -72,6 +73,7 @@ deb-src https://deb.nodesource.com/node_7.x jessie main" > /etc/apt/sources.list
     systemctl start mongodb.service &>> output.log
 
     venv/bin/python hfos_manage.py install all &>> output.log
+    venv/bin/python hfos_manage.py install frontend --dev &>> output.log
 
     echo "All Done! Visit your new Installation by opening a browser and surfing to:"
     echo
