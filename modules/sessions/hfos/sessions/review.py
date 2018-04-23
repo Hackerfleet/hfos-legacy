@@ -37,7 +37,7 @@ Review: Generic object to store data about lectures, lightning talks etc.
 from hfos.schemata.defaultform import editbuttons, section, lookup_field, rating_widget
 from hfos.schemata.base import base_object, uuid_object
 
-ReviewSchema = base_object('review', roles_create='crew', hide_owner=False)
+ReviewSchema = base_object('review', roles_create='chair', hide_owner=False)
 
 ReviewSchema['properties'].update({
     'status': {'type': 'string'},
