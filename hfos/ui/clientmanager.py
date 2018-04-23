@@ -455,7 +455,7 @@ class ClientManager(ConfigurableComponent):
                          component, action, data, user)
                 return
 
-            event = self.authorized_events[component][action]['event']
+            event = self.authorized_events[component][action]['event'](user, action, data, client)
 
             self.log('Authorized event roles:', event.roles, lvl=debug)
             if not self._checkPermissions(user, event):
@@ -464,13 +464,13 @@ class ClientManager(ConfigurableComponent):
                     'action': 'Permission',
                     'data': 'You have no role that allows this action.'
                 }
-                self.fireEvent(send(event.uuid, result))
+                self.fireEvent(send(event.client.uuid, result))
                 return
 
             self.log("Firing authorized event: ", component, action,
                      str(data)[:100], lvl=debug)
             # self.log("", (user, action, data, client), lvl=critical)
-            self.fireEvent(event(user, action, data, client))
+            self.fireEvent(event)
         except Exception as e:
             self.log("Critical error during authorized event handling:",
                      component, action, e,
