@@ -154,6 +154,8 @@ def base_object(name,
             base_schema['properties'].update({
                 'owner': uuid_object(title='Unique Owner ID', display=hide_owner)
             })
+    else:
+        base_schema['no_perms'] = True
 
     # TODO: Using this causes all sorts of (obvious) problems with the object
     # manager
