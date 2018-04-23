@@ -32,7 +32,8 @@ export function routing($stateProvider) {
             url: '/filemanager',
             template: '<filemanager></filemanager>',
             label: 'Files',
-            icon: icon
+            icon: icon,
+            roles: ['files', 'admin']
         })
 
 }
