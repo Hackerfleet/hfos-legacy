@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 from setuptools import setup, find_packages
 
 setup(name="hfos-enrol",
-      version="0.0.2",
+      version="0.0.3",
       description="hfos-enrol",
       author="Hackerfleet Community",
       author_email="riot@c-base.org",
@@ -32,7 +32,7 @@ setup(name="hfos-enrol",
       license="GNU Affero General Public License v3",
       packages=find_packages(),
       long_description="""HFOS - Enrol
-================
+============
 
 A module to manage user invitations and registrations
 
@@ -42,7 +42,8 @@ This software package is a plugin module for HFOS.
       ],
       install_requires=[
           'hfos>=1.2.0',
-          'captcha>=0.2.4'
+          'captcha>=0.2.4',
+          'validate_email>=1.3'
       ],
       entry_points="""[hfos.components]
     enrol=hfos.enrol.manager:Manager
