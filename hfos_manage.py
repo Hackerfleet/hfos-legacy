@@ -203,23 +203,24 @@ def _construct_module(info, target):
         write_template_file(source, filename, info)
 
 
-def _ask(question, default=None, data_type=str, show_hint=False):
+def _ask(question, default=None, data_type='str', show_hint=False):
     """Interactively ask the user for data"""
 
     data = default
 
-    if data_type == bool:
+    if data_type == 'bool':
         data = None
-        while data not in ('Y', 'J', 'N', '1', '0'):
-            data = input(
-                "%s? [%s]: " % (question, default.upper())).upper()
+        default_string = "Y" if default else "N"
 
-            if default and data == '':
+        while data not in ('Y', 'J', 'N', '1', '0'):
+            data = input("%s? [%s]: " % (question, default_string)).upper()
+
+            if data == '':
                 return default
 
         return data in ('Y', 'J', '1')
 
-    elif data_type in (str, unicode):
+    elif data_type in ('str', 'unicode'):
         if show_hint:
             msg = "%s? [%s] (%s): " % (question, default, data_type)
         else:
@@ -229,7 +230,7 @@ def _ask(question, default=None, data_type=str, show_hint=False):
 
         if len(data) == 0:
             data = default
-    elif data_type == int:
+    elif data_type == 'int':
         if show_hint:
             msg = "%s? [%s] (%s): " % (question, default, data_type)
         else:
@@ -253,7 +254,7 @@ def _ask_questionnaire():
     pprint(questions.items())
 
     for question, default in questions.items():
-        response = _ask(question, default, type(default), show_hint=True)
+        response = _ask(question, default, str(type(default)), show_hint=True)
         if type(default) == unicode and type(response) != str:
             response = response.decode('utf-8')
         answers[question] = response
@@ -313,9 +314,9 @@ def _get_credentials(username=None, password=None, dbhost=None):
     return username, passhash.hexdigest()
 
 
-def _get_system_configuration():
+def _get_system_configuration(dbhost, dbname):
     from hfos import database
-    database.initialize()
+    database.initialize(dbhost, dbname)
     systemconfig = database.objectmodels['systemconfig'].find_one({
         'active': True
     })
@@ -375,7 +376,7 @@ def create_module(clear, target):
     while not done:
         info = _ask_questionnaire()
         pprint(info)
-        done = _ask('Is the above correct', default='y', data_type=bool)
+        done = _ask('Is the above correct', default='y', data_type='bool')
 
     augmented_info = _augment_info(info)
 
@@ -388,17 +389,25 @@ db_host_help = 'Define hostname for database server (default: ' + \
                db_host_default + ')'
 db_host_metavar = '<ip:port>'
 
+db_default = 'hfos'
+db_help = 'Define name of database (default: ' + db_default + ')'
+db_metavar = '<name>'
+
 
 @click.group(cls=DYMGroup)
 @click.option('--dbhost', default=db_host_default, help=db_host_help,
               metavar=db_host_metavar)
+@click.option('--dbname', default=db_default, help=db_help,
+              metavar=db_metavar)
 @click.pass_context
-def db(ctx, dbhost):
+def db(ctx, dbhost, dbname):
     """Database management operations (GROUP)"""
 
     from hfos import database
-    database.initialize(dbhost)
+    database.initialize(dbhost, dbname)
     ctx.obj['db'] = database
+    ctx.obj['dbhost'] = dbhost
+    ctx.obj['dbname'] = dbname
 
 
 cli.add_command(db)
@@ -406,20 +415,26 @@ cli.add_command(db)
 
 @db.command(short_help='Irrevocably remove collection content')
 @click.argument('schema')
-def clear(schema):
+@click.pass_context
+def clear(ctx, schema):
     """Clears an entire database collection irrevocably. Use with caution!"""
 
     response = _ask('Are you sure you want to delete the collection "%s"' % (
-        schema), default='N', data_type=bool)
+        schema), default='N', data_type='bool')
     if response is True:
-        # TODO: Fix this to make use of the dbhost
+        host, port = ctx.obj['dbhost'].split(':')
 
-        client = pymongo.MongoClient(host="localhost", port=27017)
-        db = client["hfos"]
+        client = pymongo.MongoClient(host=host, port=int(port))
+        db = client[ctx.obj['dbname']]
 
         log("Clearing collection for", schema, lvl=warn,
             emitter='MANAGE')
-        db.drop_collection(schema)
+        result = db.drop_collection(schema)
+        if not result['ok']:
+            log("Could not drop collection:", lvl=error)
+            log(result, pretty=True, lvl=error)
+        else:
+            log("Done")
 
 
 @db.group(cls=DYMGroup)
@@ -443,13 +458,17 @@ def make(ctx):
 @click.group(cls=DYMGroup)
 @click.option('--dbhost', default=db_host_default, help=db_host_help,
               metavar=db_host_metavar)
+@click.option('--dbname', default=db_default, help=db_help,
+              metavar=db_metavar)
 @click.pass_context
-def config(ctx, dbhost):
+def config(ctx, dbhost, dbname):
     """Configuration management operations (GROUP)"""
 
     from hfos import database
-    database.initialize(dbhost)
+    database.initialize(dbhost, dbname)
     ctx.obj['db'] = database
+    ctx.obj['dbhost'] = dbhost
+    ctx.obj['dbname'] = dbname
 
     from hfos.schemata.component import ComponentConfigSchemaTemplate
     ctx.obj['col'] = model_factory(ComponentConfigSchemaTemplate)
@@ -512,7 +531,7 @@ def show(ctx, component):
 @db.group(cls=DYMGroup)
 @click.option("--username", help="Username for user related operations",
               default=None)
-@click.option("--password", help="Password for user related operations",
+@click.option("--password", help="Password for user related operations - supplying this via argument is unsafe",
               default=None)
 @click.pass_context
 def user(ctx, username, password):
@@ -530,6 +549,9 @@ def _create_user(ctx):
                                           ctx.obj['password'],
                                           ctx.obj['db'])
 
+    if ctx.obj['db'].objectmodels['user'].count({'name': username}) > 0:
+        raise KeyError()
+
     new_user = ctx.obj['db'].objectmodels['user']({'uuid': str(uuid4())})
 
     new_user.name = username
@@ -543,15 +565,13 @@ def _create_user(ctx):
 def create_user(ctx):
     """Creates a new local user"""
 
-    new_user = _create_user(ctx)
-
     try:
-        new_user.save()
-        log("Done!")
-    except DuplicateKeyError:
-        log('User already exists', lvl=warn)
+        new_user = _create_user(ctx)
 
-    return new_user
+        new_user.save()
+        log("Done")
+    except KeyError:
+        log('User already exists', lvl=warn)
 
 
 @user.command(short_help='create new admin')
@@ -559,29 +579,37 @@ def create_user(ctx):
 def create_admin(ctx):
     """Creates a new local user and assigns admin role"""
 
-    admin = _create_user(ctx)
-    admin.roles.append('admin')
+    try:
+        admin = _create_user(ctx)
+        admin.roles.append('admin')
 
-    admin.save()
-
-    log("Done!")
+        admin.save()
+        log("Done")
+    except KeyError:
+        log('User already exists', lvl=warn)
 
 
 @user.command(short_help='delete user')
+@click.option("--yes", "-y", help="Do not ask for confirmation",
+              default=False, is_flag=True)
 @click.pass_context
-def delete_user(ctx):
+def delete_user(ctx, yes):
     """Delete a local user"""
 
     if ctx.obj['username'] is None:
-        username = _ask("Please enter username: ")
+        username = _ask("Please enter username:")
     else:
         username = ctx.obj['username']
 
     del_user = ctx.obj['db'].objectmodels['user'].find_one({'name': username})
-    # TODO: Verify back if not --yes in args
-    del_user.delete()
-
-    log("Done!")
+    if yes or _ask('Confirm deletion', default=False, data_type='bool'):
+        try:
+            del_user.delete()
+            log("Done")
+        except AttributeError:
+            log('User not found', lvl=warn)
+    else:
+        log("Cancelled")
 
 
 @user.command(short_help="change user's password")
@@ -603,7 +631,7 @@ def change_password(ctx):
     change_user.passhash = passhash
     change_user.save()
 
-    log("Done!")
+    log("Done")
 
 
 @user.command(short_help='list local users')
@@ -624,7 +652,7 @@ def list_users(ctx, search, uuid):
             if uuid:
                 print(found_user.uuid)
 
-    log("Done!")
+    log("Done")
 
 
 @user.command(short_help='add role to user')
@@ -743,6 +771,7 @@ def install_var(clear, clear_all):
     target_paths = (
         '/var/www/challenges',  # For LetsEncrypt acme certificate challenges
         '/var/lib/hfos',
+        '/var/local/hfos',
         '/var/local/hfos/backup',
         '/var/cache/hfos',
         '/var/cache/hfos/tilecache',
@@ -781,13 +810,15 @@ def install_var(clear, clear_all):
 @click.option('--list-provisions', '-l', help='Only list available provisions',
               is_flag=True, default=False)
 @click.option('--dbhost', default=db_host_default, help=db_host_help)
-def provisions(provision, dbhost, clear, overwrite, list_provisions):
+@click.option('--dbname', default=db_default, help=db_help,
+              metavar=db_metavar)
+def provisions(provision, dbhost, dbname, clear, overwrite, list_provisions):
     """Install default provisioning data"""
 
-    install_provisions(provision, dbhost, clear, overwrite, list_provisions)
+    install_provisions(provision, dbhost, dbname, clear, overwrite, list_provisions)
 
 
-def install_provisions(provision, dbhost, clear=False, overwrite=False, list_provisions=False):
+def install_provisions(provision, dbhost, dbname='hfos', clear=False, overwrite=False, list_provisions=False):
     """Install default provisioning data"""
 
     log("Installing HFOS default provisions")
@@ -795,7 +826,7 @@ def install_provisions(provision, dbhost, clear=False, overwrite=False, list_pro
     # from hfos.logger import verbosity, events
     # verbosity['console'] = verbosity['global'] = events
     from hfos import database
-    database.initialize(dbhost)
+    database.initialize(dbhost, dbname)
 
     from hfos.provisions import provisionstore
 
@@ -1206,7 +1237,7 @@ def install_all(clear):
     * Documentation
     * systemd service descriptor
 
-    It also builds and installs the HTML5 frontend."""
+    It does NOT build and install the HTML5 frontend."""
 
     _check_root()
 
@@ -1219,7 +1250,6 @@ def install_all(clear):
     install_provisions(provision=None, dbhost=db_host_default, clear=clear)
     install_docs(clear=clear)
 
-    install_frontend(forcerebuild=True, development=True)
     install_service()
     install_nginx()
 
@@ -1342,7 +1372,7 @@ def validate(ctx, schema, all):
                 '\n\nFix this object and rerun validation!',
                 emitter='MANAGE', lvl=error)
 
-    log('Done!')
+    log('Done')
 
 
 @db.command(short_help='export objects to json')
@@ -1630,7 +1660,7 @@ def dupcheck(ctx, delete, merge, schema):
                         delete_request = -2
                         while delete_request == -2 or -1 > delete_request > len(dupes[item]):
                             delete_request = _ask('Which one? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
-                                                  data_type=int)
+                                                  data_type='int')
                         if delete_request == -1:
                             continue
                         else:
@@ -1643,13 +1673,13 @@ def dupcheck(ctx, delete, merge, schema):
 
                         while merge_request_a == -2 or -1 > merge_request_a > len(dupes[item]):
                             merge_request_a = _ask('Merge from? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
-                                                   data_type=int)
+                                                   data_type='int')
                         if merge_request_a == -1:
                             continue
 
                         while merge_request_b == -2 or -1 > merge_request_b > len(dupes[item]):
                             merge_request_b = _ask('Merge into? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
-                                                   data_type=int)
+                                                   data_type='int')
                         if merge_request_b == -1:
                             continue
 
