@@ -34,6 +34,7 @@ from socket import timeout
 from base64 import b64encode
 from time import time
 from captcha.image import ImageCaptcha
+from validate_email import validate_email
 from circuits import Timer, Event
 
 from hfos.component import ConfigurableComponent, handler
@@ -44,7 +45,7 @@ from hfos.logger import warn, debug, verbose, error, hilight
 from hfos.tools import std_uuid, std_now, std_hash, std_salt, _
 from pystache import render
 from email.mime.text import MIMEText
-from smtplib import SMTP
+from smtplib import SMTP, SMTP_SSL
 
 
 # from hfos.database import objectmodels
@@ -53,11 +54,11 @@ from smtplib import SMTP
 
 
 class change(authorizedevent):
-    pass
+    roles = ['admin']
 
 
 class invite(authorizedevent):
-    pass
+    roles = ['admin']
 
 
 class accept(anonymousevent):
@@ -105,6 +106,43 @@ class Manager(ConfigurableComponent):
                            'password resets',
             'default': 'localhost'
         },
+        'mail_server_port': {
+            'type': 'integer',
+            'title': 'Mail server port',
+            'description': 'Mail server port to connect to',
+            'default': 25
+        },
+        'mail_ssl': {
+            'type': 'boolean',
+            'title': 'Use SSL',
+            'description': 'Use SSL to secure the mail server connection',
+            'default': True
+        },
+        'mail_tls': {
+            'type': 'boolean',
+            'title': 'Use TLS',
+            'description': 'Use TLS to secure the mail server connection',
+            'default': False
+        },
+        'mail_from': {
+            'type': 'string',
+            'title': 'Mail from address',
+            'description': 'From mail address to send to new invitees',
+            # TODO: Get a better default here:
+            'default': 'enrol@{{hostname}}'
+        },
+        'mail_username': {
+            'type': 'string',
+            'title': 'SMTP Username',
+            'default': ''
+        },
+        'mail_password': {
+            'type': 'string',
+            'title': 'SMTP Password',
+            'x-schema-form': {
+                'type': 'password'
+            }
+        },
         'allow_registration': {
             'type': 'boolean',
             'title': 'Open registration',
@@ -136,13 +174,6 @@ class Manager(ConfigurableComponent):
             'description': 'Group to add self enrolled and accepted users to - use commas to specify more than one',
             'title': 'Group Enrolled',
             'default': 'crew'
-        },
-        'mail_from': {
-            'type': 'string',
-            'title': 'Mail from address',
-            'description': 'From mail address to send to new invitees',
-            # TODO: Get a better default here:
-            'default': 'enrol@{{hostname}}'
         },
         'invitation_subject': {
             'type': 'string',
@@ -225,7 +256,7 @@ the friendly robot of {{node_name}}
 
     @handler(change)
     def change(self, event):
-        """A user requests a change to an enrolment"""
+        """An admin user requests a change to an enrolment"""
 
         uuid = event.data['uuid']
         status = event.data['status']
@@ -298,7 +329,7 @@ the friendly robot of {{node_name}}
 
     @handler(invite)
     def invite(self, event):
-        """A new user has been invited to enrol by a crew member"""
+        """A new user has been invited to enrol by an admin user"""
 
         self.log('Inviting new user to enrol')
         name = event.data['name']
@@ -345,7 +376,11 @@ the friendly robot of {{node_name}}
         if mail is None:
             fail(_('You have to supply all required fields.'))
             return
-        elif objectmodels['user'].count({'mail': mail}) > 0:
+        elif not validate_email(mail):
+            fail(_('The supplied email address seems invalid'))
+            return
+
+        if objectmodels['user'].count({'mail': mail}) > 0:
             fail(_('Your mail address cannot be used.'))
             return
 
@@ -364,7 +399,7 @@ the friendly robot of {{node_name}}
 
         self.log('Provided data is good to enrol.')
         if self.config.auto_accept_enrolled:
-            self._create_user(username, password, mail)
+            self._create_user(username, password, mail, 'Enrolled')
         else:
             self._invite(username, 'Enrolled', mail, uuid)
 
@@ -463,9 +498,6 @@ the friendly robot of {{node_name}}
             email_user = user_object.find_one({'mail': email})
         if username is not None and user_object.count({'name': username}) > 0:
             named_user = user_object.find_one({'name': username})
-
-
-
 
     def _generate_captcha(self, event):
         self.log('Generating requested captcha')
@@ -604,12 +636,26 @@ the friendly robot of {{node_name}}
         if self.send_mail:
             self.log('Sending mail to', enrollment.email)
             try:
-                server = SMTP(timeout=5)
-                response_connect = server.connect(self.config.mail_server)
+                if self.config.mail_ssl:
+                    server = SMTP_SSL(self.config.mail_server, port=self.config.mail_server_port, timeout=5)
+                else:
+                    server = SMTP(self.config.mail_server, port=self.config.mail_server_port, timeout=5)
+
+                if self.config.mail_tls:
+                    self.log('Starting TLS', lvl=debug)
+                    server.starttls()
+
+                if self.config.mail_username != '':
+                    self.log('Logging in with', self.config.mail_username, lvl=debug)
+                    server.login(self.config.mail_username, self.config.mail_password)
+                else:
+                    self.log('No username, trying anonymous access', lvl=debug)
+
+                self.log('Sending Mail', lvl=debug)
                 response_send = server.send_message(mime_mail)
                 server.quit()
 
             except timeout as e:
                 self.log('Could not send email to enrollee, mailserver timeout:', e, lvl=error)
                 return
-            self.log('Server response:', response_connect, response_send)
+            self.log('Server response:',response_send)
