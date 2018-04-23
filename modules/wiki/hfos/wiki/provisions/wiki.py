@@ -84,9 +84,3 @@ def provisionPages(**kwargs):
 def provisionTemplates(**kwargs):
     provisionList(WikiTemplates, objectmodels['wikitemplate'], **kwargs)
     hfoslog('WikiTemplates: Done.', emitter='PROVISIONING')
-
-
-if __name__ == "__main__":
-    initialize()
-    provisionPages()
-    provisionTemplates()
