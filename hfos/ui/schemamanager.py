@@ -36,7 +36,7 @@ from hfos.events.schemamanager import get, all, configuration
 from hfos.debugger import cli_register_event
 from hfos.component import ConfigurableComponent
 from hfos.database import schemastore, configschemastore
-from hfos.logger import warn, debug  # , error, hilight
+from hfos.logger import warn, debug, error  # , hilight
 from hfos.component import handler
 
 
@@ -55,6 +55,11 @@ class cli_forms(Event):
     pass
 
 
+class cli_default_perms(Event):
+    """Display all schemata default permission roles"""
+    pass
+
+
 class SchemaManager(ConfigurableComponent):
     """
     Handles schemata requests from clients.
@@ -70,6 +75,7 @@ class SchemaManager(ConfigurableComponent):
         self.fireEvent(cli_register_event('schemata', cli_schemata))
         self.fireEvent(cli_register_event('form', cli_form))
         self.fireEvent(cli_register_event('forms', cli_forms))
+        self.fireEvent(cli_register_event('permissions_default', cli_default_perms))
 
     @handler('cli_schemata')
     def cli_schemata_list(self, *args):
@@ -96,6 +102,29 @@ class SchemaManager(ConfigurableComponent):
 
         self.log('Schemata with form:', forms)
         self.log('Missing forms:', missing)
+
+    @handler('cli_default_perms')
+    def cli_default_perms(self, *args):
+        for key, item in schemastore.items():
+            # self.log(item, pretty=True)
+            if item['schema'].get('no_perms', False):
+                self.log('Schema without permissions:', key)
+                continue
+            try:
+                perms = item['schema']['properties']['perms']['properties']
+                if perms == {}:
+                    self.log('Schema:', item, pretty=True)
+
+                self.log(
+                    'Schema:', key,
+                    'read', perms['read']['default'],
+                    'write', perms['write']['default'],
+                    'list', perms['list']['default'],
+                    'create', item['schema']['roles_create']
+                )
+            except KeyError as e:
+                self.log('Fishy schema found:', key, e, lvl=error)
+                self.log(item, pretty=True)
 
     @handler('ready')
     def ready(self):
