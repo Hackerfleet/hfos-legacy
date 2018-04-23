@@ -47,14 +47,17 @@ class librarycomponent {
             isbn: this.searchISBN
         };
         let self = this;
-        this.op.put('book', book).then(function(data) {
-            let packet = {
-                component: 'hfos.library.manager',
-                action: 'book_augment',
-                uuid: data.uuid
-            };
-            console.log('Augmenting new ISBN book:', data);
-            self.socket.send(packet);
+        this.op.put('book', book).then(function(msg) {
+            if (msg.action !== 'fail') {
+                let data = msg.data;
+                let packet = {
+                    component: 'hfos.library.manager',
+                    action: 'book_augment',
+                    uuid: data.uuid
+                };
+                console.log('Augmenting new ISBN book:', data);
+                self.socket.send(packet);
+            }
         })
     }
 

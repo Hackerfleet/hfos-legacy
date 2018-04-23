@@ -422,45 +422,49 @@ class mapcomponent {
         this.addLayer = function (uuid) {
             console.log('[MAP] Getting Layer');
             self.op.get('layer', uuid).then(function (msg) {
-                let layer = msg;
-                console.log('[MAP] Got a layer:', layer);
+                if (msg.action !== fail) {
+                    let layer = msg.data.object;
+                    console.log('[MAP] Got a layer:', layer);
 
-                if (layer.type === 'geoobjects') {
-                    self.getGeoobjects({'layer': uuid});
-                } else {
-                    layer.url = layer.url.replace('http://hfoshost/', self.host);
-                }
+                    if (layer.type === 'geoobjects') {
+                        self.getGeoobjects({'layer': uuid});
+                    } else {
+                        layer.url = layer.url.replace('http://hfoshost/', self.host);
+                    }
 
-                if (typeof layer.layerOptions.minZoom === 'undefined') {
-                    layer.layerOptions.minZoom = 0;
-                }
-                if (typeof layer.layerOptions.maxZoom === 'undefined') {
-                    layer.layerOptions.maxZoom = 18;
-                }
+                    if (typeof layer.layerOptions.minZoom === 'undefined') {
+                        layer.layerOptions.minZoom = 0;
+                    }
+                    if (typeof layer.layerOptions.maxZoom === 'undefined') {
+                        layer.layerOptions.maxZoom = 18;
+                    }
 
 
-                //let bounds = null;
+                    //let bounds = null;
 
-                /*if (layer.layerOptions.bounds != null) {
-                 let top_left = L.latLng(layer.layerOptions.bounds[0]),
-                 top_right = L.latLng(layer.layerOptions.bounds[1]);
-                 bounds = L.latLngBounds(top_left, top_right);
-                 //layer.layerOptions.bounds = bounds;
-                 //delete layer.layerOptions['bounds'];
-                 }*/
+                    /*if (layer.layerOptions.bounds != null) {
+                     let top_left = L.latLng(layer.layerOptions.bounds[0]),
+                     top_right = L.latLng(layer.layerOptions.bounds[1]);
+                     bounds = L.latLngBounds(top_left, top_right);
+                     //layer.layerOptions.bounds = bounds;
+                     //delete layer.layerOptions['bounds'];
+                     }*/
 
-                console.log('[MAP] Adding layer:', layer);
-                if (layer.baselayer === true) {
-                    self.layers.baselayers[layer.uuid] = layer;
-                    if (_.isEmpty(self.leafletlayers.baselayers)) {
-                        self.switchLayer('baselayers', layer.uuid);
+                    console.log('[MAP] Adding layer:', layer);
+                    if (layer.baselayer === true) {
+                        self.layers.baselayers[layer.uuid] = layer;
+                        if (_.isEmpty(self.leafletlayers.baselayers)) {
+                            self.switchLayer('baselayers', layer.uuid);
+                        }
+                    } else {
+                        self.layers.overlays[layer.uuid] = layer;
+                    }
+                    self.layer_flags[layer.uuid] = {
+                        expanded: false,
+                        zoom: [layer.layerOptions.minZoom, layer.layerOptions.maxZoom]
                     }
                 } else {
-                    self.layers.overlays[layer.uuid] = layer;
-                }
-                self.layer_flags[layer.uuid] = {
-                    expanded: false,
-                    zoom: [layer.layerOptions.minZoom, layer.layerOptions.maxZoom]
+                    console.log('[MAP] Could not get that layer:', uuid);
                 }
             })
         };
