@@ -69,6 +69,9 @@ schemastore = None
 configschemastore = {}
 objectmodels = None
 collections = None
+dbhost = ""
+dbport = 0
+dbname = ""
 
 # Necessary against import de-optimizations
 ValidationError = ValidationError
@@ -85,9 +88,8 @@ def clear_all():
         hfoslog('Not deleting the database.')
         sys.exit(5)
 
-    # TODO: Accept argument for dbhost
-    client = pymongo.MongoClient(host="localhost", port=27017)
-    db = client["hfos"]
+    client = pymongo.MongoClient(host=dbhost, port=dbport)
+    db = client[dbname]
 
     for col in db.collection_names(include_system_collections=False):
         hfoslog("Dropping collection ", col, lvl=warn, emitter='DB')
@@ -143,8 +145,8 @@ def _build_model_factories(store):
 def _build_collections(store):
     result = {}
 
-    client = pymongo.MongoClient(host='localhost', port=27017)
-    db = client['hfos']
+    client = pymongo.MongoClient(host=dbhost, port=dbport)
+    db = client[dbname]
 
     for schemaname in store:
 
@@ -172,14 +174,19 @@ def initialize(address='127.0.0.1:27017', database_name='hfos'):
     global schemastore
     global objectmodels
     global collections
+    global dbhost
+    global dbport
+    global dbname
 
-    hfoslog("Testing database availability to ", address, lvl=debug,
-            emitter='DB')
+    dbhost = address.split(':')[0]
+    dbport = int(address.split(":")[1]) if ":" in address else 27017
+    dbname = database_name
+
+    hfoslog("Using database:", dbname, '@', dbhost, ':', dbport, emitter='DB')
 
     try:
-        client = pymongo.MongoClient(host=address.split(":")[0], port=int(
-            address.split(":")[1]) if ":" in address else 27017)
-        db = client[database_name]
+        client = pymongo.MongoClient(host=dbhost, port=dbport)
+        db = client[dbname]
         hfoslog("Database: ", db.command('buildinfo'), lvl=debug, emitter='DB')
     except Exception as e:
         hfoslog("No database available! Check if you have mongodb > 3.0 "
@@ -336,9 +343,8 @@ class Maintenance(ConfigurableComponent):
         super(Maintenance, self).__init__("MAINTENANCE", *args, **kwargs)
         self.log("Maintenance started")
 
-        # TODO: Accept argument for dbhost
-        client = pymongo.MongoClient(host="localhost", port=27017)
-        self.db = client["hfos"]
+        client = pymongo.MongoClient(dbhost, dbport)
+        self.db = client[dbname]
 
         self.collection_sizes = {}
         self.collection_total = 0
@@ -461,8 +467,6 @@ class BackupManager(ConfigurableComponent):
 
 def backup(schema, uuid, export_filter, export_format, filename, pretty, export_all, omit):
     """Exports all collections to (JSON-) files."""
-
-    # TODO: Allow export of non-default database
 
     export_format = export_format.upper()
 
