@@ -35,7 +35,7 @@ System: Global systemwide settings
 from hfos.schemata.defaultform import savebutton, lookup_field
 from hfos.schemata.base import base_object, uuid_object
 
-SystemconfigSchema = base_object('systemconfig')
+SystemconfigSchema = base_object('systemconfig', roles_read=['admin', 'crew'], roles_write=['admin'])
 
 SystemconfigSchema['properties'].update({
     'active': {
