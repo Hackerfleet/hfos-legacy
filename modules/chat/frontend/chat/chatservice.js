@@ -173,10 +173,14 @@ class chatservice {
 
                         self.users[self.channel][profile.owner] = user;
                     } else {
-                        self.op.get('user', profile.owner).then(function (account) {
-                            console.log('[CHAT] Got name from account:', account);
-                            user.name = account.name;
-                            self.users[self.channel][profile.owner] = user;
+                        self.op.get('user', profile.owner).then(function (msg) {
+                            if (msg.action !== fail) {
+                                console.log('[CHAT] Got name from account:', msg.data);
+                                user.name = msg.data.object.name;
+                                self.users[self.channel][profile.owner] = user;
+                            } else {
+                                console.log('[CHAT] Fail during profile lookup');
+                            }
                         })
                     }
                 }
