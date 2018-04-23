@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from random import randint
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -235,18 +236,23 @@ def test_get_permission_error():
     account = AccountMock()
     account.roles.remove('admin')
 
+    request_id = randint(23, 42)
+
     packet = transmit('get', {
         'schema': 'systemconfig',
-        'uuid': system_config_uuid
+        'uuid': system_config_uuid,
+        'req': request_id
     }, account)
 
-    assert packet['action'] == 'get'
+    assert packet['action'] == 'fail'
     assert 'data' in packet
 
     data = packet['data']
 
     assert data['reason'] == 'No permission'
     assert type(data['data']) == dict
+
+    assert data['req'] == request_id
 
     query = packet['data']['data']
     assert query['schema'] == 'systemconfig'
@@ -323,6 +329,7 @@ def test_put_new_permission_error():
     obj = objectmodels['systemconfig']({'uuid': uuid})
     obj.active = False
     obj.name = 'TEST SYSTEMCONFIG'
+    request_id = randint(23, 42)
 
     account = AccountMock()
     account.roles.remove('admin')
@@ -330,16 +337,19 @@ def test_put_new_permission_error():
     packet = transmit('put', {
         'schema': 'systemconfig',
         'obj': obj.serializablefields(),
-        'uuid': uuid
+        'uuid': uuid,
+        'req': request_id
     }, account)
-    pprint(packet)
-    assert packet['action'] == 'put'
+
+    #pprint(packet)
+    assert packet['action'] == 'fail'
     assert 'data' in packet
 
     data = packet['data']
 
     assert data['reason'] == 'No permission'
     assert type(data['data']) == dict
+    assert data['req'] == request_id
 
 
 def test_delete():

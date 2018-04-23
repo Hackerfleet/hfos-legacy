@@ -112,22 +112,20 @@ class ObjectManager(ConfigurableComponent):
         return False
 
     def _cancel_by_permission(self, schema, data, event):
-        self.log('No permission:', schema, data, event.user.uuid,
-                 lvl=error)
+        self.log('No permission:', schema, data, event.user.uuid, lvl=warn)
 
         msg = {
             'component': 'hfos.events.objectmanager',
-            'action': event.action,
+            'action': 'fail',
             'data': {
                 'reason': 'No permission',
-                'data': data,
                 'req': data.get('req')
             }
         }
         self.fire(send(event.client.uuid, msg))
 
     def _cancel_by_error(self, event, reason="malformed"):
-        self.log('Bad request:', reason, lvl=error)
+        self.log('Bad request:', reason, lvl=warn)
 
         msg = {
             'component': 'hfos.events.objectmanager',
@@ -140,16 +138,15 @@ class ObjectManager(ConfigurableComponent):
         self.fire(send(event.client.uuid, msg))
 
     def _get_schema(self, event):
-        try:
-            data = event.data
-        except AttributeError:
-            return
+        data = event.data
 
         if 'schema' not in data:
             self._cancel_by_error(event, 'no_schema')
+            raise AttributeError
             return
         if data['schema'] not in objectmodels.keys():
             self._cancel_by_error(event, 'invalid_schema:' + data['schema'])
+            raise AttributeError
             return
 
         return data['schema']
@@ -228,7 +225,7 @@ class ObjectManager(ConfigurableComponent):
         storage_object = objectmodels[schema].find_one(object_filter)
 
         if not storage_object:
-            self._cancel_by_error(event, uuid + ' of ' + schema +
+            self._cancel_by_error(event, uuid + '(' + str(object_filter) + ') of ' + schema +
                                   ' unavailable')
             return
 
@@ -617,7 +614,7 @@ class ObjectManager(ConfigurableComponent):
                     self._cancel_by_permission(schema, data, event)
                     return
 
-                #self.log("Fields:", storage_object._fields, "\n\n\n",
+                # self.log("Fields:", storage_object._fields, "\n\n\n",
                 #         storage_object.__dict__)
 
                 storage_object.delete()
