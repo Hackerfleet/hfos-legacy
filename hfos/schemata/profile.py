@@ -33,7 +33,7 @@ Profile: Userprofile with general flags and fields
 
 
 """
-from hfos.schemata.defaultform import savebutton, lookup_field
+from hfos.schemata.defaultform import savebutton, lookup_field, country_field, area_field
 from hfos.schemata.base import base_object, uuid_object
 
 ProfileSchema = base_object('profile', roles_create='crew')
@@ -53,6 +53,9 @@ ProfileSchema['properties'].update({
                            'description': 'Last/Family name'},
             'nick': {'type': 'string', 'title': 'nickname',
                      'description': 'Nick/calling name'},
+            'country': {'type': 'string',
+                        'title': 'Country',
+                        'description': 'Country of user'},
             'location': {'type': 'string',
                          'title': 'Current user location',
                          'description': 'Autoupdated (if possible) user '
@@ -195,6 +198,13 @@ ProfileForm = [
                 'htmlClass': 'col-xs-4',
                 'items': [
                     'userdata.nick', 'userdata.phone', 'userdata.visa'
+                ]
+            },
+            {
+                'type': 'section',
+                'htmlClass': 'col-xs-4',
+                'items': [
+                    country_field('userdata.country'), '', ''
                 ]
             }
         ]
