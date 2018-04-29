@@ -22,6 +22,7 @@ __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 from hfos.logger import hfoslog, warn
+from pycountry import countries, currencies, languages, subdivisions
 
 """
 
@@ -207,6 +208,59 @@ def rating_widget(key='rating', maximum=10):
             '         ng-click="model.{0} = model.{0} - rating"></span>'
             '</div>'
             '<span>{{model.{0}}} out of 10</span>'.format(key, maximum)
+    }
+
+    return widget
+
+
+# def collapsible(key, elements, label=None):
+#     """Widget for a collapsible section"""
+#
+#     if not label:
+#         label = key
+#
+#     result = {
+#         'type': 'template',
+#         'template': '<h3 ng-click="form.'+key+'_collapsed = !form.'+key+'_collapsed">' +
+#                     label +
+#                     '<span ng-class="{\'fa-chevron-up\': form.'+key+'_collapsed,'
+#                     '                 \'fa-chevron-down\': !form.'+key+'_collapsed}" class="fa">'
+#                     '</span>'
+#                     '</h3>',
+#     }
+#
+#     return result, {'type': 'section', 'condition': 'form.'+key+'_collapsed', 'items': elements}
+
+
+def country_field(key='country'):
+    """Provides a select box for country selection"""
+
+    country_list = list(countries)
+    title_map = []
+    for item in country_list:
+        title_map.append({'value': item.alpha_3, 'name': item.name})
+
+    widget = {
+        'key': key,
+        'type': 'uiselect',
+        'titleMap': title_map
+    }
+
+    return widget
+
+
+def area_field(key='area'):
+    """Provides a select box for country selection"""
+
+    area_list = list(subdivisions)
+    title_map = []
+    for item in area_list:
+        title_map.append({'value': item.code, 'name': item.name})
+
+    widget = {
+        'key': key,
+        'type': 'uiselect',
+        'titleMap': title_map
     }
 
     return widget
