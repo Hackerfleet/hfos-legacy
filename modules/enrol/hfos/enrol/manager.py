@@ -236,8 +236,6 @@ the friendly robot of {{node_name}}
 
         self.captchas = {}
 
-        self.send_mail = True
-
         systemconfig = objectmodels['systemconfig'].find_one({'active': True})
 
         try:
@@ -400,7 +398,8 @@ the friendly robot of {{node_name}}
         if username is None or len(username) < 4:
             fail(_('Your username is not long enough.'))
             return
-        elif objectmodels['user'].count({'name': username}) > 0:
+        elif (objectmodels['user'].count({'name': username}) > 0) or \
+             (objectmodels['enrollment'].count({'name': username}) > 0):
             fail(_('The username you supplied is not available.'))
             return
 
@@ -640,7 +639,7 @@ the friendly robot of {{node_name}}
         mime_mail['To'] = enrollment.email
 
         self.log('MimeMail:', mime_mail, lvl=verbose)
-        if self.send_mail:
+        if self.config.mail_send is True:
             self.log('Sending mail to', enrollment.email)
             try:
                 if self.config.mail_ssl:
@@ -665,4 +664,4 @@ the friendly robot of {{node_name}}
             except timeout as e:
                 self.log('Could not send email to enrollee, mailserver timeout:', e, lvl=error)
                 return
-            self.log('Server response:',response_send)
+            self.log('Server response:', response_send)
