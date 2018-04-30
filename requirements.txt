@@ -7,14 +7,19 @@ git+https://github.com/hackerfleet/warmongo.git
 # virtualenv-api>=2.1.11
 pyOpenSSL>=17.0.0
 pystache>=0.5.4
+
 dpath>=1.4.0
 deepdiff>=3.2.1
+
 click>=6.7.0
 click-didyoumean>=0.0.3
 click-repl>=0.1.2
 click-plugins>=1.0.3
 prompt-toolkit>=1.0.15
+
 python-dateutil>=2.5.3
+
+pycountry>=18.2
 
 # Compat
 six
