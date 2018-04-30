@@ -47,7 +47,7 @@ class Enrol {
         this.password_confirm = '';
         this.mail = '';
         this.username = '';
-        this.tos = '/#!/' + 'wiki/tos';
+        this.tos = '/#!/' + 'tos';
         this.accept_tos = false;
         this.captcha = '';
 

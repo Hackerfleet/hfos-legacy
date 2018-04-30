@@ -50,5 +50,9 @@ export function routing($stateProvider) {
         .state('app.enrolment', {
             url: '/enrolment',
             template: '<enrolment></enrolment>'
+        })
+        .state('app.tos', {
+            url: '/tos',
+            template: '<tos></tos>'
         });
 }

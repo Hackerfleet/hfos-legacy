@@ -44,6 +44,8 @@ import enrolmenttemplate from './enrol/enrolment.tpl.html';
 import resetcomponent from './enrol/reset';
 import resettemplate from './enrol/reset.tpl.html';
 
+import tostemplate from './enrol/tos.tpl.html';
+
 export default angular
     .module('main.app.enrol', [uirouter])
     .config(routing)
@@ -52,4 +54,5 @@ export default angular
     .component('password', {controller: passwordcomponent, template: passwordtemplate})
     .component('enrolment', {controller: enrolmentcomponent, template: enrolmenttemplate})
     .component('resetaccount', {controller: resetcomponent, template: resettemplate})
+    .component('tos', {template: tostemplate})
     .name;
