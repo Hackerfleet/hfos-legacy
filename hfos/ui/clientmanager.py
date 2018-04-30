@@ -457,7 +457,7 @@ class ClientManager(ConfigurableComponent):
 
             event = self.authorized_events[component][action]['event'](user, action, data, client)
 
-            self.log('Authorized event roles:', event.roles, lvl=debug)
+            self.log('Authorized event roles:', event.roles, lvl=verbose)
             if not self._checkPermissions(user, event):
                 result = {
                     'component': 'hfos.ui.clientmanager',
@@ -668,7 +668,7 @@ class ClientManager(ConfigurableComponent):
                 self.log("No useruuid!", e, type(e), lvl=critical)
                 return
 
-            self.log('Checking if user is logged in', lvl=debug)
+            self.log('Checking if user is logged in', lvl=verbose)
 
             try:
                 user = self._users[useruuid]
@@ -678,7 +678,7 @@ class ClientManager(ConfigurableComponent):
 
                 return
 
-            self.log('Handling event:', requestcomponent, requestaction, lvl=debug)
+            self.log('Handling event:', requestcomponent, requestaction, lvl=verbose)
             try:
                 self._handleAuthorizedEvents(requestcomponent, requestaction,
                                              requestdata, user, client)
@@ -784,7 +784,7 @@ class ClientManager(ConfigurableComponent):
 
     @handler(ping)
     def ping(self, event):
-        self.log('Client ping received:', event.data, lvl=debug)
+        self.log('Client ping received:', event.data, lvl=verbose)
         response = {
             'component': 'hfos.ui.clientmanager',
             'action': 'pong',
