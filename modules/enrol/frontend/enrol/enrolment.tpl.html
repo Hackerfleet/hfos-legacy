@@ -116,7 +116,7 @@
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="captcha">Are you a conscious being?</label>
-                <div class="col-sm-2 col-sm-offset-1">
+                <div class="col-sm-3">
                     <div ng-show="$ctrl.captcha_image !== null">
                         <img class="captcha" data-ng-src="data:image/png;base64,{{$ctrl.captcha_image}}"
                              data-err-src="/assets/images/error.png"/>
@@ -141,7 +141,7 @@
                             class="btn btn-lg btn-default pull-right"
                             ng-click="$ctrl.enrol()"
                             ng-disabled="$ctrl.submitting">
-                        Enrol Account
+                        <span class="fa fa-user-plus"></span>Enrol Account
                     </button>
                 </div>
             </div>
