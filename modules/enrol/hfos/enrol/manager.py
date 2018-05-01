@@ -405,7 +405,7 @@ the friendly robot of {{node_name}}
 
         self.log('Provided data is good to enrol.')
         if self.config.auto_accept_enrolled:
-            self._create_user(username, password, mail, 'Enrolled')
+            self._create_user(username, password, mail, 'Enrolled', uuid)
         else:
             self._invite(username, 'Enrolled', mail, uuid)
 
@@ -558,7 +558,7 @@ the friendly robot of {{node_name}}
         }
         self.fireEvent(send(uuid, packet))
 
-    def _create_user(self, username, password, mail, method):
+    def _create_user(self, username, password, mail, method, uuid):
         """Create a new user and all initial data"""
 
         try:
@@ -600,7 +600,13 @@ the friendly robot of {{node_name}}
 
             newprofile.save()
 
-            # TODO: Notify new owner
+            packet = {
+                'component': 'hfos.enrol.manager',
+                'action': 'enrol',
+                'data': [True, mail]
+            }
+            self.fireEvent(send(uuid, packet))
+
             # TODO: Notify crew-admins
         except Exception as e:
             self.log("Problem creating new profile: ", type(e),
