@@ -44,7 +44,7 @@
                 If you do not receive this mail, contact an administrator of this system.
             </div>
             <div ng-show="$ctrl.enrolled">
-                You can now <a ng-click="$ctrl.user.showlogin()">login to this node.</a>
+                You can now <a ng-click="$ctrl.state.go('app.menu'); $ctrl.user.showlogin()">login to this node.</a>
             </div>
         </div>
     </div>

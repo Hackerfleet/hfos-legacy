@@ -33,11 +33,12 @@
  */
 class Enrol {
 
-    constructor(scope, user, socket, notification) {
+    constructor(scope, user, socket, notification, state) {
         this.scope = scope;
         this.user = user;
         this.socket = socket;
         this.notification = notification;
+        this.state = state;
 
         this.registration_open = null;
         this.success = false;
@@ -136,6 +137,6 @@ class Enrol {
     }
 }
 
-Enrol.$inject = ['$scope', 'user', 'socket', 'notification'];
+Enrol.$inject = ['$scope', 'user', 'socket', 'notification', '$state'];
 
 export default Enrol;
