@@ -34,14 +34,19 @@
     </div>
 
     <div ng-show="$ctrl.success === true">
-        <span>
+        <div>
             Thanks for enrolling, {{$ctrl.username}}!
             <br/>
-            An email with a confirmation link has been sent to you.
-            Please open this link in your browser to confirm your account.
+            <div ng-show="$ctrl.invited">
+                An email with a confirmation link has been sent to you.
+                Please open this link in your browser to confirm your account.
 
-            If you do not receive this mail, contact an administrator of this system.
-        </span>
+                If you do not receive this mail, contact an administrator of this system.
+            </div>
+            <div ng-show="$ctrl.enrolled">
+                You can now <a ng-click="$ctrl.user.showlogin()">login to this node.</a>
+            </div>
+        </div>
     </div>
 
     <div ng-hide="$ctrl.user.signedin || ($ctrl.registration_open !== true) || ($ctrl.success === true)">
@@ -77,7 +82,8 @@
 
             <div class="form-group">
                 <label for="password_confirm" class="col-sm-2 control-label">Confirm:</label>
-                <div class="col-sm-offset-1 col-sm-2" ng-class="{hasError: $ctrl.password_new !== $ctrl.password_confirm}">
+                <div class="col-sm-offset-1 col-sm-2"
+                     ng-class="{hasError: $ctrl.password_new !== $ctrl.password_confirm}">
                     <input type="password" name="password_confirm" ng-model="$ctrl.password_confirm"
                            class="form-control"
                            id="password_confirm"

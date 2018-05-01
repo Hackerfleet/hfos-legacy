@@ -42,6 +42,8 @@ class Enrol {
         this.registration_open = null;
         this.success = false;
         this.submitting = false;
+        this.invited = false;
+        this.enrolled = false;
 
         this.password_new = '';
         this.password_confirm = '';
@@ -64,6 +66,7 @@ class Enrol {
                 if (msg.data[0] === true) {
                     console.log('[ENROL] Invitation was sent');
                     self.success = true;
+                    self.invited = true;
                 } else {
                     console.log('[ENROL] Error during enrolment');
                     self.notification.add('danger', 'Error', 'Your enrolment did not succeed. You may want to check the form for errors and try again.', 5);
@@ -78,6 +81,8 @@ class Enrol {
                     self.submitting = false;
                 } else {
                     self.notification.add('success', 'Success', msg.data[1], 5);
+                    self.success = true;
+                    self.enrolled = true;
                 }
             }
         });
