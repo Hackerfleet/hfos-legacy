@@ -40,7 +40,7 @@ Provisions
 """
 
 from hfos.schemata.base import uuid_object, base_object
-from hfos.schemata.defaultform import editbuttons, section, fieldset, lookup_field
+from hfos.schemata.defaultform import editbuttons, section, fieldset, lookup_field  # , collapsible
 from hfos.schemata.geometry import GeometrySchema
 
 EventSchema = base_object('event', all_roles='crew')
@@ -48,12 +48,12 @@ EventSchema = base_object('event', all_roles='crew')
 EventSchema['properties'].update({
     "calendar": uuid_object('Associated calendar', display=True),
     "dtstart": {
-        "format": "date-time",
+        "format": "datetimepicker",
         "type": "string",
         "description": "Event starting time"
     },
     "dtend": {
-        "format": "date-time",
+        "format": "datetimepicker",
         "type": "string",
         "description": "Event ending time"
     },
@@ -61,14 +61,14 @@ EventSchema['properties'].update({
     "details": {"type": "string"},
     "location": {"type": "string"},
     "url": {"type": "string", "format": "uri"},
-    "color": {'type': 'string', 'format': 'colorpicker'},
+    "color": {'type': 'string', 'format': 'color'},
     "duration": {
-        "format": "time",
+        "format": "timepicker",
         "type": "string",
         "description": "Event duration"
     },
     "rdate": {
-        "format": "date-time",
+        "format": "datetimepicker",
         "type": "string",
         "description": "Recurrence date"
     },
@@ -76,8 +76,8 @@ EventSchema['properties'].update({
         "type": "string",
         "description": "Recurrence rule"
     },
-    "category": {"type": "string"},
-    "geo": GeometrySchema
+    "category": {"type": "string", "description": "Event category"},
+    #"geo": GeometrySchema
 })
 
 EventForm = [
@@ -87,7 +87,8 @@ EventForm = [
             ['dtstart', 'dtend'],
             ['duration', 'location']
         ]),
-        lookup_field('calendar'),
+        section(1, 2, [[lookup_field('calendar'), 'color']]),
+        'summary',
         'geo'
     ]),
     fieldset('Recurrence', [

@@ -48,7 +48,7 @@ CalendarSchema = base_object('calendar', all_roles='crew')
 CalendarSchema['properties'].update({
     "category": {"type": "string"},
     "description": {"type": "string"},
-    "color": {"type": "string"},
+    "color": {"type": "string", "format": "color"},
     "tz": {'type': "string"},
     "geo": GeometrySchema
 })
