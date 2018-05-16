@@ -32,3 +32,8 @@ table.user-list tr {
   border-radius: 5px;
   border-style: 1px solid $color-gray-light;
 }
+
+#deletionWarning > modal-dialog > modal-content {
+  background: firebrick;
+  color: whitesmoke;
+}

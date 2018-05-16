@@ -61,11 +61,27 @@ class invite(authorizedevent):
     roles = ['admin']
 
 
-class accept(anonymousevent):
-    pass
+class delete(authorizedevent):
+    roles = ['admin']
+
+
+class addrole(authorizedevent):
+    roles = ['admin']
+
+
+class delrole(authorizedevent):
+    roles = ['admin']
+
+
+class toggle(authorizedevent):
+    roles = ['admin']
 
 
 class changepassword(authorizedevent):
+    pass
+
+
+class accept(anonymousevent):
     pass
 
 
@@ -259,6 +275,25 @@ the friendly robot of {{node_name}}
 
         self.log("Started")
 
+    def _fail(self, event, msg="Error"):
+        self.log('Sending failure feedback to', event.client.uuid, lvl=debug)
+        fail_msg = {
+            'component': 'hfos.enrol.manager',
+            'action': event.action,
+            'data': (False, msg)
+        }
+        self.fireEvent(send(event.client.uuid, fail_msg))
+
+    def _acknowledge(self, event, msg="Done"):
+        self.log('Sending success feedback to', event.client.uuid, lvl=debug)
+        success_msg = {
+            'component': 'hfos.enrol.manager',
+            'action': event.action,
+            'data': (True, msg)
+        }
+        self.fireEvent(send(event.client.uuid, success_msg))
+
+
     @handler(change)
     def change(self, event):
         """An admin user requests a change to an enrolment"""
@@ -356,51 +391,39 @@ the friendly robot of {{node_name}}
 
         uuid = event.client.uuid
 
-        def fail(reason):
-            """Reports failure to the enrol form module"""
-
-            self.log('Enrolment request failed:', reason)
-
-            response = {
-                'component': 'hfos.enrol.manager',
-                'action': 'enrol',
-                'data': (False, reason)
-            }
-            self.fire(send(uuid, response))
-
         if uuid in self.captchas and event.data.get('captcha', None) == self.captchas[uuid]['text']:
             self.log('Captcha solved!')
         else:
             self.log('Captcha failed!')
-            fail('You did not solve the captcha correctly.')
+            self._fail(event, _('You did not solve the captcha correctly.'))
             self._generate_captcha(event)
 
             return
 
         mail = event.data.get('mail', None)
         if mail is None:
-            fail(_('You have to supply all required fields.'))
+            self._fail(event, _('You have to supply all required fields.'))
             return
         elif not validate_email(mail):
-            fail(_('The supplied email address seems invalid'))
+            self._fail(event, _('The supplied email address seems invalid'))
             return
 
         if objectmodels['user'].count({'mail': mail}) > 0:
-            fail(_('Your mail address cannot be used.'))
+            self._fail(event, _('Your mail address cannot be used.'))
             return
 
         password = event.data.get('password', None)
         if password is None or len(password) < 5:
-            fail(_('Your password is not long enough.'))
+            self._fail(event, _('Your password is not long enough.'))
             return
 
         username = event.data.get('username', None)
         if username is None or len(username) < 4:
-            fail(_('Your username is not long enough.'))
+            self._fail(event, _('Your username is not long enough.'))
             return
         elif (objectmodels['user'].count({'name': username}) > 0) or \
-             (objectmodels['enrollment'].count({'name': username}) > 0):
-            fail(_('The username you supplied is not available.'))
+            (objectmodels['enrollment'].count({'name': username}) > 0):
+            self._fail(event, _('The username you supplied is not available.'))
             return
 
         self.log('Provided data is good to enrol.')
@@ -409,18 +432,10 @@ the friendly robot of {{node_name}}
         else:
             self._invite(username, 'Enrolled', mail, uuid)
 
+
     @handler(accept)
     def accept(self, event):
         """A challenge/response for an enrolment has been accepted"""
-
-        def fail(uuid):
-            self.log('Sending failure feedback to', uuid, lvl=debug)
-            fail_msg = {
-                'component': 'hfos.enrol.manager',
-                'action': 'accept',
-                'data': False
-            }
-            self.fireEvent(send(uuid, fail_msg))
 
         self.log('Invitation accepted:', event.__dict__, lvl=debug)
         try:
@@ -454,7 +469,7 @@ the friendly robot of {{node_name}}
                            'first. Thank you, for your patience.'
                 else:
                     self.log('Enrollment has been closed already!', lvl=warn)
-                    fail(event.client.uuid)
+                    self._fail(event)
                     return
                 packet = {
                     'component': 'hfos.enrol.manager',
@@ -464,7 +479,7 @@ the friendly robot of {{node_name}}
                 self.fireEvent(send(event.client.uuid, packet))
             else:
                 self.log('No enrollment available.', lvl=warn)
-                fail(event.client.uuid)
+                self._fail(event)
         except Exception as e:
             self.log('Error during invitation accept handling:', e, type(e),
                      lvl=warn, exc=True)
@@ -504,6 +519,71 @@ the friendly robot of {{node_name}}
             email_user = user_object.find_one({'mail': email})
         if username is not None and user_object.count({'name': username}) > 0:
             named_user = user_object.find_one({'name': username})
+
+    @handler(delete)
+    def delete(self, event):
+        self.log('Deleting user')
+
+        user_object = objectmodels['user'].find_one({'uuid': event.data})
+        user_object.delete()
+        self.log('User deleted:', user_object.name)
+        self._acknowledge(event, event.data)
+
+    @handler(delrole)
+    def delrole(self, event):
+        self.log('Deleting user role')
+        role = event.data.get('role', None)
+        uuid = event.data.get('uuid', None)
+
+        if role is None or uuid is None:
+            self._fail(event, 'Bad Arguments')
+            return
+
+        user_object = objectmodels['user'].find_one({'uuid': uuid})
+        user_object.roles.remove(role)
+        user_object.save()
+
+        self.log('User role deleted:', user_object.name, role)
+        self._acknowledge(event)
+
+    @handler(addrole)
+    def addrole(self, event):
+        self.log('Adding user role')
+        role = event.data.get('role', None)
+        uuid = event.data.get('uuid', None)
+
+        if role is None or uuid is None:
+            self._fail(event, 'Bad Arguments')
+            return
+
+        user_object = objectmodels['user'].find_one({'uuid': uuid})
+
+        if role in user_object.roles:
+            self._fail(event, 'Role already assigned')
+            return
+
+        user_object.roles.append(role)
+        user_object.save()
+
+        self.log('User role added:', user_object.name, role)
+        self._acknowledge(event)
+
+    @handler(toggle)
+    def toggle(self, event):
+        self.log('Toggling user activation')
+        status = event.data.get('status', None)
+        uuid = event.data.get('uuid', None)
+
+        if status is None or uuid is None:
+            self._fail(event, 'Bad Arguments')
+            return
+
+        user_object = objectmodels['user'].find_one({'uuid': uuid})
+        user_object.active = status
+        user_object.save()
+
+        self.log('Toggled user:', user_object.name, ', activated:', status)
+        self._acknowledge(event)
 
     def _generate_captcha(self, event):
         self.log('Generating requested captcha')
