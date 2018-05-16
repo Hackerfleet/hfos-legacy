@@ -127,15 +127,7 @@ class Dashboard {
         if (typeof user.clientconfig.dashboarduuid !== 'undefined') {
             this.getDashboard();
         }
-    
-        self.scope.$on('$destroy', function() {
-            self.stopSubscriptions();
-            self.dashboardupdate();
-            self.clientconfigupdate();
-            self.loginupdate();
-            self.statechange();
-        });
-        
+
         this.scope.$on('OP.ListUpdate', function (event, schema) {
             if (schema === 'dashboardconfig') {
                 let dashboardlist = self.op.lists.dashboardconfig,
@@ -184,7 +176,29 @@ class Dashboard {
             console.log('[DASH] Logged in - fetching dashboard data');
             this.requestDashboards();
         }
-        
+
+        this.store_listener = this.scope.$on('Dash.Store', function(ev, data) {
+            console.log('[DASH] Storing widget data:', data);
+            let modified = false;
+
+            self.dashboard.cards.forEach(function(item) {
+                if (item.position.x === data.x && item.position.y === data.y) {
+                    item.valuetype = data.valuetype;
+                    modified = true;
+                }
+            });
+            if (modified === true) self.storeMenuConfig();
+        });
+
+        self.scope.$on('$destroy', function() {
+            self.stopSubscriptions();
+            self.dashboardupdate();
+            self.clientconfigupdate();
+            self.loginupdate();
+            self.statechange();
+            self.store_listener();
+        });
+
         console.log('[DASH] Starting');
     }
     
