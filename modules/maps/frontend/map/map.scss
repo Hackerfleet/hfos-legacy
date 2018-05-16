@@ -15,7 +15,7 @@
 }
 
 .aside {
-  z-index: 99;
+  z-index: 101;
 }
 
 .layer-toggle {
@@ -45,29 +45,31 @@
                1px 1px $color-gray-light;
 }
 
-#mapsidebar ul {
+#map-sidebar ul {
   list-style-type: none;
   padding-left: 10px;
 }
 
-#mapsidebar .pull-right .fa {
+#map-sidebar .pull-right .fa {
   color: $color-gray-light;
   &:hover {
     color: $color-gray-dark;
   }
 }
 
-#mapsidebar {
+#map-sidebar {
   padding: 0;
   margin: 0;
 }
 
-#mapsidebar .slider.slider-horizontal {
+#map-sidebar .slider.slider-horizontal {
   width: 96% !important;
 }
 
-#mapsidebar .tab-content {
+#map-sidebar .tab-content {
   margin: 10px;
+  min-width: 30vw;
+  max-width: 30vw;
 }
 
 #layer_selector, #layergroup_selector {
@@ -113,4 +115,8 @@
 }
 .layer_zoom_levels .slider-handle.custom:last-of-type::before {
   content: '\21a4';
+}
+
+#gdal_loader {
+  max-width: 25vw;
 }

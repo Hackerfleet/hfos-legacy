@@ -5,7 +5,7 @@
                 <button type="button" class="close" ng-click="$hide();">&times;</button>
                 <h4 class="aside-title">Map Sidebar</h4>
             </div>
-            <div id="mapsidebar" class="aside-body bs-sidebar" style="float:right;">
+            <div id="map-sidebar" class="aside-body bs-sidebar" style="float:right;">
                 <uib-tabset active="active">
                     <uib-tab index="0" heading="Layers">
                         <div id="layer_selector">
@@ -43,11 +43,11 @@
                                             <div class="pull-right">
                                                 <a ng-hide="layer.layerOptions.bounds == null"
                                                    ng-click="$ctrl.show_map_boundary(layer.uuid)"><span
-                                                        class="fa fa-search"></span></a>
+                                                    class="fa fa-search"></span></a>
                                                 <a href="#!/editor/layer/{{layer.uuid}}/edit"><span
-                                                        class="fa fa-pencil"></span></a>
+                                                    class="fa fa-pencil"></span></a>
                                                 <a href="#!/editor/layer/{{layer.uuid}}/copy"><span
-                                                        class="fa fa-copy"></span></a>
+                                                    class="fa fa-copy"></span></a>
                                             </div>
                                             <div ng-hide="!$ctrl.layer_flags[uuid].expanded"
                                                  ng-animate="'fade'">
@@ -79,6 +79,34 @@
                             </ul>
                         </div>
 
+                        <div id="mapview_selector">
+                            <h4 ng-click="mapviewsCollapsed = !mapviewsCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': !mapviewsCollapsed,
+                                                            'fa-chevron-down': mapviewsCollapsed}">
+                                </span>
+                                Mapviews
+                            </h4>
+
+                            <ul uib-collapse="mapviewsCollapsed" class="layer-overview">
+                                <li ng-repeat="(name, mapview) in $ctrl.mapviews">
+                                    <a ng-click="$ctrl.switchMapview(mapview.uuid)">
+                                        <span class="layer-toggle fa"
+                                              ng-class="{'fa-circle-o': $ctrl.mapviewuuid != mapview.uuid,
+                                                         'fa-dot-circle-o': $ctrl.mapviewuuid == mapview.uuid}">
+                                        </span>
+                                        <span ng-bind="mapview.name"></span>
+                                    </a>
+                                    <div class="pull-right">
+                                        <a href="#!/editor/mapview/{{mapview.uuid}}/edit">
+                                            <span class="fa fa-pencil"></span>
+                                        </a>
+                                        <a href="#!/editor/mapview/{{mapview.uuid}}/copy">
+                                            <span class="fa fa-copy"></span>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
 
                         <div id="layergroup_selector">
                             <h4 ng-click="groupsCollapsed = !groupsCollapsed">
@@ -87,27 +115,28 @@
                                 </span>
                                 Layergroups
                             </h4>
+
                             <ul uib-collapse="groupsCollapsed" class="layer-overview">
                                 <li ng-repeat="layergroup in $ctrl.layergroups">
-                                    <!-- {{layer}} -->
-
                                     <a ng-click="$ctrl.switchLayergroup(layergroup.uuid)">
-                                    <span class="layer-toggle fa"
-                                          ng-class="
-                                          {'fa-circle-o': $ctrl.layergroup != layergroup.uuid,
-                                           'fa-dot-circle-o': $ctrl.layergroup == layergroup.uuid
-                                           }"></span>
+                                        <span class="layer-toggle fa"
+                                              ng-class="{'fa-circle-o': $ctrl.layergroup != layergroup.uuid,
+                                                         'fa-dot-circle-o': $ctrl.layergroup == layergroup.uuid}">
+                                        </span>
                                         <span ng-bind="layergroup.name"></span>
                                     </a>
                                     <div class="pull-right">
-                                        <a href="#!/editor/layergroup/{{layergroup.uuid}}/edit"><span
-                                                class="fa fa-pencil"></span></a>
-                                        <a href="#!/editor/layergroup/{{layergroup.uuid}}/copy"><span
-                                                class="fa fa-copy"></span></a>
+                                        <a href="#!/editor/layergroup/{{layergroup.uuid}}/edit">
+                                            <span class="fa fa-pencil"></span>
+                                        </a>
+                                        <a href="#!/editor/layergroup/{{layergroup.uuid}}/copy">
+                                            <span class="fa fa-copy"></span>
+                                        </a>
                                     </div>
                                 </li>
                             </ul>
                         </div>
+
                         <div id="other_layers">
                             <h4 ng-click="otherCollapsed && $ctrl.get_other_layers(); otherCollapsed = !otherCollapsed">
                                 <span class="fa" ng-class="{'fa-chevron-right': otherCollapsed,
@@ -123,44 +152,25 @@
                                             <span class="layer-toggle fa"
                                                   ng-class="
                                                   {'fa-square-o': !$ctrl.leafletlayers['overlays'].hasOwnProperty(uuid),
-                                                   'fa-check-square-o': $ctrl.leafletlayers['overlays'].hasOwnProperty(uuid),
-                                                   }"></span>
+                                                   'fa-check-square-o': $ctrl.leafletlayers['overlays'].hasOwnProperty(uuid)}">
+                                            </span>
                                         <span ng-bind="layer.name"></span>
                                     </a>
                                     <div class="pull-right">
                                         <a ng-hide="layer.layerOptions.bounds == null"
                                            ng-click="$ctrl.show_map_boundary(layer.uuid)"><span
-                                                class="fa fa-search"></span></a>
+                                            class="fa fa-search"></span></a>
                                         <a href="#!/editor/layer/{{layer.uuid}}/edit"><span
-                                                class="fa fa-pencil"></span></a>
+                                            class="fa fa-pencil"></span></a>
                                         <a href="#!/editor/layer/{{layer.uuid}}/copy"><span
-                                                class="fa fa-copy"></span></a>
+                                            class="fa fa-copy"></span></a>
                                     </div>
                                 </li>
                             </ul>
                         </div>
                     </uib-tab>
 
-                    <uib-tab index="1" heading="Mapviews">
-                        <ul>
-                            <li ng-repeat="(name, mapview) in $ctrl.mapviews">
-                                <a ng-click="$ctrl.switchMapview(mapview.uuid)">
-                                    <span class="layer-toggle fa"
-                                          ng-class="
-                                                  {'fa-circle-o': $ctrl.mapviewuuid != mapview.uuid,
-                                                   'fa-dot-circle-o': $ctrl.mapviewuuid == mapview.uuid
-                                                   }"></span>
-                                    <span ng-bind="mapview.name"></span>
-                                </a>
-                                <div class="pull-right">
-                                    <a href="#!/editor/mapview/{{mapview.uuid}}/edit"><span class="fa fa-pencil"></span></a>
-                                    <a href="#!/editor/mapview/{{mapview.uuid}}/copy"><span
-                                            class="fa fa-copy"></span></a>
-                                </div>
-                            </li>
-                        </ul>
-                    </uib-tab>
-                    <uib-tab index="2" heading="Geo Objects">
+                    <uib-tab index="1" heading="Geo Objects">
                         <div id="geoobject_defaults">
                             <h4 ng-click="geoobjectDetailsCollapsed = !geoobjectDetailsCollapsed">
                                 <span class="fa" ng-class="{'fa-chevron-right': geoobjectDetailsCollapsed,
@@ -168,50 +178,65 @@
                                 </span>
                                 Defaults
                             </h4>
-                            <ul uib-collapse="geoobjectDetailsCollapsed">
-                                <li>
-                                    <label>Object Color:</label>
-                                    <spectrum-colorpicker ng-model="$ctrl.default_color"
-                                                          options="{showInput: true, showAlpha: true, showInput: true}">
-                                    </spectrum-colorpicker>
-                                </li>
-                                <li>
-                                    <label>Draw Markers:</label>
-                                    <select class="pull-right" ng-model="$ctrl.default_marker">
-                                        <option ng-repeat="(value, label) in $ctrl.default_options.marker"
-                                                value="{{value}}">{{label}}
-                                        </option>
-                                    </select>
-                                    <div style="display: flow-root" ng-show="$ctrl.default_marker === 'custom'">
-                                        <label>Custom type:</label>
-                                        <input class="pull-right" type="text" ng-model="$ctrl.default_custom_marker">
+                            <div class="form-horizontal" uib-collapse="geoobjectDetailsCollapsed">
+                                <div class="form-group">
+                                    <label class="col-sm-4">Object Color:</label>
+                                    <div class="col-sm-8">
+                                        <spectrum-colorpicker ng-model="$ctrl.default_color"
+                                            options="{showInput: true, showAlpha: true, showInput: true}">
+                                        </spectrum-colorpicker>
                                     </div>
-                                </li>
-                                <li>
-                                    <label>Draw Paths:</label>
-                                    <select class="pull-right" ng-model="$ctrl.default_path">
-                                        <option ng-repeat="(value, label) in $ctrl.default_options.path"
-                                                value="{{value}}">{{label}}
-                                        </option>
-                                    </select>
-                                    <div style="display: flow-root" ng-show="$ctrl.default_path === 'custom'">
-                                        <label>Custom type:</label>
-                                        <input class="pull-right" type="text" ng-model="$ctrl.default_custom_path">
+                                </div>
+                                <div class="form-group">
+                                    <label for="default_marker" class="col-sm-4">Draw Markers:</label>
+                                    <div class="col-sm-8">
+                                        <select id="default_marker" class="form-control" ng-model="$ctrl.default_marker">
+                                            <option ng-repeat="(value, label) in $ctrl.default_options.marker"
+                                                    value="{{value}}">{{label}}
+                                            </option>
+                                        </select>
                                     </div>
-                                </li>
-                                <li>
-                                    <label>Draw Shapes:</label>
-                                    <select class="pull-right" ng-model="$ctrl.default_shape">
-                                        <option ng-repeat="(value, label) in $ctrl.default_options.shape"
-                                                value="{{value}}">{{label}}
-                                        </option>
-                                    </select>
-                                    <div style="display: flow-root" ng-show="$ctrl.default_shape === 'custom'">
-                                        <label>Custom type:</label>
-                                        <input class="pull-right" type="text" ng-model="$ctrl.default_custom_shape">
+                                    <div ng-show="$ctrl.default_marker === 'custom'">
+                                        <label for="default_custom_marker" class="col-sm-4">Custom type:</label>
+                                        <div class="col-sm-8">
+                                            <input id="default_custom_marker" class="form-control" type="text"
+                                                   ng-model="$ctrl.default_custom_marker">
+                                        </div>
                                     </div>
-                                </li>
-                            </ul>
+                                </div>
+                                <div class="form-group">
+                                    <label for="default_path" class="col-sm-4">Draw Paths:</label>
+                                    <div class="col-sm-8">
+                                        <select id="default_path" class="form-control" ng-model="$ctrl.default_path">
+                                            <option ng-repeat="(value, label) in $ctrl.default_options.path"
+                                                    value="{{value}}">{{label}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div ng-show="$ctrl.default_path === 'custom'">
+                                        <label for="default_custom_path" class="col-sm-4">Custom type:</label>
+                                        <div class="col-sm-8">
+                                            <input id="default_custom_path" class="form-control" type="text" ng-model="$ctrl.default_custom_path">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="default_shape" class="col-sm-4">Draw Shapes:</label>
+                                    <div class="col-sm-8">
+                                        <select id="default_shape" class="form-control" ng-model="$ctrl.default_shape">
+                                            <option ng-repeat="(value, label) in $ctrl.default_options.shape"
+                                                    value="{{value}}">{{label}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div ng-show="$ctrl.default_shape === 'custom'">
+                                        <label for="default_custom_shape" class="col-sm-4">Custom type:</label>
+                                        <div class="col-sm-8">
+                                            <input id="default_custom_shape" class="form-control" type="text" ng-model="$ctrl.default_custom_shape">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div id="geoobjects">
@@ -230,16 +255,16 @@
                                         <td class="text-nowrap" title="'name'" filter="{ name: 'text'}"
                                             sortable="'name'">
                                             <a ng-click="$ctrl.switchGeoobject(geoobject.uuid)"><span
-                                                    ng-bind="geoobject.name != null ? geoobject.name : 'Untitled Object'"></span></a>
+                                                ng-bind="geoobject.name != null ? geoobject.name : 'Untitled Object'"></span></a>
                                         </td>
                                         <td class="text-nowrap"
                                             title="'Actions'">
                                             <a ng-click="$ctrl.zoom_to_geoobject(geoobject.uuid)"><span
-                                                    class="fa fa-crosshairs"></span></a>
+                                                class="fa fa-crosshairs"></span></a>
                                             <a href="#!/editor/geoobject/{{geoobject.uuid}}/edit"><span
-                                                    class="fa fa-pencil"></span></a>
+                                                class="fa fa-pencil"></span></a>
                                             <a href="#!/editor/geoobject/{{geoobject.uuid}}/copy"><span
-                                                    class="fa fa-copy"></span></a>
+                                                class="fa fa-copy"></span></a>
                                         </td>
                                     </tr>
                                 </table>
@@ -247,10 +272,10 @@
                         </div>
                     </uib-tab>
 
-                    <uib-tab class="hidden" index="3" heading="Vessels">
+                    <uib-tab class="hidden" index="2" heading="Vessels">
                     </uib-tab>
 
-                    <uib-tab index="4" heading="Misc">
+                    <uib-tab index="3" heading="Misc">
                         <h3>Miscellaneous</h3>
                         <span>Various tools & functionality</span>
                         <div id="offline_loader">
@@ -265,14 +290,14 @@
 
                                 <form class="form-horizontal">
                                     <div class="form-group">
-                                        <label class="col-sm-2 control-label">Maximum zoom</label>
-                                        <div class="col-sm-10">
-                                            <input type="number" class="form-control"
+                                        <label for="offline_loader_zoom" class="col-sm-6 control-label">Maximum zoom</label>
+                                        <div class="col-sm-6">
+                                            <input id="offline_loader_zoom" type="number" class="form-control"
                                                    ng-model="$ctrl.offline_loader_zoom">
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <div class="col-sm-offset-2 col-sm-10">
+                                        <div class="col-sm-offset-6 col-sm-6">
                                             <div class="checkbox">
                                                 <label>
                                                     <input ng-model="$ctrl.offline_loader_overwrite"
@@ -300,7 +325,8 @@
                                         <li ng-repeat="(uuid, request) in $ctrl.offline_loader_queue">
                                             <div class="panel">
                                                 <span>{{request.tiles}} tiles (~{{request.size}} kB)</span>
-                                                <span ng-show="request.active && request.completed === 0">Waiting...</span>
+                                                <span
+                                                    ng-show="request.active && request.completed === 0">Waiting...</span>
                                                 <a class="btn btn-sm btn-warning pull-right" type="button"
                                                    ng-hide="request.active"
                                                    ng-click="$ctrl.queue_trigger(uuid)">Start</a>
@@ -325,20 +351,25 @@
 
                             <div uib-collapse="gdalLoaderCollapsed">
                                 <div>
-                                    <span>This tool allows to upload raster charts and to rescan for already converted
-                                        map data, that got lost e.g. due to a database upgrade</span>
+                                    <span>
+                                        This tool allows to upload raster charts and to rescan for already converted
+                                        map data, that got lost e.g. due to a database upgrade
+                                    </span>
 
                                     <h3>Upload new chart</h3>
-                                    <span>The system currently only accepts BSB/KAP files. Please upload a single .kap
-                                        file to convert it to a HFOS layer.</span>
+                                    <div>The system currently only accepts BSB/KAP files. Please upload a single .kap
+                                        file to convert it to a HFOS layer.
+                                    </div>
+
                                     <input class="form-control" type="file" name="uploadfile" id="filename">
                                     <button type="submit" class="btn btn-default" ng-click="$ctrl.gdal_upload()">
                                         Upload Map
                                     </button>
                                     <hr>
                                     <h3>Rescan existing layers</h3>
-                                    <span>The rescan action triggers an analysis of all stored HFOS layer caches and
-                                        integrates them into the GDAL layer group.</span>
+                                    <div>The rescan action triggers an analysis of all stored HFOS layer caches and
+                                        integrates them into the GDAL layer group.
+                                    </div>
                                     <button type="submit" class="btn btn-danger" ng-click="$ctrl.gdal_rescan()">
                                         Rescan
                                     </button>
@@ -349,9 +380,11 @@
                 </uib-tabset>
 
             </div>
+
             <div class="aside-footer">
                 <small>-</small>
             </div>
+
         </div>
     </div>
 </div>

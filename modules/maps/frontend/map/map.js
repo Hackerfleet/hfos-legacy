@@ -422,7 +422,9 @@ class mapcomponent {
         this.addLayer = function (uuid) {
             console.log('[MAP] Getting Layer');
             self.op.get('layer', uuid).then(function (msg) {
-                if (msg.action !== fail) {
+
+                // TODO: That is no longer the response action for failing:
+                if (msg.action !== 'fail') {
                     let layer = msg.data.object;
                     console.log('[MAP] Got a layer:', layer);
 
@@ -677,7 +679,7 @@ class mapcomponent {
                 self.objectlayers[obj.uuid] = map_object;
             } else if (schema === 'layergroup') {
                 console.log('[MAP] Layergroup received:', obj);
-                if (self.layergroup == obj.uuid) {
+                if (self.layergroup === obj.uuid) {
                     console.log('[MAP] Activating layergroup ', obj.uuid);
                     self.clearLayers();
 
@@ -688,13 +690,20 @@ class mapcomponent {
                     }
                 } else {
                     console.log('[MAP] Not active, storing');
-                    self.layergroups[obj.uuid] = obj;
                 }
+                self.layergroups[obj.uuid] = obj;
+
 
             } else if (schema === 'layer') {
-                console.log('[MAP] Received layer object: ', obj);
+                console.log('[MAP] Received layer object: ', obj, self.layergroup, self.layergroups);
 
-                if (self.layergroups[self.layergroup].layers.indexOf(objuuid) >= 0) {
+                let current_layers;
+                if (self.layergroup in self.layergroups) {
+                    console.log('[MAP] Layergroup already known, selecting');
+                    current_layers = self.layergroups[self.layergroup].layers;
+                }
+
+                if (current_layers.indexOf(objuuid) >= 0) {
                     console.log('[MAP] Is activated layer');
                     self.addLayer(objuuid);
                     console.log('[MAP] Layer flags after adding:', self.layer_flags);
@@ -729,13 +738,13 @@ class mapcomponent {
 
                  //self.drawnLayer.addData(item.geojson);
                  }
-            }*/
+            }
             if (schema === 'layergroup') {
                 self.layergroups = self.op.lists.layergroup;
             }
             if (schema === 'mapview') {
                 self.mapviews = self.op.lists.mapview;
-            }
+            }*/
         });
 
         this.scope.$on('OP.Update', function (event, objuuid) {
@@ -829,11 +838,11 @@ class mapcomponent {
         };
 
         this.subscribe = function () {
-            self.op.subscribeObject(self.mapviewuuid, 'mapview');
+            self.op.subscribe(self.mapviewuuid, 'mapview');
         };
 
         this.unsubscribe = function () {
-            self.op.unsubscribeObject(self.mapviewuuid, 'mapview');
+            self.op.unsubscribe(self.mapviewuuid, 'mapview');
         };
 
         let mapEvents = self.events.map.enable;
