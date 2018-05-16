@@ -87,4 +87,8 @@ VolumeEditForm = [
     editbuttons
 ]
 
-Volume = {'schema': VolumeSchema, 'form': VolumeEditForm}
+VolumeOptions = {
+    'hidden': ['path']
+}
+
+Volume = {'schema': VolumeSchema, 'form': VolumeEditForm, 'options': VolumeOptions}

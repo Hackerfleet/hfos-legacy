@@ -32,8 +32,11 @@ import { routing } from './filemanager.config.js';
 import FileManagerComponent from './filemanager-component/filemanager';
 import template from './filemanager-component/filemanager.tpl.html';
 
+import FileManagerService from './services/filemanager.service';
+
 export default angular
     .module('main.components.filemanager', [uirouter])
     .config(routing)
+    .service('filemanagerservice', FileManagerService)
     .component('filemanager', {controller: FileManagerComponent, template})
     .name;

@@ -41,7 +41,7 @@ from circuits import Worker, task, Event, Timer
 from hfos.events.client import send
 from hfos.component import ConfigurableComponent, authorizedevent, handler
 from hfos.database import ValidationError, objectmodels
-from hfos.logger import error, warn
+from hfos.logger import error, warn, verbose, hilight
 
 try:
     PermissionError
@@ -200,41 +200,82 @@ class FileManager(ConfigurableComponent):
 
     @handler(get_volumes)
     def get_volumes(self, event):
+
+        req = event.data.get('req', None)
+
+        if req is None:
+            self.log('Request without request id!', lvl=warn)
+
         response = {
             'component': 'hfos.filemanager.manager',
             'action': 'get_volumes',
-            'data': []
+            'data': {
+                'req': req,
+                'volumes': []
+            }
         }
-        for item in self.volumes.values():
-            response['data'].append(item.serializablefields())
 
-        self.log('Transmitting list of volumes:', response, pretty=True)
+        for item in self.volumes.values():
+            response['data']['volumes'].append(item.serializablefields())
+
+        self.log('Transmitting list of volumes:', response, pretty=True, lvl=verbose)
         self.fireEvent(send(event.client.uuid, response))
 
     @handler(get_directory)
     def get_directory(self, event):
-        uuid = event.data
+        uuid = event.data.get('uuid', None)
+        path = event.data.get('path', "")
+        if uuid is None:
+            self.log('No directory uuid given!', lvl=warn)
+            self._notify_failure(event, 'No directory specified')
+            return
+
         if uuid in self.volumes:
-            path = self.volumes[uuid].path
+            volume = self.volumes[uuid]
+            self.log(volume.__dict__, pretty=True)
         else:
             node = objectmodels['file'].find_one({'uuid': uuid})
-            path = node.path
+            volume = objectmodels['volume'].find_one({'uuid': node.volume})
+
+        if 'uservolume' in volume.flags:
+            self.log('Volume is user based', lvl=verbose)
+            path = os.path.join(event.user.uuid, path)
+
+        self.log('User requests directory content:', path)
+
+        req = event.data.get('req', None)
+
+        if req is None:
+            self.log('Request without request id!', lvl=warn)
 
         response = {
             'component': 'hfos.filemanager.manager',
             'action': 'get_directory',
-            'data': self._get_directory(path)
+            'data': {
+                'directory': self._get_directory(volume, path),
+                'volume': volume.uuid,
+                'path': path,
+                'req': req
+            }
         }
 
         self.fireEvent(send(event.client.uuid, response))
 
-    def _get_directory(self, path):
+    def _get_directory(self, volume, path):
+        self.log('Getting files for directory', path)
+
         items = []
         top = time.time()
-        self.log('Getting files for directory', path)
-        self.log("Files in directory:", self.file_object.count({'path': {'$regex': '^' + path + '$'}}))
+
+        file_filter = {
+            'volume': volume.uuid,
+            'path': {'$regex': '^' + path + '.*$'}
+        }
+
+        self.log("Files in directory:", self.file_object.count(file_filter))
         count = time.time() - top
-        for item in self.file_object.find({'path': {'$regex': '^' + path + '$'}}):
+
+        for item in self.file_object.find({'path': {'$regex': '^' + path + '.*$'}}):
             self.log(item)
             items.append(item.serializablefields())
 
@@ -242,7 +283,7 @@ class FileManager(ConfigurableComponent):
 
         self.log('Count', count, 'find', find)
 
-        # self.log(items, pretty=True)
+        return items
 
     def _check_permissions(self, user, permissions):
         for role in user.account.roles:
@@ -274,6 +315,10 @@ class FileManager(ConfigurableComponent):
         raw = event.data.get('raw')
         filename = os.path.normpath(event.data.get('name'))
         path = os.path.normpath(event.data.get('path', ''))
+        req = event.data.get('req', None)
+
+        if req is None:
+            self.log('Request without request id!', lvl=warn)
 
         if not volume_id or not raw or not filename:
             self.log('Erroneous put file request:', event.__dict__, lvl=error)
@@ -290,7 +335,8 @@ class FileManager(ConfigurableComponent):
             return
 
         if not self._check_permissions(event.user, volume.default_permissions['write']):
-            self._notify_failure(event, 'User ' + event.user.account.name + ' is not allowed to write to ' + volume.name)
+            self._notify_failure(event,
+                                 'User ' + event.user.account.name + ' is not allowed to write to ' + volume.name)
             return
 
         if 'uservolume' in volume.flags:

@@ -24,8 +24,8 @@
 
 class fileManager {
 
-    constructor(userservice, $state, socket, $scope, $rootScope, $timeout, notification) {
-        this.signedin = false;
+    constructor(filemanagerservice, userservice, $state, socket, $scope, $rootScope, $timeout, notification) {
+        this.filemanagerservice = filemanagerservice;
         this.state = $state;
         this.user = userservice;
         this.socket = socket;
@@ -34,13 +34,15 @@ class fileManager {
         this.timeout = $timeout;
         this.notification = notification;
 
+        this.signedin = false;
+
         this.changetimeout = null;
         this.gridChangeWatcher = null;
 
         this.lockState = false;
 
         console.log('[FILES] FileManager initializing with Profile: ', userservice.profile);
-        console.log(userservice.profile);
+        //console.log(userservice.profile);
 
         this.nodes = [
             {
@@ -111,43 +113,37 @@ class fileManager {
         let self = this;
 
         this.get_volumes = function () {
-            console.log('[FM] Getting volumes');
-            let request = {
-                component: 'hfos.filemanager.manager',
-                action: 'get_volumes',
-                data: null
-            };
-            self.socket.send(request);
+            self.filemanagerservice.get_volumes().then(function (data) {
+                console.log('[FM] Response for get_volumes:', data);
+                self.nodes = self.filemanagerservice.volumes;
+            })
         };
+
 
         this.signInWatcher = this.rootscope.$on('User.Login', function (ev) {
             self.get_volumes();
         });
 
-        this.socket.listen('hfos.filemanager.manager', function(msg) {
-            if (msg.action === 'get_volumes') {
-                self.nodes = [];
-                for (let item of msg.data) {
-                    console.log(item);
-                    item.type = 'folder';
-                    self.nodes.push(item);
-                }
-                console.log('Nodes after get_volumes:', self.nodes);
-            } else if (msg.action === 'get_directory') {
-                // 1. get directory root from volumes
-                // 2. find node by traversing rest of the path
-                // 3. attach all nodes by traversing their path
-            }
-        });
-
         this.click_node = function (uuid) {
             console.log('[FM] Clicked on node ', uuid);
-            let packet = {
-                component: 'hfos.filemanager.manager',
-                action: 'get_directory',
-                data: uuid
-            };
-            self.socket.send(packet);
+            this.filemanagerservice.getDirectory(uuid).then(function (data) {
+                console.log('[FM] Inserting directory content');
+
+                let volume = null;
+
+                for (let i in self.filemanagerservice.volumes) {
+                    if (data.volume === i.uuid) {
+                        volume = i;
+                    }
+                }
+
+                let split_path = data.path.split('/');
+
+                console.log('[FM] Split Path:', split_path);
+                for (let path in split_path) {
+                    let new_node = self.nodes[path]
+                }
+            });
         };
 
         this.click_file = function (uuid) {
@@ -155,13 +151,13 @@ class fileManager {
         };
 
         if (self.user.signedin) {
-            self.get_volumes();
+            this.get_volumes();
         }
     }
 
 }
 
 
-fileManager.$inject = ['user', '$state', 'socket', '$scope', '$rootScope', '$timeout', 'notification'];
+fileManager.$inject = ['filemanagerservice', 'user', '$state', 'socket', '$scope', '$rootScope', '$timeout', 'notification'];
 
 export default fileManager;

@@ -24,8 +24,13 @@
 
 <div class="well">
     <h2>File Manager</h2>
+    <label>
+        <input type="checkbox" ng-model="debug" />
+        Debug
+    </label>
+
     <div class="well" ui-tree>
-        <h3>lol</h3>
+        <h3>Files</h3>
         <!-- Nested node template -->
         <script type="text/ng-template" id="nodes_renderer.html">
             <span ng-click="$ctrl.click_node(node.uuid)" class="fa fa-{{node.type}}"></span>
@@ -47,5 +52,9 @@
                 </li>
             </ol>
         </div>
+    </div>
+
+    <div ng-show="debug">
+        <pre>{{$ctrl.nodes|json}}</pre>
     </div>
 </div>
