@@ -57,11 +57,15 @@ UserSchema['properties'].update({
     },
     'mail': {
         'type': 'string'
+    },
+    'active':  {
+        'type': 'boolean',
+        'default': True
     }
 })
 
 UserOptions = {
-    'hidden': ['passhash', 'roles', 'needs_password_change']
+    'hidden': ['passhash', 'needs_password_change']
 }
 
 User = {'schema': UserSchema, 'form': noform, 'options': UserOptions}
