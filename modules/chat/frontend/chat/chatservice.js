@@ -37,7 +37,7 @@ class chatservice {
 
         this.blink_func = function () {
             let state = self.blink_state;
-            console.log('Blinkstate:', state);
+            console.debug('Blinkstate:', state);
 
             if (state === 0) {
                 //if($scope.chat.open === true) {
@@ -58,7 +58,7 @@ class chatservice {
 
         socket.listen('hfos.chat.host', function (msg) {
             if (msg.action === 'say') {
-                console.log('Incoming chat data: ', msg);
+                console.log('[CHAT] Incoming chat data: ', msg);
                 let chat_message = msg.data;
                 if (typeof self.messages[chat_message.recipient] === 'undefined') {
                     self.messages[chat_message.recipient] = {};
@@ -160,7 +160,7 @@ class chatservice {
                 console.log('[CHAT] Got user profiles:', profiles);
 
                 for (let profile of profiles) {
-                    console.log('PROFILE:', profile);
+                    console.debug('PROFILE:', profile);
                     let user = {
                         profile: profile
                     };
@@ -207,7 +207,7 @@ class chatservice {
     get_history() {
         console.log('[CHAT] Requesting history');
         let timestamp = new Date() / 1000;
-        console.log(this.messages[this.channel]);
+        console.debug(this.messages[this.channel]);
         if (typeof this.messages[this.channel] !== 'undefined') {
             console.log('[CHAT] There are old messages in the list:', this.messages[this.channel]);
             timestamp = Math.min.apply(Math, Object.keys(this.messages[this.channel]));
@@ -239,7 +239,7 @@ class chatservice {
         if (typeof channel === 'undefined') {
             console.log('[CHAT] Undefined channel:', channel, Object.keys(this.channels), this.channel);
             channel = Object.keys(this.channels)[0];
-            console.log(this.channels[0])
+            console.debug(this.channels[0])
         }
         if (typeof channel === 'undefined') {
             console.log('[CHAT] Tried to join undefined channel');
