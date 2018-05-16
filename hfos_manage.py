@@ -327,7 +327,7 @@ def _get_system_configuration(dbhost, dbname):
 @with_plugins(iter_entry_points('hfos.management'))
 @click.group(context_settings={'help_option_names': ['-h', '--help']},
              cls=DYMGroup)
-@click.option(['--instance', '-i'], default='hfos', help='Name of instance to act on',
+@click.option('--instance', default='hfos', help='Name of instance to act on',
               metavar='<name>')
 @click.option('--quiet', default=False, help="Suppress all output",
               is_flag=True)
@@ -725,12 +725,12 @@ def install_docs(instance, clear):
 
     make_docs()
 
-    log("Updating documentation directory")
-
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
     target = os.path.join('/var/lib/hfos', instance, 'frontend/docs')
     source = 'docs/build/html'
+
+    log("Updating documentation directory:", target)
 
     if not os.path.exists(os.path.join(os.path.curdir, source)):
         log(
