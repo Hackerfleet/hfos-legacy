@@ -130,12 +130,6 @@ class Core(ConfigurableComponent):
             'description': 'Component metadata',
             'default': {}
         },
-        'frontendtarget': {
-            'type': 'string',
-            'title': 'Frontend Target',
-            'description': 'Frontend deployment directory',
-            'default': '/var/lib/hfos/frontend'
-        },
         'frontendenabled': {
             'type': 'boolean',
             'title': 'Frontend enabled',
@@ -164,6 +158,7 @@ class Core(ConfigurableComponent):
 
         self.frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
             __file__)) + "/../frontend")
+        self.frontendtarget = os.path.join('/var/lib/hfos', args['instance'], 'frontend')
 
         self.loadable_components = {}
         self.runningcomponents = {}
@@ -228,7 +223,9 @@ class Core(ConfigurableComponent):
     def trigger_frontend_build(self, event):
         """Event hook to trigger a new frontend build"""
 
-        install_frontend(forcerebuild=event.force,
+        from hfos.database import instance
+        install_frontend(instance=instance,
+                         forcerebuild=event.force,
                          install=event.install,
                          development=self.development
                          )
@@ -374,10 +371,10 @@ class Core(ConfigurableComponent):
         if self.config.frontendenabled and not self.frontendrunning \
             or restart:
             self.log("Restarting webfrontend services on",
-                     self.config.frontendtarget)
+                     self.frontendtarget)
 
             self.static = Static("/",
-                                 docroot=self.config.frontendtarget).register(
+                                 docroot=self.frontendtarget).register(
                 self)
             self.websocket = WebSocketsDispatcher("/websocket").register(self)
             self.frontendrunning = True
@@ -487,12 +484,13 @@ def construct_graph(args):
               default=20)
 @click.option("--logfileverbosity", help="Define file log level (0-100)",
               type=int, default=20)
-@click.option("--logfile", help="Logfile path",
-              default='/tmp/hfos.log')
+@click.option("--logfilepath", default="/var/log/", help="Logfile path")
 @click.option("--dolog", help="Write to logfile", is_flag=True)
 @click.option("--livelog", help="Log to in memory structure as well", is_flag=True)
 @click.option("--debug", help="Run circuits debugger", is_flag=True)
-@click.option("--dev", help="Run development server", is_flag=True)
+@click.option("--dev", help="Run development server", is_flag=True, default=True)
+@click.option('--instance', default='default', help='Define name of instance',
+              metavar='<name>')
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
 @click.option("--norun", help="Only assemble system, do not run", is_flag=True)
 def launch(run=True, **args):
@@ -502,7 +500,7 @@ def launch(run=True, **args):
     verbosity['console'] = args['log'] if not args['quiet'] else 100
     verbosity['global'] = min(args['log'], args['logfileverbosity'])
     verbosity['file'] = args['logfileverbosity'] if args['dolog'] else 100
-    set_logfile(args['logfile'])
+    set_logfile(args['logfilepath'], args['instance'])
 
     if args['livelog'] is True:
         from hfos import logger
@@ -518,7 +516,7 @@ def launch(run=True, **args):
                 lvl=critical, emitter='CORE')
 
     hfoslog("Initializing database access", emitter='CORE')
-    initialize(args['dbhost'], args['dbname'])
+    initialize(args['dbhost'], args['dbname'], args['instance'])
 
     server = construct_graph(args)
     if run and not args['norun']:

@@ -54,7 +54,7 @@ import sys
 import inspect
 import six
 
-# import os
+import os
 
 root = None
 
@@ -109,11 +109,11 @@ LiveLog = []
 start = time.time()
 
 
-def set_logfile(path):
+def set_logfile(path, instance):
     """Specify logfile path"""
 
     global logfile
-    logfile = path
+    logfile = os.path.normpath(path) + '/hfos.' + instance + '.log'
 
 
 def is_muted(what):

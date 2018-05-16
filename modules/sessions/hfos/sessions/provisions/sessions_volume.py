@@ -35,15 +35,16 @@ Predefined volumes
 """
 
 from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
+from hfos.database import objectmodels, instance
 from hfos.logger import hfoslog
+from os.path import join
 
 Volumes = [
     {
         'name': 'hfos.sessions',
         'uuid': 'f47711bf-51d0-49ed-aacb-68783ce16a2b',
         'description': 'Session attachment storage',
-        'path': '/var/lib/hfos/volumes/sessions',
+        'path': join('/var/lib/hfos/', instance, 'volumes/sessions'),
         'flags': ['uservolume'],
         'perms': {
             'read': ['admin', 'chair'],

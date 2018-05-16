@@ -327,6 +327,8 @@ def _get_system_configuration(dbhost, dbname):
 @with_plugins(iter_entry_points('hfos.management'))
 @click.group(context_settings={'help_option_names': ['-h', '--help']},
              cls=DYMGroup)
+@click.option(['--instance', '-i'], default='hfos', help='Name of instance to act on',
+              metavar='<name>')
 @click.option('--quiet', default=False, help="Suppress all output",
               is_flag=True)
 @click.option('--verbose', '-v', default=False, help="Give verbose output",
@@ -334,7 +336,7 @@ def _get_system_configuration(dbhost, dbname):
 @click.option('--log', default=20, help='Log level to use (0-100)',
               metavar='<number>')
 @click.pass_context
-def cli(ctx, quiet, verbose, log):
+def cli(ctx, instance, quiet, verbose, log):
     """HFOS Management Utility
 
     This utility supports various operations to manage HFOS installations.
@@ -348,6 +350,7 @@ def cli(ctx, quiet, verbose, log):
     hfos_manage group [subgroup] [command] --help
     """
 
+    ctx.obj['instance'] = instance
     ctx.obj['quiet'] = quiet
     ctx.obj['verbose'] = verbose
     verbosity['console'] = log
@@ -688,13 +691,14 @@ def install():
 @install.command(short_help='build and install docs')
 @click.option('--clear', help='Clears target documentation '
                               'folders', default=False, is_flag=True)
-def docs(clear):
+@click.pass_context
+def docs(ctx, clear):
     """Build and install documentation"""
 
-    install_docs(clear)
+    install_docs(str(ctx.obj['instance']), clear)
 
 
-def install_docs(clear):
+def install_docs(instance, clear):
     """Builds and installs the complete HFOS documentation."""
 
     _check_root()
@@ -725,7 +729,7 @@ def install_docs(clear):
 
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
-    target = '/var/lib/hfos/frontend/docs'
+    target = os.path.join('/var/lib/hfos', instance, 'frontend/docs')
     source = 'docs/build/html'
 
     if not os.path.exists(os.path.join(os.path.curdir, source)):
@@ -750,13 +754,14 @@ def install_docs(clear):
                               'directories', is_flag=True, default=False)
 @click.option('--clear-all', help='Clears all already existing '
                                   'directories', is_flag=True, default=False)
-def var(clear, clear_all):
+@click.pass_context
+def var(ctx, clear, clear_all):
     """Install variable data to /var/[lib,cache]/hfos"""
 
-    install_var(clear, clear_all)
+    install_var(str(ctx.obj['instance']), clear, clear_all)
 
 
-def install_var(clear, clear_all):
+def install_var(instance, clear, clear_all):
     """Install required folders in /var"""
     _check_root()
 
@@ -766,19 +771,21 @@ def install_var(clear, clear_all):
     uid = pwd.getpwnam("hfos").pw_uid
     gid = grp.getgrnam("hfos").gr_gid
 
+    join = os.path.join
+
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
     target_paths = (
         '/var/www/challenges',  # For LetsEncrypt acme certificate challenges
-        '/var/lib/hfos',
-        '/var/local/hfos',
-        '/var/local/hfos/backup',
-        '/var/cache/hfos',
-        '/var/cache/hfos/tilecache',
-        '/var/cache/hfos/rastertiles',
-        '/var/cache/hfos/rastercache'
+        join('/var/lib/hfos', instance),
+        join('/var/local/hfos', instance),
+        join('/var/local/hfos', instance, 'backup'),
+        join('/var/cache/hfos', instance),
+        join('/var/cache/hfos', instance, 'tilecache'),
+        join('/var/cache/hfos', instance, 'rastertiles'),
+        join('/var/cache/hfos', instance, 'rastercache')
     )
-    logfile = "/var/log/hfos.log"
+    logfile = "/var/log/hfos-" + instance + ".log"
 
     for item in target_paths:
         if os.path.exists(item):
@@ -946,13 +953,14 @@ def install_modules(wip):
 
 
 @install.command(short_help='install systemd service')
-def service():
+@click.pass_context
+def service(ctx):
     """Install systemd service configuration"""
 
-    install_service()
+    install_service(ctx.obj['instance'])
 
 
-def install_service():
+def install_service(instance):
     """Install systemd service configuration"""
 
     _check_root()
@@ -961,7 +969,7 @@ def install_service():
 
     launcher = os.path.realpath(__file__).replace('manage', 'launcher')
     executable = sys.executable + " " + launcher
-    executable += " --dolog --logfile /var/log/hfos.log"
+    executable += " --dolog --logfile /var/log/hfos-" + instance + ".log"
     executable += " --logfileverbosity 30 -q"
 
     definitions = {
@@ -969,13 +977,14 @@ def install_service():
     }
 
     write_template_file(os.path.join('dev/templates', service_template),
-                        '/etc/systemd/system/hfos.service',
+                        '/etc/systemd/system/hfos.' + instance + '.service',
                         definitions)
+    service_name = 'hfos.' + instance + '.service'
 
     Popen([
         'systemctl',
         'enable',
-        'hfos.service'
+        service_name
     ])
 
     log('Launching service')
@@ -983,7 +992,7 @@ def install_service():
     Popen([
         'systemctl',
         'start',
-        'hfos.service'
+        service_name
     ])
 
     log("Done: Install Service")
@@ -1214,10 +1223,11 @@ def install_cert(selfsigned):
               default=False, is_flag=True)
 @click.option('--build-type', help="Specify frontend build type. Either dist(default) or build",
               default='dist')
-def frontend(dev, rebuild, build_type):
+@click.pass_context
+def frontend(ctx, dev, rebuild, build_type):
     """Build and install frontend"""
 
-    install_frontend(forcerebuild=rebuild, development=dev, build_type=build_type)
+    install_frontend(instance=ctx.obj['instance'], forcerebuild=rebuild, development=dev, build_type=build_type)
 
 
 @install.command('all', short_help='install everything')
@@ -1265,7 +1275,7 @@ def uninstall():
 
     _check_root()
 
-    response = _ask("This will delete all data of your HFOS installation! Type"
+    response = _ask("This will delete all data of your HFOS installations! Type"
                     "YES to continue:", default="N", show_hint=False)
     if response == 'YES':
         shutil.rmtree('/var/lib/hfos')

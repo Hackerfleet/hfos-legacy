@@ -80,7 +80,7 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
 
 
 # TODO: Installation of frontend requirements is currently disabled
-def install_frontend(forcereload=False, forcerebuild=False,
+def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                      forcecopy=True, install=True, development=False, build_type='dist'):
     """Builds and installs the frontend"""
 
@@ -93,7 +93,7 @@ def install_frontend(forcereload=False, forcerebuild=False,
             __file__)) + "../../../frontend")
     else:
         frontendroot = '/opt/hfos/frontend'
-    frontendtarget = '/var/lib/hfos/frontend'
+    frontendtarget = os.path.join('/var/lib/hfos', instance, 'frontend')
 
     if install:
         cmdline = ["npm", "install"]

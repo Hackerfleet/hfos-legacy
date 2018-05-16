@@ -34,7 +34,7 @@ import os
 import json
 
 from hfos.component import ConfigurableComponent, handler
-from hfos.database import objectmodels
+from hfos.database import objectmodels, instance
 from hfos.logger import verbose, debug, error, warn, critical, events, hilight
 from hfos.events.system import authorizedevent
 from hfos.tools import std_uuid
@@ -87,7 +87,7 @@ class GuideManager(ConfigurableComponent):
         super(GuideManager, self).__init__("GUIDES", *args)
 
         self.translate_binary = '/usr/bin/ogr2ogr'
-        self.cache_path = '/var/cache/hfos'
+        self.cache_path = os.path.join('/var/cache/hfos', instance)
 
         self.log("Started")
 

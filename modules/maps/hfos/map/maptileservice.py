@@ -44,7 +44,7 @@ from hfos.component import ConfigurableController, ConfigurableComponent, \
     handler, authorizedevent
 from hfos.events.client import send
 from hfos.tools import std_uuid
-from hfos.database import objectmodels
+from hfos.database import objectmodels, instance
 from hfos.debugger import cli_register_event
 from hfos.logger import error, verbose, warn, hilight
 
@@ -128,7 +128,7 @@ class MaptileLoader(ConfigurableComponent):
 
     channel = 'hfosweb'
 
-    def __init__(self, tile_path='/var/cache/hfos',
+    def __init__(self, tile_path=os.path.join('/var/cache/hfos', instance),
                  **kwargs):
         """
 
@@ -392,7 +392,7 @@ class MaptileService(ConfigurableController):
 
     configprops = {}
 
-    def __init__(self, tile_path='/var/cache/hfos', default_tile=None,
+    def __init__(self, tile_path=os.path.join('/var/cache/hfos', instance), default_tile=None,
                  **kwargs):
         """
 

@@ -40,7 +40,7 @@ import os
 from hfos.component import ConfigurableComponent, handler
 from hfos.events.system import authorizedevent
 from hfos.events.client import send
-from hfos.database import objectmodels
+from hfos.database import objectmodels, instance
 from hfos.logger import error, verbose, warn, debug
 from hfos.tools import std_uuid
 import datetime
@@ -81,8 +81,8 @@ class GDAL(ConfigurableComponent):
     configprops = {}
 
     def __init__(self, path="/rastertiles",
-                 tilepath="/var/cache/hfos/rastertiles",
-                 storagepath="/var/cache/hfos/rastercache",
+                 tilepath=os.path.join("/var/cache/hfos", instance, "rastertiles"),
+                 storagepath=os.path.join("/var/cache/hfos", instance, "rastercache"),
                  defaulttile=None, **kwargs):
         """
 

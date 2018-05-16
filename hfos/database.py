@@ -72,6 +72,7 @@ collections = None
 dbhost = ""
 dbport = 0
 dbname = ""
+instance = ""
 
 # Necessary against import de-optimizations
 ValidationError = ValidationError
@@ -167,7 +168,7 @@ def _build_collections(store):
     return result
 
 
-def initialize(address='127.0.0.1:27017', database_name='hfos'):
+def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="default"):
     """Initializes the database connectivity, schemata and finally
     object models"""
 
@@ -177,6 +178,7 @@ def initialize(address='127.0.0.1:27017', database_name='hfos'):
     global dbhost
     global dbport
     global dbname
+    global instance
 
     dbhost = address.split(':')[0]
     dbport = int(address.split(":")[1]) if ":" in address else 27017
@@ -200,6 +202,7 @@ def initialize(address='127.0.0.1:27017', database_name='hfos'):
     schemastore = _build_schemastore_new()
     objectmodels = _build_model_factories(schemastore)
     collections = _build_collections(schemastore)
+    instance = instance_name
 
 
 def test_schemata():
@@ -284,7 +287,7 @@ class Maintenance(ConfigurableComponent):
                             'type': 'string',
                             'description': 'Location of cache data',
                             'title': 'Cache location',
-                            'default': '/var/cache/hfos'
+                            'default': join('/var/cache/hfos', instance)
                         }
                     },
                     'default': {}
@@ -303,7 +306,7 @@ class Maintenance(ConfigurableComponent):
                             'type': 'string',
                             'description': 'Location of library data',
                             'title': 'Library location',
-                            'default': '/var/lib/hfos'
+                            'default': join('/var/lib/hfos', instance)
                         }
                     },
                     'default': {}
@@ -322,7 +325,7 @@ class Maintenance(ConfigurableComponent):
                             'type': 'string',
                             'description': 'Location of backup data',
                             'title': 'Backup location',
-                            'default': '/var/local/hfos/backup'
+                            'default': join('/var/local/hfos/', instance, 'backup')
                         }
                     },
                     'default': {}
@@ -430,7 +433,7 @@ class BackupManager(ConfigurableComponent):
             'type': 'string',
             'description': 'Location of library data',
             'title': 'Library location',
-            'default': '/var/local/hfos/backup'
+            'default': join('/var/local/hfos', instance, 'backup')
         },
         'interval': {
             'type': 'integer',
