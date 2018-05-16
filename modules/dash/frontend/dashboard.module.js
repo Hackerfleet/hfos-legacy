@@ -12,6 +12,7 @@ import simplebarreadout from './dashboard/controllers/simplebarreadout';
 import historybarreadout from './dashboard/controllers/historybarreadout';
 import simplecompass from './dashboard/controllers/simplecompass';
 import linechart from './dashboard/controllers/linechart';
+import clock from './dashboard/controllers/clock';
 
 import template from './dashboard/dashboard.tpl.html';
 
@@ -32,5 +33,6 @@ export default angular
     .controller('historybarreadout', historybarreadout)
     .controller('simplecompass', simplecompass)
     .controller('linechart', linechart)
+    .controller('clock', clock)
     .directive('ngDynamicController', dynamiccontroller)
     .name;

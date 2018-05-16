@@ -34,7 +34,7 @@ Dashboard: Dashboard config to store gridster settings
 """
 
 from hfos.schemata.defaultform import *
-from hfos.schemata.base import base_object
+from hfos.schemata.base import base_object, uuid_object
 
 DashboardSchema = base_object('dashboardconfig', all_roles='crew')
 
@@ -65,9 +65,12 @@ DashboardSchema['properties'].update({
                         'digitalreadout',
                         'simplecompass',
                         'linechart',
+                        'clock'
                     ]
                 },
                 'valuetype': {'type': 'string'},
+                'sensor': {'type': 'boolean', 'title': 'Sensor',
+                           'description': 'This widget reads from any sensordatatype'},
                 'title': {'type': 'string'},
                 'position': {
                     'type': 'object',
