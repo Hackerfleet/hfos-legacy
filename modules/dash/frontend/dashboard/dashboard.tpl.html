@@ -40,6 +40,7 @@
                         data-sizex="item.size.width"
                         data-sizey="item.size.height"
                         ng-repeat="item in $ctrl.dashboard.cards">
+                        <div class="boxOverlay" ng-show="$ctrl.lockState"></div>
                         <div class="box" ng-style="{'border-style': $ctrl.showBoxes ? 'solid' : 'none'}">
                             <div class="box-header" ng-show="$ctrl.showBoxes">
                                 <h3>{{ item.title }} - {{item.widgettype}}</h3>

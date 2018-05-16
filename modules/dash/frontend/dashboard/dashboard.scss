@@ -56,6 +56,19 @@
   position: absolute;
 }
 
+
+.boxOverlay {
+  position: absolute;
+  background: rgba(64, 128, 255, 0.3);
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border-radius: 10px;
+  z-index: -10;
+}
+
+
 .digital {
   font-family: "Digital";
   font-size: 5em;
