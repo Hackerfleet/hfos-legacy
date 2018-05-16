@@ -34,16 +34,19 @@
 
 class alertservice {
     
-    constructor(user, notification, interval, socket, rootscope) {
+    constructor(user, notification, interval, timeout, socket, rootscope) {
         this.user = user;
         this.notification = notification;
         this.interval = interval;
+        this.timeout = timeout;
         this.socket = socket;
         this.rootscope = rootscope;
 
         this.blink_state = 0;
         this.blinker = null;
         this.triggered = false;
+        this.alert = null;
+        this.action = null;
         
         let self = this;
 
@@ -69,23 +72,39 @@ class alertservice {
 
         this.toggle_alert = function() {
             console.log('[ALERT] Triggering', self.triggered);
-            let action;
+            let delay;
+
 
             if (self.triggered === false) {
                 console.log('[ALERT] ALERTING');
-                action = 'trigger';
+                this.action = 'trigger';
+                delay = 1000;
             } else {
-                action = 'cancel';
+                this.action = 'cancel';
+                delay = 5000;
             }
             let msg = {
                 component: 'hfos.alert.manager',
-                action: action,
+                action: this.action,
                 data: {
                     topic: 'mob',
                     msg: 'Man Over Board Alert!'
                 }
             };
-            this.socket.send(msg);
+            this.alert = this.timeout(this.send_alert, delay, false, msg);
+        };
+
+        this.send_alert = function(msg) {
+            self.socket.send(msg);
+            self.action = null;
+        };
+
+        this.untrigger = function() {
+            console.log('[ALERT] Cancelling trigger');
+            if (this.action !== null) {
+                this.notification.add('warning', 'Hold pressed', 'Keep this button pressed longer to trigger an alert change.', 5);
+            }
+            this.timeout(self.timeout.cancel, 100, false, self.alert);
         };
 
         this.socket.listen('hfos.alert.manager', function(msg) {
@@ -106,6 +125,6 @@ class alertservice {
     }
 }
 
-alertservice.$inject = ['user', 'notification', '$interval', 'socket', '$rootScope'];
+alertservice.$inject = ['user', 'notification', '$interval', '$timeout', 'socket', '$rootScope'];
 
 export default alertservice;

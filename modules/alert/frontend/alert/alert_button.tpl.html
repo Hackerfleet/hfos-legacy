@@ -22,7 +22,9 @@
   ~ """
   -->
 
-<button id="btnalert" type="button" ng-click="alert.toggle_alert();"
+<button id="btnalert" type="button"
+        ng-mousedown="alert.toggle_alert();"
+        ng-mouseup="alert.untrigger();"
         class="pagination-centered navbar-brand navbar-inverse btn"
         style="text-align: center; border-color: transparent; margin-left:5px; color: red"
         aria-label="Center Align">
