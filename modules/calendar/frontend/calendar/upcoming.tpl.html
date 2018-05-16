@@ -22,16 +22,90 @@
   ~ """
   -->
 
-<div class="well">
-    <h1>Upcoming Events</h1>
-    <hr />
+<div class="well upcoming">
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#toolbar" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <h3 class="navbar-text">Upcoming Events</h3>
+            </div>
+            <div class="collapse navbar-collapse" id="toolbar">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <h3 class="navbar-text">{{$ctrl.now | date:'mediumTime'}}</h3>
+                    </li>
+                    <li ng-show="customizeCollapsed">
+                        <form class="navbar-form">
+                            <button type="button" class="btn btn-default" ng-model="$ctrl.calendars_enabled"
+                                    data-html="1" data-multiple="1"
+                                    ng-change="$ctrl.getEvents()"
+                                    bs-options="item.value as item.label for item in $ctrl.calendars_available"
+                                    bs-select>
+                                Select calendars <span class="caret"></span>
+                            </button>
+                        </form>
+                    </li>
+                    <li class="inline-block">
+                    <span class="fa btn"
+                          ng-click="customizeCollapsed = !customizeCollapsed"
+                          ng-class="{'fa-lock':!customizeCollapsed,'fa-unlock':customizeCollapsed}">
+                    </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div ng-show="$ctrl.user.debug">
+        <label>
+            <input type="checkbox" ng-model="debug">
+            Debug
+        </label>
+    </div>
     <div>
-        <h2>{{$ctrl.events[0].dtstart | date:'mediumTime'}} - {{$ctrl.events[0].name}}</h2>
+        <h2 title="{{$ctrl.events[0].dtstart|date:'fullDate'}}">
+            <a href="#!/editor/event/{{$ctrl.events[0].uuid}}/edit">
+                {{$ctrl.events[0].dtstart | date:'shortTime'}} - {{$ctrl.events[0].name}}
+            </a>
+            <small>{{$ctrl.events[0]._eta}}</small>
+        </h2>
+        <small ng-show="$ctrl.multi_calendar">
+            <a href="#!/editor/calendar/{{$ctrl.events[0].calendar}}/edit">{{$ctrl.calendars[$ctrl.events[0].calendar].name}}</a>
+        </small>
+        <small ng-show="$ctrl.events[0]._day !== $ctrl.today">
+            {{$ctrl.events[0].dtstart | date:'shortDate'}}
+        </small>
+
+
         <p>{{$ctrl.events[0].summary}}</p>
     </div>
-    <hr />
+    <hr/>
     <div ng-repeat="item in $ctrl.events" ng-if="$index > 0">
-        <h3>{{item.dtstart | date:'mediumTime'}} - {{item.name}}</h3>
+        <h3 title="item.dtstart|date:'fullDate'}}">
+            <a href="#!/editor/event/{{item.uuid}}/edit">
+                {{item.dtstart | date:'mediumTime'}} - {{item.name}}
+            </a>
+        </h3>
+        <small ng-show="$ctrl.multi_calendar">
+            <a href="#!/editor/calendar/{{item.calendar}}/edit">{{$ctrl.calendars[item.calendar].name}}</a>
+        </small>
+        <small> - {{item._eta}}</small>
+        <small ng-show="item._day !== $ctrl.today">
+            ({{item.dtstart | date:'shortDate'}})
+        </small>
+
+
         <p>{{item.summary}}</p>
     </div>
+    <div ng-show="debug">
+        <pre>
+            {{$ctrl.events|json}}
+        </pre>
+    </div>
+
 </div>

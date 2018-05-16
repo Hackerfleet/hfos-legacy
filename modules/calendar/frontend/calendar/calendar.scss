@@ -161,3 +161,8 @@
 #vResizer:hover, #hResizer:hover {
   background-color: $color-gray-dark;
 }
+
+upcoming > div > div > h3,
+upcoming > div > div > h2 {
+    margin-bottom: 0;
+}
