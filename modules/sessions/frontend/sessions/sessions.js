@@ -26,7 +26,7 @@
 
 class Sessions {
 
-    constructor(scope, rootscope, user, socket, notification, schemata, objectproxy) {
+    constructor(scope, rootscope, user, socket, notification, schemata, objectproxy, filemanagerservice) {
         this.scope = scope;
         this.rootscope = rootscope;
         this.user = user;
@@ -34,6 +34,7 @@ class Sessions {
         this.notification = notification;
         this.schemata = schemata;
         this.op = objectproxy;
+        this.filemanagerservice = filemanagerservice;
 
         this.form = null;
         this.schema = null;
@@ -140,7 +141,7 @@ class Sessions {
         let file = document.getElementById('upload_file').files[0];
         let self = this;
 
-        this.op.sendFile(file, 'hfos.sessions').then(function (result) {
+        this.filemanagerservice.sendFile(file, 'hfos.sessions').then(function (result) {
             console.log('[SESSIONS] Uploaded. Result:', result);
 
             if (result.success === true) {
@@ -202,6 +203,6 @@ class Sessions {
     }
 }
 
-Sessions.$inject = ['$scope', '$rootScope', 'user', 'socket', 'notification', 'schemata', 'objectproxy'];
+Sessions.$inject = ['$scope', '$rootScope', 'user', 'socket', 'notification', 'schemata', 'objectproxy', 'filemanagerservice'];
 
 export default Sessions;
