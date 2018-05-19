@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 """
 
 
-Module: Enrolmanager
+Module: EnrolManager
 ===================
 
 
@@ -42,7 +42,7 @@ from hfos.events.system import authorizedevent, anonymousevent
 from hfos.events.client import send
 from hfos.database import objectmodels
 from hfos.logger import warn, debug, verbose, error, hilight
-from hfos.tools import std_uuid, std_now, std_hash, std_salt, _
+from hfos.tools import std_uuid, std_now, std_hash, std_salt, _, std_human_uid
 from pystache import render
 from email.mime.text import MIMEText
 from smtplib import SMTP, SMTP_SSL
@@ -101,9 +101,9 @@ class request_reset(anonymousevent):
     pass
 
 
-class Manager(ConfigurableComponent):
+class EnrolManager(ConfigurableComponent):
     """
-    The Enrol-Manager handles enrollment requests, invitations and user
+    The Enrol-EnrolManager handles enrollment requests, invitations and user
     verification.
     """
     channel = "hfosweb"
@@ -233,6 +233,8 @@ You can now use the HFOS node at {{node_name}}!
 Click this link to login: 
 {{node_url}}
 
+Your new password is {{password}} - please change it immediately after logging in!
+
 Have fun,
 the friendly robot of {{node_name}}
 '''
@@ -246,7 +248,7 @@ the friendly robot of {{node_name}}
         :param args:
         """
 
-        super(Manager, self).__init__("ENROL", *args, **kwargs)
+        super(EnrolManager, self).__init__("ENROL", *args, **kwargs)
 
         self.image_captcha = ImageCaptcha(fonts=['/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf'])
 
@@ -278,7 +280,7 @@ the friendly robot of {{node_name}}
     def _fail(self, event, msg="Error"):
         self.log('Sending failure feedback to', event.client.uuid, lvl=debug)
         fail_msg = {
-            'component': 'hfos.enrol.manager',
+            'component': 'hfos.enrol.enrolmanager',
             'action': event.action,
             'data': (False, msg)
         }
@@ -287,12 +289,11 @@ the friendly robot of {{node_name}}
     def _acknowledge(self, event, msg="Done"):
         self.log('Sending success feedback to', event.client.uuid, lvl=debug)
         success_msg = {
-            'component': 'hfos.enrol.manager',
+            'component': 'hfos.enrol.enrolmanager',
             'action': event.action,
             'data': (True, msg)
         }
         self.fireEvent(send(event.client.uuid, success_msg))
-
 
     @handler(change)
     def change(self, event):
@@ -323,12 +324,12 @@ the friendly robot of {{node_name}}
             enrollment.save()
             reply = {True: enrollment.serializablefields()}
 
-        if status == 'Accepted':
-            self._create_user(enrollment.name, enrollment.password, enrollment.email, 'Invited')
-            self._send_acceptance(enrollment)
+        # if status == 'Accepted':
+        #     self._create_user(enrollment.name, enrollment.password, enrollment.email, 'Invited')
+        #     self._send_acceptance(enrollment)
 
         packet = {
-            'component': 'hfos.enrol.manager',
+            'component': 'hfos.enrol.enrolmanager',
             'action': 'change',
             'data': reply
         }
@@ -352,7 +353,7 @@ the friendly robot of {{node_name}}
             user.save()
 
             packet = {
-                'component': 'hfos.enrol.manager',
+                'component': 'hfos.enrol.enrolmanager',
                 'action': 'changepassword',
                 'data': True
             }
@@ -360,7 +361,7 @@ the friendly robot of {{node_name}}
             self.log('Successfully changed password for user', uuid)
         else:
             packet = {
-                'component': 'hfos.enrol.manager',
+                'component': 'hfos.enrol.enrolmanager',
                 'action': 'changepassword',
                 'data': False
             }
@@ -432,28 +433,31 @@ the friendly robot of {{node_name}}
         else:
             self._invite(username, 'Enrolled', mail, uuid)
 
-
     @handler(accept)
     def accept(self, event):
         """A challenge/response for an enrolment has been accepted"""
 
         self.log('Invitation accepted:', event.__dict__, lvl=debug)
         try:
+            uuid = event.data
             enrollment = objectmodels['enrollment'].find_one({
-                'uuid': event.data
+                'uuid': uuid
             })
 
             if enrollment is not None:
                 self.log('Enrollment found', lvl=debug)
                 if enrollment.status == 'Open':
                     self.log('Enrollment is still open', lvl=debug)
-                    if enrollment.method in ('Invited', 'Manual') and \
-                        self.config.auto_accept_invited:
+                    if enrollment.method in ('Invited', 'Manual') and self.config.auto_accept_invited:
                         enrollment.status = 'Accepted'
-                        data = 'You can now log in to the system and start to use it.'
-                        self._create_user(enrollment.name, enrollment.password, enrollment.email, enrollment.method)
-                        self._send_acceptance(enrollment)
-                        # TODO: add account to self.config.group_accept group
+
+                        data = 'You should have received an email with your new password ' \
+                               'and can now log in to the system and start to use it. <br/>' \
+                               'Please change your password immediately after logging in'
+                        password = std_human_uid().replace(" ", '')
+
+                        self._create_user(enrollment.name, password, enrollment.email, enrollment.method, uuid)
+                        self._send_acceptance(enrollment, password)
                     else:
                         enrollment.status = 'Pending'
                         data = 'Someone has to confirm your enrollment ' \
@@ -472,7 +476,7 @@ the friendly robot of {{node_name}}
                     self._fail(event)
                     return
                 packet = {
-                    'component': 'hfos.enrol.manager',
+                    'component': 'hfos.enrol.enrolmanager',
                     'action': 'accept',
                     'data': {True: data}
                 }
@@ -491,7 +495,7 @@ the friendly robot of {{node_name}}
         self.log('Registration status requested')
 
         response = {
-            'component': 'hfos.enrol.manager',
+            'component': 'hfos.enrol.enrolmanager',
             'action': 'status',
             'data': self.config.allow_registration
         }
@@ -512,13 +516,15 @@ the friendly robot of {{node_name}}
 
         user_object = objectmodels['user']
 
-        username = event.data.get('username', None)
         email = event.data.get('email', None)
+        email_user = None
 
         if email is not None and user_object.count({'mail': email}) > 0:
             email_user = user_object.find_one({'mail': email})
-        if username is not None and user_object.count({'name': username}) > 0:
-            named_user = user_object.find_one({'name': username})
+
+        if email_user is None:
+            self._fail(event, msg="Mail address unknown")
+            return
 
     @handler(delete)
     def delete(self, event):
@@ -607,7 +613,7 @@ the friendly robot of {{node_name}}
         self.log('Transmitting captcha')
 
         response = {
-            'component': 'hfos.enrol.manager',
+            'component': 'hfos.enrol.enrolmanager',
             'action': 'captcha',
             'data': b64encode(captcha['image'].getvalue()).decode('utf-8')
         }
@@ -632,7 +638,7 @@ the friendly robot of {{node_name}}
         self._send_invitation(enrollment)
 
         packet = {
-            'component': 'hfos.enrol.manager',
+            'component': 'hfos.enrol.enrolmanager',
             'action': 'invite',
             'data': [True, email]
         }
@@ -661,9 +667,10 @@ the friendly robot of {{node_name}}
                 'uuid': std_uuid(),
                 'roles': roles
             })
-            if password == '':
+
+            if method == 'Invited':
                 newuser.needs_password_change = True
-                newuser.passhash = ''
+
             newuser.save()
         except Exception as e:
             self.log("Problem creating new user: ", type(e), e,
@@ -681,7 +688,7 @@ the friendly robot of {{node_name}}
             newprofile.save()
 
             packet = {
-                'component': 'hfos.enrol.manager',
+                'component': 'hfos.enrol.enrolmanager',
                 'action': 'enrol',
                 'data': [True, mail]
             }
@@ -699,12 +706,14 @@ the friendly robot of {{node_name}}
 
         self._send_mail(self.config.invitation_subject, self.config.invitation_mail, enrollment)
 
-    def _send_acceptance(self, enrollment):
+    def _send_acceptance(self, enrollment, password):
         """Send an acceptance mail to an open enrolment"""
 
         self.log('Sending acceptance status mail to user')
 
-        self._send_mail(self.config.acceptance_subject, self.config.acceptance_mail, enrollment)
+        acceptance_text = render(self.config.acceptance_mail, {'password': password})
+
+        self._send_mail(self.config.acceptance_subject, acceptance_text, enrollment)
 
     def _send_mail(self, subject, template, enrollment):
         """Connect to mail server and send actual email"""
