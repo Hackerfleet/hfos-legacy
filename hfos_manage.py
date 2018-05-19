@@ -416,6 +416,52 @@ def db(ctx, dbhost, dbname):
 cli.add_command(db)
 
 
+@db.command(short_help='List all mongodb databases')
+@click.pass_context
+def list_all(ctx):
+    from pymongo import MongoClient
+
+    client = MongoClient(ctx.obj['dbhost'])
+    log(client.database_names())
+    log('Done')
+
+
+@db.command(short_help='Rename database')
+@click.argument('source')
+@click.argument('destination')
+@click.option('--keep', is_flag=True, help='Keep original database', default=False)
+@click.option('--clear-target', is_flag=True, help='Erase target if it exists', default=False)
+@click.pass_context
+def rename(ctx, source, destination, keep, clear_target):
+    from pymongo import MongoClient
+
+    client = MongoClient(ctx.obj['dbhost'])
+
+    if source not in client.database_names():
+        log('Source database', source, 'does not exist!', lvl=warn)
+        sys.exit(-1)
+
+    database = client.admin
+    log('Copying', source, 'to', destination)
+
+    if destination in client.database_names():
+        log('Destination exists')
+        if clear_target:
+            log('Clearing')
+            client.drop_database(destination)
+        else:
+            log('Not destroying existing data', lvl=warn)
+            sys.exit(-1)
+
+    database.command('copydb', fromdb=source, todb=destination)
+
+    if not keep:
+        log('Deleting old database')
+        client.drop_database(source)
+
+    log('Done')
+
+
 @db.command(short_help='Irrevocably remove collection content')
 @click.argument('schema')
 @click.pass_context
@@ -683,9 +729,12 @@ def add_role(ctx, role):
 
 
 @click.group(cls=DYMGroup)
-def install():
+@click.option('--port', help='Specify local HFOS port', default=8055)
+@click.pass_context
+def install(ctx, port):
     """Install various aspects of HFOS (GROUP)"""
-    pass
+
+    ctx.obj['port'] = port
 
 
 @install.command(short_help='build and install docs')
@@ -907,6 +956,7 @@ def install_modules(wip):
         'enrol',
         'maps',
         'nmea',
+        'nodestate',
         'polls',
         'project',
         'shareables',
@@ -957,10 +1007,10 @@ def install_modules(wip):
 def service(ctx):
     """Install systemd service configuration"""
 
-    install_service(ctx.obj['instance'])
+    install_service(ctx.obj['instance'], ctx.obj['dbhost'], ctx.obj['dbname'], ctx.obj['port'])
 
 
-def install_service(instance):
+def install_service(instance, dbhost, dbname, port):
     """Install systemd service configuration"""
 
     _check_root()
@@ -969,17 +1019,21 @@ def install_service(instance):
 
     launcher = os.path.realpath(__file__).replace('manage', 'launcher')
     executable = sys.executable + " " + launcher
+    executable += " --instance " + instance
+    executable += " --dbname " + dbname + " --dbhost " + dbhost
+    executable += " --port " + port
     executable += " --dolog --logfile /var/log/hfos-" + instance + ".log"
     executable += " --logfileverbosity 30 -q"
 
     definitions = {
+        'instance': instance,
         'executable': executable
     }
+    service_name = 'hfos.' + instance + '.service'
 
     write_template_file(os.path.join('dev/templates', service_template),
-                        '/etc/systemd/system/hfos.' + instance + '.service',
+                        os.path.join('/etc/systemd/system/', service_name),
                         definitions)
-    service_name = 'hfos.' + instance + '.service'
 
     Popen([
         'systemctl',
@@ -1002,13 +1056,14 @@ def install_service(instance):
 @click.option('--hostname', default=None,
               help='Override public Hostname (FQDN) Default from active system '
                    'configuration')
-def nginx(hostname):
+@click.pass_context
+def nginx(ctx, hostname):
     """Install nginx configuration"""
 
-    install_nginx(hostname)
+    install_nginx(ctx.obj['dbhost'], ctx.obj['dbname'], ctx.obj['port'], hostname)
 
 
-def install_nginx(hostname=None):
+def install_nginx(instance, dbhost, dbname, port, hostname=None):
     """Install nginx configuration"""
 
     _check_root()
@@ -1017,7 +1072,7 @@ def install_nginx(hostname=None):
 
     if hostname is None:
         try:
-            config = _get_system_configuration()
+            config = _get_system_configuration(dbhost, dbname)
             hostname = config.hostname
         except Exception as e:
             log('Exception:', e, type(e), exc=True, lvl=error)
@@ -1029,15 +1084,16 @@ Using 'localhost' for now""", lvl=warn)
             hostname = 'localhost'
 
     definitions = {
+        'instance': instance,
         'server_public_name': hostname,
         'ssl_certificate': cert_file,
         'ssl_key': key_file,
-        'host_url': 'http://127.0.0.1:8055/'
+        'host_url': 'http://127.0.0.1:%i/' % port
     }
 
     if distribution == 'DEBIAN':
-        configuration_file = '/etc/nginx/sites-available/hfos.conf'
-        configuration_link = '/etc/nginx/sites-enabled/hfos.conf'
+        configuration_file = '/etc/nginx/sites-available/hfos.%s.conf' % instance
+        configuration_link = '/etc/nginx/sites-enabled/hfos.%s.conf' % instance
     elif distribution == 'ARCH':
         configuration_file = '/etc/nginx/nginx.conf'
         configuration_link = None
@@ -1173,42 +1229,7 @@ def install_cert(selfsigned):
         log('Done: Install Cert')
     else:
 
-        # # Account private key
-        # openssl genrsa 4096 > account.key
-
-        # # enerate a domain private key (if you haven't already)
-        # openssl genrsa 4096 > domain.key
-
-        # #for a single domain
-        # openssl req -new -sha256 -key domain.key -subj "/CN=yoursite.com"
-        # > domain.csr
-        #
-        # #for multiple domains (use this one if you want both
-        # www.yoursite.com and yoursite.com)
-        # openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN
-        # -config <(cat /etc/ssl/openssl.cnf <(printf "[
-        # SAN]\nsubjectAltName=DNS:yoursite.com,DNS:www.yoursite.com")) >
-        # domain.csr
-
-        # #run the script on your server
-        # python acme_tiny.py --account-key ./account.key --csr ./domain.csr
-        #  --acme-dir /var/www/challenges/ > ./signed.crt
-
-        # #NOTE: For nginx, you need to append the Let's Encrypt
-        # intermediate cert to your cert
-        # wget -O - https://letsencrypt.org/certs/lets-encrypt-x3-cross
-        # -signed.pem > intermediate.pem
-        # cat signed.crt intermediate.pem > chained.pem
-
-        # Renew certificate
-        # #!/usr/bin/sh
-        # python /path/to/acme_tiny.py --account-key /path/to/account.key
-        # --csr /path/to/domain.csr --acme-dir /var/www/challenges/ >
-        # /tmp/signed.crt || exit
-        # wget -O - https://letsencrypt.org/certs/lets-encrypt-x3-cross
-        # -signed.pem > intermediate.pem
-        # cat /tmp/signed.crt intermediate.pem > /path/to/chained.pem
-        # service nginx reload
+        # TODO
 
         log('Not implemented yet. You can build your own certificate and '
             'store it in /etc/ssl/certs/hfos/server-cert.pem - it should '
@@ -1234,7 +1255,8 @@ def frontend(ctx, dev, rebuild, build_type):
 @click.option('--clear', help='Clears already existing cache '
                               'directories and data', is_flag=True,
               default=False)
-def install_all(clear):
+@click.pass_context
+def install_all(ctx, clear):
     """Default-Install everything installable
 
     \b
@@ -1251,17 +1273,22 @@ def install_all(clear):
 
     _check_root()
 
+    instance = ctx.obj['instance']
+    dbhost = ctx.obj['dbhost']
+    dbname = ctx.obj['dbname']
+    port = ctx.obj['port']
+
     install_system_user()
     install_cert(selfsigned=True)
 
-    install_var(clear=clear, clear_all=clear)
+    install_var(instance, clear=clear, clear_all=clear)
     install_modules(wip=False)
     install_provisions(provision='user', dbhost=db_host_default, clear=clear)
     install_provisions(provision=None, dbhost=db_host_default, clear=clear)
-    install_docs(clear=clear)
+    install_docs(instance, clear=clear)
 
-    install_service()
-    install_nginx()
+    install_service(instance, dbhost, dbname, port)
+    install_nginx(instance, dbhost, dbname, port)
 
     log('Done')
 

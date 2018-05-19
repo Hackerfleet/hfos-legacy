@@ -1,5 +1,5 @@
 [Unit]
-Description=Hackerfleet Operating System
+Description=Hackerfleet Operating System - {{instance}}
 After=network.target
 Wants=mongodb.service
 
