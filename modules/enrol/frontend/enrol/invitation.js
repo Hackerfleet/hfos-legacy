@@ -54,7 +54,7 @@ class Accept {
         console.log('[INVITATION] UUID:', this.uuid);
         
         let packet = {
-            component: 'hfos.enrol.manager',
+            component: 'hfos.enrol.enrolmanager',
             action: 'accept',
             data: this.uuid
         };
@@ -64,7 +64,7 @@ class Accept {
                 self.socket.send(packet);
             }, 3000);
         });
-        this.socket.listen('hfos.enrol.manager', function(msg) {
+        this.socket.listen('hfos.enrol.enrolmanager', function(msg) {
             console.log('Message!', msg);
             if (msg.action === 'accept') {
                 let data = msg.data[true];

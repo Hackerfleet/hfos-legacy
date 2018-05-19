@@ -46,7 +46,7 @@ class AccountReset {
         console.log('Transmitting reset request');
         
         let packet = {
-            component: 'hfos.enrol.manager',
+            component: 'hfos.enrol.enrolmanager',
             action: 'request_reset',
             data: {
                 'username': this.username,

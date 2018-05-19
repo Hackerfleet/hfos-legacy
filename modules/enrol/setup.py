@@ -46,7 +46,7 @@ This software package is a plugin module for HFOS.
           'validate_email>=1.3'
       ],
       entry_points="""[hfos.components]
-    enrol=hfos.enrol.manager:Manager
+    enrol=hfos.enrol.enrolmanager:EnrolManager
     [hfos.schemata]
     enrollment=hfos.enrol.enrollment:Enrollment
     """,

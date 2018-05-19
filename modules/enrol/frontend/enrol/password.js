@@ -46,7 +46,7 @@ class PasswordChange {
 
         let self = this;
 
-        this.socket.listen('hfos.enrol.manager', function(msg) {
+        this.socket.listen('hfos.enrol.enrolmanager', function(msg) {
             console.log('[PASSWORD]', msg);
             if (msg.action === 'changepassword') {
                 if (msg.data === true) {
@@ -75,7 +75,7 @@ class PasswordChange {
         }
         console.log('Transmitting password change request');
         let packet = {
-            component: 'hfos.enrol.manager',
+            component: 'hfos.enrol.enrolmanager',
             action: 'changepassword',
             data: {
                 'old': old,

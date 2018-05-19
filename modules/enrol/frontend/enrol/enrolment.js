@@ -59,7 +59,7 @@ class Enrol {
 
         let self = this;
 
-        this.socket.listen('hfos.enrol.manager', function (msg) {
+        this.socket.listen('hfos.enrol.enrolmanager', function (msg) {
             if (msg.action === 'captcha') {
                 console.log('[ENROL] Got captcha:', msg);
                 self.captcha_image = msg.data;
@@ -98,7 +98,7 @@ class Enrol {
         this.captcha_image = null;
 
         this.socket.send({
-            component: 'hfos.enrol.manager',
+            component: 'hfos.enrol.enrolmanager',
             action: 'captcha'
         });
     }
@@ -107,7 +107,7 @@ class Enrol {
         console.log('[ENROL] Getting registration open status');
 
         this.socket.send({
-            component: 'hfos.enrol.manager',
+            component: 'hfos.enrol.enrolmanager',
             action: 'status'
         });
     }
@@ -119,7 +119,7 @@ class Enrol {
         }
         console.log('Transmitting account enrolment request');
         let packet = {
-            component: 'hfos.enrol.manager',
+            component: 'hfos.enrol.enrolmanager',
             action: 'enrol',
             data: {
                 username: this.username,
