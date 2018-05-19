@@ -20,7 +20,7 @@
                     <li class="inline-block"><a role="button" ng-click="show_setup = !show_setup">
                         <i class="fa fa-gear"></i>Setup</a>
                     </li>
-                    <li class="inline-block"><a role="button" ng-click="show_filters = !show_filters">
+                    <li class="inline-block" ng-class="{'active': show_filters_tag || show_filters_project}"><a role="button" ng-click="show_filters = !show_filters">
                         <i class="fa fa-filter"></i>Filter</a>
                     </li>
                     <li class="inline-block"><a role="button" href="#!/editor/task//create"><i class="fa fa-plus"
@@ -145,7 +145,8 @@
                             ng-show="(task.name.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1
                                          || task.description.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1)
                                          && (show_filters_project ? $ctrl.filter_project === task.project : true)
-                                         && (show_filters_tag ? task.tags.indexOf($ctrl.filter_tag) > -1 : true)"
+                                         && ((show_filters_tag ? task.tags.indexOf($ctrl.filter_tag) > -1 : true)
+                                         || (show_filters_tag && $ctrl.filter_tag === '' && task.tags.length === 0))"
                             ng-repeat="task in $ctrl.tasksByGroup[item.taskgroup]">
                             <ul class="tagList">
                                 <li class="tagPill"
