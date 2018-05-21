@@ -63,7 +63,7 @@ class FileManagerService {
 
         this.lists = {};
         this.callbacks = {};
-        
+
         this.volumes = {};
         this.directories = {};
 
@@ -89,8 +89,8 @@ class FileManagerService {
         this.signInWatcher = this.rootscope.$on('User.Login', function (ev) {
             self.get_volumes();
         });
-        
-        
+
+
         function handleFilemanagerResponse(msg) {
             let data = msg.data;
             let requestId = data.req;
@@ -107,11 +107,11 @@ class FileManagerService {
                 // 1. get directory root from volumes
                 // 2. find node by traversing rest of the path
                 // 3. attach all nodes by traversing their path
-                
+
                 console.log('[FMS] Got directory:', msg.data);
-                
+
             }
-            
+
             if (angular.isDefined(self.callbacks[requestId])) {
                 let callback = self.callbacks[requestId];
                 delete self.callbacks[requestId];
@@ -120,7 +120,7 @@ class FileManagerService {
                 console.log('[FMS] Filemanager request without callback: ', msg.action, msg.data);
             }
         }
-        
+
         self.socket.listen('hfos.filemanager.manager', handleFilemanagerResponse);
 
 
@@ -160,7 +160,7 @@ class FileManagerService {
                     req: reqid
                 }
             });
-            
+
             let deferred = self.q.defer();
             self.callbacks[reqid] = deferred;
 
@@ -182,7 +182,7 @@ class FileManagerService {
                 action: 'get',
                 data: {
                     req: reqid,
-                    uuid: uuid        
+                    uuid: uuid
                 }
             });
 
@@ -213,7 +213,7 @@ class FileManagerService {
             };
 
             reader.onload = function (e) {
-                console.debug('[FMS] SendFile event:', e);
+                console.debug('[FMS] SendFile event');
                 raw = e.target.result;
                 let msg = {
                     component: 'hfos.filemanager.manager',
@@ -226,7 +226,7 @@ class FileManagerService {
                         path: path
                     }
                 };
-                console.debug('[FMS] MSG:', msg);
+                console.debug('[FMS] Sending via socket');
                 self.socket.send(msg);
                 console.log("[FMS] File has been transferred.");
             };
@@ -270,7 +270,7 @@ class FileManagerService {
         }
         this.socket.send({'component': 'hfos.filemanager.manager', 'action': 'unsubscribe', 'data': data});
     }
-    
+
     */
 
     delete(uuid) {
