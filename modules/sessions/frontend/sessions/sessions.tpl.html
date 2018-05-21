@@ -25,11 +25,54 @@
 <div class="well" style="padding-top: 5px">
     <h1>Session Management</h1>
 
-    <button class="btn btn-success" ng-click="$ctrl.addSession()">
-        <span class="fa fa-plus"></span>Add a new session
-    </button>
-
     <div class="panel-group" ng-model="panel.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
+        <div class="panel panel-default">
+            <div class="panel-heading panel-hover" role="tab">
+                <h4 class="panel-title">
+                    <a bs-collapse-toggle>
+                        <span ng-hide="$ctrl.editing">Add a new session</span>
+                        <span ng-show="$ctrl.editing">Edit session {{$ctrl.model.name}}</span>
+
+                        <button class="pull-right btn btn-xs btn-default"
+                                ng-click="$ctrl.addSession()">
+                            <span class="fa fa-plus"></span>Clear & add a new session
+                        </button>
+                    </a>
+                </h4>
+            </div>
+            <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
+                <div class="panel-body">
+                    <div ng-show="$ctrl.schema !== null">
+
+                        <form sf-schema="$ctrl.schema" sf-form="$ctrl.form" sf-model="$ctrl.model">
+                        </form>
+
+                        <!-- TODO: This is lightning talk and conference specific,
+                                   as such, needs to be configurable by chair!
+                        -->
+                        <span>
+                            Please upload at least one (obviously named) PDF(!) containing your presentation slides.
+                            <b>No other formats allowed for presentation.</b>
+                        </span>
+
+                        <form class="form form-inline">
+                            <div class="form-group">
+                                <input class="form-control" type="file" id="upload_file">
+                                <button class="btn btn-default" ng-click="$ctrl.uploadFile()"><span class="fa fa-chain"></span>Attach file</button>
+                            </div>
+                            <div class="form-group pull-right">
+                                <button class="btn btn-success" ng-click="$ctrl.submitSession()"><span class="fa fa-floppy-o"></span>Save session</button>
+                            </div>
+                        </form>
+
+                        <div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="panel panel-default">
             <div class="panel-heading panel-hover" role="tab">
                 <h4 class="panel-title">
@@ -42,21 +85,29 @@
             </div>
             <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
                 <div class="panel-body">
-                    <table class="table table-condensed table-bordered table-striped">
+                    <table class="table table-condensed table-bordered table-striped"
+                           id="sessions">
                         <thead>
                         <tr>
                             <th>Title</th>
                             <th>Type</th>
+                            <th>Keywords</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
                         <tr ng-repeat="session in $ctrl.sessions">
                             <td>
-                                {{session.name}}
+                                <a ng-click="$ctrl.editSession(session.uuid)">{{session.name}}</a>
                             </td>
                             <td>
                                 {{$ctrl.sessiontypes[session.sessiontype].name}}
+                            </td>
+                            <td>
+                                <span ng-repeat="keyword in session.keywords.split(' ')|orderBy"
+                                      class="label label-default">
+                                    {{keyword}}
+                                </span>
                             </td>
                             <td>
                                 <span>{{session.status}}</span>
@@ -77,39 +128,6 @@
             </div>
         </div>
 
-        <div class="panel panel-default">
-            <div class="panel-heading panel-hover" role="tab">
-                <h4 class="panel-title">
-                    <a bs-collapse-toggle>
-                        <span ng-hide="$ctrl.editing">Add a new session</span>
-                        <span ng-show="$ctrl.editing">Edit session {{$ctrl.model.name}}</span>
-                    </a>
-                </h4>
-            </div>
-            <div class="panel-collapse" role="tabpanel" bs-collapse-target uib-collapse="false">
-                <div class="panel-body">
-                    <div ng-show="$ctrl.schema !== null">
-
-                        <form sf-schema="$ctrl.schema" sf-form="$ctrl.form" sf-model="$ctrl.model">
-                        </form>
-
-                        <form class="form form-inline">
-                            <div class="form-group">
-                                <input class="form-control" type="file" id="upload_file">
-                                <button class="btn btn-default" ng-click="$ctrl.uploadFile()"><span class="fa fa-chain"></span>Attach file</button>
-                            </div>
-                            <div class="form-group pull-right">
-                                <button class="btn btn-success" ng-click="$ctrl.submitSession()"><span class="fa fa-floppy-o"></span>Save session</button>
-                            </div>
-                        </form>
-
-                        <div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div ng-show="$ctrl.user.debug === true">

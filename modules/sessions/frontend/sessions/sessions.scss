@@ -24,11 +24,7 @@
 
 @import '../../../colors.scss';
 
-table.user-list tr {
-  height: 4em;
-}
-
-.captcha {
-  border-radius: 5px;
-  border-style: 1px solid $color-gray-light;
+#sessions > tbody > tr > td > span.label {
+  background: $color-primary-0;
+  margin-right: 2px;
 }

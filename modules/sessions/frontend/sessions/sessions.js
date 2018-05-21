@@ -69,6 +69,9 @@ class Sessions {
                 if (typeof msg.data.list !== 'undefined') {
                     self.sessions = {};
                     for (let session of msg.data.list){
+                        // TODO: Get this from another chair-only-writable object
+                        session.status = 'Undecided';
+
                         self.sessions[session.uuid] = session;
                     }
                 } else {
@@ -196,10 +199,9 @@ class Sessions {
 
     addSession() {
         console.log('[SESSIONS] Adding a new session');
-        this.model = {};
+        this.model = {abstract: ' '};
         this.editing = false;
         document.getElementById('upload_file').value = '';
-
     }
 }
 
