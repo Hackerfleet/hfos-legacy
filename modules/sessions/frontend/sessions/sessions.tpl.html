@@ -32,11 +32,6 @@
                     <a bs-collapse-toggle>
                         <span ng-hide="$ctrl.editing">Add a new session</span>
                         <span ng-show="$ctrl.editing">Edit session {{$ctrl.model.name}}</span>
-
-                        <button class="pull-right btn btn-xs btn-default"
-                                ng-click="$ctrl.addSession()">
-                            <span class="fa fa-plus"></span>Clear & add a new session
-                        </button>
                     </a>
                 </h4>
             </div>
@@ -50,10 +45,13 @@
                         <!-- TODO: This is lightning talk and conference specific,
                                    as such, needs to be configurable by chair!
                         -->
-                        <span>
-                            Please upload at least one (obviously named) PDF(!) containing your presentation slides.
-                            <b>No other formats allowed for presentation.</b>
-                        </span>
+
+                        <div class="strong">
+                            <ul>
+                                <li>Please upload at least one (obviously named) PDF(!) containing your presentation slides.</li>
+                                <li>No other formats allowed for presentation.</li>
+                            </ul>
+                        </div>
 
                         <form class="form form-inline">
                             <div class="form-group">
@@ -61,7 +59,15 @@
                                 <button class="btn btn-default" ng-click="$ctrl.uploadFile()"><span class="fa fa-chain"></span>Attach file</button>
                             </div>
                             <div class="form-group pull-right">
-                                <button class="btn btn-success" ng-click="$ctrl.submitSession()"><span class="fa fa-floppy-o"></span>Save session</button>
+                                <button class="btn btn-warning"
+                                        ng-click="$ctrl.addSession()">
+                                    <span class="fa fa-plus"></span>Clear & add a new session
+                                </button>
+
+                                <button class="btn btn-success"
+                                        ng-click="$ctrl.submitSession()">
+                                    <span class="fa fa-floppy-o"></span>Save session
+                                </button>
                             </div>
                         </form>
 

@@ -141,10 +141,16 @@ class Sessions {
 
     uploadFile() {
         console.log('[SESSIONS] Uploading attachment');
+        let session_uuid = this.model.uuid;
+        if (typeof session_uuid === 'undefined') {
+            this.notification.add('warning', 'Cannot attach file', 'To attach any files, please fill out the form and store this session first.', 10);
+            return
+        }
+
         let file = document.getElementById('upload_file').files[0];
         let self = this;
 
-        this.filemanagerservice.sendFile(file, 'hfos.sessions').then(function (result) {
+        this.filemanagerservice.sendFile(file, 'hfos.sessions', session_uuid).then(function (result) {
             console.log('[SESSIONS] Uploaded. Result:', result);
 
             if (result.success === true) {
@@ -154,6 +160,7 @@ class Sessions {
                 });
 
                 self.notification.add('success', 'File attached', 'Your file has been uploaded successfully.', 5);
+                self.submitSession(true);
             } else {
                 self.notification.add('danger', 'Upload failed', 'The attachment was not uploaded successfully:' + result.reason, 10);
             }
@@ -161,7 +168,7 @@ class Sessions {
         })
     }
 
-    submitSession() {
+    submitSession(no_show) {
         let model = this.model;
         let self = this;
         if (this.editing !== true) { model.uuid = 'create'; }
@@ -169,7 +176,7 @@ class Sessions {
         console.log('[SESSIONS] Object update initiated with ', model);
         this.op.put('session', model).then(function (msg) {
             if (msg.action !== 'fail') {
-                self.notification.add('success', 'Submission stored', 'Your session has been submitted successfully.', 5);
+                if (!no_show) self.notification.add('success', 'Submission stored', 'Your session has been submitted successfully.', 5);
                 self.get_sessions();
             } else {
                 self.notification.add('warning', 'Submission not stored', 'Your session has not been submitted: ' + result.reason, 10);
