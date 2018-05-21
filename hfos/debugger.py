@@ -294,7 +294,7 @@ class CLI(ConfigurableComponent):
                 self.log("Sending backend reload event")
                 self.fireEvent(componentupdaterequest(force=False), "setup")
             else:
-                self.log('Unknown Command. Use /help to get a list of enabled '
+                self.log('Unknown Command:', cmd, '. Use /help to get a list of enabled '
                          'cli hooks')
 
     @handler('cli_help')
