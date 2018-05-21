@@ -176,7 +176,11 @@ class Sessions {
         console.log('[SESSIONS] Object update initiated with ', model);
         this.op.put('session', model).then(function (msg) {
             if (msg.action !== 'fail') {
+                self.model = msg.data.object;
+                self.editing = true;
+
                 if (!no_show) self.notification.add('success', 'Submission stored', 'Your session has been submitted successfully.', 5);
+
                 self.get_sessions();
             } else {
                 self.notification.add('warning', 'Submission not stored', 'Your session has not been submitted: ' + result.reason, 10);
