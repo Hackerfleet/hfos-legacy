@@ -220,7 +220,6 @@ the friendly robot of {{node_name}}
             'description': 'Mail subject to send to accepted invitees',
             'default': 'Your account on {{node_name}} is now active'
         },
-
         'acceptance_mail': {
             'type': 'string',
             'title': 'Acceptance mail text',
@@ -232,8 +231,6 @@ the friendly robot of {{node_name}}
 You can now use the HFOS node at {{node_name}}!
 Click this link to login: 
 {{node_url}}
-
-Your new password is {{password}} - please change it immediately after logging in!
 
 Have fun,
 the friendly robot of {{node_name}}
@@ -324,9 +321,9 @@ the friendly robot of {{node_name}}
             enrollment.save()
             reply = {True: enrollment.serializablefields()}
 
-        # if status == 'Accepted':
-        #     self._create_user(enrollment.name, enrollment.password, enrollment.email, 'Invited')
-        #     self._send_acceptance(enrollment)
+        if status == 'Accepted' and enrollment.method == 'Enrolled':
+            self._create_user(enrollment.name, enrollment.password, enrollment.email, 'Invited', event.client.uuid)
+            self._send_acceptance(enrollment, None)
 
         packet = {
             'component': 'hfos.enrol.enrolmanager',
@@ -431,7 +428,7 @@ the friendly robot of {{node_name}}
         if self.config.auto_accept_enrolled:
             self._create_user(username, password, mail, 'Enrolled', uuid)
         else:
-            self._invite(username, 'Enrolled', mail, uuid)
+            self._invite(username, 'Enrolled', mail, uuid, password)
 
     @handler(accept)
     def accept(self, event):
@@ -619,7 +616,7 @@ the friendly robot of {{node_name}}
         }
         self.fire(send(uuid, response))
 
-    def _invite(self, name, method, email, uuid):
+    def _invite(self, name, method, email, uuid, password=""):
         """Actually invite a given user"""
 
         props = {
@@ -628,6 +625,7 @@ the friendly robot of {{node_name}}
             'name': name,
             'method': method,
             'email': email,
+            'password': password,
             'timestamp': std_now()
         }
         enrollment = objectmodels['enrollment'](props)
@@ -711,7 +709,12 @@ the friendly robot of {{node_name}}
 
         self.log('Sending acceptance status mail to user')
 
-        acceptance_text = render(self.config.acceptance_mail, {'password': password})
+        if password is not "":
+            password_hint = '\n\nPS: Your new password is ' + password + ' - please change it after your first login!'
+
+            acceptance_text = self.config.acceptance_mail + password_hint
+        else:
+            acceptance_text = self.config.acceptance_mail
 
         self._send_mail(self.config.acceptance_subject, acceptance_text, enrollment)
 
