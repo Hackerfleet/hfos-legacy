@@ -57,11 +57,13 @@ class UpcomingCtrl {
         this.calendars_available = [];
         this.calendars_enabled = [];
         this.multi_calendar = false;
+        this.show_only_upcoming = false;
 
         let self = this;
 
         this.clock_update = this.interval(function () {
             self.now = new Date();
+            self.five_minutes = new Date(self.now.getTime() + (5 * 60000));
             self.today = new Date().setHours(0, 0, 0, 0);
             self.events.forEach(function (event) {
                 event._eta = moment(event.dtstart).fromNow();
@@ -104,7 +106,7 @@ class UpcomingCtrl {
                     dtstart: {'$gt': self.now}
                 };
 
-                self.op.search('event', filter, '*', '', true, self.limit).then(function (msg) {
+                self.op.search('event', filter, '*', '', true, self.limit, 0, [['dtstart', 'asc']]).then(function (msg) {
                     console.log('[UPCOMING] Events:', msg);
                     let events = msg.data.list;
                     for (let item of events) {
