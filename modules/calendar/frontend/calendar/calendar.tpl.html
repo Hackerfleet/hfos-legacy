@@ -67,13 +67,14 @@
                                 Your calendars
                             </h4>
                             <ul uib-collapse="ownCollapsed">
-                                <li ng-repeat="uuid in $ctrl.calendars_own"
-                                    ng-click="$ctrl.toggle_calendar(uuid)">
+                                <li ng-repeat="uuid in $ctrl.calendars_own">
+                                    <span class="fa fa-wrench" ng-click="$ctrl.edit_calendar(uuid)"></span>
                                     <span class="calendar-toggle"
+                                          ng-click="$ctrl.toggle_calendar(uuid)"
                                           ng-style="$ctrl.calendars[uuid].enabled && {'background': $ctrl.calendars[uuid].color,
                                           'border': '1px solid '+ $ctrl.calendars[uuid].color } || {'border': '1px solid ' + $ctrl.calendars[uuid].color }">
                                     </span>
-                                    <span>{{$ctrl.calendars[uuid].name}}</span>
+                                    <span ng-click="$ctrl.toggle_calendar(uuid)">{{$ctrl.calendars[uuid].name}}</span>
                                 </li>
                             </ul>
                         </li>
