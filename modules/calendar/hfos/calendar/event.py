@@ -57,15 +57,25 @@ EventSchema['properties'].update({
         "type": "string",
         "description": "Event ending time"
     },
-    "summary": {"type": "string"},
-    "details": {"type": "string"},
+    "summary": {"type": "string", "format": "html"},
     "location": {"type": "string"},
+    "created": {"type": "string"},
+    "timestamp": {"type": "string"},
+    "modified": {"type": "string"},
+    "status": {"type": "string"},
+    "uid": {"type": "string"},
+    "class": {"type": "string"},
     "url": {"type": "string", "format": "uri"},
     "color": {'type': 'string', 'format': 'color'},
     "duration": {
         "format": "timepicker",
         "type": "string",
         "description": "Event duration"
+    },
+    "recurring": {
+        "type": "boolean",
+        "title": "Recurring event",
+        "default": False
     },
     "rdate": {
         "format": "datetimepicker",
@@ -95,7 +105,9 @@ EventForm = [
         section(1,2, [
             ['rdate', 'rrule']
         ])
-    ]),
+    ], options={
+        'condition': '$ctrl.model.recurring'
+    }),
     editbuttons
 ]
 
