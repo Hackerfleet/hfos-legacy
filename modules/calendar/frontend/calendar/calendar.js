@@ -328,20 +328,20 @@ class CalendarCtrl {
     }
 
     toggle_calendar(uuid) {
-        // TODO: Fix calendar switching - until then, this is deactivated. It is too messy.
-        /*
+        // TODO: Fix calendar switching
+
         console.log('[CALENDAR] Toggling calendar:', uuid);
         if (this.calendars[uuid].enabled === true) {
-            this.calendars[uuid].enabled = false;
-            this.enabled.pop(uuid);
-            this.popCalendar(uuid);
+            //this.calendars[uuid].enabled = false;
+            //this.enabled.pop(uuid);
+            //this.popCalendar(uuid);
         } else {
             this.calendars[uuid].enabled = true;
             this.enabled.push(uuid);
             this.getEvents(uuid);
         }
         console.log('[CALENDAR] Result: ', this.calendars, this.enabled);
-        */
+
     }
 }
 
