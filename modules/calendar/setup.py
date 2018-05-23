@@ -31,7 +31,7 @@ setup(name="hfos-calendar",
       author_email="riot@c-base.org",
       url="https://github.com/hackerfleet/hfos-calendar",
       license="GNU Affero General Public License v3",
-      namespace_packages = ['hfos'],
+      namespace_packages=['hfos'],
       packages=find_packages(),
       long_description="""HFOS - Calendar
 =================
@@ -41,12 +41,17 @@ A modern, opensource approach to calendar resource management.
 This software package is a plugin module for HFOS.
 """,
       dependency_links=[],
-      install_requires=['hfos>=1.2.0'],
+      install_requires=[
+          'hfos>=1.2.0',
+          'icalendar>=4.0.1'
+      ],
       entry_points="""[hfos.components]
     calendar=hfos.calendar.manager:Manager
     [hfos.schemata]
     event=hfos.calendar.event:Event
     calendar=hfos.calendar.calendar:Calendar
+    [hfos.management]
+    icalimporter=hfos.calendar.importer.ical:ICALImporter
     """,
       test_suite="tests.main.main",
       )
