@@ -33,6 +33,7 @@ OM manager
 
 from uuid import uuid4
 from circuits import Event
+from pymongo import ASCENDING, DESCENDING
 
 from hfos.events.objectmanager import objectcreation, objectchange, \
     objectdeletion, getlist, search, get, change, put, delete, subscribe, \
@@ -286,6 +287,7 @@ class ObjectManager(ConfigurableComponent):
 
         skip = data.get('skip', 0)
         limit = data.get('limit', 0)
+        sort = data.get('sort', None)
         # page = data.get('page', 0)
         # count = data.get('count', 0)
         #
@@ -319,6 +321,13 @@ class ObjectManager(ConfigurableComponent):
             options['skip'] = skip
         if limit > 0:
             options['limit'] = limit
+        if sort is not None:
+            options['sort'] = []
+            for item in sort:
+                key = item[0]
+                direction = item[1]
+                direction = ASCENDING if direction == 'asc' else DESCENDING
+                options['sort'].append([key, direction])
 
         cursor = objectmodels[schema].find(object_filter, **options)
 
