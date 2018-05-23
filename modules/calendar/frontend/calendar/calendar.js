@@ -227,10 +227,15 @@ class CalendarCtrl {
             console.log('CAL-Ev:', date, jsEvent);
             self.selected_event = date.uuid;
             console.log('EMITTING');
-            self.scope.$broadcast('Changed.UUID', self.selected_event);
+            self.scope.$broadcast('Changed.UUID', {eid: 'eventEditor', uuid: self.selected_event});
             self.active_tab = 1;
             self.scope.$broadcast('Resize', '<75%');
         };
+
+        this.edit_calendar = function(uuid) {
+            this.selected_calendar = uuid;
+            self.scope.$broadcast('Changed.UUID', {eid: 'calendarEditor', uuid: self.selected_calendar});
+        }
         /* alert on Drop */
         this.alertOnDrop = function (event, delta, revertFunc, jsEvent, ui, view) {
             self.notificationMessage = ('Event Droped to make dayDelta ' + delta);
@@ -289,6 +294,12 @@ class CalendarCtrl {
                         duration: {weeks: 2},
                         rows: 2,
                         buttonText: '2 Weeks'
+                    },
+                    day: {
+                        slotDuration: '00:10:00'
+                    },
+                    week: {
+                        slotDuration: '00:20:00'
                     }
                 },
                 businessHours: this.business_time,
@@ -317,8 +328,10 @@ class CalendarCtrl {
     }
 
     toggle_calendar(uuid) {
+        // TODO: Fix calendar switching - until then, this is deactivated. It is too messy.
+        /*
         console.log('[CALENDAR] Toggling calendar:', uuid);
-        if (this.calendars[uuid].enabled) {
+        if (this.calendars[uuid].enabled === true) {
             this.calendars[uuid].enabled = false;
             this.enabled.pop(uuid);
             this.popCalendar(uuid);
@@ -328,7 +341,7 @@ class CalendarCtrl {
             this.getEvents(uuid);
         }
         console.log('[CALENDAR] Result: ', this.calendars, this.enabled);
-
+        */
     }
 }
 
