@@ -60,50 +60,56 @@
                     <ul class="calendar-overview">
                         <li>
                             <h4 ng-click="ownCollapsed = !ownCollapsed">
-                                        <span class="fa"
-                                              ng-class="{'fa-chevron-right': ownCollapsed,
-                                                         'fa-chevron-down': !ownCollapsed}">
-                                        </span>
+                                <span class="fa"
+                                      ng-class="{'fa-chevron-right': ownCollapsed,
+                                                 'fa-chevron-down': !ownCollapsed}">
+                                </span>
                                 Your calendars
                             </h4>
                             <ul uib-collapse="ownCollapsed">
                                 <li ng-repeat="uuid in $ctrl.calendars_own"
                                     ng-click="$ctrl.toggle_calendar(uuid)">
-                                            <span class="calendar-toggle"
-                                                  ng-style="$ctrl.calendars[uuid].enabled && {'background': $ctrl.calendars[uuid].color,
-                                                  'border': '1px solid '+ $ctrl.calendars[uuid].color } || {'border': '1px solid ' + $ctrl.calendars[uuid].color }">
-                                            </span>
+                                    <span class="calendar-toggle"
+                                          ng-style="$ctrl.calendars[uuid].enabled && {'background': $ctrl.calendars[uuid].color,
+                                          'border': '1px solid '+ $ctrl.calendars[uuid].color } || {'border': '1px solid ' + $ctrl.calendars[uuid].color }">
+                                    </span>
                                     <span>{{$ctrl.calendars[uuid].name}}</span>
                                 </li>
                             </ul>
                         </li>
                         <li>
                             <h4 ng-click="otherCollapsed = !otherCollapsed">
-                                        <span class="fa"
-                                              ng-class="{'fa-chevron-right': !otherCollapsed,
-                                                         'fa-chevron-down': otherCollapsed}">
-                                        </span>
+                                <span class="fa"
+                                      ng-class="{'fa-chevron-right': !otherCollapsed,
+                                                 'fa-chevron-down': otherCollapsed}">
+                                </span>
                                 Other calendars
                             </h4>
                             <ul uib-collapse="!otherCollapsed">
-                                <li ng-repeat="uuid in $ctrl.calendars_other"
-                                    ng-click="$ctrl.toggle_calendar(uuid)">
-                                            <span class="calendar-toggle"
-                                                  ng-style="$ctrl.calendars[uuid].enabled && {'background': $ctrl.calendars[uuid].color,
-                                                  'border': '1px solid '+ $ctrl.calendars[uuid].color } || {'border': '1px solid ' + $ctrl.calendars[uuid].color }">
-                                            </span>
-                                    <span>{{$ctrl.calendars[uuid].name}}</span>
+                                <li ng-repeat="uuid in $ctrl.calendars_other">
+                                    <span class="fa fa-wrench" ng-click="$ctrl.edit_calendar(uuid)"></span>
+                                    <span class="calendar-toggle" ng-click="$ctrl.toggle_calendar(uuid)"
+                                          ng-style="$ctrl.calendars[uuid].enabled &&
+                                            {'background': $ctrl.calendars[uuid].color,
+                                             'border': '1px solid ' + $ctrl.calendars[uuid].color } ||
+                                          {'border': '1px solid ' + $ctrl.calendars[uuid].color }">
+                                    </span>
+                                    <span ng-click="$ctrl.toggle_calendar(uuid)">{{$ctrl.calendars[uuid].name}}</span>
                                 </li>
                             </ul>
                         </li>
                     </ul>
-                    <a href="#!/editor/calendar//create" class="btn btn-default" role="button">Add
-                        calendar</a>
+                    <a href="#!/editor/calendar//create" class="btn btn-default" role="button">
+                        Add calendar
+                    </a>
+                    {{$ctrl.selected_calendar}}
+                    <objecteditor eid="calendarEditor" schema="calendar" action="edit" uuid="{{$ctrl.selected_calendar}}"
+                                  ng-if="$ctrl.selected_calendar != null"></objecteditor>
                 </div>
             </uib-tab>
             <uib-tab index="1" heading="Event">
                 <div class="sidebar-editor">
-                    <objecteditor schema="event" action="edit" uuid="{{$ctrl.selected_event}}"
+                    <objecteditor eid="eventEditor" schema="event" action="edit" uuid="{{$ctrl.selected_event}}"
                                   ng-if="$ctrl.selected_event != null"></objecteditor>
 
                     <objecteditor schema="event" action="create" initial="$ctrl.new_event"
