@@ -49,6 +49,16 @@
                                     bs-select>
                                 Select calendars <span class="caret"></span>
                             </button>
+                            <label>
+                                <input type="checkbox" ng-model="$ctrl.show_only_upcoming">
+                                Only upcoming
+                            </label>
+                            <div ng-show="$ctrl.user.debug">
+                                <label>
+                                    <input type="checkbox" ng-model="debug">
+                                    Debug
+                                </label>
+                            </div>
                         </form>
                     </li>
                     <li class="inline-block">
@@ -61,46 +71,66 @@
             </div>
         </div>
     </div>
-    <div ng-show="$ctrl.user.debug">
-        <label>
-            <input type="checkbox" ng-model="debug">
-            Debug
-        </label>
-    </div>
-    <div>
-        <h2 title="{{$ctrl.events[0].dtstart|date:'fullDate'}}">
+
+    <!-- Upcoming event in less than five minutes -->
+    <div ng-if="$ctrl.events[0].dtstart < $ctrl.five_minutes || $ctrl.show_only_upcoming">
+        <h1 class="text-center" title="{{$ctrl.events[0].dtstart|date:'fullDate'}}">
+            Upcoming {{$ctrl.events[0]._eta}}:
             <a href="#!/editor/event/{{$ctrl.events[0].uuid}}/edit">
-                {{$ctrl.events[0].dtstart | date:'shortTime'}} - {{$ctrl.events[0].name}}
+                {{$ctrl.events[0].name}}
             </a>
-            <small>{{$ctrl.events[0]._eta}}</small>
-        </h2>
-        <small ng-show="$ctrl.multi_calendar">
+        </h1>
+        <h4 class="text-center">
             <a href="#!/editor/calendar/{{$ctrl.events[0].calendar}}/edit">{{$ctrl.calendars[$ctrl.events[0].calendar].name}}</a>
-        </small>
-        <small ng-show="$ctrl.events[0]._day !== $ctrl.today">
-            {{$ctrl.events[0].dtstart | date:'shortDate'}}
-        </small>
+            {{$ctrl.events[0].dtstart | date:'shortTime'}} - {{$ctrl.events[0].dtstart | date:'shortDate'}}
+        </h4>
 
-
-        <p>{{$ctrl.events[0].summary}}</p>
+        <h2 class="text-center" ng-bind-html="$ctrl.events[0].summary"></h2>
     </div>
-    <hr/>
-    <div ng-repeat="item in $ctrl.events" ng-if="$index > 0">
-        <h3 title="item.dtstart|date:'fullDate'}}">
-            <a href="#!/editor/event/{{item.uuid}}/edit">
-                {{item.dtstart | date:'mediumTime'}} - {{item.name}}
-            </a>
-        </h3>
-        <small ng-show="$ctrl.multi_calendar">
-            <a href="#!/editor/calendar/{{item.calendar}}/edit">{{$ctrl.calendars[item.calendar].name}}</a>
-        </small>
-        <small> - {{item._eta}}</small>
-        <small ng-show="item._day !== $ctrl.today">
-            ({{item.dtstart | date:'shortDate'}})
-        </small>
 
+    <!-- No shortly upcoming event -->
+    <div ng-if="$ctrl.events[0].dtstart >= $ctrl.five_minutes &&  !$ctrl.show_only_upcoming">
+        <div class="row">
+            <div class="col-md-4">
+                <h2 title="{{$ctrl.events[0].dtstart|date:'fullDate'}}">
+                    <a href="#!/editor/event/{{$ctrl.events[0].uuid}}/edit">
+                        {{$ctrl.events[0].dtstart | date:'shortTime'}} - {{$ctrl.events[0].name}}
+                    </a>
+                    <small>{{$ctrl.events[0]._eta}}</small>
+                </h2>
+                <small ng-show="$ctrl.multi_calendar">
+                    <a href="#!/editor/calendar/{{$ctrl.events[0].calendar}}/edit">{{$ctrl.calendars[$ctrl.events[0].calendar].name}}</a>
+                </small>
+                <small ng-show="$ctrl.events[0]._day !== $ctrl.today">
+                    {{$ctrl.events[0].dtstart | date:'shortDate'}}
+                </small>
+            </div>
 
-        <p>{{item.summary}}</p>
+            <div class="col-md-8">
+                <p ng-bind-html="$ctrl.events[0].summary"></p>
+            </div>
+        </div>
+        <hr/>
+        <div class="row" ng-repeat="item in $ctrl.events" ng-if="$index > 0">
+            <div class="col-md-4">
+                <h3 title="item.dtstart|date:'fullDate'}}">
+                    <a href="#!/editor/event/{{item.uuid}}/edit">
+                        {{item.dtstart | date:'mediumTime'}} - {{item.name}}
+                    </a>
+                </h3>
+                <small ng-show="$ctrl.multi_calendar">
+                    <a href="#!/editor/calendar/{{item.calendar}}/edit">{{$ctrl.calendars[item.calendar].name}}</a>
+                </small>
+                <small> - {{item._eta}}</small>
+                <small ng-show="item._day !== $ctrl.today">
+                    ({{item.dtstart | date:'shortDate'}})
+                </small>
+            </div>
+
+            <div class="col-md-8">
+                <p ng-bind-html="item.summary"></p>
+            </div>
+        </div>
     </div>
     <div ng-show="debug">
         <pre>
