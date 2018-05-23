@@ -114,13 +114,16 @@ def lookup_field(key, lookup_type=None, placeholder=None, html_class="div",
     return result
 
 
-def fieldset(title, items):
+def fieldset(title, items, options=None):
     """A field set with a title and sub items"""
     result = {
         'title': title,
         'type': 'fieldset',
         'items': items
     }
+    if options is not None:
+        result['x-schema-form'] = options
+
     return result
 
 
