@@ -323,6 +323,15 @@ def _get_system_configuration(dbhost, dbname):
 
     return systemconfig
 
+db_host_default = '127.0.0.1:27017'
+db_host_help = 'Define hostname for database server (default: ' + \
+               db_host_default + ')'
+db_host_metavar = '<ip:port>'
+
+db_default = 'hfos'
+db_help = 'Define name of database (default: ' + db_default + ')'
+db_metavar = '<name>'
+
 
 @with_plugins(iter_entry_points('hfos.management'))
 @click.group(context_settings={'help_option_names': ['-h', '--help']},
@@ -335,8 +344,12 @@ def _get_system_configuration(dbhost, dbname):
               is_flag=True)
 @click.option('--log', default=20, help='Log level to use (0-100)',
               metavar='<number>')
+@click.option('--dbhost', default=db_host_default, help=db_host_help,
+              metavar=db_host_metavar)
+@click.option('--dbname', default=db_default, help=db_help,
+              metavar=db_metavar)
 @click.pass_context
-def cli(ctx, instance, quiet, verbose, log):
+def cli(ctx, instance, quiet, verbose, log, dbhost, dbname):
     """HFOS Management Utility
 
     This utility supports various operations to manage HFOS installations.
@@ -355,6 +368,12 @@ def cli(ctx, instance, quiet, verbose, log):
     ctx.obj['verbose'] = verbose
     verbosity['console'] = log
     verbosity['global'] = log
+
+    from hfos import database
+    database.initialize(dbhost, dbname)
+    ctx.obj['db'] = database
+    ctx.obj['dbhost'] = dbhost
+    ctx.obj['dbname'] = dbname
 
 
 @click.command(short_help='create starterkit module')
@@ -387,30 +406,11 @@ def create_module(clear, target):
     _construct_module(augmented_info, target)
 
 
-db_host_default = '127.0.0.1:27017'
-db_host_help = 'Define hostname for database server (default: ' + \
-               db_host_default + ')'
-db_host_metavar = '<ip:port>'
-
-db_default = 'hfos'
-db_help = 'Define name of database (default: ' + db_default + ')'
-db_metavar = '<name>'
-
 
 @click.group(cls=DYMGroup)
-@click.option('--dbhost', default=db_host_default, help=db_host_help,
-              metavar=db_host_metavar)
-@click.option('--dbname', default=db_default, help=db_help,
-              metavar=db_metavar)
 @click.pass_context
-def db(ctx, dbhost, dbname):
+def db(ctx):
     """Database management operations (GROUP)"""
-
-    from hfos import database
-    database.initialize(dbhost, dbname)
-    ctx.obj['db'] = database
-    ctx.obj['dbhost'] = dbhost
-    ctx.obj['dbname'] = dbname
 
 
 cli.add_command(db)
@@ -505,19 +505,9 @@ def make(ctx):
 
 
 @click.group(cls=DYMGroup)
-@click.option('--dbhost', default=db_host_default, help=db_host_help,
-              metavar=db_host_metavar)
-@click.option('--dbname', default=db_default, help=db_help,
-              metavar=db_metavar)
 @click.pass_context
-def config(ctx, dbhost, dbname):
+def config(ctx):
     """Configuration management operations (GROUP)"""
-
-    from hfos import database
-    database.initialize(dbhost, dbname)
-    ctx.obj['db'] = database
-    ctx.obj['dbhost'] = dbhost
-    ctx.obj['dbname'] = dbname
 
     from hfos.schemata.component import ComponentConfigSchemaTemplate
     ctx.obj['col'] = model_factory(ComponentConfigSchemaTemplate)
