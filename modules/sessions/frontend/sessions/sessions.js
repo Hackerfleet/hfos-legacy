@@ -65,7 +65,7 @@ class Sessions {
         this.get_sessions = function () {
             console.log('[SESSIONS] Login successful - fetching session data');
 
-            self.op.search('session', {owner: self.user.uuid}, '*').then(function (msg) {
+            self.op.search('session', {owner: self.user.useruuid}, '*').then(function (msg) {
                 if (typeof msg.data.list !== 'undefined') {
                     self.sessions = {};
                     for (let session of msg.data.list){
