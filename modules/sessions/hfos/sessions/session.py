@@ -37,7 +37,11 @@ Session: Generic object to store data about lectures, lightning talks etc.
 from hfos.schemata.defaultform import editbuttons, section, lookup_field
 from hfos.schemata.base import base_object, uuid_object
 
-SessionSchema = base_object('session', roles_create='crew')
+SessionSchema = base_object('session',
+                            roles_create='crew',
+                            roles_list=['owner', 'admin', 'chair'],
+                            roles_read=['owner', 'admin', 'chair'],
+                            roles_write=['owner', 'admin', 'chair'])
 
 SessionSchema['properties'].update({
     'sessiontype': uuid_object('Session Type', 'Select a session type'),
