@@ -122,7 +122,7 @@ def fieldset(title, items, options=None):
         'items': items
     }
     if options is not None:
-        result['x-schema-form'] = options
+        result.update(options)
 
     return result
 
