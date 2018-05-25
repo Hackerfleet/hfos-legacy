@@ -3,16 +3,25 @@
     <words>
       <w>affero</w>
       <w>automat</w>
+      <w>baselayers</w>
+      <w>crosshairs</w>
       <w>dbhost</w>
+      <w>dbname</w>
       <w>debian</w>
+      <w>geoobject</w>
+      <w>geoobjects</w>
       <w>hfoslog</w>
+      <w>layergroup</w>
+      <w>layergroups</w>
       <w>mapview</w>
+      <w>mapviews</w>
       <w>mmsi</w>
       <w>navdata</w>
       <w>nginx</w>
       <w>pypi</w>
       <w>rastercache</w>
       <w>rastertiles</w>
+      <w>rbac</w>
       <w>redirector</w>
       <w>selfsigned</w>
       <w>sudo</w>
@@ -21,6 +30,7 @@
       <w>systemd</w>
       <w>tilecache</w>
       <w>uuids</w>
+      <w>warmongo</w>
       <w>wget</w>
     </words>
   </dictionary>
