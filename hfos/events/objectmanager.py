@@ -114,3 +114,9 @@ class subscribe(authorizedevent):
 
 class unsubscribe(authorizedevent):
     """A client requires a schema to validate data or display a form"""
+
+class remove_role(authorizedevent):
+    pass
+
+class add_role(authorizedevent):
+    pass

@@ -37,7 +37,7 @@ from pymongo import ASCENDING, DESCENDING
 
 from hfos.events.objectmanager import objectcreation, objectchange, \
     objectdeletion, getlist, search, get, change, put, delete, subscribe, \
-    unsubscribe
+    unsubscribe, remove_role, add_role
 from hfos.events.client import send
 from hfos.debugger import cli_register_event
 from hfos.component import handler, ConfigurableComponent
@@ -759,3 +759,63 @@ class ObjectManager(ConfigurableComponent):
                 self.log('Notifying subscriber: ', client, recipient,
                          lvl=verbose)
                 self.fireEvent(send(client, update))
+
+    @handler(remove_role)
+    def remove_role(self, event):
+        schema = event.data.get('schema', None)
+        uuid = event.data.get('uuid', None)
+        action = event.data.get('action', None)
+        role = event.data.get('role', None)
+
+        if schema is None or uuid is None or action is None or role is None:
+            self.log('Invalid request, arguments missing:', event.data, lvl=error)
+            return
+
+        user = event.user
+
+        if not isinstance(uuid, list):
+            uuid = [uuid]
+
+        for item in uuid:
+            obj = objectmodels[schema].find_one({'uuid': item})
+
+            if not self._check_permissions(user, 'write', obj):
+                self.log('Revoking role not possible due to insufficient permissions.')
+                return
+
+            self.log('Removing role', role, 'of', action, 'on', schema, ':', item)
+            try:
+                obj.perms[action].remove(role)
+                obj.save()
+            except ValueError:
+                self.log('Could not remove role, it is not existing:', role, action, schema, ':', item)
+
+    @handler(add_role)
+    def add_role(self, event):
+        schema = event.data.get('schema', None)
+        uuid = event.data.get('uuid', None)
+        action = event.data.get('action', None)
+        role = event.data.get('role', None)
+
+        if schema is None or uuid is None or action is None or role is None:
+            self.log('Invalid request, arguments missing:', event.data, lvl=error)
+            return
+
+        user = event.user
+
+        if not isinstance(uuid, list):
+            uuid = [uuid]
+
+        for item in uuid:
+            obj = objectmodels[schema].find_one({'uuid': item})
+
+            if not self._check_permissions(user, 'write', obj):
+                self.log('Adding role not possible due to insufficient permissions.')
+                return
+
+            self.log('Appending role', role, 'of', action, 'on', schema, ':', item)
+            if role not in obj.perms[action]:
+                obj.perms[action].append(role)
+                obj.save()
+            else:
+                self.log('Role already present, not adding')
