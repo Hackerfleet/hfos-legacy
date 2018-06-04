@@ -39,7 +39,7 @@ Provisions
 
 """
 
-from hfos.schemata.defaultform import defaultform
+from hfos.schemata.defaultform import defaultform, section, lookup_field, editbuttons
 from hfos.schemata.base import base_object, uuid_object
 
 GeoObjectSchema = base_object('geoobject', all_roles='crew')
@@ -51,34 +51,59 @@ GeoObjectSchema['properties'].update({
         'title': 'Type',
         'description': 'Free-form classification with reserved types'
     },
-    'color': {'type': 'string', 'title': 'Background Color',
-              # 'format': 'color',
-              'description': 'GeoObject background color indicator',
-              'default': '#4384BF'},
-    'iconcolor': {'type': 'string', 'title': 'Icon Color',
-                  # 'format': 'color',
-                  'description': 'GeoObject icon color indicator', 'default':
-                      'white'},
-    'icon': {'type': 'string', 'title': 'Icon',
-             'description': 'Custom user icon', 'default': 'flag'},
-    'notes': {'type': 'string', 'format': 'html', 'title': 'User notes',
-              'description': 'Custom user notes'},
-    'minZoom': {'type': 'number', 'description': 'Minimum zoom number.',
-                'default': 0},
-    'maxZoom': {'type': 'number', 'description': 'Maximum zoom number.',
-                'default': 18},
+    'color': {
+        'type': 'string', 'title': 'Background Color',
+        'format': 'color',
+        'description': 'GeoObject background color indicator',
+        'default': '#4384BF'
+    },
+    'iconcolor': {
+        'type': 'string', 'title': 'Icon Color',
+        'format': 'color',
+        'description': 'GeoObject icon color indicator', 'default':
+            'white'
+    },
+    'icon': {
+        'type': 'string', 'title': 'Icon',
+        'description': 'Custom user icon', 'default': 'flag'
+    },
+    'notes': {
+        'type': 'string', 'format': 'html', 'title': 'User notes',
+        'description': 'Custom user notes'
+    },
+    'minZoom': {
+        'type': 'number', 'description': 'Minimum zoom number.',
+        'default': 0
+    },
+    'maxZoom': {
+        'type': 'number', 'description': 'Maximum zoom number.',
+        'default': 18
+    },
     'opacity': {'type': 'number',
                 'description': 'The opacity of the GeoObject.',
-                'default': 1.0},
-    'zIndex': {'type': 'number',
-               'description': 'The explicit zIndex of the GeoObject.'
-                              'Not set by default.',
-               },
+                'default': 1.0
+                },
+    'zIndex': {
+        'type': 'number',
+        'description': 'The explicit zIndex of the GeoObject.'
+                       'Not set by default.',
+    },
     'geojson': {
         'type': 'object',
         'default': {},
         'properties': {}
     }
-}
-)
-GeoObject = {'schema': GeoObjectSchema, 'form': defaultform}
+})
+
+GeoObjectForm = [
+    section(4, 2, [
+        ['name', 'type'],
+        [lookup_field('layer'), 'icon'],
+        ['color', 'iconcolor'],
+        ['minZoom', 'maxZoom'],
+    ]),
+    'notes',
+    editbuttons
+]
+
+GeoObject = {'schema': GeoObjectSchema, 'form': GeoObjectForm}

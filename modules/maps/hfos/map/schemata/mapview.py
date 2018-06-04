@@ -37,10 +37,10 @@ from hfos.schemata.defaultform import lookup_field, editbuttons
 from hfos.schemata.base import base_object, uuid_object
 
 MapViewSchema = base_object('mapview',
-                            roles_read=['crew'],
-                            roles_write=['navigator', 'crew'],
-                            roles_create=['navigator', 'crew'],
-                            roles_list=['crew']
+                            roles_read=['admin', 'crew'],
+                            roles_write=['admin', 'navigator', 'crew'],
+                            roles_create=['admin', 'navigator', 'crew'],
+                            roles_list=['admin', 'crew']
                             )
 
 MapViewSchema['properties'].update({

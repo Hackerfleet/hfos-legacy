@@ -43,10 +43,10 @@ from hfos.schemata.defaultform import editbuttons
 from hfos.schemata.base import base_object
 
 RouteSchema = base_object('route',
-                          roles_read=['crew'],
-                          roles_write=['navigator'],
-                          roles_create=['navigator'],
-                          roles_list=['crew']
+                          roles_read=['admin', 'crew'],
+                          roles_write=['admin', 'navigator'],
+                          roles_create=['admin', 'navigator'],
+                          roles_list=['admin', 'crew']
                           )
 
 RouteSchema['properties'].update({

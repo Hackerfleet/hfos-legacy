@@ -39,14 +39,14 @@ Provisions
 
 """
 
-from hfos.schemata.defaultform import defaultform
+from hfos.schemata.defaultform import defaultform, section, editbuttons
 from hfos.schemata.base import base_object
 
 LayerSchema = base_object('layer',
-                          roles_read=['crew'],
-                          roles_write=['navigator'],
-                          roles_create=['navigator'],
-                          roles_list=['crew']
+                          roles_read=['admin', 'crew'],
+                          roles_write=['admin', 'navigator'],
+                          roles_create=['admin', 'navigator'],
+                          roles_list=['admin', 'crew']
                           )
 
 LayerSchema['properties'].update({
@@ -62,10 +62,13 @@ LayerSchema['properties'].update({
         'type': 'boolean', 'title': 'Use tilecache',
         'description': 'Cache all downloaded map data'
     },
-    'baselayer': {
-        'type': 'boolean', 'title': 'Can be baselayer',
-        'description': 'Baselayer (can be the first layer of a '
-                       'group)'
+    'type': {
+        'type': 'string', 'title': 'Coordinate style'
+    },
+    'category': {
+        'type': 'string', 'title': 'Layer Category',
+        'enum': ['baselayer', 'overlay', 'geolayer'],
+        'description': 'Baselayer, Overlay or Geolayer'
     },
     'cachesize': {
         'type': 'number',
@@ -236,4 +239,10 @@ LayerSchema['properties'].update({
     }
 })
 
-Layer = {'schema': LayerSchema, 'form': defaultform}
+LayerForm = [
+    section(2, 2, [['name', 'category'], ['color', 'layeroptions.opacity']]),
+    'notes',
+    editbuttons
+]
+
+Layer = {'schema': LayerSchema, 'form': LayerForm}
