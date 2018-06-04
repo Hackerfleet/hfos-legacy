@@ -61,6 +61,14 @@ UserSchema['properties'].update({
     'active':  {
         'type': 'boolean',
         'default': True
+    },
+    'created': {
+        'type': 'string',
+        'format': 'datetimepicker'
+    },
+    'lastlogin': {
+        'type': 'string',
+        'format': 'datetimepicker'
     }
 })
 

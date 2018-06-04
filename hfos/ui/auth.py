@@ -39,7 +39,7 @@ from hfos.events.client import authentication, send
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, debug
-from hfos.tools import std_hash, std_salt, std_uuid
+from hfos.tools import std_hash, std_salt, std_uuid, std_now
 
 
 class AuthenticationError(Exception):
@@ -104,6 +104,9 @@ class Authenticator(ConfigurableComponent):
     def _login(self, event, user_account, user_profile, client_config):
         """Send login notification to client"""
 
+        user_account.lastlogin = std_now()
+        user_account.save()
+
         user_account.passhash = ""
         self.fireEvent(
             authentication(user_account.name, (
@@ -158,6 +161,11 @@ class Authenticator(ConfigurableComponent):
             self._fail(event)
             return
 
+        if user_account.active is False:
+            self.log("Account deactivated.")
+            self._fail(event, 'Account deactivated.')
+            return
+
         user_profile = self._get_profile(user_account)
 
         self._login(event, user_account, user_profile, client_config)
@@ -195,6 +203,11 @@ class Authenticator(ConfigurableComponent):
             return
 
         self.log("User found.", lvl=debug)
+
+        if user_account.active is False:
+            self.log("Account deactivated.")
+            self._fail(event, 'Account deactivated.')
+            return
 
         if not std_hash(event.password, self.salt) == user_account.passhash:
             self.log("Password was wrong!", lvl=warn)

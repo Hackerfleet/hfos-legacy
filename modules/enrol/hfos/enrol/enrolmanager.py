@@ -663,7 +663,8 @@ the friendly robot of {{node_name}}
                 'passhash': std_hash(password, self.salt),
                 'mail': mail,
                 'uuid': std_uuid(),
-                'roles': roles
+                'roles': roles,
+                'created': std_now()
             })
 
             if method == 'Invited':

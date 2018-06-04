@@ -68,6 +68,8 @@
                         <th>Active</th>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>Joined</th>
+                        <th>Last login</th>
                         <th>Roles</th>
                         <th>Actions</th>
                     </tr>
@@ -89,6 +91,12 @@
                         </td>
                         <td>
                             <span>{{user.mail}}</span>
+                        </td>
+                        <td>
+                            <span>{{user.created | date:'mediumDate'}}</span>
+                        </td>
+                        <td>
+                            <span am-time-ago="user.lastlogin"></span>
                         </td>
                         <td>
                             <span ng-repeat="role in user.roles|orderBy"
