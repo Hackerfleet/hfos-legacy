@@ -44,7 +44,7 @@ layers = [
         "uuid": "2837298e-a3e8-4a2e-8df2-f475554d2f23",
         "shared": True,
         "description": "Open Street Map",
-        "baselayer": True,
+        "category": "baselayer",
         "url": "http://hfoshost/tilecache/a.tile.osm.org/{z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": False,
@@ -59,7 +59,7 @@ layers = [
         "uuid": "3a4cceaa-3e8b-4f65-85ee-2ff9f6de6a71",
         "shared": True,
         "description": "Open Street Map Overlay",
-        "baselayer": False,
+        "category": "overlay",
         "url": "http://hfoshost/tilecache/a.tile.osm.org/{z}/{x}/{y}.png",
         "layerOptions": {
             "opacity": 0.5,
@@ -91,7 +91,7 @@ layers = [
         "uuid": "19e5704e-68a2-435e-9f21-ac389973cc7a",
         "shared": True,
         "description": "Shaded Satellite relief image data from ESRI",
-        "baselayer": True,
+        "category": "baselayer",
         "url": 'http://hfoshost/tilecache/server.arcgisonline.com/ArcGIS/rest'
                '/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
         "layerOptions": {
@@ -104,7 +104,7 @@ layers = [
         "name": "OpenCycleMap",
         "uuid": "4e4809c8-111f-4910-838f-62fd7eb0c038",
         "shared": True,
-        "baselayer": True,
+        "category": "baselayer",
         "description": "Open Cycle Map",
         "url": "http://hfoshost/tilecache/a.tile.opencyclemap.org/cycle/{"
                "z}/{x}/{y}.png",
@@ -121,7 +121,7 @@ layers = [
         "uuid": "ab3f1d76-cb26-4ddf-9811-05527e0d3640",
         "shared": True,
         "description": "Open Sea Map Baselayer",
-        "baselayer": True,
+        "category": "baselayer",
         "url": "http://hfoshost/tilecache/tiles.openseamap.org/seamark/{z}/{"
                "x}/{y}.png",
         "layerOptions": {
@@ -135,7 +135,7 @@ layers = [
         "uuid": "2bedb0d2-be9f-479c-9516-256cd5a0baae",
         "shared": True,
         "description": "Open Sea Map",
-        "baselayer": False,
+        "category": "overlay",
         "url": "http://hfoshost/tilecache/tiles.openseamap.org/seamark/{z}/{"
                "x}/{y}.png",
         "layerOptions": {
@@ -149,7 +149,7 @@ layers = [
         "uuid": "fefa0221-850c-4e35-9d5d-04244521c32a",
         "shared": True,
         "description": "Hillshade layer for Europe from GIScience",
-        "baselayer": False,
+        "category": "baselayer",
         "visible": False,
         "url": "http://hfoshost/tilecache/129.206.228.72/cached/hillshade",
         "layerOptions": {
@@ -188,7 +188,7 @@ layers = [
         "shared": True,
         "description": "Shaded Satellite relief image data from ESRI as "
                        "base layer",
-        "baselayer": True,
+        "category": "baselayer",
         "visible": False,
         "url": "http://hfoshost/tilecache/server.arcgisonline.com/ArcGIS"
                "/rest/services/World_Imagery/MapServer/\
@@ -208,7 +208,7 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
         "shared": True,
         "description": "Shaded Satellite relief image data from ESRI as "
                        "Overlay",
-        "baselayer": False,
+        "category": "overlay",
         "visible": False,
         "url": "http://hfoshost/tilecache/server.arcgisonline.com/ArcGIS"
                "/rest/services/World_Imagery/MapServer/\
@@ -227,7 +227,7 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
         "uuid": "06a6b913-039a-4638-b495-748b042002df",
         "shared": True,
         "description": "Open Fire Map containing data about local fire safety",
-        "baselayer": False,
+        "category": "overlay",
         "visible": False,
         "url": "http://hfoshost/tilecache/openfiremap.org/hytiles/{z}/{x}/{"
                "y}.png",
@@ -239,20 +239,6 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
         },
         "type": "xyz"
     },
-    {
-        "name": "OpenWeatherMap-Clouds",
-        "uuid": "7b73024e-9ede-4c90-821d-9c24c0cc0ff6",
-        "shared": True,
-        "description": "Open Weather Map showing clouds",
-        "baselayer": False,
-        "url": "http://hfoshost/tilecache/a.tile.openweathermap.org/map"
-               "/clouds/{z}/{x}/{y}.png",
-        "layerOptions": {
-            "continuousWorld": True,
-            "attribution": "&copy; OpenWeatherMap"
-        },
-        "type": "xyz"
-    }
 ]
 
 
