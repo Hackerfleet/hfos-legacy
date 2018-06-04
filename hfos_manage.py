@@ -67,7 +67,7 @@ from pymongo.errors import DuplicateKeyError
 from hfos.ui.builder import install_frontend
 from hfos.migration import make_migrations
 from hfos.logger import debug, warn, error, verbosity, hfoslog
-from hfos.tools import write_template_file
+from hfos.tools import write_template_file, std_now
 from hfos.database import backup
 
 # 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
@@ -591,7 +591,10 @@ def _create_user(ctx):
     if ctx.obj['db'].objectmodels['user'].count({'name': username}) > 0:
         raise KeyError()
 
-    new_user = ctx.obj['db'].objectmodels['user']({'uuid': str(uuid4())})
+    new_user = ctx.obj['db'].objectmodels['user']({
+        'uuid': str(uuid4()),
+        'created': std_now()
+    })
 
     new_user.name = username
     new_user.passhash = passhash
