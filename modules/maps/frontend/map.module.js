@@ -11,11 +11,13 @@ import leafletdirective from 'angular-leaflet-directive';
 
 import { routing } from './map.config.js';
 
-import mapcomponent from './map/map.js';
-import maptemplate from './map/map.tpl.html';
+import mapcomponent from './map/components/map.js';
+import maptemplate from './map/components/map.tpl.html';
+import mapservice from './map/services/map.service';
 
 export default angular
     .module('main.app.map', ['leaflet-directive', uirouter])
     .config(routing)
+    .service('mapservice', mapservice)
     .component('map', {controller: mapcomponent, template: maptemplate})
     .name;

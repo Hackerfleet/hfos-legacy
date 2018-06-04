@@ -1,3 +1,27 @@
+/*
+ * #!/usr/bin/env python
+ * # -*- coding: UTF-8 -*-
+ *
+ * __license__ = """
+ * Hackerfleet Operating System
+ * ============================
+ * Copyright (C) 2011- 2018 riot <riot@c-base.org> and others.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * """
+ */
+
 'use strict';
 
 /* TODO
@@ -24,8 +48,6 @@ import contextmenu from 'leaflet-contextmenu';
 
 import 'Leaflet.vector-markers/dist/leaflet-vector-markers.css';
 
-let vectormarkers = require('Leaflet.vector-markers/dist/leaflet-vector-markers');
-import default_marker from 'leaflet/dist/images/marker-icon.png';
 
 // import 'Leaflet.Grid/L.Grid.css';
 // import leafletgrid from 'Leaflet.Grid/L.Grid';
@@ -33,274 +55,244 @@ import default_marker from 'leaflet/dist/images/marker-icon.png';
 //import 'leaflet.simplegraticule/L.SimpleGraticule.css';
 import 'leaflet.simplegraticule/L.SimpleGraticule.js';
 
-
 import 'leaflet-easybutton/src/easy-button.css';
 import 'leaflet.zoomslider/src/L.Control.Zoomslider.css';
 
-import defaultIcon from '../assets/images/icons/default.png';
-import vesselIcon from '../assets/images/icons/vessel.png';
-import vesselMovingIcon from '../assets/images/icons/vessel-moving.png';
-import vesselStoppedIcon from '../assets/images/icons/vessel-stopped.png';
-import lighthouseIcon from '../assets/images/icons/lighthouse.png';
+let vectormarkers = require('Leaflet.vector-markers/dist/leaflet-vector-markers');
+import default_marker from 'leaflet/dist/images/marker-icon.png';
+
+import defaultIcon from '../../assets/images/icons/default.png';
+import vesselIcon from '../../assets/images/icons/vessel.png';
+import vesselMovingIcon from '../../assets/images/icons/vessel-moving.png';
+import vesselStoppedIcon from '../../assets/images/icons/vessel-stopped.png';
+import lighthouseIcon from '../../assets/images/icons/lighthouse.png';
+
 
 
 class mapcomponent {
 
     constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, notification, clipboard,
-                navdata, $compile, $aside, uuid, NgTableParams) {
-        this.scope = scope;
-        this.leaflet = leafletData;
-        this.op = objectproxy;
-        this.state = $state;
-        this.rootscope = $rootScope;
-        this.socket = socket;
-        this.user = user;
-        this.schemata = schemata;
-        this.menu = menu;
-        this.notification = notification;
-        this.clipboard = clipboard;
-        this.navdata = navdata;
-        this.uuid = uuid;
-
-        this.mapviews = null;
-        this.geoobjects = null;
-        this.layergroups = {};
-        this.other_layers = {};
-
-        this.scope.otherCollapsed = true;
-
-        this.baseLayer = null;
-
-        this.layergroup = null;
-
-        this.drawnLayer = new L.FeatureGroup();
-        //this.drawnLayer.addLayer(new L.marker([50, 50]));
-        this.objectlayers = {};
-
-        this.vessel_display = 'off';
-
-        this.default_color = 'red';
-        this.default_marker = "poi";
-        this.default_path = "route";
-        this.default_shape = "danger";
-
-        this.default_custom_marker = "Custom";
-        this.default_custom_path = "Custom";
-        this.default_custom_shape = "Custom";
-
-        this.offline_loader = false;
-        this.offline_loader_queue = {};
-        this.offline_loader_zoom = 2;
-
-        this.default_options = {
-            marker: {
-                poi: 'Point of interest',
-                waypoint: 'Waypoint',
-                custom: 'Custom'
-            },
-            path: {
-                route: 'Route',
-                vessel_trail: 'Vessel trail',
-                custom: 'Custom'
-            },
-            shape: {
-                danger: 'Dangerous zone',
-                traffic: 'Traffic separation zone',
-                industry: 'Industrial zone',
-                fishing: 'Fishing zone',
-                custom: 'Custom'
-            }
-        };
-
-        this.map = '';
-
+                navdata, mapservice, $compile, $aside, uuid, NgTableParams) {
         let self = this;
 
-        this.leafletlayers = {
-            overlays: {},
-            baselayers: {}
-        };
+        {
+            this.scope = scope;
+            this.leaflet = leafletData;
+            this.op = objectproxy;
+            this.state = $state;
+            this.rootscope = $rootScope;
+            this.socket = socket;
+            this.user = user;
+            this.schemata = schemata;
+            this.menu = menu;
+            this.notification = notification;
+            this.clipboard = clipboard;
+            this.navdata = navdata;
+            this.service = mapservice;
+            this.uuid = uuid;
 
-        this.geojson = {};
+            this.scope.otherCollapsed = true;
 
-        this.layer_flags = {};
-
-        this.layers = {
-            baselayers: {
-                osm: {
-                    name: 'OpenStreetMap',
-                    type: 'xyz',
-                    // url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-                    url: this.host + 'tilecache/a.tile.osm.org/{z}/{x}/{y}.png',
-                    layerOptions: {
-                        //subdomains: ['a', 'b', 'c'],
-                        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-                        continuousWorld: false,
-                        minZoom: 3
-                    }
-                }
-            },
-            overlays: {}
-        };
-
-        this.clearLayers = function () {
-            self.layers.baselayers = {};
-            self.layers.overlays = {};
-            self.leafletlayers.baselayers = {};
-            self.leafletlayers.overlays = {
-                draw: {
-                    name: 'draw',
-                    type: 'group',
-                    visible: true,
-                    layerParams: {
-                        showOnSelector: false
-                    },
-                    polyline: {
-                        metric: false
-                    }
-                }
+            this.layers = {
+                baselayers: {},
+                overlays: {},
+                geolayers: {}
             };
-        };
+            this.geoobjects = {};
 
-        this.clearLayers();
+            this.baseLayer = null;
 
-        this.host = 'http';
-        if (socket.protocol === 'wss') {
-            this.host = this.host + 's';
-        }
-        this.host = this.host + '://' + socket.host + ':' + socket.port + '/';
+            this.layergroup = null;
 
-        this.follow = false;
-        this.followlayers = false;
+            this.drawnLayer = new L.FeatureGroup();
+            //this.drawnLayer.addLayer(new L.marker([50, 50]));
 
-        this.mapviewuuid = null;
+            this.objectlayers = {};
 
-        this.deviceinfo = {}; // TODO: Fix this one. Needs angular device detector service
+            this.vessel_display = 'off';
 
-        this.center = {
-            lat: 0,
-            lng: 0,
-            zoom: 4,
-            autoDiscover: false
-        };
+            this.DefaultMarker = vectormarkers.Icon;
 
-        this.vessel = {
-            coords: {
-                lat: 54.17825,
-                lng: 7.88888
-            },
-            course: 0,
-            speed: 0,
-            radiorange: 700
-        };
+            this.Icons = {
+                Default: L.icon({
+                    iconUrl: defaultIcon,
+                    //shadowUrl: 'leaf-shadow.png',
 
-        this.vessels = [];
+                    iconSize: [25, 25], // size of the icon
+                    //shadowSize:   [50, 64], // size of the shadow
+                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                    //shadowAnchor: [4, 62],  // the same for the shadow
+                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+                }),
+                Vessel: L.icon({
+                    iconUrl: vesselIcon,
+                    //shadowUrl: 'leaf-shadow.png',
 
-        //L.VectorMarkers.Icon.prototype.options.prefix = 'fa';
-        console.log("####################", vectormarkers);
-        let DefaultMarker = vectormarkers.Icon;
+                    iconSize: [25, 25], // size of the icon
+                    //shadowSize:   [50, 64], // size of the shadow
+                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                    //shadowAnchor: [4, 62],  // the same for the shadow
+                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+                }),
+                VesselMoving: L.icon({
+                    iconUrl: vesselMovingIcon,
+                    //shadowUrl: 'leaf-shadow.png',
 
+                    iconSize: [25, 25], // size of the icon
+                    //shadowSize:   [50, 64], // size of the shadow
+                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                    //shadowAnchor: [4, 62],  // the same for the shadow
+                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+                }),
+                VesselStopped: L.icon({
+                    iconUrl: vesselStoppedIcon,
+                    //shadowUrl: 'leaf-shadow.png',
 
-        let Icons = {
-            Default: L.icon({
-                iconUrl: defaultIcon,
-                //shadowUrl: 'leaf-shadow.png',
+                    iconSize: [25, 25], // size of the icon
+                    //shadowSize:   [50, 64], // size of the shadow
+                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                    //shadowAnchor: [4, 62],  // the same for the shadow
+                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+                }),
+                Lighthouse: L.icon({
+                    iconUrl: lighthouseIcon,
 
-                iconSize: [25, 25], // size of the icon
-                //shadowSize:   [50, 64], // size of the shadow
-                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                //shadowAnchor: [4, 62],  // the same for the shadow
-                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-            }),
-            Vessel: L.icon({
-                iconUrl: vesselIcon,
-                //shadowUrl: 'leaf-shadow.png',
+                    iconSize: [25, 25], // size of the icon
+                    //shadowSize:   [50, 64], // size of the shadow
+                    iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
+                    //shadowAnchor: [4, 62],  // the same for the shadow
+                    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+                })
+            };
 
-                iconSize: [25, 25], // size of the icon
-                //shadowSize:   [50, 64], // size of the shadow
-                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                //shadowAnchor: [4, 62],  // the same for the shadow
-                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-            }),
-            VesselMoving: L.icon({
-                iconUrl: vesselMovingIcon,
-                //shadowUrl: 'leaf-shadow.png',
+            this.map = '';
 
-                iconSize: [25, 25], // size of the icon
-                //shadowSize:   [50, 64], // size of the shadow
-                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                //shadowAnchor: [4, 62],  // the same for the shadow
-                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-            }),
-            VesselStopped: L.icon({
-                iconUrl: vesselStoppedIcon,
-                //shadowUrl: 'leaf-shadow.png',
+            this.leafletlayers = {
+                overlays: {},
+                baselayers: {}
+            };
 
-                iconSize: [25, 25], // size of the icon
-                //shadowSize:   [50, 64], // size of the shadow
-                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                //shadowAnchor: [4, 62],  // the same for the shadow
-                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-            }),
-            Lighthouse: L.icon({
-                iconUrl: lighthouseIcon,
+            this.geojson = {};
 
-                iconSize: [25, 25], // size of the icon
-                //shadowSize:   [50, 64], // size of the shadow
-                iconAnchor: [12, 12], // point of the icon which will correspond to marker's location
-                //shadowAnchor: [4, 62],  // the same for the shadow
-                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-            })
-        };
+            this.layer_flags = {};
 
-        this.controls = {
-            draw: {
+            this.follow = false;
+            this.followlayers = false;
+
+            this.mapviewuuid = null;
+
+            L.VectorMarkers.Icon.prototype.options.prefix = 'fa';
+
+            this.VesselMarker = null;
+
+            this.deviceinfo = {}; // TODO: Fix this one. Needs angular device detector service
+
+            this.center = {
+                lat: 0,
+                lng: 0,
+                zoom: 4,
+                autoDiscover: false
+            };
+
+            this.vessel = {
+                coords: {},
+                course: 0,
+                speed: 0,
+                radiorange: 700
+            };
+
+            this.vessels = [];
+            this.controls = {
                 draw: {
-                    polyline: {
-                        //metric: false
+                    draw: {
+                        polyline: {
+                            //metric: false
+                        },
+                        marker: {
+                            icon: new this.DefaultMarker({
+                                icon: 'flag',
+                                iconColor: 'white',
+                                markerColor: '#4384BF'
+                            })
+                        }
                     },
-                    marker: {
-                        icon: new DefaultMarker({
-                            icon: 'flag',
-                            iconColor: 'white',
-                            markerColor: '#4384BF'
-                        })
+                    edit: {
+                        featureGroup: new L.FeatureGroup()
                     }
                 },
-                edit: {
-                    featureGroup: new L.FeatureGroup()
+                scale: {}
+            };
+
+            this.terminator = null;
+            this.grid = null;
+
+            this.tableParams = new NgTableParams({}, {
+                getData: function (params) {
+                    // ajax request to api
+                    let filter;
+
+                    if (typeof filter === 'undefined') {
+                        filter = {'owner': self.user.useruuid};
+                    }
+
+                    console.log("MAP_TABLE1:", params);
+                    let limit = params._params.count;
+                    let skip = limit * (params._params.page - 1);
+
+                    return self.op.search('geoobject', filter, '*', null, false, limit, skip).then(function (msg) {
+                        let geoobjects = msg.data.list;
+                        params.total(msg.data.size); // recal. page nav controls
+                        console.log("MAP_TABLE2:", params);
+
+                        return geoobjects;
+                    });
                 }
-            },
-            scale: {}
-        };
+            });
 
-        this.terminator = null;
-        this.grid = null;
+            this.defaults = {
+                map: {
+                    contextmenu: true,
+                    contextmenuWidth: 140,
+                    contextmenuItems: [{
+                        text: 'Copy coordinates',
+                        callback: this.copyCoordinates
+                    }, {
+                        text: 'Lookup on Geohack',
+                        callback: this.openGeohack
+                    }, {
+                        text: 'Edit map on OSM',
+                        callback: this.openOSMiD
+                    }, {
+                        text: 'Center map here',
+                        callback: this.centerMap
+                    }, '-', {
+                        text: 'Zoom in',
+                        iconCls: 'fa fa-search-plus',
+                        callback: this.zoomIn
+                    }, {
+                        text: 'Zoom out',
+                        iconCls: 'fa fa-search-minus',
+                        callback: this.zoomOut
+                    }]
+                }
+            };
 
-        this.tableParams = new NgTableParams({}, {
-          getData: function (params) {
-              // ajax request to api
-              let filter;
+            this.events = {
+                map: {
+                    enable: ['moveend', 'dblclick', 'mousemove'],
+                    logic: 'emit'
+                }
+            };
 
-              if (typeof filter === 'undefined') {
-                  filter = {'owner': self.user.useruuid};
-              }
+            this.host = 'http';
+            if (socket.protocol === 'wss') {
+                this.host = this.host + 's';
+            }
+            this.host = this.host + '://' + socket.host + ':' + socket.port + '/';
+        }
 
-              console.log("MAP_TABLE1:", params);
-              let limit = params._params.count;
-              let skip = limit * (params._params.page - 1);
 
-              return self.op.search('geoobject', filter, '*', null, false, limit, skip).then(function(msg) {
-                  let geoobjects = msg.data.list;
-                  params.total(msg.data.size); // recal. page nav controls
-                  console.log("MAP_TABLE2:", params);
-                  self.geoobjects = geoobjects;
-                  return geoobjects;
-              });
-          }
-        });
         this.mapsidebar = $aside({scope: this.scope, template: sidebar, backdrop: false, show: false});
-
         this.showSidebar = function (event) {
             console.log('[MAP] Opening sidebar: ', self.mapsidebar);
 
@@ -310,31 +302,23 @@ class mapcomponent {
             });
         };
 
-        this.hasQueued = function () {
-            return Object.keys(this.offline_loader_queue).length > 0
-        };
 
         this.copyCoordinates = function (e) {
             console.log(e);
             self.clipboard.copyText(e.latlng);
         };
-
         this.centerMap = function (e) {
             self.map.panTo(e.latlng);
         };
-
         this.zoomTo = function (level) {
             self.map.setZoom(level);
         };
-
         this.zoomIn = function () {
             self.map.zoomIn();
         };
-
         this.zoomOut = function () {
             self.map.zoomOut();
         };
-
         this.openOSMiD = function (e) {
             let url = 'http://www.openstreetmap.org/edit?editor=id#map=', //52_17_28_N_5_32_32_E';
                 lat = e.latlng.lat,
@@ -345,7 +329,6 @@ class mapcomponent {
             window.open(url, '_blank');
             window.focus();
         };
-
         this.openGeohack = function (e) {
             let url = 'https://tools.wmflabs.org/geohack/geohack.php?params=', //52_17_28_N_5_32_32_E';
                 lat = e.latlng.lat,
@@ -378,187 +361,19 @@ class mapcomponent {
             window.focus();
         };
 
-        this.defaults = {
-            map: {
-                contextmenu: true,
-                contextmenuWidth: 140,
-                contextmenuItems: [{
-                    text: 'Copy coordinates',
-                    callback: this.copyCoordinates
-                }, {
-                    text: 'Lookup on Geohack',
-                    callback: this.openGeohack
-                }, {
-                    text: 'Edit map on OSM',
-                    callback: this.openOSMiD
-                }, {
-                    text: 'Center map here',
-                    callback: this.centerMap
-                }, '-', {
-                    text: 'Zoom in',
-                    iconCls: 'fa fa-search-plus',
-                    callback: this.zoomIn
-                }, {
-                    text: 'Zoom out',
-                    iconCls: 'fa fa-search-minus',
-                    callback: this.zoomOut
-                }]
-            }
-        };
-
-        this.events = {
-            map: {
-                enable: ['moveend', 'dblclick', 'mousemove'],
-                logic: 'emit'
-            }
-        };
-
         this.editObject = function (uuid) {
             console.log('Editing layer:', uuid);
             let layer = this.objectlayers[uuid];
             this.drawnLayer.addLayer(layer);
         };
 
-        this.addLayer = function (uuid) {
-            console.log('[MAP] Getting Layer');
-            self.op.get('layer', uuid).then(function (msg) {
-
-                // TODO: That is no longer the response action for failing:
-                if (msg.action !== 'fail') {
-                    let layer = msg.data.object;
-                    console.log('[MAP] Got a layer:', layer);
-
-                    if (layer.type === 'geoobjects') {
-                        self.getGeoobjects({'layer': uuid});
-                    } else {
-                        layer.url = layer.url.replace('http://hfoshost/', self.host);
-                    }
-
-                    if (typeof layer.layerOptions.minZoom === 'undefined') {
-                        layer.layerOptions.minZoom = 0;
-                    }
-                    if (typeof layer.layerOptions.maxZoom === 'undefined') {
-                        layer.layerOptions.maxZoom = 18;
-                    }
-
-
-                    //let bounds = null;
-
-                    /*if (layer.layerOptions.bounds != null) {
-                     let top_left = L.latLng(layer.layerOptions.bounds[0]),
-                     top_right = L.latLng(layer.layerOptions.bounds[1]);
-                     bounds = L.latLngBounds(top_left, top_right);
-                     //layer.layerOptions.bounds = bounds;
-                     //delete layer.layerOptions['bounds'];
-                     }*/
-
-                    console.log('[MAP] Adding layer:', layer);
-                    if (layer.baselayer === true) {
-                        self.layers.baselayers[layer.uuid] = layer;
-                        if (_.isEmpty(self.leafletlayers.baselayers)) {
-                            self.switchLayer('baselayers', layer.uuid);
-                        }
-                    } else {
-                        self.layers.overlays[layer.uuid] = layer;
-                    }
-                    self.layer_flags[layer.uuid] = {
-                        expanded: false,
-                        zoom: [layer.layerOptions.minZoom, layer.layerOptions.maxZoom]
-                    }
-                } else {
-                    console.log('[MAP] Could not get that layer:', uuid);
-                }
-            })
-        };
-
-        this.removeLayer = function (uuid) {
-            let layer = self.op.objects[uuid];
-            console.log('[MAP] Removing layer:', layer);
-            if (layer.baselayer === true) {
-                self.layers.baselayers.delete(uuid);
-            } else {
-                self.layers.overlays.delete(uuid);
-            }
-            self.layer_flags.delete(uuid);
-        };
-
-        this.toggleLayer = function (state, uuid) {
-            console.log('[MAP] Oh, you selected layer:', state, uuid);
-            if (state === true) {
-                self.addLayer(uuid);
-            } else {
-                self.removeLayer(uuid);
-            }
-        };
-
-        this.switchLayer = function (type, uuid) {
-            console.log('[MAP] Current Layers:', self.layers);
-            if (type == 'baselayers') {
-                console.log('[MAP] Switching base layer: ', uuid);
-                this.baseLayer = uuid;
-                this.leafletlayers.baselayers = {};
-                this.leafletlayers.baselayers[uuid] = this.layers.baselayers[uuid];
-            } else {
-                console.log('[MAP] Switching overlay: ', uuid);
-                let overlays = this.leafletlayers.overlays;
-                if (overlays.hasOwnProperty(uuid)) {
-                    delete overlays[uuid];
-                } else {
-                    let layer;
-                    if (this.layers.overlays.hasOwnProperty(uuid)) {
-                        layer = this.layers.overlays[uuid];
-                    } else if (this.other_layers.hasOwnProperty(uuid)) {
-                        layer = this.other_layers[uuid];
-                    }
-
-                    layer.visible = true;
-                    console.log('[MAP] New overlay:', layer);
-                    overlays[uuid] = layer;
-                }
-            }
-            console.log('[MAP] LAYERS:', self.leafletlayers);
-        };
-
-
-        this.switchLayergroup = function (uuid) {
-            console.log('[MAP] Switching to new layergroup: ', uuid);
-            self.op.getObject('layergroup', uuid);
-            self.layergroup = uuid;
-            self.clearLayers();
-        };
-
-        this.switchMapview = function (uuid) {
-            console.log('[MAP] Switching to new mapview: ', uuid);
-            self.mapviewuuid = uuid;
-            self.layergroup = false;
-            self.op.getObject('mapview', uuid);
-        };
-
-        this.switchGeoobject = function (uuid) {
-            this.op.getObject('geoobject', uuid)
-        };
-
-        this.zoom_to_geoobject = function (uuid) {
-            console.log('[MAP] Zooming to geoobject');
-            let coords = this.geoobjects[uuid].geojson.geometry.coordinates,
-                target = [coords[1], coords[0]];
-            this.map.setView(target, 15, {animate: true});
-        };
-
-        this.getLayergroups = function () {
-            console.log('[MAP] Checking layergroups:', self.mapview);
-            if (typeof self.mapview.layergroups !== 'undefined') {
-                self.layergroup = self.mapview.layergroups[0];
-                for (let group of self.mapview.layergroups) {
-                    self.op.getObject('layergroup', group);
-                }
-            }
-        };
-
         this.show_map_boundary = function (uuid) {
             console.log('[MAP] Zooming to chart extents');
+            if (!this.layers.overlays.hasOwnProperty(uuid)) {
+                this.addLayer([uuid]);
+            }
             if (!this.leafletlayers.overlays.hasOwnProperty(uuid)) {
-                this.switchLayer('overlays', uuid);
+                this.switchLayer(uuid);
             }
             this.map.fitBounds(this.layers.overlays[uuid].layerOptions.bounds);
         };
@@ -572,93 +387,74 @@ class mapcomponent {
                 bounds._northEast.lng, bounds._northEast.lat
             ];
             let layers = [];
-            let uuid = null;
+            let uuid;
 
-            for (uuid in self.leafletlayers.baselayers) {
-                if (self.layers.baselayers.hasOwnProperty(uuid)) {
+            for (uuid in Object.keys(self.leafletlayers.baselayers)) {
+                if (uuid in Object.keys(self.layers.baselayers)) {
                     layers.push(uuid);
                 }
             }
-            for (uuid in self.leafletlayers.overlays) {
-                if (self.layers.overlays.hasOwnProperty(uuid)) {
+            for (uuid in Object.keys(self.leafletlayers.overlays)) {
+                if (uuid in Object.keys(self.layers.overlays)) {
                     layers.push(uuid);
                 }
             }
-            let event = {
-                'component': 'hfos.map.maptileservice',
-                'action': 'request_maptile_area',
-                'data': {
-                    'extent': rect,
-                    'zoom': self.center.zoom + self.offline_loader_zoom,
-                    'layers': layers
-                }
-            };
-            self.socket.send(event);
-        };
+            let zoom = self.center.zoom + self.offline_loader_zoom;
 
-        this.queue_trigger = function (uuid) {
-            console.log('[MAP] Requesting download of queue', uuid);
-            let event = {
-                'component': 'hfos.map.maptileservice',
-                'action': 'queue_trigger',
-                'data': uuid
-            };
-            self.socket.send(event);
+            self.service.get_offline_data(rect, zoom, layers)
         };
-        this.queue_cancel = function () {
-            console.log('[MAP] Requesting cancellation of queues', uuid);
-            let event = {
-                'component': 'hfos.map.maptileservice',
-                'action': 'queue_cancel'
-            };
-            self.socket.send(event);
-        };
-        this.queue_remove = function (uuid) {
-            console.log('[MAP] Requesting removal of queue', uuid);
-            let event = {
-                'component': 'hfos.map.maptileservice',
-                'action': 'queue_remove',
-                'data': uuid
-            };
-            self.socket.send(event);
-        };
-
-
-        function handle_maptileservice(msg) {
-            if (msg.action === 'queued') {
-                console.log('[MAP] Loader request was queued');
-                self.offline_loader_queue[msg.data.uuid] = msg.data;
-            } else if (msg.action === 'empty') {
-                console.log('[MAP] No tiles to fetch');
-                self.notification.add('warning', 'No tiles to fetch', 'The area you selected does not contain any tile data.')
-            } else if (msg.action === 'acting') {
-                self.offline_loader_queue[msg.data].acting = true;
-                self.notification.add('success', 'Caching tiles', 'The system tries to download the requested tiles now.')
-            } else if (msg.action === 'offline_loader_progress') {
-                self.offline_loader_queue[msg.data.queue].completed = msg.data.completed;
-            } else if (msg.action === 'removed') {
-                delete self.offline_loader_queue[msg.data.uuid];
-            }
-        }
-
-        this.socket.listen('hfos.map.maptileservice', handle_maptileservice);
 
         this.toggle_vessels = function (state) {
             this.vessel_display = state;
         };
 
-        this.scope.$on('OP.Get', function (event, objuuid, obj, schema) {
-            console.log('[MAP] Object:', obj, schema);
-            if (objuuid === self.mapviewuuid) {
-                self.updateMapview(objuuid);
-                self.clearLayers();
-            } else if (schema === 'geoobject') {
-                console.log('[MAP] Geoobject received: ', obj);
+        this.zoom_to_geoobject = function (obj) {
+            console.log('[MAP] Zooming to geoobject', obj, obj.geojson.geometry.type, obj.geojson.geometry.coordinates);
+            let coords = obj.geojson.geometry.coordinates,
+                type = obj.geojson.geometry.type,
+                real = null,
+                target = null;
+
+            // Path might have more than one coordinate
+            if (type === 'Point') {
+                real = coords;
+            } else if (type === 'LineString') {
+                real = coords[0];
+            } else if (type === 'Polygon') {
+                real = coords[0][0];
+            }
+            console.log(real);
+
+            target = [real[1], real[0]];
+
+            console.log(target);
+
+            this.map.setView(target, 15, {animate: true});
+        };
+
+        this.delete_geoobject = function (uuid) {
+            this.op.deleteObject('geoobject', uuid).then(function (msg) {
+                if (msg.data.uuid === uuid) {
+                    self.notification.add('success', 'Geoobject deleted', '', 5);
+                } else {
+                    self.notification.add('warning', 'Geoobject not deleted', msg.data.reason, 5);
+                }
+            })
+        };
+
+        this.select_geoobject = function (uuid) {
+            this.selected_geoobject = uuid;
+            this.scope.$broadcast('Changed.UUID', {eid: 'geoobjectEditor', uuid: self.selected_geoobject});
+        };
+
+        this.switchGeoobject = function (uuid) {
+            function addGeoobject(obj) {
+                console.log('[MAP] Appending geoobject: ', obj);
                 self.geoobjects[obj.uuid] = obj;
                 let map_object;
 
                 if (obj.geojson.geometry.type === 'Point') {
-                    let marker_icon = new DefaultMarker({
+                    let marker_icon = new self.DefaultMarker({
                         icon: obj.icon,
                         iconColor: obj.iconcolor,
                         markerColor: obj.color
@@ -677,79 +473,281 @@ class mapcomponent {
 
                 console.log('DRAWN LAYERS:', self.drawnLayer);
                 self.objectlayers[obj.uuid] = map_object;
-            } else if (schema === 'layergroup') {
-                console.log('[MAP] Layergroup received:', obj);
-                if (self.layergroup === obj.uuid) {
-                    console.log('[MAP] Activating layergroup ', obj.uuid);
-                    self.clearLayers();
+            }
 
-                    if (typeof obj.layers !== 'undefined') {
-                        for (let layer of obj.layers) {
-                            self.op.getObject('layer', layer);
-                        }
+            if (uuid in Object.keys(self.geoobjects)) {
+                addGeoobject(self.geoobjects[uuid]);
+            } else {
+                this.op.get('geoobject', uuid).then(function (msg) {
+                    addGeoobject(msg.data.object);
+                });
+            }
+
+        };
+
+        this.getGeoobjects = function (filter) {
+            console.log('[MAP] Getting geoobjects');
+            if (typeof filter === 'undefined') {
+                filter = {'owner': self.user.useruuid};
+            }
+            self.op.search('geoobject', filter, '*').then(function (msg) {
+                for (let item of msg.data.list) {
+                    self.geoobjects[item.uuid] = item;
+                    self.switchGeoobject(item.uuid);
+                }
+            });
+
+        };
+
+
+        self.addContextMenu = function (layer, uuid) {
+            console.log('[MAP] Adding context menu to geoobject');
+            let obj = self.geoobjects[uuid];
+
+            layer.on('click', function (e) {
+                self.editObject(uuid);
+                // TODO: This is not angular-compatible - no access to this or other controllers
+                let notes = "",
+                    type = "";
+                if (typeof obj.type !== 'undefined') {
+                    type = obj.type
+                }
+                if (typeof obj.notes !== 'undefined') {
+                    notes = obj.notes
+                }
+                L.popup().setContent('<h2>' + obj.name + '</h2>' +
+                    '<small>'+ type + '</small>' +
+                    '<div>' + notes + '</div>' +
+                    '<small><a href="#!/editor/geoobject/' + uuid + '/edit">Edit Object in Editor</a></small>')
+                    .setLatLng(e.latlng)
+                    .openOn(self.map);
+            });
+        };
+
+
+        this.addLayer = function (layers) {
+            console.log('[MAP] Adding Layers');
+
+            for (let uuid of layers) {
+                let layer = self.service.all_layers[uuid];
+                console.log('[MAP] Layer:', uuid, layer);
+                if (layer.type === 'geoobjects') {
+                    self.layers.geolayers[uuid] = layer;
+                } else {
+                    layer.url = layer.url.replace('http://hfoshost/', self.host);
+                }
+
+                if (typeof layer.layerOptions.minZoom === 'undefined') {
+                    layer.layerOptions.minZoom = 0;
+                }
+                if (typeof layer.layerOptions.maxZoom === 'undefined') {
+                    layer.layerOptions.maxZoom = 18;
+                }
+
+
+                //let bounds = null;
+
+                /*if (layer.layerOptions.bounds != null) {
+                 let top_left = L.latLng(layer.layerOptions.bounds[0]),
+                 top_right = L.latLng(layer.layerOptions.bounds[1]);
+                 bounds = L.latLngBounds(top_left, top_right);
+                 //layer.layerOptions.bounds = bounds;
+                 //delete layer.layerOptions['bounds'];
+                 }*/
+
+                console.log('[MAP] Adding layer:', layer);
+                if (layer.category === 'baselayer') {
+                    self.layers.baselayers[layer.uuid] = layer;
+                    if (_.isEmpty(self.leafletlayers.baselayers)) {
+                        self.switchLayer(layer.uuid);
                     }
-                } else {
-                    console.log('[MAP] Not active, storing');
-                }
-                self.layergroups[obj.uuid] = obj;
+                } else /*if (layer.category !== 'geoobjects')*/ {
+                    self.layers.overlays[layer.uuid] = layer;
+                    self.switchLayer(layer.uuid);
+                } /*else {
+                    console.log('GeoObject layer added.')
 
+                }*/
 
-            } else if (schema === 'layer') {
-                console.log('[MAP] Received layer object: ', obj, self.layergroup, self.layergroups);
-
-                let current_layers;
-                if (self.layergroup in self.layergroups) {
-                    console.log('[MAP] Layergroup already known, selecting');
-                    current_layers = self.layergroups[self.layergroup].layers;
-                }
-
-                if (current_layers.indexOf(objuuid) >= 0) {
-                    console.log('[MAP] Is activated layer');
-                    self.addLayer(objuuid);
-                    console.log('[MAP] Layer flags after adding:', self.layer_flags);
-                } else {
-                    console.log('[MAP] Inactive layer');
+                self.layer_flags[layer.uuid] = {
+                    expanded: false,
+                    zoom: [layer.layerOptions.minZoom, layer.layerOptions.maxZoom]
                 }
             }
+        };
+
+        this.removeLayer = function (uuids) {
+            for (let uuid of uuids) {
+                let layer = self.service.all_layers[uuid];
+                console.log('[MAP] Removing layer:', layer);
+                if (layer.category === 'baselayer') {
+                    self.layers.baselayers.delete(uuid);
+                } else {
+                    self.layers.overlays.delete(uuid);
+                }
+                self.layer_flags.delete(uuid);
+            }
+        };
+
+        this.toggleLayer = function (state, uuid) {
+            console.log('[MAP] Oh, you selected layer:', state, uuid);
+            if (state === true) {
+                self.addLayer([uuid]);
+            } else {
+                self.removeLayer([uuid]);
+            }
+        };
+
+        this.switchLayer = function (uuid) {
+            console.log('[MAP] Current Layers:', self.layers);
+            let layer = self.service.all_layers[uuid];
+            console.log('[MAP] Switching layer:', uuid, layer);
+
+            if (layer.category === 'baselayer') {
+                console.log('[MAP] Switching base layer: ', uuid);
+                this.baseLayer = uuid;
+                this.leafletlayers.baselayers = {};
+                this.leafletlayers.baselayers[uuid] = this.service.all_layers[uuid];
+            } else if (layer.category === 'overlay' || layer.category === 'geolayer') {
+                console.log('[MAP] Switching overlay: ', uuid);
+                let overlays = this.leafletlayers.overlays;
+                if (overlays.hasOwnProperty(uuid)) {
+                    delete overlays[uuid];
+                } else {
+                    console.log('[MAP] All known layers: ', this.service.layers);
+
+                    layer.visible = true;
+                    console.log('[MAP] New overlay:', layer);
+                    overlays[uuid] = layer;
+                }
+            }
+            if (layer.category === 'geolayer') {
+                self.getGeoobjects({'layer': uuid});
+            }
+            console.log('[MAP] LAYERS:', self.leafletlayers);
+        };
+
+
+        this.clearLayers = function () {
+            self.layers.baselayers = {};
+            self.layers.overlays = {};
+            self.layers.geolayers = {};
+            self.leafletlayers.baselayers = {};
+            self.leafletlayers.overlays = {
+                draw: {
+                    name: 'draw',
+                    type: 'group',
+                    visible: true,
+                    layerParams: {
+                        showOnSelector: false
+                    },
+                    polyline: {
+                        metric: false
+                    }
+                }
+            };
+        };
+
+        this.clearLayers();
+
+        this.getLayers = function () {
+            console.log('[MAP] Getting layers');
+            this.op.search('layer', '*', '*').then(function (msg) {
+                for (let item of msg.data.list) {
+                    // TODO: Kick out layers that are already in mapview?
+                    self.service.all_layers[item.uuid] = item;
+                }
+            })
+        };
+
+        this.is_other_layer = function(uuid) {
+            return !(uuid in this.layers.baselayers) && !(uuid in this.layers.overlays);
+        };
+
+        this.getLayergroups = function () {
+            console.log('[MAP] Getting layergroups');
+            self.op.search('layergroup', '*', '*').then(function (msg) {
+                for (let item of msg.data.list) {
+                    self.service.layergroups[item.uuid] = item;
+                }
+            });
+        };
+
+        this.getMapviews = function () {
+            console.log('[MAP] Getting layergroups');
+            self.op.search('mapview', '*', '*').then(function (msg) {
+                for (let item of msg.data.list) {
+                    self.service.mapviews[item.uuid] = item;
+                }
+            });
+        };
+
+        this.requestMapData = function () {
+            console.log('[MAP] Requesting mapdata from server.');
+
+            self.getMapviews();
+            self.getLayergroups();
+            self.getLayers();
+
+            self.getDefaultMapview();
+            self.getMapview();
+
+            self.getGeoobjects();
+        };
+
+        this.switchLayergroup = function (uuid) {
+            console.log('[MAP] Switching to new layergroup: ', uuid);
+            self.clearLayers();
+            self.layergroup = uuid;
+            self.addLayer(self.service.layergroups[uuid].layers)
+        };
+
+        this.switchMapview = function (uuid) {
+            console.log('[MAP] Switching to new mapview: ', uuid);
+            self.clearLayers();
+            self.drawnLayer.clearLayers();
+            self.mapviewuuid = uuid;
+            self.layergroup = false;
+            self.switchLayergroup(self.mapview.layergroups[0]);
+            self.syncFromMapview();
+        };
+
+        this.getMapview = function () {
+            self.op.get('mapview', self.mapviewuuid).then(function (msg) {
+                self.updateMapview(msg.data.object);
+                self.switchMapview(self.mapviewuuid);
+            });
+        };
+
+        this.getDefaultMapview = function () {
+            console.log('[MAP] Getting associated mapview.');
+
+            self.mapviewuuid = self.user.clientconfig.mapviewuuid;
+
+            console.log('[MAP] Clientconfig Mapview UUID: ', self.mapviewuuid);
+
+            if (self.mapviewuuid === '' || typeof self.mapviewuuid === 'undefined') {
+                console.log('[MAP] Picking user profile mapview', self.user.profile);
+                self.mapviewuuid = self.user.profile.settings.mapviewuuid;
+            }
+            console.log('[MAP] Final Mapview UUID: ', self.mapviewuuid);
+
+            if (self.mapviewuuid !== null && typeof self.mapviewuuid !== 'undefined' && self.mapviewuuid !== '') {
+                self.getMapview();
+            } else {
+                self.mapviewuuid = null; // Normalize unset mapview
+            }
+        };
+
+
+        this.scope.$on('Profile.Update', function () {
+            console.log('[MAP] Profile update - fetching map data');
+            self.requestMapData();
         });
 
-        this.scope.$on('OP.ListUpdate', function (event, schema) {
-            /*if (schema === 'geoobject') {
-                let list = self.op.lists.geoobject;
-
-                console.log('[MAP] Map received a list of geoobjects: ', schema, list);
-                self.geoobjects = list;
-                self.geoobject_tableParams = new NgTableParams(
-                    {},
-                    {
-                        dataset: self.geoobjects
-                    }
-                );
-
-
-                /*for (let item of list) {
-                 console.log('[MAP] Item:', item);
-                 console.log('[MAP] Layer:', self.drawnLayer);
-
-
-                 let myLayer = L.geoJson().addTo(self.map);
-                 console.log('[MAP] This strange thing:', myLayer);
-                 myLayer.addData(item.geojson);
-
-                 //self.drawnLayer.addData(item.geojson);
-                 }
-            }
-            if (schema === 'layergroup') {
-                self.layergroups = self.op.lists.layergroup;
-            }
-            if (schema === 'mapview') {
-                self.mapviews = self.op.lists.mapview;
-            }*/
-        });
-
-        this.scope.$on('OP.Update', function (event, objuuid) {
+        this.scope.$on('OP.Update', function (event, objuuid, obj) {
             if (objuuid === self.mapviewuuid) {
-                self.updateMapview(objuuid);
+                self.updateMapview(obj);
                 self.syncFromMapview();
             }
         });
@@ -765,13 +763,10 @@ class mapcomponent {
             }
         };
 
-        this.updateMapview = function (objuuid) {
-            if (objuuid === self.mapviewuuid) {
+        this.updateMapview = function (obj) {
+            if (obj.uuid === self.mapviewuuid) {
                 console.log('[MAP] Received associated mapview.');
-                self.mapview = self.op.objects[objuuid];
-                //if (self.followlayers === true || self.layergroup == false) {
-                self.getLayergroups();
-                //}
+                self.mapview = obj;
             }
         };
 
@@ -781,60 +776,6 @@ class mapcomponent {
                 self.scope.$apply();
                 console.log('[MAP] Sync from MV: ', self.center);
             }
-        };
-
-        this.getGeoobjects = function (filter) {
-            /*console.log('[MAP] Getting geoobjects');
-            if (typeof filter === 'undefined') {
-                filter = {'owner': self.user.useruuid};
-            }
-            self.op.getList('geoobject', filter);
-            */
-        };
-
-        this.getMapview = function () {
-            console.log('[MAP] Getting associated mapview.');
-
-            self.mapviewuuid = self.user.clientconfig.mapviewuuid;
-
-            console.log('[MAP] Clientconfig Mapview UUID: ', self.mapviewuuid);
-
-            if (self.mapviewuuid === '' || typeof self.mapviewuuid === 'undefined') {
-                console.log('[MAP] Picking user profile mapview', self.user.profile);
-                self.mapviewuuid = self.user.profile.settings.mapviewuuid;
-            }
-            console.log('[MAP] Final Mapview UUID: ', self.mapviewuuid);
-
-            if (self.mapviewuuid !== null && typeof self.mapviewuuid !== 'undefined' && self.mapviewuuid !== '') {
-                self.op.getObject('mapview', self.mapviewuuid);
-            } else {
-                self.mapviewuuid = null; // Normalize unset mapview
-            }
-        };
-
-        this.get_other_layers = function () {
-            this.op.search('layer', '', '*').then(function (msg) {
-                let other_layers = msg.data.list;
-                console.log('[MAP] Got a list of all layers');
-                for (let item of other_layers) {
-                    // TODO: Kick out layers that are already in mapview?
-                    self.other_layers[item.uuid] = item;
-                }
-            })
-        };
-
-        this.getMapdataLists = function () {
-            console.log('[MAP] Getting available map data objects.');
-            self.op.getList('layergroup');
-            self.op.getList('mapview', {}, ['name', 'uuid', 'viewtype']);
-        };
-
-        this.requestMapData = function () {
-            console.log('[MAP] Requesting mapdata from server.');
-
-            self.getMapview();
-            self.getGeoobjects();
-            self.getMapdataLists();
         };
 
         this.subscribe = function () {
@@ -935,7 +876,7 @@ class mapcomponent {
             //let PanControl = L.control.pan().addTo(map);
             self.courseplot = L.polyline([], {color: 'red'}).addTo(map);
 
-            //map.addLayer(self.drawnLayer);
+            map.addLayer(self.drawnLayer);
 
             self.zoom_to_vessel = L.easyButton({
                 id: 'btn_zoom_to_vessel',
@@ -1145,29 +1086,20 @@ class mapcomponent {
             self.toggleradiorange.addTo(map);
             self.toggleterminator.addTo(map);
 
-
-            self.addContextMenu = function (layer, uuid) {
-                console.log('[MAP] Adding context menu to geoobject');
-                layer.on('click', function (e) {
-                    self.editObject(uuid);
-                    // TODO: This is not angular-compatible - no access to this or other controllers
-                    L.popup().setContent('<h2>Marker</h2>' +
-                        '<div><a href="#!/editor/geoobject/' + uuid + '/edit">Edit Object in Editor</a></div>')
-                        .setLatLng(e.latlng)
-                        .openOn(map);
-                });
-            };
-
             leafletData.getLayers().then(function (baselayers) {
                 let drawnItems = baselayers.overlays.draw;
                 self.drawnLayer = drawnItems;
                 console.log('[MAP] The basedrawlayer looks like this:', drawnItems);
                 map.on('draw:created', function (e) {
                     let layer = e.layer;
+
                     let uuid = self.uuid.v4();
                     console.log('[MAP] Map drawing created:', e, ' layer:', layer);
                     self.addContextMenu(layer, uuid);
-                    drawnItems.addLayer(layer);
+                    console.log('[MAP] Context added');
+                    console.log('[MAP] Drawn Items:', self.drawnLayer);
+                    self.drawnLayer.addLayer(layer);
+                    console.log('[MAP] Added to:', self.drawnLayer);
 
                     let geojson = layer.toGeoJSON();
 
@@ -1193,13 +1125,14 @@ class mapcomponent {
                         }
                     }
 
+                    console.log('[MAP] ObjType selection done');
 
                     let geoobject = {
                         uuid: uuid,
                         //owner: self.user.useruuid,
                         geojson: geojson,
                         type: objtype,
-                        color: self.default_color
+                        color: self.service.default_color
                     };
                     self.op.putObject('geoobject', geoobject);
                 });
@@ -1229,8 +1162,6 @@ class mapcomponent {
                 return new L.RotatedMarker(pos, options);
             };
 
-
-            let VesselMarker = L.rotatedMarker(self.vessel.coords, {icon: Icons.Vessel}).addTo(map);
 
             function update_show_vessels() {
                 console.log('[MAP] Toggling Show Vessels');
@@ -1346,20 +1277,24 @@ class mapcomponent {
             function UpdateMapMarker() {
                 console.log('[MAP] Getting current Vessel position');
 
-                Coords = response.coords;
-                Course = response.course;
+                let Coords = response.coords,
+                    Course = response.course;
                 console.log('[MAP] Coords: ' + Coords + ' Course:' + Course);
 
                 courseplot.addLatLng(Coords);
-                plotted = courseplot.getLatLngs();
+                let plotted = courseplot.getLatLngs();
 
                 if (plotted.length > 50) {
                     courseplot.spliceLatLngs(0, 1);
                 }
 
-                VesselMarker.setLatLng(Coords);
-                VesselMarker.options.angle = Course;
-                VesselMarker.update();
+                if (self.VesselMarker === null) {
+                    self.VesselMarker = L.rotatedMarker(Coords, {icon: Icons.Vessel}).addTo(map);
+                }
+
+                self.VesselMarker.setLatLng(Coords);
+                self.VesselMarker.options.angle = Course;
+                self.VesselMarker.update();
 
                 if ($('#cb_show_radiorange').is(':checked')) {
                     if (RangeDisplay == false) {
@@ -1374,10 +1309,6 @@ class mapcomponent {
             }
         });
 
-        this.scope.$on('Profile.Update', function () {
-            console.log('[MAP] Profile update - fetching map data');
-            self.requestMapData();
-        });
         if (this.user.signedin === true) {
             console.log('[MAP] Logged in - fetching map data');
             this.requestMapData();
@@ -1390,27 +1321,9 @@ class mapcomponent {
         })
     }
 
-    gdal_upload() {
-        console.log('Uploading new map file.');
-
-        let file = document.getElementById('filename').files[0];
-        console.log('file: ', file);
-        this.socket.sendFile(file, 'hfos.map.gdal', 'mapimport');
-
-    }
-
-    gdal_rescan() {
-        console.log('Triggering rastertile path rescan.');
-
-        this.socket.send({
-            component: 'hfos.map.gdal',
-            action: 'rescan'
-        });
-
-    }
 }
 
 mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata',
-    'menu', 'notification', 'clipboard', 'navdata', '$compile', '$aside', 'uuid', 'NgTableParams'];
+    'menu', 'notification', 'clipboard', 'navdata', 'mapservice', '$compile', '$aside', 'uuid', 'NgTableParams'];
 
 export default mapcomponent;
