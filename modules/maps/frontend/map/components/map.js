@@ -533,7 +533,7 @@ class mapcomponent {
             for (let uuid of layers) {
                 let layer = self.service.all_layers[uuid];
                 console.log('[MAP] Layer:', uuid, layer);
-                if (layer.type === 'geolayer') {
+                if (layer.category === 'geolayer') {
                     self.layers.geolayers[uuid] = layer;
                 } else {
                     layer.url = layer.url.replace('http://hfoshost/', self.host);
