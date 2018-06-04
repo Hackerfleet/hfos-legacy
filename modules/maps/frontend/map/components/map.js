@@ -71,13 +71,14 @@ import lighthouseIcon from '../../assets/images/icons/lighthouse.png';
 
 class mapcomponent {
 
-    constructor(scope, leafletData, objectproxy, $state, $rootScope, socket, user, schemata, menu, notification, clipboard,
+    constructor(scope, leafletData, systemconfig, objectproxy, $state, $rootScope, socket, user, schemata, menu, notification, clipboard,
                 navdata, mapservice, $compile, $aside, uuid, NgTableParams) {
         let self = this;
 
         {
             this.scope = scope;
             this.leaflet = leafletData;
+            this.systemconfig = systemconfig;
             this.op = objectproxy;
             this.state = $state;
             this.rootscope = $rootScope;
@@ -730,6 +731,10 @@ class mapcomponent {
                 console.log('[MAP] Picking user profile mapview', self.user.profile);
                 self.mapviewuuid = self.user.profile.settings.mapviewuuid;
             }
+            if (self.mapviewuuid === '' || typeof self.mapviewuuid === 'undefined') {
+                console.log('[MAP] Picking system profile mapview', self.user.profile);
+                self.mapviewuuid = self.systemconfig.config.defaultmapviewuuid;
+            }
             console.log('[MAP] Final Mapview UUID: ', self.mapviewuuid);
 
             if (self.mapviewuuid !== null && typeof self.mapviewuuid !== 'undefined' && self.mapviewuuid !== '') {
@@ -1323,7 +1328,7 @@ class mapcomponent {
 
 }
 
-mapcomponent.$inject = ['$scope', 'leafletData', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata',
+mapcomponent.$inject = ['$scope', 'leafletData', 'systemconfig', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata',
     'menu', 'notification', 'clipboard', 'navdata', 'mapservice', '$compile', '$aside', 'uuid', 'NgTableParams'];
 
 export default mapcomponent;
