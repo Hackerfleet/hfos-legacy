@@ -323,6 +323,7 @@ def _get_system_configuration(dbhost, dbname):
 
     return systemconfig
 
+
 db_host_default = '127.0.0.1:27017'
 db_host_help = 'Define hostname for database server (default: ' + \
                db_host_default + ')'
@@ -405,6 +406,50 @@ def create_module(clear, target):
     log("Constructing module %(plugin_name)s" % info)
     _construct_module(augmented_info, target)
 
+
+@click.command(short_help='Manage updates')
+@click.option('--no-restart', help='Do not restart service', is_flag=True, default=False)
+@click.option('--no-rebuild', help='Do not rebuild frontend', is_flag=True, default=False)
+@click.pass_context
+def update(ctx, no_restart, no_rebuild):
+    """Update a HFOS node"""
+
+    # 0. (NOT YET! MAKE A BACKUP OF EVERYTHING)
+    # 1. update repository
+    # 2. update frontend repository
+    # 3. (Not yet: update venv)
+    # 4. rebuild frontend
+    # 5. restart service
+
+    instance = ctx.obj['instance']
+
+    def run_process(cwd, *args):
+        try:
+            proc = Popen(args, cwd=cwd)
+
+            proc.wait()
+        except Exception as e:
+            log('Uh oh! Error:', e, type(e), lvl=error)
+
+    log('Pulling github updates')
+    run_process('.', ['git', 'pull', 'origin', 'master'])
+    run_process('./frontend', ['git', 'pull', 'origin', 'master'])
+
+    if not no_rebuild:
+        log('Rebuilding frontend')
+        install_frontend(instance, install=False, development=True)
+
+    if not no_restart:
+        log('Restaring service')
+        if instance != 'hfos':
+            instance = 'hfos-' + instance
+
+        run_process('.', ['sudo', 'systemctl', 'restart', instance])
+
+    log('Done')
+
+
+cli.add_command(update)
 
 
 @click.group(cls=DYMGroup)
@@ -1018,7 +1063,7 @@ def install_service(instance, dbhost, dbname, port):
         'instance': instance,
         'executable': executable
     }
-    service_name = 'hfos.' + instance + '.service'
+    service_name = 'hfos-' + instance + '.service'
 
     write_template_file(os.path.join('dev/templates', service_template),
                         os.path.join('/etc/systemd/system/', service_name),
@@ -1231,13 +1276,19 @@ def install_cert(selfsigned):
               default=False, is_flag=True)
 @click.option('--rebuild', help="Rebuild frontend before installation",
               default=False, is_flag=True)
+@click.option('--no-install', help="Do not install requirements",
+              default=False, is_flag=True)
 @click.option('--build-type', help="Specify frontend build type. Either dist(default) or build",
               default='dist')
 @click.pass_context
-def frontend(ctx, dev, rebuild, build_type):
+def frontend(ctx, dev, rebuild, no_install, build_type):
     """Build and install frontend"""
 
-    install_frontend(instance=ctx.obj['instance'], forcerebuild=rebuild, development=dev, build_type=build_type)
+    install_frontend(instance=ctx.obj['instance'],
+                     forcerebuild=rebuild,
+                     development=dev,
+                     install=not no_install,
+                     build_type=build_type)
 
 
 @install.command('all', short_help='install everything')
@@ -1485,6 +1536,107 @@ def cli_import(ctx, schema, uuid, filter, format, filename, all, dry):
             for item in item_list:
                 item._fields['_id'] = bson.objectid.ObjectId(item._fields['_id'])
                 item.save()
+
+
+@db.group()
+@click.option("--schema", "-s", default=None, help="Specify object schema to modify")
+@click.option("--filter", "-f", default=None, help="Filter objects (pymongo query syntax)")
+@click.option("--action", "-a", default=None, help="Specify action to modify")
+@click.option("--role", "-r", default=None, help="Specify role")
+@click.option("--all", default=False, is_flag=True, help="Agree to work on all documents, if no schema specified")
+@click.pass_context
+def rbac(ctx, schema, filter, action, role, all):
+    """Database operations around role based access control."""
+
+    database = ctx.obj['db']
+
+    if schema is None:
+        if all is False:
+            log('No schema given. Read the help', lvl=warn)
+            return
+        else:
+            schemata = database.objectmodels.keys()
+    else:
+        schemata = [schema]
+
+    things = []
+
+    if filter is None:
+        parsed_filter = {}
+    else:
+        parsed_filter = json.loads(filter)
+
+    for schema in schemata:
+        for obj in database.objectmodels[schema].find(parsed_filter):
+            things.append(obj)
+
+    ctx.obj['objects'] = things
+    ctx.obj['action'] = action
+    ctx.obj['role'] = role
+
+
+db.add_command(rbac)
+
+
+@rbac.command(short_help='Add role to action')
+@click.pass_context
+def add_role(ctx):
+    """Adds a role to an action on objects"""
+
+    objects = ctx.obj['objects']
+    action = ctx.obj['action']
+    role = ctx.obj['role']
+
+    for item in objects:
+        if not role in item.perms[action]:
+            item.perms[action].append(role)
+            item.save()
+
+    log("Done")
+
+
+@rbac.command(short_help='Add role to action')
+@click.pass_context
+def del_role(ctx):
+    """Deletes a role from an action on objects"""
+
+    objects = ctx.obj['objects']
+    action = ctx.obj['action']
+    role = ctx.obj['role']
+
+    for item in objects:
+        if role in item.perms[action]:
+            item.perms[action].remove(role)
+            item.save()
+
+    log("Done")
+
+
+@rbac.command(short_help='Change owner')
+@click.argument('owner')
+@click.option("--uuid", help="Specify user by uuid", default=False, is_flag=True)
+@click.pass_context
+def change_owner(ctx, owner, uuid):
+    """Changes the ownership of objects"""
+
+    objects = ctx.obj['objects']
+    database = ctx.obj['db']
+
+    if uuid is True:
+        owner_filter = {'uuid': owner}
+    else:
+        owner_filter = {'name': owner}
+
+    owner = database.objectmodels['user'].find_one(owner_filter)
+    if owner is None:
+        log('User unknown.', lvl=error)
+        return
+
+    for item in objects:
+        item.owner = owner.uuid
+        item.save()
+
+    log('Done')
 
 
 @db.command(short_help='find in object model fields')
