@@ -14,22 +14,20 @@
     :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
     :alt: Requirements Status
 
+.. image:: https://img.shields.io/badge/IRC-%23hackerfleet%20on%20freenode-blue.svg
+    :target: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>
+    :alt: IRC Channel
 
 HFOS - The Hackerfleet Operating System
 =======================================
 
-A modern, opensource approach to collaborative tasks.
+**A collaborative and modular infrastructure for your data.**
 
-This software package is supposed to run on your home/office/ship/plane/ufo/*space's
-board computer.
-
-It initially grew out of frustration with existing navigation solutions for sailors,
-as none of these are really oriented towards sailing crews (i.e. multi-user setups), but
-we saw the potential for other 'classic' areas of collaboration and started extending
-it towards a more general application framework.
-
-A lot of the included modules are still Work in Progress, so help out, if you're interested
-in a powerful - **cloud independent** - collaboration tool suite.
+* **Geo Information** Use a sophisticated map to annotate and review geographical information
+* **Vehicle support** Attach a sailyacht, your camper or pack one in your backpack
+* **Project planning** Issue tracking for collaborative teams
+* **Modular** Expandable with integrated modules, build your own
+* **Cloud independent** Run nodes on your own infrastructure
 
 Installation
 ============
@@ -54,6 +52,9 @@ Modules
 =======
 
 The system is modular, so you can install what you need and leave other things.
+
+A lot of the included modules are still Work in Progress, so help out, if you're interested
+in a powerful - **cloud independent** - collaboration tool suite.
 
 General modules
 ---------------
@@ -90,7 +91,7 @@ switchboard    Virtual switchboard
 wiki           Etherpad + Wiki = awesomeness
 ============== ==============================================================
 
-Most of these are not yet fully usable, so please help out and perhaps take ownership of one (or more) of them!
+Many of these are not yet fully usable, so please help out and perhaps take ownership of one (or more) of them!
 
 Navigation (Hackerfleet) modules
 --------------------------------
@@ -150,14 +151,6 @@ You can also find us here:
 
 Contributors
 ============
-
-We like to hang out on irc, if you want to chat or help out,
-join irc://freenode.org/hackerfleet :)
-
-Please be patient or even better use screen/tmux or something to irc.
-Most of us are there 24/7 but not always in front of our machines.
-
-Missing in the list below? Add yourself or ping us ;)
 
 Code
 ----
