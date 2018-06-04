@@ -858,24 +858,20 @@ def install_var(instance, clear, clear_all):
               is_flag=True, default=False)
 @click.option('--list-provisions', '-l', help='Only list available provisions',
               is_flag=True, default=False)
-@click.option('--dbhost', default=db_host_default, help=db_host_help)
-@click.option('--dbname', default=db_default, help=db_help,
-              metavar=db_metavar)
-def provisions(provision, dbhost, dbname, clear, overwrite, list_provisions):
+@click.pass_context
+def provisions(ctx, provision, clear, overwrite, list_provisions):
     """Install default provisioning data"""
 
-    install_provisions(provision, dbhost, dbname, clear, overwrite, list_provisions)
+    install_provisions(provision, clear, overwrite, list_provisions)
 
 
-def install_provisions(provision, dbhost, dbname='hfos', clear=False, overwrite=False, list_provisions=False):
+def install_provisions(provision, clear=False, overwrite=False, list_provisions=False):
     """Install default provisioning data"""
 
     log("Installing HFOS default provisions")
 
     # from hfos.logger import verbosity, events
     # verbosity['console'] = verbosity['global'] = events
-    from hfos import database
-    database.initialize(dbhost, dbname)
 
     from hfos.provisions import provisionstore
 
