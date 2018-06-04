@@ -476,7 +476,7 @@ class mapcomponent {
                 self.objectlayers[obj.uuid] = map_object;
             }
 
-            if (uuid in Object.keys(self.geoobjects)) {
+            if (Object.keys(self.geoobjects).indexOf(uuid) >= 0) {
                 addGeoobject(self.geoobjects[uuid]);
             } else {
                 this.op.get('geoobject', uuid).then(function (msg) {
@@ -496,6 +496,7 @@ class mapcomponent {
                     self.geoobjects[item.uuid] = item;
                     self.switchGeoobject(item.uuid);
                 }
+
             });
 
         };
@@ -532,7 +533,7 @@ class mapcomponent {
             for (let uuid of layers) {
                 let layer = self.service.all_layers[uuid];
                 console.log('[MAP] Layer:', uuid, layer);
-                if (layer.type === 'geoobjects') {
+                if (layer.type === 'geolayer') {
                     self.layers.geolayers[uuid] = layer;
                 } else {
                     layer.url = layer.url.replace('http://hfoshost/', self.host);
@@ -763,7 +764,9 @@ class mapcomponent {
                 self.mapview.coords = self.center;
                 console.log('[MAP] Sync to MV: ', self.mapview);
                 if (self.sync) {
-                    self.op.putObject('mapview', self.mapview);
+                    self.op.put('mapview', self.mapview).then(function (msg) {
+                        console.log('[MAP] Synchronized:', msg);
+                    });
                 }
             }
         };
