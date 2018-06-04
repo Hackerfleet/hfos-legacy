@@ -51,6 +51,8 @@ try:
 except ImportError:
     from subprocess32 import Popen  # NOQA
 
+GDAL_LAYER_UUID = '6a18fdad-93a2-4563-bb8a-cb5888f43300'
+
 
 # TODO:
 # * Thread the call to gdal utilities
@@ -177,7 +179,7 @@ class GDAL(ConfigurableComponent):
             'component': 'hfos.alert.manager',
             'action': 'notify',
             'data': {
-                'msg': 'New rasterchart rendered: <a href="#!/editor/layer/' + str(
+                'message': 'New rasterchart rendered: <a href="#!/editor/layer/' + str(
                     newlayer.uuid) + '/edit">' + newlayer.name + '</a>',
                 'type': 'success'
             }
@@ -222,7 +224,7 @@ class GDAL(ConfigurableComponent):
             'component': 'hfos.alert.manager',
             'action': 'notify',
             'data': {
-                'msg': data,
+                'message': data,
                 'type': 'warning' if count == 0 else 'success',
             }
         }
@@ -270,8 +272,10 @@ class GDAL(ConfigurableComponent):
         layer.notes = "Imported GDAL chart"
         layer.description = "Imported GDAL chart '%s'" % name
         layer.type = 'xyz'
+        layer.category = 'overlay'
         layer.layerOptions = {
             'continuousWorld': False,
+            'opacity': 0.75,
             'tms': True,
             'minZoom': min(zoomlevels),
             'maxZoom': max(zoomlevels),
@@ -284,7 +288,7 @@ class GDAL(ConfigurableComponent):
         layer.save()
 
         gdal_layers = objectmodels['layergroup'].find_one({
-            'uuid': '6a18fdad-93a2-4563-bb8a-cb5888f43300'
+            'uuid': GDAL_LAYER_UUID
         })
 
         gdal_layers.layers.append(layer.uuid)
@@ -295,16 +299,17 @@ class GDAL(ConfigurableComponent):
             'geometry': {
                 'type': 'Polygon',
                 'coordinates': [[
-                    [bounding_box['miny'], bounding_box['minx']],
-                    [bounding_box['miny'], bounding_box['maxx']],
-                    [bounding_box['maxy'], bounding_box['maxx']],
-                    [bounding_box['maxy'], bounding_box['minx']]
+                    [bounding_box['minx'], bounding_box['miny']],
+                    [bounding_box['minx'], bounding_box['maxy']],
+                    [bounding_box['maxx'], bounding_box['maxy']],
+                    [bounding_box['maxx'], bounding_box['miny']]
                 ]]
             }
         }
 
         geoobject = objectmodels['geoobject']({'uuid': uuid})
         geoobject.name = name
+        geoobject.layer = GDAL_LAYER_UUID
         geoobject.owner = client.useruuid
         geoobject.notes = "Imported GDAL chart"
         geoobject.type = "Chart"
