@@ -4,6 +4,14 @@
   z-index: 30;
 }
 
+.leaflet-container a {
+  color: $color-gray-dark !important;
+  &:hover {
+    color: $color-primary-2 !important;
+  }
+}
+
+
 .leaflet-grid-label .lng {
   margin-left: 8px;
   -webkit-transform: rotate(90deg);

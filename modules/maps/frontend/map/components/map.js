@@ -47,7 +47,7 @@ import zoomslider from 'leaflet.zoomslider';
 import contextmenu from 'leaflet-contextmenu';
 
 import 'Leaflet.vector-markers/dist/leaflet-vector-markers.css';
-
+import leaflet_popups from 'leaflet-popup-angular';
 
 // import 'Leaflet.Grid/L.Grid.css';
 // import leafletgrid from 'Leaflet.Grid/L.Grid';
@@ -66,7 +66,6 @@ import vesselIcon from '../../assets/images/icons/vessel.png';
 import vesselMovingIcon from '../../assets/images/icons/vessel-moving.png';
 import vesselStoppedIcon from '../../assets/images/icons/vessel-stopped.png';
 import lighthouseIcon from '../../assets/images/icons/lighthouse.png';
-
 
 
 class mapcomponent {
@@ -212,7 +211,7 @@ class mapcomponent {
                         marker: {
                             icon: new this.DefaultMarker({
                                 icon: 'flag',
-                                iconColor: 'white',
+                                iconColor: '#fff',
                                 markerColor: '#4384BF'
                             })
                         }
@@ -508,7 +507,8 @@ class mapcomponent {
 
             layer.on('click', function (e) {
                 self.editObject(uuid);
-                // TODO: This is not angular-compatible - no access to this or other controllers
+                self.select_geoobject(uuid);
+
                 let notes = "",
                     type = "";
                 if (typeof obj.type !== 'undefined') {
@@ -517,10 +517,20 @@ class mapcomponent {
                 if (typeof obj.notes !== 'undefined') {
                     notes = obj.notes
                 }
-                L.popup().setContent('<h2>' + obj.name + '</h2>' +
-                    '<small>'+ type + '</small>' +
-                    '<div>' + notes + '</div>' +
-                    '<small><a href="#!/editor/geoobject/' + uuid + '/edit">Edit Object in Editor</a></small>')
+                L.popup.angular({
+                    template: '<h2>' + obj.name + '</h2>' +
+                    '<small>' + type + '</small>' +
+                    '<div ng-bind-html="popup.notes | embed:popup.user.embed_options"></div>' +
+                    '<small><a href="#!/editor/geoobject/' + uuid + '/edit">Edit Object in Editor</a></small>',
+                    controllerAs: 'popup',
+                    controller: ['user', function (user) {
+                        this.user = user;
+                        this.name = obj.name;
+                        this.type = type;
+                        this.notes = notes;
+                        this.uuid = uuid;
+                    }]
+                })
                     .setLatLng(e.latlng)
                     .openOn(self.map);
             });
@@ -566,10 +576,11 @@ class mapcomponent {
                 } else /*if (layer.category !== 'geoobjects')*/ {
                     self.layers.overlays[layer.uuid] = layer;
                     self.switchLayer(layer.uuid);
-                } /*else {
-                    console.log('GeoObject layer added.')
+                }
+                /*else {
+                                   console.log('GeoObject layer added.')
 
-                }*/
+                               }*/
 
                 self.layer_flags[layer.uuid] = {
                     expanded: false,
@@ -662,7 +673,7 @@ class mapcomponent {
             })
         };
 
-        this.is_other_layer = function(uuid) {
+        this.is_other_layer = function (uuid) {
             return !(uuid in this.layers.baselayers) && !(uuid in this.layers.overlays);
         };
 
