@@ -85,11 +85,11 @@ TagData = {
 
 TagForm = {
     'type': 'fieldset',
-    'startEmpty': True,
     'items': [
         {
             'key': 'tags',
             'add': 'Add Tag',
+            'startEmpty': True,
             'style': {
                 'add': 'btn-success'
             },
