@@ -423,7 +423,7 @@ def update(ctx, no_restart, no_rebuild):
 
     instance = ctx.obj['instance']
 
-    def run_process(cwd, *args):
+    def run_process(cwd, args):
         try:
             proc = Popen(args, cwd=cwd)
 
@@ -437,7 +437,7 @@ def update(ctx, no_restart, no_rebuild):
 
     if not no_rebuild:
         log('Rebuilding frontend')
-        install_frontend(instance, install=False, development=True)
+        install_frontend(instance, forcerebuild=True, install=False, development=True)
 
     if not no_restart:
         log('Restaring service')
