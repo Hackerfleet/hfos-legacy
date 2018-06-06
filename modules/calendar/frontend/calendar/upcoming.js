@@ -56,6 +56,8 @@ class UpcomingCtrl {
         this.calendars = {};
         this.calendars_available = [];
         this.calendars_enabled = [];
+        this.state_calendars = null;
+
         this.multi_calendar = false;
         this.show_only_upcoming = false;
 
@@ -89,13 +91,19 @@ class UpcomingCtrl {
 
                 self.multi_calendar = self.calendars_available.length > 1;
 
-                // TODO: Get this from state parameters
+                if (self.state_calendars === 'all') {
+                    for (let cal in self.calendars) {
+                        self.calendars_enabled.push(cal);
+                    }
+                } else { self.calendars_enabled = self.state_calendars.split(',')}
+                console.log('[CALENDAR] Calendars:', self.calendars_enabled);
+
                 if (self.calendars_enabled.length === 0) {
                     self.calendars_enabled.push(self.calendars[0].uuid);
                 }
 
                 console.log('Transitioning:');
-                self.state.transitionTo('app.upcoming', {calendars: JSON.stringify(self.calendars_enabled)}, {
+                self.state.transitionTo('app.upcoming', {calendars: self.calendars_enabled}, {
                     location: 'replace',
                     notify: false
                 });
@@ -155,9 +163,13 @@ class UpcomingCtrl {
 
     $onInit() {
         console.log('[UPCOMING] State parameters', this.scope.stateParams, this.scope, this.scope.stateParams.calendars);
-        this.calendars_enabled = JSON.parse(this.scope.stateParams.calendars);
+        this.state_calendars = this.scope.stateParams.calendars;
+        console.log('[UPCOMING] State:', this.state_calendars);
+        if (this.state_calendars !== 'all') {
+            this.calendars_enabled = this.state_calendars.split(',');
+        }
+        console.log('[UPCOMING] State calendars:', this.calendars_enabled);
     }
-
 }
 
 UpcomingCtrl.$inject = [

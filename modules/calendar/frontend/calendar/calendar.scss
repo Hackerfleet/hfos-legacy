@@ -104,6 +104,27 @@
   }
 }
 
+
+#leftmostpane {
+  position: absolute;
+  top: 50px;
+  bottom: 20px;
+  left: 0;
+  width: 25%;
+  overflow: hidden;
+}
+
+
+#middlepane {
+  position: absolute;
+  top: 50px;
+  bottom: 20px;
+  left: 25%;
+  width: 75%;
+  overflow: hidden;
+}
+
+
 #leftpane {
   position: absolute;
   top: 50px;

@@ -99,7 +99,8 @@ EventForm = [
         ]),
         section(1, 2, [[lookup_field('calendar'), 'color']]),
         'summary',
-        'geo'
+        'geo',
+        'recurring'
     ]),
     fieldset('Recurrence', [
         section(1,2, [

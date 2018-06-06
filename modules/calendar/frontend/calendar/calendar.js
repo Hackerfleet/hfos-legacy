@@ -62,7 +62,7 @@ class CalendarCtrl {
         this.selected_event = null;
         this.new_event = null;
 
-        this.events = [];
+        this.events = {};
 
         this.active_tab = 0;
 
@@ -95,7 +95,17 @@ class CalendarCtrl {
                 allDay: false,
                 className: ['calendar-event']
             };
+            let poppable = [];
+            for (let elem of self.calendar_events) {
+                if (elem.uuid === event.uuid) {
+                    poppable.push(elem);
+                }
+            }
+            for (let el of poppable) {
+                self.calendar_events.pop(el);
+            }
             self.calendar_events.push(ev);
+            self.events[event.uuid] = event;
         };
 
         this.popEvent = function (uuid) {
@@ -238,17 +248,32 @@ class CalendarCtrl {
         }
         /* alert on Drop */
         this.alertOnDrop = function (event, delta, revertFunc, jsEvent, ui, view) {
-            self.notificationMessage = ('Event Droped to make dayDelta ' + delta);
+            console.log('[CALENDAR] Event ' + event + ' dropped to make dayDelta ' + delta);
+
+            let real_event = self.events[event.uuid];
+            console.log('[CALENDAR] Event:', real_event, self.events);
+
+            real_event.dtstart = moment(new Date(real_event.dtstart)).add(delta).toISOString();
+            real_event.dtend = moment(new Date(real_event.dtend)).add(delta).toISOString();
+
+            console.log('[CALENDAR] After drop:', real_event);
+            self.save_event(event.uuid);
+
         };
         /* alert on Resize */
         this.alertOnResize = function (event, delta, revertFunc, jsEvent, ui, view) {
-            self.notificationMessage = ('Event Resized to make dayDelta ' + delta);
+            console.log('[CALENDAR] Event ', event, ' resized to make dayDelta ' + delta);
         };
 
         this.toggleButtons = function () {
             console.log('Toggling button bar visibility');
             $('.fc-right').toggle();
 
+        };
+
+        this.save_event= function(uuid) {
+            console.log('[CALENDAR] Storing event:', uuid, self.events[uuid]);
+            self.op.put('event', self.events[uuid]);
         };
 
         this.scope.$on('User.Login', function (ev) {
@@ -260,7 +285,7 @@ class CalendarCtrl {
         }
 
         this.eventRender = function (event, element, view) {
-            console.log('element:', element);
+            //console.log('element:', element);
             element.attr({
                 'tooltip': event.title,
                 'tooltip-append-to-body': true
@@ -274,11 +299,12 @@ class CalendarCtrl {
                 height: 'parent',
                 editable: true,
                 weekNumbers: true,
+                nowIndicator: true,
                 customButtons: {
                     upcoming: {
                         text: 'Upcoming',
                         click: function() {
-                            self.state.go('app.upcoming');
+                            self.state.go('app.upcoming', {calendars: 'all'});
                         }
                     }
                 },
@@ -299,13 +325,38 @@ class CalendarCtrl {
                         slotDuration: '00:10:00'
                     },
                     week: {
-                        slotDuration: '00:20:00'
+                        slotDuration: '00:10:00'
                     }
                 },
+                defaultView: 'agendaWeek',
                 businessHours: this.business_time,
                 firstDay: this.first_day,
                 eventClick: this.alertOnEventClick,
                 eventDrop: this.alertOnDrop,
+                droppable: true, // this allows things to be dropped onto the calendar
+                drop: function(date, jsEvent, ui, resourceId ) {
+                    let friendScope = angular.element(this).scope();
+                    let data = angular.copy(friendScope.$ctrl.dragdata);
+                    console.log(date, data);
+                    console.log(date._a);
+                    let real_date = new Date(date._a[0],date._a[1],date._a[2],date._a[3]+2,date._a[4],date._a[5],date._a[6]);
+                    console.log('REAL:', real_date);
+
+                    let delta = new Date(data.dtstart).getTime() - real_date.getTime();
+                    console.log('DROPPED START&DELTA:', data.dtstart, delta);
+                    console.log('[CALENDAR] Before drop:', data);
+
+                    let dtstart = new Date(new Date(data.dtstart).getTime() - delta);
+                    let dtend = new Date(new Date(data.dtend).getTime() - delta);
+
+                    data.dtstart = dtstart;
+                    data.dtend = dtend;
+
+                    console.log(dtstart, dtend);
+
+                    console.log('[CALENDAR] After drop:', data);
+                    self.op.put('event', data);
+                },
                 eventResize: this.alertOnResize,
                 eventRender: this.eventRender,
                 dayClick: this.alertOnDayClick,

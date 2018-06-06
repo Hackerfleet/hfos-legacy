@@ -46,7 +46,7 @@ This software package is a plugin module for HFOS.
           'icalendar>=4.0.1'
       ],
       entry_points="""[hfos.components]
-    calendar=hfos.calendar.manager:Manager
+    calendar=hfos.calendar.calendarmanager:CalendarManager
     [hfos.schemata]
     event=hfos.calendar.event:Event
     calendar=hfos.calendar.calendar:Calendar

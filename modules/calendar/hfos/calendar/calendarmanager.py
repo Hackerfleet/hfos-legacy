@@ -39,8 +39,7 @@ from hfos.events.client import send
 # from pprint import pprint
 
 
-
-class Manager(ConfigurableComponent):
+class CalendarManager(ConfigurableComponent):
     """
     Manages calendar resources.
     """
@@ -55,7 +54,7 @@ class Manager(ConfigurableComponent):
         :param args:
         """
 
-        super(Manager, self).__init__("CALENDAR", *args)
+        super(CalendarManager, self).__init__("CALENDAR", *args)
 
         self.log("Started")
 
