@@ -1,0 +1,167 @@
+<!--
+  ~ #!/usr/bin/env python
+  ~ # -*- coding: UTF-8 -*-
+  ~
+  ~ __license__ = """
+  ~ Hackerfleet Operating System
+  ~ ============================
+  ~ Copyright (C) 2011- 2018 riot <riot@c-base.org> and others.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~ """
+  -->
+<button id="sidebargrab" type="button" ng-click="$ctrl.scope.$broadcast('Resize', '75%')">
+    <span id="sidebargrabicon" class="fa fa-arrow-left"></span>
+</button>
+
+<div class="well content" id="chair">
+    <div id="leftmostpane">
+        <h1>Session Management</h1>
+
+        <div class="panel-group" ng-model="panels.activePanel" role="tablist" aria-multiselectable="true" bs-collapse>
+            <div class="panel panel-default">
+                <div class="panel-heading panel-hover">
+                    <h4 class="panel-title">
+                        <a bs-collapse-toggle>
+                            Existing Sessions
+                            <span class="badge"
+                                  ng-show="$ctrl.sessions.length > 0">{{$ctrl.sessions.length}}</span>
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <div class="panel-body">
+                        <form class="form-horizontal" ng-if="$ctrl.can_confirm()">
+                            <label>Select calendar:</label>
+                            <select ng-model="$ctrl.calendar">
+                                <option ng-repeat="(key, value) in $ctrl.calendars" value="{{key}}">{{value.name}}
+                                </option>
+                            </select>
+                        </form>
+                        <table class="table table-condensed table-bordered table-striped"
+                               id="sessions">
+                            <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Keywords</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tr ng-repeat="session in $ctrl.sessions">
+                                <td>
+                                    <a ng-click="$ctrl.editSession(session.uuid)">{{session.name}}</a>
+                                </td>
+                                <td>
+                                    {{$ctrl.sessiontypes[session.sessiontype].name}}
+                                </td>
+                                <td>
+                        <span ng-repeat="keyword in session.keywords.split(' ')|orderBy"
+                              class="label label-default">
+                            {{keyword}}
+                        </span>
+                                </td>
+                                <td>
+                                    <span>{{session.status}}</span>
+                                </td>
+                                <td>
+                                    <button ng-if="$ctrl.can_review() &&  !$ctrl.hasReview(session.uuid)"
+                                            class="btn btn-sm btn-success"
+                                            ng-click="$ctrl.handleReview(session.uuid, 'create')">
+                                        <span class="fa fa-plus"></span>Add Review
+                                    </button>
+                                    <button ng-if="$ctrl.can_review() && $ctrl.hasReview(session.uuid)"
+                                            class="btn btn-sm btn-success"
+                                            ng-click="$ctrl.handleReview(session.uuid, 'edit')">
+                                        <span class="fa fa-pencil"></span>Edit Review
+                                    </button>
+                                    <button ng-if="$ctrl.can_confirm()" class="btn btn-sm btn-info"
+                                            ng-click="$ctrl.handleReview(session.uuid, 'confirm')">
+                                        <span class="fa fa-check"></span>Confirm Session
+                                    </button>
+                                    <button class="btn btn-sm btn-success"
+                                            ng-click="$ctrl.editSession(session.uuid)">
+                                        <span class="fa fa-pencil"></span>Edit Session
+                                    </button>
+                                    <button class="btn btn-sm btn-danger"
+                                            ng-click="$ctrl.deleteSession(session.uuid)">
+                                        <span class="fa fa-times"></span>Delete Session
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading panel-hover" role="tab">
+                    <h4 class="panel-title">
+                        <a bs-collapse-toggle>
+                            Unscheduled Events
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <div class="panel-body">
+                        <ul>
+                            <li ng-repeat="event in $ctrl.events"
+                                ng-show="!is_scheduled(event)">
+                                <span data-drag="true"
+                                      jqyoui-draggable="{zIndex: 1000000000,
+                                                         onStart: '$ctrl.set_drag_data(event)'}"
+                                      ng-model="$ctrl.dragdata">
+                                    {{event.name}} <span class="fa fa-times" ng-click="$ctrl.op.deleteObject('event', event.uuid); $ctrl.get_events()"></span>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading panel-hover" role="tab">
+                    <h4 class="panel-title">
+                        <a bs-collapse-toggle>
+                            Scheduled Events
+                        </a>
+                    </h4>
+                </div>
+                <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+                    <div class="panel-body">
+                        <ul>
+                            <li ng-repeat="event in $ctrl.events"
+                                ng-show="is_scheduled(event)">
+                                <span data-drag="true"
+                                      jqyoui-draggable="{zIndex: 1000000000,
+                                                         onStart: '$ctrl.set_drag_data(event)'
+                                                         duration: '00:05'}"
+                                      ng-model="$ctrl.dragdata">
+                                    {{event.name}} <span class="fa fa-times" ng-click="$ctrl.op.deleteObject('event', event.uuid); $ctrl.get_events()"></span>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vertical Resizer -->
+    <div id="vMiddleResizer" resizer="vertical" resizer-width="10" resizer-left="#leftmostpane" resizer-right="#middlepane"></div>
+
+    <div id="middlepane" class="sidebar">
+        <calendar></calendar>
+    </div>
+</div>

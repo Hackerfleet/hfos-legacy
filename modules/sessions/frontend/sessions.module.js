@@ -32,8 +32,12 @@ import { routing } from './sessions.config.js';
 import sessionscomponent from './sessions/sessions';
 import sessionstemplate from './sessions/sessions.tpl.html';
 
+import chaircomponent from './sessions/chair';
+import chairtemplate from './sessions/chair.tpl.html';
+
 export default angular
     .module('main.app.sessions', [uirouter])
     .config(routing)
     .component('sessions', {controller: sessionscomponent, template: sessionstemplate})
+    .component('chair', {controller: chaircomponent, template: chairtemplate})
     .name;

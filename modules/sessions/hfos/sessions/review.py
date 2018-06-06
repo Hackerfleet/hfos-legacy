@@ -40,25 +40,31 @@ from hfos.schemata.base import base_object, uuid_object
 ReviewSchema = base_object('review', roles_create='chair', hide_owner=False)
 
 ReviewSchema['properties'].update({
-    'status': {'type': 'string'},
+    'status': {
+        'type': 'string',
+        'enum': [
+            'Denied',
+            'Accepted',
+            'Not reviewed'
+        ],
+        'default': 'Not reviewed'
+    },
     'calendar_reference': uuid_object(title='Calendar'),
     'session_reference': uuid_object(title='Session'),
     'comments': {'type': 'string', 'format': 'html'},
     'rating': {'type': 'integer'}
 })
 
-StatusField = {
-    'key': 'status',
-    'type': 'string', 'enum': [
-        'Denied',
-        'Accepted',
-        'Not reviewed'
-    ],
-    'default': 'Not reviewed'
-}
-
 ReviewForm = [
-    section(2, 2, [['owner', StatusField], ['calendar_reference', 'session_reference']]),
+    section(2, 2, [
+        [
+            'owner', 'status'
+        ],
+        [
+            lookup_field('calendar_reference', 'calendar'),
+            lookup_field('session_reference', 'session')
+        ]
+    ]),
     rating_widget(),
     'comments',
     editbuttons

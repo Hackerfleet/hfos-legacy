@@ -22,7 +22,8 @@
  * """
  */
 
-import icon from './assets/lecture.svg';
+import session_icon from './assets/lecture.svg';
+import chair_icon from './assets/chair.svg';
 
 
 export function routing($stateProvider) {
@@ -32,6 +33,11 @@ export function routing($stateProvider) {
             url: '/sessions',
             template: '<sessions></sessions>',
             label: 'Sessions',
-            icon: icon
+            icon: session_icon
+        }).state('app.chair', {
+            url: '/chair',
+            template: '<chair></chair>',
+            label: 'Chair',
+            icon: chair_icon
         });
 }

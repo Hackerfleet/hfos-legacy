@@ -51,7 +51,19 @@ SessionSchema['properties'].update({
                  'format': 'html',
                  'description': 'Abstract description'},
     'keywords': {'type': 'string', 'title': 'Keywords',
-                 'description': 'Descriptive keywords'},
+                 'description': 'Space or comma separated descriptive keywords'},
+    'topics': {'type': 'string', 'title': 'Topics',
+               'description': 'Space or comma separated list of session Topics'},
+    'speakers': {
+        'type': 'array',
+        'title': 'Speakers',
+        'description': 'Speakers holding the session (leave empty if it is only you)',
+        'default': [],
+        'startEmpty': True,
+        'items': {
+            'type': 'string'
+        }
+    },
     'files': {
         'type': 'array', 'title': 'Attachments',
         'description': 'Attached files',
@@ -65,13 +77,17 @@ SessionSchema['properties'].update({
 
         }
     },
-    #'calendar_reference': uuid_object(title='Calendar')
+    # 'calendar_reference': uuid_object(title='Calendar')
 })
 
 SessionForm = [
     'name',
+    section(1, 2, [[
+        {'key': 'speakers', 'add': 'Add Speaker', 'startEmpty': True},
+        'topics'
+    ]]),
     'abstract',
-    section(1, 2, [[lookup_field('sessiontype', 'sessiontype'), 'keywords']]), #, ['status', 'calendar_reference']]),
+    section(1, 2, [[lookup_field('sessiontype', 'sessiontype'), 'keywords']]),
     {
         'key': 'files',
         'add': None,

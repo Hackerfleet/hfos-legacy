@@ -21,11 +21,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * """
  */
-
 @import '../../../colors.scss';
 
 #sessions > tbody > tr > td > span.label {
   background: $color-primary-0;
   margin-right: 2px;
   display: inline-block;
+}
+
+#leftmostpane {
+  position: absolute;
+  top: 50px;
+  bottom: 20px;
+  left: 0;
+  width: 25%;
+}
+
+#middlepane > calendar > div > #leftpane {
+  top: 0;
+}
+
+#middlepane > calendar > div > #rightpane {
+  top: 0;
+}
+
+#vMiddleResizer {
+  background-color: #aaa;
+  position: absolute;
+  top: 51px;
+  bottom: 20px;
+  left: calc(25% - 10px);
+  width: 10px;
+  cursor: ew-resize;
+  z-index: 1000;
+}
+
+#middlepane > calendar > div > #vResizer {
+  top: 0;
 }
