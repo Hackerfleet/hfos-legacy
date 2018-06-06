@@ -18,8 +18,8 @@ def log(*args, **kwargs):
 @click.command('icalimporter')
 @click.argument('filename')
 @click.option('--all', default=False, help='Import past calendar entries')
-@click.option('--owner', prompt=True)
-@click.option('--calendar', prompt=True)
+@click.option('--owner')
+@click.option('--calendar')
 @click.option('--create-calendar', is_flag=True, default=False)
 @click.option('--clear-calendar', is_flag=True, default=False)
 @click.option('--dry', is_flag=True, default=False)
@@ -62,7 +62,8 @@ def ICALImporter(ctx, filename, all, owner, calendar, create_calendar, clear_cal
 
     if clear_calendar is True:
         log('Clearing calendar events')
-        objectmodels['event'].remove({'calendar': calendar.uuid})
+        for item in objectmodels['event'].find({'calendar': calendar.uuid}):
+            item.delete()
 
     with open(filename, 'rb') as file_object:
         caldata = Calendar.from_ical(file_object.read())
