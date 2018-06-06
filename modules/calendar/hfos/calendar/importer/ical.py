@@ -21,10 +21,11 @@ def log(*args, **kwargs):
 @click.option('--owner', prompt=True)
 @click.option('--calendar', prompt=True)
 @click.option('--create-calendar', is_flag=True, default=False)
+@click.option('--clear-calendar', is_flag=True, default=False)
 @click.option('--dry', is_flag=True, default=False)
 @click.option('--execfilter', default=None)
 @click.pass_context
-def ICALImporter(ctx, filename, all, owner, calendar, create_calendar, dry, execfilter):
+def ICALImporter(ctx, filename, all, owner, calendar, create_calendar, clear_calendar, dry, execfilter):
     """Calendar Importer for iCal (ics) files
 
     """
@@ -58,6 +59,10 @@ def ICALImporter(ctx, filename, all, owner, calendar, create_calendar, dry, exec
         return
 
     log('Found calendar')
+
+    if clear_calendar is True:
+        log('Clearing calendar events')
+        objectmodels['event'].remove({'calendar': calendar.uuid})
 
     with open(filename, 'rb') as file_object:
         caldata = Calendar.from_ical(file_object.read())
