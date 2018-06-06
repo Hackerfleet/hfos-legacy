@@ -144,11 +144,19 @@ class SessionManager(ConfigurableComponent):
 
         keyword = '<span class="label label-default">%s</span>\n'
 
-        sep = ',' if ',' in summary_data['event_keywords'] else sep = ' '
+        if ',' in summary_data['event_keywords']:
+            sep = ','
+        else:
+            sep = ' '
+
         for word in summary_data['event_keywords'].split(sep):
             summary_data['keywords'] += keyword % word
 
-        sep = ',' if ',' in summary_data['event_topics'] else sep = ' '
+        if ',' in summary_data['event_topics']:
+            sep = ','
+        else:
+            sep = ' '
+
         for topic in summary_data['event_topics'].split(sep):
             summary_data['topics'] += keyword % topic
 
