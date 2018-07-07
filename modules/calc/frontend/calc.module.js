@@ -32,7 +32,7 @@ import {routing} from './calc.config.js';
 import calccomponent from './calc/calc';
 import template from './calc/calc.tpl.html';
 
-import socialcalc from 'socialcalc';
+//import socialcalc from 'socialcalc';
 
 export default angular
     .module('main.app.calc', [uirouter])

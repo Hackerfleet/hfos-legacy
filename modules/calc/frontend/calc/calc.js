@@ -24,7 +24,7 @@
 
 'use strict';
 
-import SocialCalc from 'socialcalc';
+//import SocialCalc from 'socialcalc';
 
 /**
  * @ngdoc function
