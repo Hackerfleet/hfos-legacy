@@ -104,4 +104,10 @@ ProjectForm = [
     editbuttons
 ]
 
-Project = {'schema': ProjectSchema, 'form': ProjectForm}
+Project = {
+    'schema': ProjectSchema,
+    'form': ProjectForm,
+    'indices': {
+        'name': {}
+    }
+}
