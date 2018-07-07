@@ -25,10 +25,9 @@
 
 .chat {
   width: 100%;
+  height: calc(100% - 20px);
   padding: 0 20px 0 20px;
-  position: absolute;
   bottom: 0;
-  top: 50px;
 }
 
 .chat-messages {
