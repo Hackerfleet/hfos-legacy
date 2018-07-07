@@ -22,7 +22,10 @@
   ~ """
   -->
 
-<div class="aside bs-docs-aside" tabindex="-1" role="dialog">
+<div class="aside bs-docs-aside"
+     ng-style="{height: $ctrl.user.mainmenu_visible ? 'calc(100% - 50px)' : '100%',
+                top: $ctrl.user.mainmenu_visible ? '50px' : '0'}"
+     tabindex="-1" role="dialog">
     <div class="aside-dialog">
         <div class="aside-content">
             <div class="aside-header">
@@ -202,7 +205,7 @@
                                 </span>
                                 Defaults
                             </h4>
-                            <div class="form-horizontal" uib-collapse="geoobjectDetailsCollapsed">
+                            <form class="form" uib-collapse="geoobjectDetailsCollapsed">
                                 <div class="form-group">
                                     <label class="col-sm-4">Object Color:</label>
                                     <div class="col-sm-8">
@@ -260,7 +263,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </form>
                         </div>
 
                         <div id="geoobjects">
@@ -330,7 +333,7 @@
 
                             <div uib-collapse="offlineLoaderCollapsed">
 
-                                <form class="form-horizontal">
+                                <form class="form-inline">
                                     <div class="form-group">
                                         <label for="offline_loader_zoom" class="col-sm-6 control-label">Maximum zoom</label>
                                         <div class="col-sm-6">
@@ -422,11 +425,6 @@
                 </uib-tabset>
 
             </div>
-
-            <div class="aside-footer">
-                <small>-</small>
-            </div>
-
         </div>
     </div>
 </div>

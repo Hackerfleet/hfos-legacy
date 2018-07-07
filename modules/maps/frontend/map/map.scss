@@ -23,7 +23,7 @@
 }
 
 .aside {
-  z-index: 101;
+  z-index: 10002;
 }
 
 .layer-toggle {
@@ -58,6 +58,11 @@
   padding-left: 10px;
 }
 
+#map-sidebar > div > div.tab-content {
+  max-height: calc(100vh - 175px);
+  overflow-y: auto;
+}
+
 #map-sidebar .pull-right .fa {
   color: $color-gray-light;
   &:hover {
@@ -76,8 +81,9 @@
 
 #map-sidebar .tab-content {
   margin: 10px;
-  min-width: 30vw;
-  max-width: 30vw;
+  min-width: 320px;
+  max-width: 320px;
+  overflow-wrap: break-word;
 }
 
 #layer_selector, #layergroup_selector {
