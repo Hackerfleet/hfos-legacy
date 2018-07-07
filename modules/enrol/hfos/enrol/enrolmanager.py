@@ -42,7 +42,7 @@ from hfos.events.system import authorizedevent, anonymousevent
 from hfos.events.client import send
 from hfos.database import objectmodels
 from hfos.logger import warn, debug, verbose, error, hilight
-from hfos.tools import std_uuid, std_now, std_hash, std_salt, _, std_human_uid
+from hfos.misc import std_uuid, std_now, std_hash, std_salt, _, std_human_uid
 from pystache import render
 from email.mime.text import MIMEText
 from smtplib import SMTP, SMTP_SSL
@@ -179,6 +179,12 @@ class EnrolManager(ConfigurableComponent):
                            'verify',
             'default': False
         },
+        'no_verify': {
+            'type': 'boolean',
+            'title': 'Skip verification',
+            'description': 'Automatically accept all users immediately',
+            'default': False
+        },
         'group_accept_invited': {
             'type': 'string',
             'description': 'Group to add invited and accepted users to - use commas to specify more than one',
@@ -247,6 +253,15 @@ the friendly robot of {{node_name}}
 
         super(EnrolManager, self).__init__("ENROL", *args, **kwargs)
 
+        self._setup()
+        self.log("Started")
+
+    def reload_configuration(self, event):
+        super(EnrolManager, self).reload_configuration(event)
+        self.log('Reloaded configuration.')
+        self._setup()
+
+    def _setup(self):
         self.image_captcha = ImageCaptcha(fonts=['/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf'])
 
         self.captchas = {}
@@ -272,7 +287,7 @@ the friendly robot of {{node_name}}
         self.salt = salt
         self.systemconfig = systemconfig
 
-        self.log("Started")
+        self.log("Set up done", lvl=verbose)
 
     def _fail(self, event, msg="Error"):
         self.log('Sending failure feedback to', event.client.uuid, lvl=debug)
@@ -380,7 +395,7 @@ the friendly robot of {{node_name}}
     def enrol(self, event):
         """A user tries to self-enrol with the enrolment form"""
 
-        if self.systemconfig.allowregister is False:
+        if self.config.allow_registration is False:
             self.log('Someone tried to register although enrolment is closed.')
             return
 
@@ -425,7 +440,7 @@ the friendly robot of {{node_name}}
             return
 
         self.log('Provided data is good to enrol.')
-        if self.config.auto_accept_enrolled:
+        if self.config.no_verify:
             self._create_user(username, password, mail, 'Enrolled', uuid)
         else:
             self._invite(username, 'Enrolled', mail, uuid, password)
@@ -445,7 +460,7 @@ the friendly robot of {{node_name}}
                 self.log('Enrollment found', lvl=debug)
                 if enrollment.status == 'Open':
                     self.log('Enrollment is still open', lvl=debug)
-                    if enrollment.method in ('Invited', 'Manual') and self.config.auto_accept_invited:
+                    if enrollment.method == 'Invited' and self.config.auto_accept_invited:
                         enrollment.status = 'Accepted'
 
                         data = 'You should have received an email with your new password ' \
@@ -455,6 +470,14 @@ the friendly robot of {{node_name}}
 
                         self._create_user(enrollment.name, password, enrollment.email, enrollment.method, uuid)
                         self._send_acceptance(enrollment, password)
+                    elif enrollment.method == 'Enrolled' and self.config.auto_accept_enrolled:
+                        enrollment.status = 'Accepted'
+                        data = 'Your account is now activated.'
+
+                        self._create_user(enrollment.name, enrollment.password, enrollment.email, enrollment.method, uuid)
+
+                        # TODO: Evaluate if sending an acceptance mail makes sense
+                        # self._send_acceptance(enrollment, "")
                     else:
                         enrollment.status = 'Pending'
                         data = 'Someone has to confirm your enrollment ' \
@@ -528,7 +551,11 @@ the friendly robot of {{node_name}}
         self.log('Deleting user')
 
         user_object = objectmodels['user'].find_one({'uuid': event.data})
+        profile_object = objectmodels['profile'].find_one({'owner': event.data})
+
         user_object.delete()
+        profile_object.delete()
+
         self.log('User deleted:', user_object.name)
         self._acknowledge(event, event.data)
 
@@ -764,3 +791,6 @@ the friendly robot of {{node_name}}
                 self.log('Could not send email to enrollee, mailserver timeout:', e, lvl=error)
                 return
             self.log('Server response:', response_send)
+
+        else:
+            self.log('Not sending mail, here it is for debugging info:', mail, pretty=True)
