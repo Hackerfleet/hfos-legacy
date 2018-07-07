@@ -53,21 +53,22 @@ SystemconfigSchema['properties'].update({
         'title': 'Description',
         'description': 'System description'
     },
-    'allowregister': {
-        'type': 'boolean', 'title': 'Registration open',
-        'description': 'Allow self registration of new users'
+    'contact': {
+        'type': 'string', 'title': 'Contact',
+        'description': 'Contact e-mail address'
     },
-    'vesseluuid': uuid_object('Associated Vessel Unique ID'),
-    'defaultmapviewuuid': uuid_object('Default Mapview Unique ID'),
-    'defaultdashboarduuid': uuid_object('Default Dashboard Unique ID'),
-    'defaulttaskgriduuid': uuid_object('Default Taskgrid Unique ID'),
+    # TODO: This should probably be an extension of a future themes pack
     'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
                      'description': 'Default theme used for user '
                                     'interface'},
     'hostname': {'type': 'string', 'title': 'Public hostname',
                  'description': 'Public FQDN hostname to use for internet '
                                 'based services (host.domain.tld)',
-                 'default': 'localhost'}
+                 'default': 'localhost'},
+    'modules': {
+        'type': 'object',
+        'default': {}
+    }
 })
 
 SystemconfigForm = [
@@ -86,21 +87,28 @@ SystemconfigForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    {'key': 'active', 'readonly': True}, 'allowregister'
+                    {'key': 'active', 'readonly': True}
                 ]
             },
             {
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    lookup_field('defaultmapviewuuid', 'mapview'),
-                    lookup_field('defaultdashboarduuid', 'dashboardconfig'),
-                    lookup_field('defaulttaskgriduuid', 'taskgridconfig')
                 ]
             }
         ]
     },
-
+    {
+        'id': 'modules',
+        'type': 'section',
+        'htmlClass': 'row',
+        'items': [
+            {
+                'type': 'help',
+                'helpvalue': '<h2>Default module configurations</h2>'
+            }
+        ]
+    },
     'description',
     savebutton
 ]

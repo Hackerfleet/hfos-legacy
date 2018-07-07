@@ -102,9 +102,10 @@ ClientconfigSchema['properties'].update({
         'type': 'array',
         'items': ScreenRotationSchema
     },
-    'mapviewuuid': uuid_object('Associated Unique Mapview ID'),
-    'dashboarduuid': uuid_object('Associated Unique Dashboard ID'),
-    'taskgriduuid': uuid_object('Associated Unique Task Grid ID'),
+    'modules': {
+        'type': 'object',
+        'default': {}
+    }
 })
 
 ClientconfigForm = [
@@ -126,18 +127,6 @@ ClientconfigForm = [
                     {'key': 'active', 'readonly': True}, 'locked', 'autologin'
                 ]
             }
-        ]
-    },
-    {
-        'type': 'section',
-        'htmlClass': 'row',
-        'items': [
-            lookup_field('taskgriduuid', 'taskgridconfig',
-                         html_class='col-xs-4'),
-            lookup_field('dashboarduuid', 'dashboardconfig',
-                         html_class='col-xs-4'),
-            lookup_field('mapviewuuid', 'mapview',
-                         html_class='col-xs-4'),
         ]
     },
     {
@@ -164,6 +153,17 @@ ClientconfigForm = [
         ]
     },
     'description',
+    {
+        'id': 'modules',
+        'type': 'section',
+        'htmlClass': 'row',
+        'items': [
+            {
+                'type': 'help',
+                'helpvalue': '<h2>Default module configurations</h2>'
+            }
+        ]
+    },
     savebutton
 ]
 

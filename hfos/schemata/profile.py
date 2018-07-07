@@ -79,6 +79,10 @@ ProfileSchema['properties'].update({
             'image': {'type': 'string'}
         }
     },
+    'modules': {
+        'type': 'object',
+        'default': {}
+    },
     "components": {
         "id": "#profile.components",
         "type": "object",
@@ -150,10 +154,7 @@ ProfileSchema['properties'].update({
                                  "title": "Menuitem size"},
                     }
                 }
-            },
-            'mapviewuuid': uuid_object('Default Unique Mapview ID'),
-            'taskgriduuid': uuid_object('Default Unique Taskgrid ID'),
-            'dashboarduuid': uuid_object('Default Unique Dashboard ID')
+            }
         }
     },
     "alertconfig": {
@@ -200,13 +201,14 @@ ProfileForm = [
                     'userdata.nick', 'userdata.phone', 'userdata.visa'
                 ]
             },
-            {
-                'type': 'section',
-                'htmlClass': 'col-xs-4',
-                'items': [
-                    country_field('userdata.country'), '', ''
-                ]
-            }
+            # TODO: That is too much for a form:
+            # {
+            #     'type': 'section',
+            #     'htmlClass': 'col-xs-4',
+            #     'items': [
+            #         country_field('userdata.country'), '', ''
+            #     ]
+            # }
         ]
     },
     {
@@ -234,19 +236,17 @@ ProfileForm = [
     },
     'settings.notifications',
     {
+        'id': 'modules',
         'type': 'section',
         'htmlClass': 'row',
         'items': [
             {
                 'type': 'help',
                 'helpvalue': '<h2>Default module configurations</h2>'
-            },
-            lookup_field('settings.dashboarduuid', 'dashboardconfig', 'Select a Dashboard', 'col-xs-4'),
-            lookup_field('settings.taskgriduuid', 'taskgridconfig', 'Select a Dashboard', 'col-xs-4'),
-            lookup_field('settings.mapviewuuid', 'mapview', 'Select a Dashboard', 'col-xs-4'),
-        ],
+            }
+        ]
     },
-    #'alertconfig',
+    # 'alertconfig',
     'userdata.notes',
     savebutton
 ]
