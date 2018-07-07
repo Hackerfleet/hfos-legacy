@@ -108,6 +108,15 @@ class hfosEvent(Event):
     pass
 
 
+class reload_configuration(hfosEvent):
+    """Instructs a component to reload its configuration"""
+
+    def __init__(self, target, *args, **kwargs):
+        super(reload_configuration, self).__init__(*args, **kwargs)
+        self.target = target
+        hfoslog('Reload of configuration triggered', lvl=events)
+
+
 class anonymousevent(hfosEvent):
     """Base class for events for logged in users."""
 
