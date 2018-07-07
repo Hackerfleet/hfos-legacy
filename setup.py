@@ -90,8 +90,7 @@ setup(name="hfos",
                 'hfos.provisions'],
       namespace_packages=['hfos'],
       scripts=[
-          'hfos_launcher.py',
-          'hfos_manage.py',
+          'iso',
       ],
       long_description="""HFOS - The Hackerfleet Operating System
 =======================================
