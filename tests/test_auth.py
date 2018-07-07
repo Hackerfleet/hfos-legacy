@@ -35,7 +35,7 @@ from circuits import Manager
 import pytest
 from hfos.ui.auth import Authenticator
 from hfos.events.client import authenticationrequest, authentication
-from hfos.tools import std_uuid
+from hfos.misc import std_uuid
 import hfos.logger as logger
 
 # from pprint import pprint
