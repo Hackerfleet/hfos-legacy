@@ -23,8 +23,6 @@ __license__ = "AGPLv3"
 
 from setuptools import setup, find_packages
 
-print(find_packages())
-
 setup(name="hfos-busrepeater",
       version="0.0.1",
       description="hfos-busrepeater",
