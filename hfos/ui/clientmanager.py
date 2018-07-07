@@ -52,7 +52,7 @@ from hfos.logger import error, warn, critical, debug, info, network, \
     verbose, hilight
 from hfos.ui.clientobjects import Socket, Client, User
 from hfos.debugger import cli_register_event
-from hfos.tools import std_table
+from hfos.misc import std_table
 
 
 class cli_users(Event):
@@ -148,7 +148,7 @@ class ClientManager(ConfigurableComponent):
         """Display known details about a given client"""
         client = self._clients[args[0]]
 
-        self.log(client.uuid, client.ip, client.name, client.useruuid, pretty=True)
+        self.log('UUID:', client.uuid, 'IP:', client.ip, 'Name:', client.name, 'User:', client.useruuid, pretty=True)
 
     @handler('cli_clients')
     def client_list(self, *args):

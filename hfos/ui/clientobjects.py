@@ -35,7 +35,7 @@ User:
 
 """
 
-from hfos.tools import std_human_uid
+from hfos.misc import std_human_uid
 
 
 class Socket(object):
@@ -78,6 +78,9 @@ class Client(object):
         else:
             self.name = name
         self.config = config
+
+    def __repr__(self):
+        return self.name
 
 
 class User(object):

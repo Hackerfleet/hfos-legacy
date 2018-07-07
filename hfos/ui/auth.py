@@ -39,7 +39,7 @@ from hfos.events.client import authentication, send
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
 from hfos.logger import error, warn, debug
-from hfos.tools import std_hash, std_salt, std_uuid, std_now
+from hfos.misc import std_hash, std_salt, std_uuid, std_now, std_human_uid
 
 
 class AuthenticationError(Exception):
@@ -245,8 +245,8 @@ class Authenticator(ConfigurableComponent):
 
             client_config = objectmodels['client']({'uuid': uuid})
 
-            client_config.name = "New client"
-            # TODO: Replace with std_human_uid(kind='places'):
+            client_config.name = std_human_uid(kind='place')
+
             client_config.description = "New client configuration from " + user_account.name
             client_config.owner = user_account.uuid
 
