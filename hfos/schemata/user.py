@@ -55,6 +55,7 @@ UserSchema['properties'].update({
         'type': 'boolean',
         'default': False,
     },
+    # TODO: Decide if this should be an extension of the enrol module
     'mail': {
         'type': 'string'
     },
