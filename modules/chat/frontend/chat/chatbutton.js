@@ -28,7 +28,7 @@
 
 import chatbuttontemplate from './chat_button.tpl.html';
 
-let chatbutton = function ($compile) {
+let chatbutton = function () {
     return {
         restrict: 'E',
         scope: {},

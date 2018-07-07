@@ -34,7 +34,7 @@
 
 class alertservice {
     
-    constructor(user, notification, interval, timeout, socket, rootscope) {
+    constructor(user, notification, interval, timeout, socket, rootscope, navbar) {
         this.user = user;
         this.notification = notification;
         this.interval = interval;
@@ -42,12 +42,15 @@ class alertservice {
         this.socket = socket;
         this.rootscope = rootscope;
 
+        navbar.add('alertbutton');
+
         this.blink_state = 0;
         this.blinker = null;
         this.triggered = false;
         this.alert = null;
         this.action = null;
-        
+
+
         let self = this;
 
         this.blink_stop = function() {
@@ -125,6 +128,6 @@ class alertservice {
     }
 }
 
-alertservice.$inject = ['user', 'notification', '$interval', '$timeout', 'socket', '$rootScope'];
+alertservice.$inject = ['user', 'notification', '$interval', '$timeout', 'socket', '$rootScope', 'navbar'];
 
 export default alertservice;

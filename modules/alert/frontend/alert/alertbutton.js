@@ -28,12 +28,12 @@
 
 import alertbuttontemplate from './alert_button.tpl.html';
 
-let alertbutton = function ($compile) {
+let alertbutton = function () {
     return {
         restrict: 'E',
         scope: {},
         template: alertbuttontemplate,
-        controller: function($scope, alertservice, $state) {
+        controller: function($scope, alertservice) {
             console.log('[ALERTBUTTON] Running');
             $scope.alert = alertservice;
         }

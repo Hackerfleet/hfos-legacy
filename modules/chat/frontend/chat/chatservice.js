@@ -10,13 +10,16 @@
 
 class chatservice {
 
-    constructor(user, notification, interval, socket, rootscope, $timeout, objectproxy) {
+    constructor(user, notification, interval, socket, rootscope, $timeout, objectproxy, navbar) {
         this.user = user;
         this.notification = notification;
         this.interval = interval;
         this.socket = socket;
         this.rootscope = rootscope;
         this.op = objectproxy;
+        this.navbar = navbar;
+
+        this.navbar.add('chatbutton');
 
         this.messages = {};
         this.channels = {};
@@ -283,6 +286,6 @@ class chatservice {
 
 }
 
-chatservice.$inject = ['user', 'notification', '$interval', 'socket', '$rootScope', '$timeout', 'objectproxy'];
+chatservice.$inject = ['user', 'notification', '$interval', 'socket', '$rootScope', '$timeout', 'objectproxy', 'navbar'];
 
 export default chatservice;
