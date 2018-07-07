@@ -37,7 +37,7 @@ def test_systemconfig_provision():
 
     from hfos.provisions.system import provision
 
-    assert callable(provision)
+    assert isinstance(provision, dict)
 
 
 def test_user_provision():
@@ -45,4 +45,4 @@ def test_user_provision():
 
     from hfos.provisions.user import provision
 
-    assert callable(provision)
+    assert isinstance(provision, dict)
