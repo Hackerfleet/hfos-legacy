@@ -184,6 +184,7 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                     reqfile = os.path.join(origin, 'requirements.txt')
 
                     if os.path.exists(reqfile):
+                        # TODO: Speed this up by collecting deps first then doing one single install call
                         hfoslog("Installing package dependencies", lvl=debug,
                                 emitter='BUILDER')
                         with open(reqfile, 'r') as f:
