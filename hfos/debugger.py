@@ -47,12 +47,13 @@ from hfos.logger import hfoslog, critical, error, warn, debug, verbose, verbosit
 
 try:
     import objgraph
-    from guppy import hpy
 except ImportError:
     objgraph = None
+
+try:
+    from guppy import hpy
+except ImportError:
     hpy = None
-    hfoslog("Debugger couldn't import objgraph and/or guppy.", lvl=warn,
-            emitter="DBG")
 
 
 class clicommand(Event):
@@ -98,6 +99,11 @@ class cli_log_level(Event):
     pass
 
 
+class cli_compgraph(Event):
+    """Draw current component graph"""
+    pass
+
+
 class HFDebugger(ConfigurableComponent):
     """
     Handles various debug requests.
@@ -126,16 +132,19 @@ class HFDebugger(ConfigurableComponent):
             # noinspection PyCallingNonCallable
             self.heapy = hpy()
         else:
-            self.log("Can't use heapy. guppy package missing?")
+            self.log("Cannot use heapy. guppy package missing?", lvl=warn)
+
+        if objgraph is None:
+            self.log("Cannot use objgraph.", lvl=warn)
 
         try:
             self.fireEvent(cli_register_event('errors', cli_errors))
             self.fireEvent(cli_register_event('log_level', cli_log_level))
+            self.fireEvent(cli_register_event('compgraph', cli_compgraph))
         except AttributeError:
             pass  # We're running in a test environment and root is not yet running
 
-        self.log("Started. Notification users: ",
-                 self.config.notificationusers)
+        self.log("Started. Notification users: ", self.config.notificationusers)
 
     @handler("cli_errors")
     def cli_errors(self, *args):
@@ -144,7 +153,6 @@ class HFDebugger(ConfigurableComponent):
         for logline in LiveLog:
             if logline[1] >= error:
                 self.log(logline, pretty=True)
-
 
     @handler("cli_log_level")
     def cli_log_level(self, *args):
@@ -195,6 +203,22 @@ class HFDebugger(ConfigurableComponent):
             self.log("Exception during exception handling: ", e, type(e),
                      lvl=critical)
 
+    @handler('cli_compgraph')
+    def cli_compgraph(self, event):
+        self.log('Drawing component graph')
+        from circuits.tools import graph
+
+        graph(self)
+        self._drawgraph()
+
+    def _drawgraph(self):
+        objgraph.show_backrefs([self.root],
+                               max_depth=5,
+                               filter=lambda x: type(x) not in [list, tuple, set],
+                               highlight=lambda x: type(x) in [ConfigurableComponent],
+                               filename='backref-graph.png')
+        self.log("Backref graph written.", lvl=critical)
+
     @handler(debugrequest)
     def debugrequest(self, event):
         """Handler for client-side debug requests"""
@@ -214,9 +238,7 @@ class HFDebugger(ConfigurableComponent):
                 self.log("Memory growth since last call:", lvl=critical)
                 objgraph.show_growth()
             if event.data == "graph":
-                objgraph.show_backrefs([self.root], max_depth=42,
-                                       filename='backref-graph.png')
-                self.log("Backref graph written.", lvl=critical)
+                self._drawgraph()
             if event.data == "exception":
                 class TestException(BaseException):
                     """Generic exception to test exception monitoring"""
@@ -295,7 +317,7 @@ class CLI(ConfigurableComponent):
                 self.fireEvent(componentupdaterequest(force=False), "setup")
             else:
                 self.log('Unknown Command:', cmd, '. Use /help to get a list of enabled '
-                         'cli hooks')
+                                                  'cli hooks')
 
     @handler('cli_help')
     def cli_help(self, *args):
@@ -327,5 +349,5 @@ class CLI(ConfigurableComponent):
         """Registers a new command line interface event hook as command"""
 
         self.log('Registering event hook:', event.cmd, event.thing,
-                 pretty=True, lvl=debug)
+                 pretty=True, lvl=verbose)
         self.hooks[event.cmd] = event.thing
