@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import hfos.tool.templates
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -38,7 +39,7 @@ from tempfile import NamedTemporaryFile
 # from datetime import datetime
 import dateutil.parser
 
-from hfos import tools
+from hfos import misc
 from collections import namedtuple
 
 template = """Hello {{placeholder}}!"""
@@ -49,14 +50,14 @@ content = {
 
 
 def test_uuid():
-    uuid = tools.std_uuid()
+    uuid = misc.std_uuid()
 
     assert isinstance(uuid, str)
     assert re.match('(\w{8}(-\w{4}){3}-\w{12}?)', uuid)
 
 
 def test_std_now():
-    now = tools.std_now()
+    now = misc.std_now()
 
     assert isinstance(now, str)
 
@@ -72,14 +73,14 @@ def test_std_table():
         Row("1", "2")
     ]
 
-    table = tools.std_table(rows)
+    table = misc.std_table(rows)
 
     rows.append(Row("345", "6"))
-    table = tools.std_table(rows)
+    table = misc.std_table(rows)
 
 
 def test_format_template():
-    result = tools.format_template(template, content)
+    result = hfos.tool.templates.format_template(template, content)
 
     assert result == 'Hello HFOS dev!'
 
@@ -90,7 +91,7 @@ def test_format_template_file():
                             delete=True) as f:
         f.write(template.encode('utf-8'))
         f.flush()
-        result = tools.format_template_file(f.name, content)
+        result = hfos.tool.templates.format_template_file(f.name, content)
 
     assert result == 'Hello HFOS dev!'
 
@@ -103,7 +104,7 @@ def test_write_template_file():
         f.flush()
 
         target = f.name + '_filled'
-        tools.write_template_file(f.name, target, content)
+        hfos.tool.templates.write_template_file(f.name, target, content)
 
         with open(target, 'r') as tf:
             result = tf.readline()
