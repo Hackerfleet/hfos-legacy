@@ -337,6 +337,14 @@ class ConfigurableMeta(LoggingMeta):
 
             # self.log("Fields:", self.config._fields, lvl=verbose)
 
+    @handler('reload_configuration')
+    def reload_configuration(self, event):
+        """Event triggered configuration reload"""
+
+        if event.target == self.uniquename:
+            self.log('Reloading configuration')
+            self._read_config()
+
 
 class LoggingComponent(LoggingMeta, Component):
     """Logging capable component for simple HFOS components"""
