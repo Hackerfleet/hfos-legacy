@@ -1,11 +1,10 @@
+import gettext
 from datetime import datetime
-from pprint import pprint
 from uuid import uuid4
+
+import os
 from hashlib import sha512
 from random import choice
-
-import gettext
-import os
 
 localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locale')
 translate = gettext.translation('hfos', localedir, fallback=True)
@@ -200,81 +199,6 @@ def std_table(rows):
             result += "%*s = %s" % (hwidth, row._fields[i], row[i]) + "\n"
 
     return result
-
-
-def format_template(template, content):
-    """Render a given pystache template
-    with given content"""
-
-    import pystache
-    result = u""
-    if True:  # try:
-        result = pystache.render(template, content, string_encoding='utf-8')
-    # except (ValueError, KeyError) as e:
-    #    print("Templating error: %s %s" % (e, type(e)))
-
-    # pprint(result)
-    return result
-
-
-def format_template_file(filename, content):
-    """Render a given pystache template file with given content"""
-
-    with open(filename, 'r') as f:
-        template = f.read()
-        if type(template) != str:
-            template = template.decode('utf-8')
-
-    return format_template(template, content)
-
-
-def write_template_file(source, target, content):
-    """Write a new file from a given pystache template file and content"""
-
-    # print(formatTemplateFile(source, content))
-    print(target)
-    data = format_template_file(source, content)
-    with open(target, 'w') as f:
-        for line in data:
-            if type(line) != str:
-                line = line.encode('utf-8')
-            f.write(line)
-
-
-def insert_nginx_service(definition):  # pragma: no cover
-    """Insert a new nginx service definition"""
-
-    config_file = '/etc/nginx/sites-available/hfos.conf'
-    splitter = "### SERVICE DEFINITIONS ###"
-
-    with open(config_file, 'r') as f:
-        old_config = "".join(f.readlines())
-
-    pprint(old_config)
-
-    if definition in old_config:
-        print("Service definition already inserted")
-        return
-
-    parts = old_config.split(splitter)
-    print(len(parts))
-    if len(parts) != 3:
-        print("Nginx configuration seems to be changed and cannot be "
-              "extended automatically anymore!")
-        pprint(parts)
-        return
-
-    try:
-        with open(config_file, "w") as f:
-            f.write(parts[0])
-            f.write(splitter + "\n")
-            f.write(parts[1])
-            for line in definition:
-                f.write(line)
-            f.write("\n    " + splitter)
-            f.write(parts[2])
-    except Exception as e:
-        print("Error during Nginx configuration extension:", type(e), e)
 
 
 def std_salt(length=16, lowercase=True):
