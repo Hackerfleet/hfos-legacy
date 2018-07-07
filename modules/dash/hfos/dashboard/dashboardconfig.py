@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos.schemata.extends import DefaultExtension
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -130,4 +131,9 @@ DashboardForm = [
     editbuttons
 ]
 
-DashboardConfig = {'schema': DashboardSchema, 'form': DashboardForm}
+DashboardExtends = DefaultExtension(
+    {'dashboarduuid': uuid_object('Default Dashboard')},
+    lookup_field('modules.dashboarduuid', 'dashboardconfig')
+)
+
+DashboardConfig = {'schema': DashboardSchema, 'form': DashboardForm, 'extends': DashboardExtends}

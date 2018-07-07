@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos.schemata.extends import DefaultExtension
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -118,4 +119,19 @@ MapViewForm = [
     editbuttons
 ]
 
-MapView = {'schema': MapViewSchema, 'form': MapViewForm}
+MapViewExtends = DefaultExtension(
+    {'mapviewuuid': uuid_object('Default Mapview')},
+    lookup_field('modules.mapviewuuid', 'mapview')
+)
+
+MapView = {
+    'schema': MapViewSchema,
+    'form': MapViewForm,
+    'extends': MapViewExtends,
+    'indices': {
+        'name': {
+            'type': 'text',
+            'reindex': True
+        }
+    }
+}

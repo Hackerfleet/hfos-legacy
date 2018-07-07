@@ -401,4 +401,28 @@ VesselForm = [
     }
 ]
 
-VesselData = {'schema': VesselSchema, 'form': VesselForm}
+VesselExtends = {
+    'systemconfig': {
+        'schema': {
+            "properties/": [
+                {
+                    'vesseluuid': uuid_object('Associated Vessel Unique ID'),
+                }
+            ]
+        }
+    }
+}
+
+VesselIndices = {
+    'geojson': {
+        'type': '2dsphere',
+        'reindex': True
+    }
+}
+
+VesselData = {
+    'schema': VesselSchema,
+    'form': VesselForm,
+    'extends': VesselExtends,
+    'indices': VesselIndices,
+}
