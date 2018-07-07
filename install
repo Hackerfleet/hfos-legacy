@@ -72,8 +72,8 @@ if VERB="$( which apt-get )" 2> /dev/null; then
 
     systemctl start mongodb.service &>> output.log
 
-    venv/bin/python hfos_manage.py install all &>> output.log
-    venv/bin/python hfos_manage.py install frontend --dev &>> output.log
+    venv/bin/python iso install all &>> output.log
+    venv/bin/python iso install frontend --dev &>> output.log
 
     echo "All Done! Visit your new Installation by opening a browser and surfing to:"
     echo
