@@ -30,20 +30,12 @@ Module NMEA
 
 """
 
-import time
-import sys
-import glob
 import ais
+from circuits import Event
+from hfos.navdata.bus import register_protocol
 
-from circuits import Component, Timer, Event
-from circuits.net.sockets import TCPClient
-from circuits.net.events import connect, read
-from circuits.io.serial import Serial
-from decimal import Decimal
-from hfos.component import ConfigurableComponent, handler
-from hfos.database import ValidationError
-from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
-from hfos.navdata.bus import register_protocol, start_scanner
+from hfos.component import ConfigurableComponent
+from hfos.logger import verbose, warn
 
 
 # from pprint import pprint
