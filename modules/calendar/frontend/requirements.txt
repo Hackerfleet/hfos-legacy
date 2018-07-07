@@ -1,0 +1,2 @@
+angular-ui-calendar@1.0.2
+fullcalendar@3.6.2
