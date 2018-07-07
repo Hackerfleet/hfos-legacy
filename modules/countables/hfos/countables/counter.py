@@ -32,9 +32,7 @@ Module: Countables
 
 from hfos.component import ConfigurableComponent, handler
 from hfos.database import objectmodels
-from hfos.logger import hfoslog, error, warn, critical, events
 from hfos.events.system import authorizedevent
-from pprint import pprint
 
 
 class increment(authorizedevent):
