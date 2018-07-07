@@ -36,30 +36,27 @@ Basic functionality around provisioning.
 
 from jsonschema import ValidationError
 from hfos.logger import hfoslog, debug, verbose, warn, error
-from hfos.database import objectmodels, dbhost, dbport, dbname
 
 
 def log(*args, **kwargs):
     """Log as Emitter:MANAGE"""
 
-    kwargs.update({'emitter': 'PROVISIONS'})
+    kwargs.update({'emitter': 'PROVISIONS', 'frame_ref': 2})
     hfoslog(*args, **kwargs)
 
 
-def provisionList(items, dbobject, overwrite=False, clear=False,
-                  indices=None, indices_types=None, indices_unique=None,
-                  skip_user_check=False):
+def provisionList(items, database_name, overwrite=False, clear=False, skip_user_check=False):
     """Provisions a list of items according to their schema
 
     :param items: A list of provisionable items.
-    :param dbobject: A warmongo database object
+    :param database_object: A warmongo database object
     :param overwrite: Causes existing items to be overwritten
     :param clear: Clears the collection first (Danger!)
-    :param indices: Creates indices for the given fields
-    :param indices_types: Optional list of indices-types for each indexed field
+    :param skip_user_check: Skips checking if a system user is existing already (for user provisioning)
     :return:
     """
 
+    log('Provisioning', items, database_name, lvl=debug)
     system_user = None
 
     def get_system_user():
@@ -86,7 +83,11 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
         return False
 
     import pymongo
+    from hfos.database import objectmodels, dbhost, dbport, dbname
 
+    database_object = objectmodels[database_name]
+
+    log(dbhost, dbname)
     # TODO: Fix this to make use of the dbhost
 
     client = pymongo.MongoClient(dbhost, dbport)
@@ -99,12 +100,12 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
             return
     else:
         # TODO: Evaluate what to do instead of using a hardcoded UUID
-        # This is ususally only here for provisioning the system user
+        # This is usually only here for provisioning the system user
         # One way to avoid this, is to create (instead of provision)
         # this one upon system installation.
         system_user = '0ba87daa-d315-462e-9f2e-6091d768fd36'
 
-    col_name = dbobject.collection_name()
+    col_name = database_object.collection_name()
 
     if clear is True:
         log("Clearing collection for", col_name, lvl=warn)
@@ -116,16 +117,16 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
         item_uuid = item['uuid']
         log("Validating object (%i/%i):" % (no + 1, len(items)), item_uuid, lvl=debug)
 
-        if dbobject.count({'uuid': item_uuid}) > 0:
+        if database_object.count({'uuid': item_uuid}) > 0:
             log('Object already present', lvl=warn)
             if overwrite is False:
                 log("Not updating item", item, lvl=warn)
             else:
                 log("Overwriting item: ", item_uuid, lvl=warn)
-                new_object = dbobject.find_one({'uuid': item_uuid})
+                new_object = database_object.find_one({'uuid': item_uuid})
                 new_object._fields.update(item)
         else:
-            new_object = dbobject(item)
+            new_object = database_object(item)
 
         if new_object is not None:
             try:
@@ -143,18 +144,5 @@ def provisionList(items, dbobject, overwrite=False, clear=False,
             except ValidationError as e:
                 raise ValidationError(
                     "Could not provision object: " + str(item_uuid), e)
-
-    if indices is not None:
-        col = db[col_name]
-        for index, index_name, unique in zip(indices, indices_types, indices_unique):
-            if index_name in (None, 'text'):
-                index_type = pymongo.TEXT
-            elif index_name == '2dsphere':
-                index_type = pymongo.GEOSPHERE
-            log('Enabling index of type', index_type, 'on', index)
-            col.ensure_index([(index, index_type)], unique=unique)
-
-            # for index in col.list_indexes():
-            #    log("Index: ", index)
 
     log("Provisioned %i out of %i items successfully." % (counter, len(items)))
