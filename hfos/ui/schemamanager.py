@@ -40,6 +40,11 @@ from hfos.logger import warn, debug, error  # , hilight
 from hfos.component import handler
 
 
+class cli_schema(Event):
+    """Display a specified schema"""
+    pass
+
+
 class cli_schemata(Event):
     """Display all registered schemata"""
     pass
@@ -72,6 +77,7 @@ class SchemaManager(ConfigurableComponent):
     def __init__(self, *args):
         super(SchemaManager, self).__init__('SM', *args)
 
+        self.fireEvent(cli_register_event('schema', cli_schema))
         self.fireEvent(cli_register_event('schemata', cli_schemata))
         self.fireEvent(cli_register_event('form', cli_form))
         self.fireEvent(cli_register_event('forms', cli_forms))
@@ -87,7 +93,39 @@ class SchemaManager(ConfigurableComponent):
 
     @handler('cli_form')
     def cli_form(self, *args):
-        self.log(schemastore[args[0]]['form'], pretty=True)
+        if args[0] == '*':
+            for schema in schemastore:
+                self.log(schema, ':', schemastore[schema]['form'], pretty=True)
+        else:
+            self.log(schemastore[args[0]]['form'], pretty=True)
+
+    @handler('cli_schema')
+    def cli_schema(self, *args):
+        key = None
+        if len(args) > 1:
+            key = args[1]
+
+        def output(schema):
+            self.log("%s :" % schema)
+            if key == 'props':
+                self.log(schemastore[schema]['schema']['properties'], pretty=True)
+            elif key == 'perms':
+                try:
+                    self.log(schemastore[schema]['schema']['roles_create'], pretty=True)
+                except KeyError:
+                    self.log('Schema', schema, 'has no role for creation', lvl=warn)
+                try:
+                    self.log(schemastore[schema]['schema']['properties']['perms']['properties'], pretty=True)
+                except KeyError:
+                    self.log('Schema', schema, 'has no permissions', lvl=warn)
+            else:
+                self.log(schemastore[schema]['schema'], pretty=True)
+
+        if args[0] == '*':
+            for schema in schemastore:
+                output(schema)
+        else:
+            output(args[0])
 
     @handler('cli_forms')
     def cli_forms(self, *args):
