@@ -30,6 +30,7 @@ Module: Configurator
 """
 
 from hfos.events.client import send
+from hfos.events.system import reload_configuration
 from hfos.component import ConfigurableComponent, authorizedevent, handler
 from hfos.schemata.component import ComponentConfigSchemaTemplate as Schema
 from hfos.database import ValidationError
@@ -129,6 +130,8 @@ class Configurator(ConfigurableComponent):
             }
             self.log('Updated component configuration:',
                      component.name)
+
+            self.fireEvent(reload_configuration(component.name))
         except (KeyError, ValueError, ValidationError, PermissionError) as e:
             response = {
                 'component': 'hfos.ui.configurator',
