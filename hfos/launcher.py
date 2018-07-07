@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos import component
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -78,6 +79,19 @@ class cli_components(Event):
 
 class cli_reload_db(Event):
     """Reload database and schemata (Dangerous!) WiP - does nothing right now"""
+    pass
+
+
+class cli_reload(Event):
+    """Reload all components and data models"""
+    pass
+
+
+class cli_quit(Event):
+    """Stop this instance
+
+    Uses sys.exit() to quit.
+    """
     pass
 
 
@@ -218,6 +232,8 @@ class Core(ConfigurableComponent):
         self.fireEvent(cli_register_event('components', cli_components))
         self.fireEvent(cli_register_event('drop_privileges', cli_drop_privileges))
         self.fireEvent(cli_register_event('reload_db', cli_reload_db))
+        self.fireEvent(cli_register_event('reload', cli_reload))
+        self.fireEvent(cli_register_event('quit', cli_quit))
 
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
@@ -243,7 +259,22 @@ class Core(ConfigurableComponent):
     def cli_reload_db(self, event):
         self.log('This command is WiP.')
 
-        #initialize()
+        initialize()
+
+    @handler('cli_reload')
+    def cli_reload(self, event):
+        self.log('Reloading all components.')
+
+        self.update_components(forcereload=True)
+        initialize()
+
+        from hfos.debugger import cli_compgraph
+        self.fireEvent(cli_compgraph())
+
+    @handler('cli_quit')
+    def cli_quit(self, event):
+        self.log('Quitting on CLI request.')
+        sys.exit()
 
     def _start_server(self, *args):
         """Run the node local server"""
@@ -368,8 +399,7 @@ class Core(ConfigurableComponent):
 
     def _start_frontend(self, restart=False):
         self.log(self.config, self.config.frontendenabled, lvl=verbose)
-        if self.config.frontendenabled and not self.frontendrunning \
-            or restart:
+        if self.config.frontendenabled and not self.frontendrunning or restart:
             self.log("Restarting webfrontend services on",
                      self.frontendtarget)
 
@@ -381,10 +411,29 @@ class Core(ConfigurableComponent):
 
     def _instantiate_components(self, clear=True):
         if clear:
+            import objgraph
+            from copy import deepcopy
+            from circuits.tools import kill
+            from circuits import Component
             for comp in self.runningcomponents.values():
-                comp.unregister()
-                comp.stop()
-                del comp
+                self.log(comp, type(comp), isinstance(comp, Component), pretty=True)
+                kill(comp)
+            # removables = deepcopy(list(self.runningcomponents.keys()))
+            #
+            # for key in removables:
+            #     comp = self.runningcomponents[key]
+            #     self.log(comp)
+            #     comp.unregister()
+            #     comp.stop()
+            #     self.runningcomponents.pop(key)
+            #
+            #     objgraph.show_backrefs([comp],
+            #                            max_depth=5,
+            #                            filter=lambda x: type(x) not in [list, tuple, set],
+            #                            highlight=lambda x: type(x) in [ConfigurableComponent],
+            #                            filename='backref-graph_%s.png' % comp.uniquename)
+            #     del comp
+            # del removables
             self.runningcomponents = {}
 
         self.log('Not running blacklisted components: ',
@@ -403,7 +452,8 @@ class Core(ConfigurableComponent):
                     self.log("Component already running: ", name,
                              lvl=warn)
                 else:
-                    runningcomponent = componentdata().register(self)
+                    runningcomponent = componentdata()
+                    runningcomponent.register(self)
                     self.runningcomponents[name] = runningcomponent
             except Exception as e:
                 self.log("Could not register component: ", name, e,
@@ -506,8 +556,6 @@ def launch(run=True, **args):
         from hfos import logger
         logger.live = True
 
-    print(args['dev'])
-
     hfoslog("Running with Python", sys.version.replace("\n", ""),
             sys.platform, lvl=debug, emitter='CORE')
     hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
@@ -515,7 +563,7 @@ def launch(run=True, **args):
         hfoslog("Warning! Using SSL without nginx is currently not broken!",
                 lvl=critical, emitter='CORE')
 
-    hfoslog("Initializing database access", emitter='CORE')
+    hfoslog("Initializing database access", emitter='CORE', lvl=debug)
     initialize(args['dbhost'], args['dbname'], args['instance'])
 
     server = construct_graph(args)
