@@ -1,4 +1,4 @@
-import icon from './assets/iconmonstr-compass-6-icon.svg';
+import icon from './assets/nodestate-icon.svg';
 
 
 export function routing($stateProvider) {
