@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from traceback import format_exception
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -190,7 +191,7 @@ def hfoslog(*what, **kwargs):
 
     emitter = kwargs.get('emitter', 'UNKNOWN')
     traceback = kwargs.get('tb', False)
-
+    frame_ref = kwargs.get('frame_ref', 0)
 
     output = None
 
@@ -199,13 +200,16 @@ def hfoslog(*what, **kwargs):
 
     callee = None
 
+    exception = kwargs.get('exc', False)
+
+    if exception:
+        exc_type, exc_obj, exc_tb = sys.exc_info()  # NOQA
+
     if verbosity['global'] <= debug or traceback:
         # Automatically log the current function details.
 
-        exception = kwargs.get('exc', False)
-
         if 'sourceloc' not in kwargs:
-            frame = kwargs.get('frame', 0)
+            frame = kwargs.get('frame', frame_ref)
 
             # Get the previous frame in the stack, otherwise it would
             # be this function
@@ -218,9 +222,9 @@ def hfoslog(*what, **kwargs):
             # Dump the message + the name of this function to the log.
 
             if exception:
-                exc_type, exc_obj, exc_tb = sys.exc_info()  # NOQA
                 line_no = exc_tb.tb_lineno
-                lvl = error
+                if lvl <= error:
+                    lvl = error
             else:
                 line_no = func.co_firstlineno
 
@@ -256,6 +260,9 @@ def hfoslog(*what, **kwargs):
             content += str(thing)
 
     msg += content
+
+    if exception:
+        msg += "\n" + "".join(format_exception(exc_type, exc_obj, exc_tb))
 
     if is_muted(msg):
         return
