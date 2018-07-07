@@ -1,3 +1,4 @@
+networkx
 # Basics
 setuptools
 git+https://github.com/circuits/circuits.git
