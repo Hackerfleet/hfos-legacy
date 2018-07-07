@@ -34,10 +34,6 @@ Controllables for several predefined functions.
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import controllableobject
-from hfos.logger import hfoslog
-
 Controllables = [
     {
         "uuid": "51358884-0d61-40a7-acd6-e1f35bbfa3c8",
@@ -99,10 +95,4 @@ Controllables = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(Controllables, controllableobject, **kwargs)
-    hfoslog('[PROV] Provisioning: Controllables: Done.')
-
-
-if __name__ == "__main__":
-    provision()
+provision = {'data': Controllables, 'model': 'controllable'}

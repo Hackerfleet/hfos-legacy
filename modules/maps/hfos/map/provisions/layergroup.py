@@ -34,10 +34,6 @@ Predefined groups of layers.
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 layergroups = [
     {
         "name": "Default",
@@ -86,10 +82,4 @@ layergroups = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(layergroups, objectmodels['layergroup'], **kwargs)
-    hfoslog('Provisioning: Layergroups: Done.', emitter='PROVISIONS')
-
-
-if __name__ == "__main__":
-    provision()
+provision = {'data': layergroups, 'model': 'layergroup'}

@@ -37,10 +37,6 @@ Choose a provision that matches your vessel.
 
 # TODO: Allow choosing of predefined provisions.
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 NodeStates = [
     {
         "label-activated": "Online",
@@ -421,7 +417,4 @@ NodeStates = [
     }
 ]
 
-
-def default_provision(**kwargs):
-    provisionList(NodeStates, objectmodels['nodestate'], **kwargs)
-    hfoslog('[PROV] Provisioning: Nodestates: Done.')
+provision = {'data': NodeStates, 'model': 'nodestate'}

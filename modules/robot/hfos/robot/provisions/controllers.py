@@ -34,10 +34,6 @@ Controllables for several predefined functions.
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import controllerobject
-from hfos.logger import hfoslog
-
 Controllers = [
     {'name': 'MS0x00 - Logitech Extreme 3D Pro',
      'description': 'Setup for MS0x00 and a Logitech Extreme 3D Pro Joystick',
@@ -77,10 +73,4 @@ Controllers = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(Controllers, controllerobject, **kwargs)
-    hfoslog('[PROV] Provisioning: Controllers: Done.')
-
-
-if __name__ == "__main__":
-    provision()
+provision = {'data': Controllers, 'model': 'controller'}

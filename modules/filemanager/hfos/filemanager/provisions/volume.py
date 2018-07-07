@@ -34,10 +34,6 @@ Predefined volumes
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 Volumes = [
     # {
     #     'name': 'Default',
@@ -49,6 +45,4 @@ Volumes = [
 ]
 
 
-def provision(*args, **kwargs):
-    provisionList(Volumes, objectmodels['volume'], **kwargs)
-    hfoslog('[PROV] Provisioning: Volumes: Done.')
+provision = {'data': Volumes, 'model': 'volume'}

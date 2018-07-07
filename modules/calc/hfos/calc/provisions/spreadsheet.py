@@ -34,10 +34,6 @@ A default empty spreadsheet (akin to an Index)
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 Spreadsheets = [
     {
         'name': 'Default',
@@ -47,6 +43,4 @@ Spreadsheets = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(Spreadsheets, objectmodels['spreadsheet'], **kwargs)
-    hfoslog('[PROV] Provisioning: Spreadsheets: Done.')
+provision = {'data': Spreadsheets, 'model': 'spreadsheet'}

@@ -34,18 +34,8 @@ Just creates a fulltext searchable index over the name field.
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import projectobject
-from hfos.logger import hfoslog
-
 Projects = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(Projects, projectobject, indices=['name'], **kwargs)
-    hfoslog('[PROV] Provisioning: Project: Done.')
-
-
-if __name__ == "__main__":
-    provision()
+provision = {'data': Projects, 'model': 'project'}

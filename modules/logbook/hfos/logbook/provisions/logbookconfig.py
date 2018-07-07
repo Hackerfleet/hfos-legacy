@@ -34,10 +34,6 @@ Logbooks for ships
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 Logbooks = [
     {
         'name': 'Default',
@@ -49,6 +45,4 @@ Logbooks = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(Logbooks, objectmodels['logbookconfig'], **kwargs)
-    hfoslog('[PROV] Provisioning: Logbooks: Done.')
+provision = {'data': Logbooks, 'model': 'logbookconfig'}

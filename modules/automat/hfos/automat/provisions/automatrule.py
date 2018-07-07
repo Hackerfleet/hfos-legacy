@@ -34,10 +34,6 @@ Predefined automation rules
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 Automata = [
     # {
     #     'name': 'Default',
@@ -48,7 +44,4 @@ Automata = [
     # }
 ]
 
-
-def provision(*args, **kwargs):
-    provisionList(Automata, objectmodels['automatrule'], **kwargs)
-    hfoslog('[PROV] Provisioning: Automata: Done.')
+provision = {'data': Automata, 'model': 'automatrule'}

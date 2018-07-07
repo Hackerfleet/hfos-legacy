@@ -50,6 +50,4 @@ Dashboards = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(Dashboards, objectmodels['dashboardconfig'], **kwargs)
-    hfoslog('[PROV] Provisioning: Dashboards: Done.')
+provision = {'data': Dashboards, 'model': 'dashboardconfig'}

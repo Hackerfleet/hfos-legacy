@@ -50,8 +50,8 @@ This software package is a plugin module for HFOS.
     wikipage=hfos.wiki.wikipage:WikiPage
     wikitemplate=hfos.wiki.wikipage:WikiTemplate
 [hfos.provisions]
-    wikipages=hfos.wiki.provisions.wiki:provisionPages
-    wikitemplate=hfos.wiki.provisions.wiki:provisionTemplates
+    wikipages=hfos.wiki.provisions.pages:provision
+    wikitemplate=hfos.wiki.provisions.templates:provision
     """,
       test_suite="tests.main.main",
       )

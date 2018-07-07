@@ -23,8 +23,8 @@ __license__ = "AGPLv3"
 
 """
 
-Provisioning: Wiki
-==================
+Provisioning: Wiki - Pages
+==========================
 
 Contains
 --------
@@ -33,10 +33,6 @@ Wiki skeleton for ships
 
 
 """
-
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels, initialize
-from hfos.logger import hfoslog
 
 WikiPages = [
     {
@@ -56,31 +52,7 @@ WikiPages = [
     }
 ]
 
-WikiTemplates = [
-    {
-        'name': 'Protocol',
-        'uuid': '14e52e30-4ff7-4d73-9e18-bf9df1803214',
-        'title': 'Simple Meeting protocol from $DD$MM$YY',
-        'slugtemplate': 'protocol-$DD-$MM-$YY',
-        'html': 'This would be a protocol template, once the provision have '
-                'been fleshed out.'
-    },
-    {
-        'name': 'Todo',
-        'uuid': '88ec45e7-7b12-4450-a8f0-290d51290fa3',
-        'title': 'Simple Todo item list for $USER',
-        'slugtemplate': 'todo-$USER-$DD-$MM-$YY',
-        'html': 'This would be a todo template text, once the provision have '
-                'been fleshed out.'
-    }
-]
+
+provision = {'data': WikiPages, 'model': 'wikipage'}
 
 
-def provisionPages(**kwargs):
-    provisionList(WikiPages, objectmodels['wikipage'], **kwargs)
-    hfoslog('WikiPages: Done.', emitter='PROVISIONING')
-
-
-def provisionTemplates(**kwargs):
-    provisionList(WikiTemplates, objectmodels['wikitemplate'], **kwargs)
-    hfoslog('WikiTemplates: Done.', emitter='PROVISIONING')

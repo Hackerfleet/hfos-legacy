@@ -22,32 +22,36 @@ __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 from hfos.logger import hfoslog
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
 from uuid import uuid4
 
-systemvessel = {
+SystemVessel = {
     'name': 'Default System Vessel',
     'uuid': str(uuid4()),
 }
 
 
-def provision(**kwargs):
+def provision_system_vessel(items, database_name, overwrite=False, clear=False, skip_user_check=False):
+    """Provisions the default system vessel"""
+
+    from hfos.provisions.base import provisionList
+    from hfos.database import objectmodels
 
     vessel = objectmodels['vessel'].find_one({'name': 'Default System Vessel'})
     if vessel is not None:
-        if not kwargs.get('overwrite', False):
+        if overwrite is False:
             hfoslog('Default vessel already existing. Skipping provisions.')
             return
         else:
             vessel.delete()
 
-    provisionList([systemvessel], objectmodels['vessel'],
-                  indices=['geojson'], indices_types=['2dsphere'], indices_unique=[False], **kwargs)
+    provisionList([SystemVessel], 'vessel', overwrite, clear, skip_user_check)
 
     sysconfig = objectmodels['systemconfig'].find_one({'active': True})
     hfoslog('Adapting system config for default vessel:', sysconfig)
-    sysconfig.vesseluuid = systemvessel['uuid']
+    sysconfig.vesseluuid = SystemVessel['uuid']
     sysconfig.save()
 
     hfoslog('Provisioning: Vessel: Done.', emitter='PROVISIONS')
+
+
+provision = {'data': SystemVessel, 'method': provision_system_vessel, 'dependencies': 'system'}

@@ -34,10 +34,6 @@ Predefined open layers.
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 meshnodes = [
     {
         "name": "Primary Hackerfleet Hub",
@@ -50,10 +46,4 @@ meshnodes = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(meshnodes, objectmodels['meshnode'], **kwargs)
-    hfoslog('Provisioning: Meshnodes: Done.', emitter='PROVISIONS')
-
-
-if __name__ == "__main__":
-    provision()
+provision = {'data': meshnodes, 'model': 'meshnode'}

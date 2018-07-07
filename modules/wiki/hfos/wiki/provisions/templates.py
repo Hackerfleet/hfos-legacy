@@ -23,40 +23,34 @@ __license__ = "AGPLv3"
 
 """
 
-Provisioning: Volume
-====================
+Provisioning: Wiki - Templates
+==============================
 
 Contains
 --------
 
-Predefined volumes
+Wiki skeleton for ships
 
 
 """
 
-from os.path import join
-
-from hfos.database import objectmodels, instance
-
-Volumes = [
+WikiTemplates = [
     {
-        'name': 'hfos.sessions',
-        'uuid': 'f47711bf-51d0-49ed-aacb-68783ce16a2b',
-        'description': 'Session attachment storage',
-        'path': join('/var/lib/hfos/', instance, 'volumes/sessions'),
-        'flags': ['uservolume'],
-        'perms': {
-            'read': ['admin', 'chair'],
-            'write': ['admin', 'chair'],
-            'list': ['admin', 'chair']
-        },
-        'default_permissions': {
-            'read': ['admin', 'owner', 'chair'],
-            'write': ['admin', 'owner', 'chair', 'crew'],
-            'list': ['admin', 'chair']
-        }
+        'name': 'Protocol',
+        'uuid': '14e52e30-4ff7-4d73-9e18-bf9df1803214',
+        'title': 'Simple Meeting protocol from $DD$MM$YY',
+        'slugtemplate': 'protocol-$DD-$MM-$YY',
+        'html': 'This would be a protocol template, once the provision have '
+                'been fleshed out.'
+    },
+    {
+        'name': 'Todo',
+        'uuid': '88ec45e7-7b12-4450-a8f0-290d51290fa3',
+        'title': 'Simple Todo item list for $USER',
+        'slugtemplate': 'todo-$USER-$DD-$MM-$YY',
+        'html': 'This would be a todo template text, once the provision have '
+                'been fleshed out.'
     }
 ]
 
-
-provision = {'data': Volumes, 'model': 'volume'}
+provision = {'data': WikiTemplates, 'model': 'wikitemplate'}

@@ -48,7 +48,7 @@ This software package is a plugin module for HFOS.
     [hfos.schemata]
     nodestate=hfos.nodestate.nodestate:NodeState
     [hfos.provisions]
-    defaultstates=hfos.nodestate.provisions.nodestates:default_provision
+    nodestates=hfos.nodestate.provisions.nodestates:provision
     """,
       test_suite="tests.main.main",
       )

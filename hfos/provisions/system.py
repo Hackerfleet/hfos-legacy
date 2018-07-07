@@ -33,15 +33,12 @@ System: Global systemwide settings
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.tools import std_salt
+from hfos.misc import std_salt
 from hfos.logger import hfoslog, warn
 from uuid import uuid4
 
-systemconfig = {
+SystemConfiguration = {
     'uuid': str(uuid4()),
-    'allowregister': True,
     'salt': std_salt(),
     'active': True,
     'name': 'Default System Configuration',
@@ -50,19 +47,21 @@ systemconfig = {
 }
 
 
-def provision(*args, **kwargs):
+def provision_system_config(items, database_name, overwrite=False, clear=False, skip_user_check=False):
     """Provision a basic system configuration"""
 
-    clear = kwargs.get('clear', False)
-    overwrite = kwargs.get('overwrite', False)
+    from hfos.provisions.base import provisionList
+    from hfos.database import objectmodels
 
     default_system_config_count = objectmodels['systemconfig'].count({
         'name': 'Default System Configuration'})
 
     if default_system_config_count == 0 or (clear or overwrite):
-        provisionList([systemconfig], objectmodels['systemconfig'], *args,
-                      **kwargs)
+        provisionList([SystemConfiguration], 'systemconfig', overwrite, clear, skip_user_check)
         hfoslog('Provisioning: System: Done.', emitter='PROVISIONS')
     else:
         hfoslog('Default system configuration already present.', lvl=warn,
                 emitter='PROVISIONS')
+
+
+provision = {'data': SystemConfiguration, 'method': provision_system_config, 'dependencies': 'user'}

@@ -21,15 +21,14 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-from hfos.logger import hfoslog
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from pynmea2 import types
-from pynmea2.types import proprietary
-from pynmea2.nmea import NMEASentenceType, ProprietarySentence
 from decimal import Decimal
 from uuid import uuid4
-from pprint import pprint
+
+from pynmea2 import types
+from pynmea2.nmea import NMEASentenceType, ProprietarySentence
+from pynmea2.types import proprietary
+
+from hfos.database import objectmodels
 
 
 # TODO: This needs to be independent of the datasource.
@@ -123,7 +122,7 @@ def getSensorData(fields, sentences):
     return sensordata
 
 
-def provision(**kwargs):
+def generate_provisions():
     sentences = {}
     sentences.update(getNMEASentences())
     sentences.update(getProprietarySentences())
@@ -159,5 +158,7 @@ def provision(**kwargs):
         # for name, typeitems in datatypes.items():
         #    print('%s has %i elements' % (name, len(typeitems)))
 
-    provisionList(provisionitems, objectmodels['sensordatatype'], **kwargs)
-    hfoslog('Provisioning: Sensordatatypes: Done.', emitter='PROVISIONS')
+    return provisionitems
+
+
+provision = {'data': generate_provisions(), 'model': 'sensordatatype'}

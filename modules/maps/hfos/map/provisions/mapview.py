@@ -34,10 +34,6 @@ Mapview skeleton for ships
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 Mapviews = [
     {
         'name': 'Default OpenSeaMap + OpenStreetMap',
@@ -51,12 +47,4 @@ Mapviews = [
 ]
 
 
-def provision(**kwargs):
-    provisionList(Mapviews, objectmodels['mapview'],
-                  indices=['name'], indices_types=['text'], indices_unique=[False],
-                  **kwargs)
-    hfoslog('Provisioning: Mapviews: Done.', emitter='PROVISIONS')
-
-
-if __name__ == "__main__":
-    provision()
+provision = {'data': Mapviews, 'model': 'mapview'}

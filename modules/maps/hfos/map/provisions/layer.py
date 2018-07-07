@@ -34,10 +34,6 @@ Predefined open layers.
 
 """
 
-from hfos.provisions.base import provisionList
-from hfos.database import objectmodels
-from hfos.logger import hfoslog
-
 layers = [
     {
         "name": "OpenStreetMap",
@@ -242,10 +238,4 @@ Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
 ]
 
 
-def provision(**kwargs):
-    provisionList(layers, objectmodels['layer'], **kwargs)
-    hfoslog('Provisioning: Layers: Done.', emitter='PROVISIONS')
-
-
-if __name__ == "__main__":
-    provision()
+provision = {'data': layers, 'model': 'layer'}
