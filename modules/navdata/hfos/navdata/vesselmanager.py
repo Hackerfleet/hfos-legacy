@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from hfos.tools import std_uuid
+from hfos.misc import std_uuid
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -158,7 +158,7 @@ class VesselManager(ConfigurableComponent):
 
     @handler('referenceframe', channel='navdata')
     def referenceframeupdate(self, event):
-        self.log('Reference update:', event.data, lvl=verbose)
+        self.log('Reference update:', event.data, lvl=events)
         frame = event.data['data']
 
         if 'GLL_lat' in frame and 'GLL_lon' in frame:

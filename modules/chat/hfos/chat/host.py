@@ -38,7 +38,7 @@ from hfos.logger import error, warn, hilight, debug, verbose
 from hfos.database import objectmodels
 from hfos.events.client import broadcast, send
 from hfos.events.system import authorizedevent
-from hfos.tools import std_now, std_uuid, std_table
+from hfos.misc import std_now, std_uuid, std_table
 from circuits import Event
 from pymongo import DESCENDING
 

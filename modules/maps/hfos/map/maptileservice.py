@@ -43,7 +43,7 @@ from circuits.web.tools import serve_file
 from hfos.component import ConfigurableController, ConfigurableComponent, \
     handler, authorizedevent
 from hfos.events.client import send
-from hfos.tools import std_uuid
+from hfos.misc import std_uuid
 from hfos.database import objectmodels, instance
 from hfos.debugger import cli_register_event
 from hfos.logger import error, verbose, warn, hilight
@@ -498,7 +498,7 @@ class MaptileService(ConfigurableController):
                 except OSError as e:
                     if e.errno != errno.EEXIST:
                         self.log(
-                            "Couldn't create path: %s (%s)" % (e, type(e)))
+                            "Couldn't create path: %s (%s)" % (e, type(e)), lvl=error)
 
                 self.log("Caching tile.", lvl=verbose)
                 try:
@@ -506,10 +506,10 @@ class MaptileService(ConfigurableController):
                         try:
                             tile_file.write(bytes(tile))
                         except Exception as e:
-                            self.log("Writing error: %s" % str([type(e), e]))
+                            self.log("Writing error: %s" % str([type(e), e]), lvl=error)
 
                 except Exception as e:
-                    self.log("Open error: %s" % str([type(e), e]))
+                    self.log("Open error on %s - %s" % (filename, str([type(e), e])), lvl=error)
                     return
                 finally:
                     event.stop()

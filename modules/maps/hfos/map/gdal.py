@@ -42,13 +42,14 @@ from hfos.events.system import authorizedevent
 from hfos.events.client import send
 from hfos.database import objectmodels, instance
 from hfos.logger import error, verbose, warn, debug
-from hfos.tools import std_uuid
+from hfos.misc import std_uuid
 import datetime
 import xml.etree.ElementTree
 
 try:
     from subprocess import Popen
 except ImportError:
+    # noinspection PyUnresolvedReferences
     from subprocess32 import Popen  # NOQA
 
 GDAL_LAYER_UUID = '6a18fdad-93a2-4563-bb8a-cb5888f43300'

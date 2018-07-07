@@ -37,7 +37,7 @@ from hfos.component import ConfigurableComponent, handler
 from hfos.database import objectmodels, instance
 from hfos.logger import verbose, debug, error, warn, critical, events, hilight
 from hfos.events.system import authorizedevent
-from hfos.tools import std_uuid
+from hfos.misc import std_uuid
 from urllib import request
 
 try:

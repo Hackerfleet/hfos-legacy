@@ -7,11 +7,11 @@ import datetime
 from dateutil import parser
 import click
 from hfos.logger import hfoslog, warn, verbose, debug
-from hfos.tools import std_uuid, std_now
+from hfos.misc import std_uuid, std_now
 
 
 def log(*args, **kwargs):
-    kwargs.update({'emitter': 'ICALIMPORT'})
+    kwargs.update({'emitter': 'ICALIMPORT', 'frame_ref': 2})
     hfoslog(*args, **kwargs)
 
 

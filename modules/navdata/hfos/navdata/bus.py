@@ -43,7 +43,7 @@ from decimal import Decimal
 from hfos.component import ConfigurableComponent, LoggingComponent, handler
 from hfos.database import ValidationError
 from hfos.logger import hfoslog, verbose, debug, warn, critical, error, hilight
-from hfos.tools import std_uuid
+from hfos.misc import std_uuid
 from hfos.navdata.events import sensordata
 
 # from pprint import pprint
@@ -451,7 +451,7 @@ class SerialBusManager(ConfigurableComponent):
 
     @handler('register_protocol')
     def register_protocol(self, event):
-        self.log('Registering scanner protocol:', event)
+        self.log('Registering scanner protocol:', event.protocol)
         self.protocols[event.protocol] = event.keyword
 
     @handler('restart_scan')
