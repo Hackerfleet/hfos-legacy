@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -42,6 +41,9 @@ Schemastore and Objectstore builder functions.
 import sys
 import time
 import json
+import jsonschema
+from copy import deepcopy
+from jsonschema import ValidationError  # NOQA
 from ast import literal_eval
 from pprint import pprint
 
@@ -57,8 +59,23 @@ from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
 
 from hfos.component import ConfigurableComponent, handler
-from jsonschema import ValidationError  # NOQA
 from hfos.logger import hfoslog, debug, warn, error, critical, verbose
+
+
+def db_log(*args, **kwargs):
+    kwargs.update({'emitter': 'DB', 'frame_ref': 2})
+    hfoslog(*args, **kwargs)
+
+
+def backup_log(*args, **kwargs):
+    kwargs.update({'emitter': 'BACKUP', 'frame_ref': 2})
+    hfoslog(*args, **kwargs)
+
+
+def schemata_log(*args, **kwargs):
+    kwargs.update({'emitter': 'SCHEMATA', 'frame_ref': 2})
+    hfoslog(*args, **kwargs)
+
 
 try:  # PY 2/3
     PermissionError
@@ -73,6 +90,7 @@ dbhost = ""
 dbport = 0
 dbname = ""
 instance = ""
+initialized = False
 
 # Necessary against import de-optimizations
 ValidationError = ValidationError
@@ -86,14 +104,14 @@ def clear_all():
     sure = input("Are you sure to drop the complete database content? (Type "
                  "in upppercase YES)")
     if not (sure == 'YES'):
-        hfoslog('Not deleting the database.')
+        db_log('Not deleting the database.')
         sys.exit(5)
 
     client = pymongo.MongoClient(host=dbhost, port=dbport)
     db = client[dbname]
 
     for col in db.collection_names(include_system_collections=False):
-        hfoslog("Dropping collection ", col, lvl=warn, emitter='DB')
+        db_log("Dropping collection ", col, lvl=warn)
         db.drop_collection(col)
 
 
@@ -103,19 +121,88 @@ def _build_schemastore_new():
     for schema_entrypoint in iter_entry_points(group='hfos.schemata',
                                                name=None):
         try:
-            hfoslog("Schemata found: ", schema_entrypoint.name, lvl=verbose,
-                    emitter='DB')
+            schemata_log("Schemata found: ", schema_entrypoint.name, lvl=verbose)
             schema = schema_entrypoint.load()
             available[schema_entrypoint.name] = schema
         except (ImportError, DistributionNotFound) as e:
-            hfoslog("Problematic schema: ", e, type(e),
-                    schema_entrypoint.name, exc=True, lvl=warn,
-                    emitter='SCHEMATA')
+            schemata_log("Problematic schema: ", schema_entrypoint.name, exc=True, lvl=warn)
 
-    hfoslog("Found", len(available), "schemata: ", sorted(available.keys()),
-            lvl=debug,
-            emitter='SCHEMATA')
-    # pprint(available)
+    def schema_insert(dictionary, path, obj):
+        path = path.split('/')
+
+        place = dictionary
+
+        for element in path:
+            if element != '':
+                place = place[element]
+
+        place.update(obj)
+
+        return dictionary
+
+    def form_insert(form, index, path, obj):
+        path = path.split('/')
+
+        if isinstance(index, str):
+            for widget in form:
+                if isinstance(widget, dict) and widget.get('id', None) is not None:
+                    place = widget
+        else:
+            place = form[index]
+
+        for element in path:
+            schemata_log(element, place, lvl=verbose)
+            try:
+                element = int(element)
+            except ValueError:
+                pass
+            if element != '':
+                place = place[element]
+
+        if isinstance(place, dict):
+            place.update(obj)
+        else:
+            place.append(obj)
+
+        return form
+
+    for key, item in available.items():
+        extends = item.get('extends', None)
+        if extends is not None:
+            schemata_log(key, 'extends:', extends, pretty=True, lvl=verbose)
+
+            for model, extension_group in extends.items():
+                schema_extensions = extension_group.get('schema', None)
+                form_extensions = extension_group.get('form', None)
+                schema = available[model].get('schema', None)
+                form = available[model].get('form', None)
+
+                original_schema = deepcopy(schema)
+
+                if schema_extensions is not None:
+                    schemata_log('Extending schema', model, 'from', key, lvl=debug)
+                    for path, extensions in schema_extensions.items():
+                        schemata_log('Item:', path, 'Extensions:', extensions, lvl=verbose)
+                        for obj in extensions:
+                            available[model]['schema'] = schema_insert(schema, path, obj)
+                            schemata_log('Path:', path, 'obj:', obj, lvl=verbose)
+
+                if form_extensions is not None:
+                    schemata_log('Extending form of', model, 'with', key, lvl=verbose)
+                    for index, extensions in form_extensions.items():
+                        schemata_log('Item:', index, 'Extensions:', extensions, lvl=verbose)
+                        for path, obj in extensions.items():
+                            available[model]['form'] = form_insert(form, index, path, obj)
+                            schemata_log('Path:', path, 'obj:', obj, lvl=verbose)
+
+                # schemata_log(available[model]['form'], pretty=True, lvl=warn)
+                try:
+                    jsonschema.Draft4Validator.check_schema(schema)
+                except jsonschema.SchemaError as e:
+                    schemata_log('Schema extension failed:', model, extension_group, exc=True)
+                    available[model]['schema'] = original_schema
+
+    schemata_log("Found", len(available), "schemata: ", sorted(available.keys()), lvl=debug)
 
     return available
 
@@ -130,15 +217,12 @@ def _build_model_factories(store):
         try:
             schema = store[schemaname]['schema']
         except KeyError:
-            hfoslog("No schema found for ", schemaname, lvl=critical,
-                    emitter='DB')
+            schemata_log("No schema found for ", schemaname, lvl=critical, exc=True)
 
         try:
             result[schemaname] = warmongo.model_factory(schema)
         except Exception as e:
-            hfoslog("Could not create factory for schema ", e, type(e),
-                    schemaname, schema,
-                    lvl=critical, emitter='DB')
+            schemata_log("Could not create factory for schema ", schemaname, schema, lvl=critical, exc=True)
 
     return result
 
@@ -152,23 +236,69 @@ def _build_collections(store):
     for schemaname in store:
 
         schema = None
+        indices = None
 
         try:
             schema = store[schemaname]['schema']
+            indices = store[schemaname].get('indices', None)
         except KeyError:
-            hfoslog("No schema found for ", schemaname, lvl=critical,
-                    emitter='DB')
+            db_log("No schema found for ", schemaname, lvl=critical)
 
         try:
             result[schemaname] = db[schemaname]
-        except Exception as e:
-            hfoslog("Could not get collection for schema ", schemaname, schema,
-                    e, lvl=critical, emitter='DB')
+        except Exception:
+            db_log("Could not get collection for schema ", schemaname, schema, lvl=critical, exc=True)
 
+        if indices is not None:
+            col = db[schemaname]
+            db_log('Adding indices to', schemaname, lvl=debug)
+            i = 0
+            keys = list(indices.keys())
+
+            while i < len(indices):
+                index_name = keys[i]
+                index = indices[index_name]
+
+                index_type = index.get('type', None)
+                index_unique = index.get('unique', False)
+                index_sparse = index.get('sparse', True)
+                index_reindex = index.get('reindex', False)
+
+                if index_type in (None, 'text'):
+                    index_type = pymongo.TEXT
+                elif index_type == '2dsphere':
+                    index_type = pymongo.GEOSPHERE
+
+                def do_index():
+                    col.ensure_index([(index_name, index_type)],
+                                     unique=index_unique,
+                                     sparse=index_sparse)
+
+                db_log('Enabling index of type', index_type, 'on', index_name, lvl=debug)
+                try:
+                    do_index()
+                    i += 1
+                except pymongo.errors.OperationFailure:
+                    db_log(col.list_indexes().__dict__, pretty=True, lvl=verbose)
+                    if not index_reindex:
+                        db_log('Index was not created!', lvl=warn)
+                        i += 1
+                    else:
+                        try:
+                            col.drop_index(index_name)
+                            do_index()
+                            i += 1
+                        except pymongo.errors.OperationFailure as e:
+                            db_log('Index recreation problem:', exc=True, lvl=error)
+                            col.drop_indexes()
+                            i = 0
+
+                            # for index in col.list_indexes():
+                            #    db_log("Index: ", index)
     return result
 
 
-def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="default"):
+def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="default", reload=False):
     """Initializes the database connectivity, schemata and finally
     object models"""
 
@@ -179,22 +309,26 @@ def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="d
     global dbport
     global dbname
     global instance
+    global initialized
+
+    if initialized and not reload:
+        hfoslog('Already initialized and not reloading.', lvl=warn, emitter="DB", frame_ref=2)
+        return
 
     dbhost = address.split(':')[0]
     dbport = int(address.split(":")[1]) if ":" in address else 27017
     dbname = database_name
 
-    hfoslog("Using database:", dbname, '@', dbhost, ':', dbport, emitter='DB')
+    db_log("Using database:", dbname, '@', dbhost, ':', dbport)
 
     try:
         client = pymongo.MongoClient(host=dbhost, port=dbport)
         db = client[dbname]
-        hfoslog("Database: ", db.command('buildinfo'), lvl=debug, emitter='DB')
+        db_log("Database: ", db.command('buildinfo'), lvl=debug)
     except Exception as e:
-        hfoslog("No database available! Check if you have mongodb > 3.0 "
-                "installed and running as well as listening on port 27017 "
-                "of localhost. (Error: %s) -> EXIT" % e, lvl=critical,
-                emitter='DB')
+        db_log("No database available! Check if you have mongodb > 3.0 "
+               "installed and running as well as listening on port 27017 "
+               "of localhost. (Error: %s) -> EXIT" % e, lvl=critical)
         sys.exit(5)
 
     warmongo.connect(database_name)
@@ -203,6 +337,7 @@ def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="d
     objectmodels = _build_model_factories(schemastore)
     collections = _build_collections(schemastore)
     instance = instance_name
+    initialized = True
 
 
 def test_schemata():
@@ -217,50 +352,49 @@ def test_schemata():
             testobject = objects[schemaname]()
             testobject.validate()
         except Exception as e:
-            hfoslog('Blank schema did not validate:', schemaname, e,
-                    type(e), lvl=verbose, emitter='DB')
+            db_log('Blank schema did not validate:', schemaname, exc=True)
 
-    pprint(objects)
+            # pprint(objects)
 
 
 def profile(schemaname='sensordata', profiletype='pjs'):
     """Profiles object model handling with a very simple benchmarking test"""
 
-    hfoslog("Profiling ", schemaname, emitter='DB')
+    db_log("Profiling ", schemaname)
 
     schema = schemastore[schemaname]['schema']
 
-    hfoslog("Schema: ", schema, lvl=debug, emitter='DB')
+    db_log("Schema: ", schema, lvl=debug)
 
     testclass = None
 
     if profiletype == 'warmongo':
-        hfoslog("Running Warmongo benchmark", emitter='DB')
+        db_log("Running Warmongo benchmark")
         testclass = warmongo.model_factory(schema)
     elif profiletype == 'pjs':
-        hfoslog("Running PJS benchmark", emitter='DB')
+        db_log("Running PJS benchmark")
         try:
             import python_jsonschema_objects as pjs
         except ImportError:
-            hfoslog("PJS benchmark selected but not available. Install "
-                    "python_jsonschema_objects (PJS)", emitter="DB")
+            db_log("PJS benchmark selected but not available. Install "
+                   "python_jsonschema_objects (PJS)")
             return
 
-        hfoslog()
+        db_log()
         builder = pjs.ObjectBuilder(schema)
         ns = builder.build_classes()
         pprint(ns)
         testclass = ns[schemaname]
-        hfoslog("ns: ", ns, lvl=warn, emitter='DB')
+        db_log("ns: ", ns, lvl=warn)
 
     if testclass is not None:
-        hfoslog("Instantiating elements...", emitter='DB')
+        db_log("Instantiating elements...")
         for i in range(100):
             testclass()
     else:
-        hfoslog("No Profiletype available!", emitter="DB")
+        db_log("No Profiletype available!")
 
-    hfoslog("Profiling done", emitter='DB')
+    db_log("Profiling done")
 
 
 # profile(schemaname='sensordata', profiletype='warmongo')
@@ -484,7 +618,7 @@ def backup(schema, uuid, export_filter, export_format, filename, pretty, export_
         try:
             f = open(filename, 'w')
         except (IOError, PermissionError) as e:
-            hfoslog('Could not open output file for writing:', e, type(e), lvl=error, emitter='BACKUP')
+            backup_log('Could not open output file for writing:', exc=True, lvl=error)
             return
 
     def output(what, convert=False):
@@ -505,7 +639,7 @@ def backup(schema, uuid, export_filter, export_format, filename, pretty, export_
 
     if schema is None:
         if export_all is False:
-            hfoslog('No schema given.', lvl=warn, emitter='BACKUP')
+            backup_log('No schema given.', lvl=warn)
             return
         else:
             schemata = objectmodels.keys()
