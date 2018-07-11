@@ -9,14 +9,7 @@ from uuid import uuid4
 from hashlib import sha512
 from random import choice
 
-localedir = '/home/riot/src/hfos_master/locale'
-
-
-def translate(thing, lang):
-    """Selects a language, then returns the translated string"""
-
-    languages[lang].install()
-    return _(thing)
+localedir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '..', 'locale'))
 
 
 def all_languages():
