@@ -2,6 +2,16 @@
 host = https://www.transifex.com
 type = PO
 
+[hfos.frontend]
+file_filter = locale/<lang>/LC_MESSAGES/frontend.po
+source_file = locale/frontend.pot
+source_lang = en
+
+[hfos.backend]
+file_filter = locale/<lang>/LC_MESSAGES/backend.po
+source_file = locale/backend.pot
+source_lang = en
+
 [hfos.roadmap]
 file_filter = locale/<lang>/LC_MESSAGES/roadmap.po
 source_file = docs/build/locale/roadmap.pot
