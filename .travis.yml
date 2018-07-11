@@ -1,5 +1,7 @@
 sudo: required
 language: python
+python:
+  - "3.5"
 services:
   - mongodb
 addons:
@@ -14,7 +16,7 @@ install:
   - pip install -r requirements-test.txt
   - pip install -r requirements.txt
   - pip install -e .
-  - python hfos_manage.py install provisions
+  - python iso install provisions
 #  - docker build -t hackerfleet/hfos -f docker/Dockerfile.debian .
 script: python setup.py test
 # -  docker run -i -t hackerfleet/hfos /etc/init.d/mongodb start && py.test tests
