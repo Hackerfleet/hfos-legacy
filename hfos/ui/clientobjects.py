@@ -78,6 +78,7 @@ class Client(object):
         else:
             self.name = name
         self.config = config
+        self.language = "C"
 
     def __repr__(self):
         return self.name

@@ -1,0 +1,89 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"X-Generator: Poedit 1.8.11\n"
+"Last-Translator: Hackerfleet German Translation Team <riot@c-base.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Language: fr\n"
+
+#: src/app/app-component/app-component.tpl.html:175
+msgid "About"
+msgstr "Sur"
+
+#: src/objects/list/list.tpl.html:23 src/objects/search/search.tpl.html:23
+msgid "Create new"
+msgstr "Créer un nouveau"
+
+#: src/objects/editor/editor.tpl.html:46
+msgid "Debug"
+msgstr "Déboguer"
+
+#: src/app/app-component/app-component.tpl.html:173
+msgid "Documentation"
+msgstr "Documentation"
+
+#: src/objects/editor/editor.tpl.html:30
+msgid "Edit Live"
+msgstr "Modifier en direct"
+
+#: src/objects/editor/editor.tpl.html:34
+msgid "Keep History"
+msgstr "Garder l'histoire"
+
+#: src/objects/list/list.tpl.html:22
+msgid "List:"
+msgstr "Liste:"
+
+#: src/featuremenu/menu/menu.tpl.html:44
+msgid "Logging in..."
+msgstr "Se connecter"
+
+#: src/common/component/login.tpl.html:29
+msgid "Login"
+msgstr "S'identifier"
+
+#: src/about/missing/missing.tpl.html:23
+msgid "Maybe this functionality has not been developed, yet."
+msgstr "Peut-être que cette fonctionnalité n'a pas encore été développée."
+
+#: src/objects/editor/editor.tpl.html:50
+msgid "Modified"
+msgstr "Modifié"
+
+#: src/featuremenu/menu/menu.tpl.html:50
+msgid "No connection"
+msgstr "Pas de connection"
+
+#: src/about/missing/missing.tpl.html:22
+msgid "Not found"
+msgstr "Pas trouvé"
+
+#: src/objects/editor/editor.tpl.html:40
+msgid "Readonly"
+msgstr "Lecture seulement"
+
+#: src/common/component/login.tpl.html:37
+msgid "Register"
+msgstr "Registre"
+
+#: src/objects/search/search.tpl.html:22
+msgid "Search:"
+msgstr "Chercher"
+
+#: src/app/app-component/app-component.tpl.html:196
+msgid "Starting HFOS client"
+msgstr "Démarrer le HFOS client"
+
+#: src/objects/editor/editor.tpl.html:49
+msgid "Stored"
+msgstr "Stocké"
+
+#: src/featuremenu/menu/menu.tpl.html:51
+msgid "Your client is not connected to the node."
+msgstr "Votre client n'est pas connecté au noeud."

@@ -33,30 +33,31 @@ Client: Clientprofile to store client specific settings
 
 """
 from hfos.schemata.defaultform import savebutton, lookup_field
-from hfos.schemata.base import base_object, uuid_object
+from hfos.schemata.base import base_object, uuid_object, language_field
+from hfos.misc import i18n as _
 
 ScreenRotationSchema = {
     'id': '#screenrotation',
     'type': 'object',
     'properties': {
-        'state': {'type': 'string', 'minLength': 1, 'title': 'New State',
-                  'description': 'State to switch to'
+        'state': {'type': 'string', 'minLength': 1, 'title': _('New State'),
+                  'description': _('State to switch to')
                   },
         'args': {
             'type': 'array',
             'items': {
                 'type': 'object',
                 'properties': {
-                    'name': {'type': 'string', 'title': 'Argument Name'
+                    'name': {'type': 'string', 'title': _('Argument Name')
                              },
-                    'value': {'type': 'string', 'title': 'Argument Value'
+                    'value': {'type': 'string', 'title': _('Argument Value')
                               }
                 }
             }
         },
-        'duration': {'type': 'number', 'title': 'Duration',
-                     'description': 'Timeout in seconds to swith to the next '
-                                    'screen'}
+        'duration': {'type': 'number', 'title': _('Duration'),
+                     'description': _('Timeout in seconds to swith to the next '
+                                      'screen')}
     }
 }
 
@@ -68,35 +69,35 @@ ClientconfigSchema = base_object(
 
 ClientconfigSchema['properties'].update({
     'autologin': {
-        'type': 'boolean', 'title': 'Automatic login',
-        'description': 'Automatically logs in this client.'
+        'type': 'boolean', 'title': _('Automatic login'),
+        'description': _('Automatically logs in this client.')
     },
     'active': {
-        'type': 'boolean', 'title': 'Active client',
-        'description': 'Indicates whether client is currently '
-                       'active.'
+        'type': 'boolean', 'title': _('Active client'),
+        'description': _('Indicates whether client is currently active.')
     },
     'locked': {
-        'type': 'boolean', 'title': 'Locked client',
-        'description': 'Determines whether the client should be '
-                       'locked against changes.'
+        'type': 'boolean', 'title': _('Locked client'),
+        'description': _('Determines whether the client should be '
+                         'locked against changes.')
     },
+    'language': language_field(),
     'infoscreen': {
-        'type': 'boolean', 'title': 'Infoscreen client',
-        'description': 'This client rotates set up infoscreens'
+        'type': 'boolean', 'title': _('Infoscreen client'),
+        'description': _('This client rotates set up infoscreens')
     },
     'currentview': {
-        'type': 'string', 'minLength': 1, 'title': 'Name',
-        'description': 'Client name'
+        'type': 'string', 'minLength': 1, 'title': _('Name'),
+        'description': _('Client name')
     },
     'theme': {
-        'type': 'string', 'title': 'Client Theme',
-        'description': 'Theme used for user interface'
+        'type': 'string', 'title': _('Client Theme'),
+        'description': _('Theme used for user interface')
     },
     'description': {
         'type': 'string', 'format': 'html',
-        'title': 'Client description',
-        'description': 'Client description'
+        'title': _('Client description'),
+        'description': _('Client description')
     },
     'infoscreenrotations': {
         'type': 'array',
@@ -124,7 +125,7 @@ ClientconfigForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-6',
                 'items': [
-                    {'key': 'active', 'readonly': True}, 'locked', 'autologin'
+                    'language', {'key': 'active', 'readonly': True}, 'locked', 'autologin'
                 ]
             }
         ]
@@ -160,7 +161,7 @@ ClientconfigForm = [
         'items': [
             {
                 'type': 'help',
-                'helpvalue': '<h2>Default module configurations</h2>'
+                'helpvalue': _('<h2>Default module configurations</h2>')
             }
         ]
     },

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: hfos 1.2.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-02-16 21:23+0100\n"
+"POT-Creation-Date: 2018-07-11 20:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,127 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
 
-#: modules/enrol/hfos/enrol/manager.py:317
+#: hfos/database.py:224
+msgid "title"
+msgstr ""
+
+#: hfos/database.py:227
+msgid "description"
+msgstr ""
+
+#: hfos/schemata/client.py:43
+msgid "New State"
+msgstr ""
+
+#: hfos/schemata/client.py:44
+msgid "State to switch to"
+msgstr ""
+
+#: hfos/schemata/client.py:51
+msgid "Argument Name"
+msgstr ""
+
+#: hfos/schemata/client.py:53
+msgid "Argument Value"
+msgstr ""
+
+#: hfos/schemata/client.py:58
+msgid "Duration"
+msgstr ""
+
+#: hfos/schemata/client.py:59
+msgid "Timeout in seconds to swith to the next screen"
+msgstr ""
+
+#: hfos/schemata/client.py:72
+msgid "Automatic login"
+msgstr ""
+
+#: hfos/schemata/client.py:73
+msgid "Automatically logs in this client."
+msgstr ""
+
+#: hfos/schemata/client.py:76
+msgid "Active client"
+msgstr ""
+
+#: hfos/schemata/client.py:77
+msgid "Indicates whether client is currently active."
+msgstr ""
+
+#: hfos/schemata/client.py:80
+msgid "Locked client"
+msgstr ""
+
+#: hfos/schemata/client.py:81
+msgid "Determines whether the client should be locked against changes."
+msgstr ""
+
+#: hfos/schemata/client.py:86
+msgid "Infoscreen client"
+msgstr ""
+
+#: hfos/schemata/client.py:87
+msgid "This client rotates set up infoscreens"
+msgstr ""
+
+#: hfos/schemata/client.py:90
+msgid "Name"
+msgstr ""
+
+#: hfos/schemata/client.py:91
+msgid "Client name"
+msgstr ""
+
+#: hfos/schemata/client.py:94
+msgid "Client Theme"
+msgstr ""
+
+#: hfos/schemata/client.py:95
+msgid "Theme used for user interface"
+msgstr ""
+
+#: hfos/schemata/client.py:99 hfos/schemata/client.py:100
+msgid "Client description"
+msgstr ""
+
+#: hfos/schemata/client.py:164
+msgid "<h2>Default module configurations</h2>"
+msgstr ""
+
+#: hfos/ui/clientmanager.py:154
+msgid "Client details:"
+msgstr ""
+
+#: hfos/ui/clientmanager.py:471
+msgid "You have no role that allows this action."
+msgstr ""
+
+#: modules/enrol/hfos/enrol/enrolmanager.py:411
+msgid "You did not solve the captcha correctly."
+msgstr ""
+
+#: modules/enrol/hfos/enrol/enrolmanager.py:418
 msgid "You have to supply all required fields."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/manager.py:320
+#: modules/enrol/hfos/enrol/enrolmanager.py:421
+msgid "The supplied email address seems invalid"
+msgstr ""
+
+#: modules/enrol/hfos/enrol/enrolmanager.py:425
 msgid "Your mail address cannot be used."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/manager.py:325
+#: modules/enrol/hfos/enrol/enrolmanager.py:430
 msgid "Your password is not long enough."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/manager.py:330
+#: modules/enrol/hfos/enrol/enrolmanager.py:435
 msgid "Your username is not long enough."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/manager.py:333
+#: modules/enrol/hfos/enrol/enrolmanager.py:439
 msgid "The username you supplied is not available."
 msgstr ""
 

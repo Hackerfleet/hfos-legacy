@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos.misc import all_languages
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -60,6 +61,7 @@ from six.moves import \
 
 from hfos.component import ConfigurableComponent, handler
 from hfos.logger import hfoslog, debug, warn, error, critical, verbose
+from hfos.misc import i18n as _
 
 
 def db_log(*args, **kwargs):
@@ -204,6 +206,39 @@ def _build_schemastore_new():
 
     schemata_log("Found", len(available), "schemata: ", sorted(available.keys()), lvl=debug)
 
+    l10n_schemata = {}
+
+    for lang in all_languages():
+
+        language_schemata = {}
+
+        def translate(schema):
+
+            localized = deepcopy(schema)
+
+            def walk(branch):
+                if isinstance(branch, dict):
+
+                    if 'title' in branch and isinstance(branch['title'], str):
+                        # schemata_log(branch['title'])
+                        branch['title'] = _(branch['title'], lang=lang)
+                    if 'description' in branch and isinstance(branch['description'], str):
+                        # schemata_log(branch['description'])
+                        branch['description'] = _(branch['description'], lang=lang)
+
+                    for key, item in branch.items():
+                        walk(item)
+
+            walk(localized)
+
+            return localized
+
+        for key, item in available.items():
+            language_schemata[key] = translate(item)
+
+        l10n_schemata[lang] = language_schemata
+
+    # schemata_log(l10n_schemata['de']['client'], pretty=True, lvl=error)
     return available
 
 

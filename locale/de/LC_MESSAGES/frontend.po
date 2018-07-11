@@ -1,50 +1,58 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Hackerfleet German Translation Team <riot@c-base.org>\n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Project-Id-Version: \n"
+"X-Generator: Poedit 1.8.11\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: src/common/services/user.service.js:130
-msgid "<br />Welcome to this HFOS node! Now is a good time to fill out your profile.<br />Click the user button <a href=\"/#!/editor/profile//edit\">to edit your profile</a>, logout or change your password.<br /> <small>Adding some user data will prevent this notification from reappearing.</small>"
+msgid ""
+"<br />Welcome to this HFOS node! Now is a good time to fill out your profile."
+"<br />Click the user button <a href=\"/#!/editor/profile//edit\">to edit "
+"your profile</a>, logout or change your password.<br /> <small>Adding some "
+"user data will prevent this notification from reappearing.</small>"
 msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:175
 msgid "About"
-msgstr ""
+msgstr "Über"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:118
 msgid "Accept <a href=\"{{$ctrl.tos}}\">terms of service</a>"
-msgstr ""
+msgstr "Ich akzeptiere die <a href=\"{{$ctrl.tos}}\">Nutzungsbedingungen</a>"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:123
 msgid "Acceptance of Terms is required"
-msgstr ""
+msgstr "Das akzeptieren der Nutzungsbedingungen ist erforderlich"
 
 #: src/objects/list/list.tpl.html:177
 msgid "Actions"
 msgstr ""
 
-#: src/objects/list/list.tpl.html:102
-#: src/objects/list/list.tpl.html:125
-#: src/objects/list/list.tpl.html:132
-#: src/objects/list/list.tpl.html:154
-#: src/objects/list/list.tpl.html:161
-#: src/objects/list/list.tpl.html:211
-#: src/objects/list/list.tpl.html:219
-#: src/objects/list/list.tpl.html:243
-#: src/objects/list/list.tpl.html:251
-#: src/objects/list/list.tpl.html:274
-#: src/objects/list/list.tpl.html:282
-#: src/objects/list/list.tpl.html:95
+#: src/objects/list/list.tpl.html:102 src/objects/list/list.tpl.html:125
+#: src/objects/list/list.tpl.html:132 src/objects/list/list.tpl.html:154
+#: src/objects/list/list.tpl.html:161 src/objects/list/list.tpl.html:211
+#: src/objects/list/list.tpl.html:219 src/objects/list/list.tpl.html:243
+#: src/objects/list/list.tpl.html:251 src/objects/list/list.tpl.html:274
+#: src/objects/list/list.tpl.html:282 src/objects/list/list.tpl.html:95
 msgid "Add"
 msgstr ""
 
 #: src/components/enrol/enrol/enrolment.tpl.html:40
 msgid ""
 "An email with a confirmation link has been sent to you.\n"
-"                Please open this link in your browser to confirm your account.\n"
+"                Please open this link in your browser to confirm your "
+"account.\n"
 "\n"
-"                If you do not receive this mail, contact an administrator of this system."
+"                If you do not receive this mail, contact an administrator of "
+"this system."
 msgstr ""
 
 #: src/about/about-component/about-component.tpl.html:44
@@ -63,8 +71,7 @@ msgstr ""
 msgid "Browse on Github"
 msgstr ""
 
-#: src/common/modals/login.tpl.html:16
-#: src/common/modals/user.tpl.html:24
+#: src/common/modals/login.tpl.html:16 src/common/modals/user.tpl.html:24
 msgid "Cancel"
 msgstr ""
 
@@ -92,10 +99,6 @@ msgstr ""
 msgid "Client<span class=\"caret\"></span>"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:89
-msgid "Confirm:"
-msgstr ""
-
 #: src/about/about-component/about-component.tpl.html:56
 msgid "Contact the isomer framework maintainers"
 msgstr ""
@@ -108,14 +111,13 @@ msgstr ""
 msgid "Controls"
 msgstr ""
 
-#: src/objects/list/list.tpl.html:23
-#: src/objects/search/search.tpl.html:23
+#: src/objects/list/list.tpl.html:23 src/objects/search/search.tpl.html:23
 msgid "Create new"
-msgstr ""
+msgstr "Erzeuge neu"
 
 #: src/objects/editor/editor.tpl.html:46
 msgid "Debug"
-msgstr ""
+msgstr "Debug"
 
 #: src/objects/list/list.tpl.html:189
 msgid "Delete"
@@ -123,7 +125,7 @@ msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:173
 msgid "Documentation"
-msgstr ""
+msgstr "Dokumentation"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:112
 msgid "E-Mail address is not valid"
@@ -139,7 +141,7 @@ msgstr ""
 
 #: src/objects/editor/editor.tpl.html:30
 msgid "Edit Live"
-msgstr ""
+msgstr "Live editieren"
 
 #: src/common/modals/user.tpl.html:18
 msgid "Edit Profile"
@@ -187,24 +189,23 @@ msgstr ""
 
 #: src/objects/editor/editor.tpl.html:34
 msgid "Keep History"
-msgstr ""
+msgstr "Behalte Vergangenheit"
 
-#: src/objects/list/list.tpl.html:140
-#: src/objects/list/list.tpl.html:259
+#: src/objects/list/list.tpl.html:140 src/objects/list/list.tpl.html:259
 msgid "List"
 msgstr ""
 
 #: src/objects/list/list.tpl.html:22
 msgid "List:"
-msgstr ""
+msgstr "Liste:"
 
 #: src/featuremenu/menu/menu.tpl.html:32
 msgid "Logging in..."
-msgstr ""
+msgstr "Anmelden..."
 
 #: src/common/component/login.tpl.html:29
 msgid "Login"
-msgstr ""
+msgstr "Anmelden"
 
 #: src/common/services/user.service.js:143
 msgid "Login failed"
@@ -218,24 +219,19 @@ msgstr ""
 msgid "Logout"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:106
-msgid "Mail Address"
-msgstr ""
-
 #: src/about/missing/missing.tpl.html:23
 msgid "Maybe this functionality has not been developed, yet."
 msgstr ""
 
 #: src/objects/editor/editor.tpl.html:50
 msgid "Modified"
-msgstr ""
+msgstr "Modifiziert"
 
 #: src/app/app-component/app-component.tpl.html:133
 msgid "N/A"
 msgstr ""
 
-#: src/objects/list/list.tpl.html:176
-#: src/objects/list/list.tpl.html:56
+#: src/objects/list/list.tpl.html:176 src/objects/list/list.tpl.html:56
 msgid "Name"
 msgstr ""
 
@@ -245,7 +241,7 @@ msgstr ""
 
 #: src/featuremenu/menu/menu.tpl.html:38
 msgid "No connection"
-msgstr ""
+msgstr "Keine Verbindung"
 
 #: src/common/services/socket.factory.js:333
 msgid "No permission"
@@ -271,10 +267,6 @@ msgstr ""
 msgid "Online"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:73
-msgid "Password:"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:192
 msgid "Permissions"
 msgstr ""
@@ -297,18 +289,17 @@ msgstr ""
 msgid "Please use at least 4 characters"
 msgstr ""
 
-#: src/objects/list/list.tpl.html:111
-#: src/objects/list/list.tpl.html:228
+#: src/objects/list/list.tpl.html:111 src/objects/list/list.tpl.html:228
 msgid "Read"
 msgstr ""
 
 #: src/objects/editor/editor.tpl.html:40
 msgid "Readonly"
-msgstr ""
+msgstr "Schreibgeschützt"
 
 #: src/common/component/login.tpl.html:37
 msgid "Register"
-msgstr ""
+msgstr "Registrieren"
 
 #: src/common/services/user.service.js:129
 msgid "Registration successful"
@@ -322,12 +313,9 @@ msgstr ""
 msgid "Report on Github"
 msgstr ""
 
-#: src/objects/list/list.tpl.html:114
-#: src/objects/list/list.tpl.html:143
-#: src/objects/list/list.tpl.html:199
-#: src/objects/list/list.tpl.html:231
-#: src/objects/list/list.tpl.html:262
-#: src/objects/list/list.tpl.html:84
+#: src/objects/list/list.tpl.html:114 src/objects/list/list.tpl.html:143
+#: src/objects/list/list.tpl.html:199 src/objects/list/list.tpl.html:231
+#: src/objects/list/list.tpl.html:262 src/objects/list/list.tpl.html:84
 msgid "Revoke"
 msgstr ""
 
@@ -337,7 +325,7 @@ msgstr ""
 
 #: src/objects/search/search.tpl.html:22
 msgid "Search:"
-msgstr ""
+msgstr "Suchen:"
 
 #: src/objects/list/list.tpl.html:70
 msgid "Select multiple objects to:"
@@ -349,7 +337,7 @@ msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:196
 msgid "Starting HFOS client"
-msgstr ""
+msgstr "Starte HFOS Klient"
 
 #: src/common/component/login.tpl.html:43
 msgid "Stay logged in"
@@ -357,7 +345,7 @@ msgstr ""
 
 #: src/objects/editor/editor.tpl.html:49
 msgid "Stored"
-msgstr ""
+msgstr "Gespeichert"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:38
 msgid "Thanks for enrolling, {{$ctrl.username}}!"
@@ -369,7 +357,7 @@ msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:56
 msgid "Toggle Fullscreen"
-msgstr ""
+msgstr "Vollbild umschalten"
 
 #: src/app/app-component/app-component.tpl.html:27
 msgid "Toggle navigation"
@@ -383,10 +371,6 @@ msgstr ""
 msgid "User actions"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:57
-msgid "Username:"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:187
 msgid "View"
 msgstr ""
@@ -395,8 +379,7 @@ msgstr ""
 msgid "With {{$ctrl.selected_objects.length}} selected, do:"
 msgstr ""
 
-#: src/objects/list/list.tpl.html:196
-#: src/objects/list/list.tpl.html:81
+#: src/objects/list/list.tpl.html:196 src/objects/list/list.tpl.html:81
 msgid "Write"
 msgstr ""
 
@@ -406,7 +389,7 @@ msgstr ""
 
 #: src/common/services/socket.factory.js:142
 msgid "You have been disconnected from the node. Retry interval is at"
-msgstr ""
+msgstr "Sie wurden vom Knoten getrennt. Es wird wieder versucht in"
 
 #: src/common/services/socket.factory.js:334
 msgid "You have insufficient permissions to do that."
@@ -418,7 +401,7 @@ msgstr ""
 
 #: src/featuremenu/menu/menu.tpl.html:39
 msgid "Your client is not connected to the node."
-msgstr ""
+msgstr "Ihr Klient ist nicht mit dem Knoten verbunden."
 
 #: src/components/enrol/enrol/enrolment.tpl.html:33
 msgid "log out"
@@ -431,3 +414,6 @@ msgstr ""
 #: src/components/enrol/enrol/enrolment.tpl.html:33
 msgid "to enrol another account."
 msgstr ""
+
+#~ msgid "Accept"
+#~ msgstr "Akzeptieren"

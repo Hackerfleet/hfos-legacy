@@ -23,65 +23,70 @@
   -->
 
 <div class="well" style="padding-top: 5px">
-    <h1>Enrol Account</h1>
+    <h1 translate>Enrol Account</h1>
 
     <div class="text-warning" ng-hide="$ctrl.registration_open">
-        <span>Sorry, but enrolling is currently not possible.</span>
+        <span translate>Sorry, but enrolling is currently not possible.</span>
     </div>
 
     <div ng-show="$ctrl.user.signedin && ($ctrl.registration_open === true)">
-        <span>You're already logged in. Please <a ng-click="$ctrl.logout()">log out</a> to enrol another account.</span>
+        <div><span translate>You're already logged in. Please </span><a ng-click="$ctrl.logout()" translate>log out</a><span translate> to enrol another account.</span></div>
     </div>
 
     <div ng-show="$ctrl.success === true">
         <div>
-            Thanks for enrolling, {{$ctrl.username}}!
+            <span translate>Thanks for enrolling, {{$ctrl.username}}!</span>
             <br/>
-            <div ng-show="$ctrl.invited">
+            <div ng-show="$ctrl.invited" translate>
                 An email with a confirmation link has been sent to you.
                 Please open this link in your browser to confirm your account.
 
                 If you do not receive this mail, contact an administrator of this system.
             </div>
             <div ng-show="$ctrl.enrolled">
-                You can now <a ng-click="$ctrl.state.go('app.menu'); $ctrl.user.showlogin()">login to this node.</a>
+                <span translate>You can now </span><a ng-click="$ctrl.state.go('app.menu'); $ctrl.user.showlogin()" translate>login to this node.</a>
             </div>
         </div>
     </div>
 
     <div ng-hide="$ctrl.user.signedin || ($ctrl.registration_open !== true) || ($ctrl.success === true)">
-        <span>Enrol a new account with this form</span>
+        <span translate>Enrol a new account with this form</span>
 
         <form name="enrolment" class="form-horizontal" novalidate>
             <div class="form-group" ng-class="{hasError: $ctrl.username.length < 4}">
-                <label for="username" class="col-sm-2 control-label">Username:</label>
+                <label for="username" class="col-sm-2 control-label" translate>Username:</label>
                 <div class="col-sm-offset-1 col-sm-2">
                     <input id="username" name="username" type="text" ng-model="$ctrl.username" class="form-control"
                            autofocus required/>
                 </div>
                 <div ng-show="enrolment.$submitted || enrolment.username.$touched">
-                    <div class="help-block" ng-show="$ctrl.username.length < 4">Please use at least 4 characters</div>
-                    <div class="help-block" ng-show="enrolment.username.$error.required">Please enter a username
+                    <div class="help-block" ng-show="$ctrl.username.length < 4" translate>
+                        Please use at least 4 characters
+                    </div>
+                    <div class="help-block" ng-show="enrolment.username.$error.required" translate>
+                        Please enter a username
                     </div>
                 </div>
             </div>
 
             <div class="form-group" ng-class="{hasError: $ctrl.password_new.length < 5}">
-                <label for="password_new" class="col-sm-2 control-label">Password:</label>
+                <label for="password_new" class="col-sm-2 control-label" translate>Password:</label>
                 <div class="col-sm-offset-1 col-sm-2">
                     <input type="password" name="password_new" ng-model="$ctrl.password_new" class="form-control"
                            id="password_new" required/>
                 </div>
                 <div ng-show="enrolment.$submitted || enrolment.password_new.$touched">
-                    <div class="help-block" ng-show="enrolment.password_new.$error.required">Please enter a
+                    <div class="help-block" ng-show="enrolment.password_new.$error.required" translate>Please enter a
                         password
                     </div>
-                    <div class="help-block" ng-show="$ctrl.password_new.length < 5">Enter at least 5 characters</div>
+                    <div class="help-block" ng-show="$ctrl.password_new.length < 5" translate>
+                        Enter at least 5 characters
+                    </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="password_confirm" class="col-sm-2 control-label">Confirm:</label>
+                <label for="password_confirm" class="col-sm-2 control-label" translate>Confirm:</label>
                 <div class="col-sm-offset-1 col-sm-2"
                      ng-class="{hasError: $ctrl.password_new !== $ctrl.password_confirm}">
                     <input type="password" name="password_confirm" ng-model="$ctrl.password_confirm"
@@ -90,7 +95,7 @@
                            required/>
                 </div>
                 <div ng-show="enrolment.$submitted || enrolment.password_confirm.$touched">
-                    <div class="help-block"
+                    <div class="help-block" translate
                          ng-show="enrolment.password_confirm.$error.required || $ctrl.password_new !== $ctrl.password_confirm">
                         Enter the same password for confirmation
                     </div>
@@ -98,35 +103,35 @@
             </div>
 
             <div class="form-group">
-                <label for="mail" class="col-sm-2 control-label">Mail Address</label>
+                <label for="mail" class="col-sm-2 control-label" translate>Mail Address</label>
                 <div class="col-sm-offset-1 col-sm-3">
                     <input id="mail" name="mail" type="email" ng-model="$ctrl.mail" class="form-control" required>
                 </div>
                 <div ng-show="enrolment.$submitted || enrolment.mail.$touched">
-                    <div class="help-block" ng-show="enrolment.mail.$error.required">E-Mail address is required</div>
-                    <div class="help-block" ng-show="enrolment.mail.$error.email">E-Mail address is not valid</div>
+                    <div class="help-block" ng-show="enrolment.mail.$error.required" translate>E-Mail address is required</div>
+                    <div class="help-block" ng-show="enrolment.mail.$error.email" translate>E-Mail address is not valid</div>
                 </div>
             </div>
 
             <div class="form-group" ng-show="$ctrl.tos">
-                <label class="col-sm-2 control-label" for="accept_tos">Accept <a href="{{$ctrl.tos}}">terms of
-                    service</a></label>
+                <label class="col-sm-2 control-label" for="accept_tos">
+                    <span translate>Accept <a href="{{$ctrl.tos}}">terms of service</a></span></label>
                 <div class="col-sm-offset-1 col-sm-2">
                     <input id="accept_tos" name="accept_tos" type="checkbox" ng-model="$ctrl.accept_tos"/>
                 </div>
                 <div ng-show="enrolment.$submitted || enrolment.accept_tos.$touched">
-                    <div class="help-block" ng-show="!$ctrl.accept_tos">Acceptance of Terms is
-                        required
+                    <div class="help-block" ng-show="!$ctrl.accept_tos" translate>
+                        Acceptance of Terms is required
                     </div>
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="captcha">Are you a conscious being?</label>
+                <label class="col-sm-2 control-label" for="captcha" translate>Are you a conscious being?</label>
                 <div class="col-sm-3">
                     <div ng-show="$ctrl.captcha_image !== null">
                         <img class="captcha" data-ng-src="data:image/png;base64,{{$ctrl.captcha_image}}"
                              data-err-src="/assets/images/error.png"/>
-                        <a ng-click="$ctrl.get_captcha()">Illegible?</a>
+                        <a ng-click="$ctrl.get_captcha()" translate>Illegible?</a>
                     </div>
                     <span ng-show="$ctrl.captcha_image === null" us-spinner="{color: '#0C5392'}"></span>
                 </div>
@@ -135,8 +140,8 @@
                            required/>
                 </div>
                 <div ng-show="enrolment.$submitted || enrolment.captcha.$touched">
-                    <div class="help-block" ng-show="enrolment.captcha.$error.required">Please type in the characters
-                        you see in the image next to the input
+                    <div class="help-block" ng-show="enrolment.captcha.$error.required" translate>
+                        Please type in the characters you see in the image next to the input
                     </div>
                 </div>
             </div>
@@ -147,7 +152,7 @@
                             class="btn btn-lg btn-default pull-right"
                             ng-click="$ctrl.enrol()"
                             ng-disabled="$ctrl.submitting">
-                        <span class="fa fa-user-plus"></span>Enrol Account
+                        <span class="fa fa-user-plus" translate></span>Enrol Account
                     </button>
                 </div>
             </div>

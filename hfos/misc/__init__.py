@@ -1,14 +1,84 @@
 import gettext
+import pprint
+
+import os
+
 from datetime import datetime
 from uuid import uuid4
 
-import os
 from hashlib import sha512
 from random import choice
 
-localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locale')
-translate = gettext.translation('hfos', localedir, fallback=True)
-_ = translate.gettext
+localedir = '/home/riot/src/hfos_master/locale'
+
+
+def translate(thing, lang):
+    """Selects a language, then returns the translated string"""
+
+    languages[lang].install()
+    return _(thing)
+
+
+def all_languages():
+    rv = []
+
+    for lang in os.listdir(localedir):
+        base = lang.split('_')[0].split('.')[0].split('@')[0]
+        if 2 <= len(base) <= 3 and all(c.islower() for c in base):
+            if base != 'all':
+                rv.append(lang)
+    rv.sort()
+    rv.append('C.UTF-8')
+    rv.append('C')
+    # pprint.pprint(rv)
+    return rv
+
+
+class Domain:
+    """Gettext domain capable of translating into all registered languages"""
+
+    def __init__(self, domain):
+        self._domain = domain
+        self._translations = {}
+
+    def _get_translation(self, lang):
+        """Add a new translation language to the live gettext translator"""
+
+        try:
+            return self._translations[lang]
+        except KeyError:
+            # The fact that `fallback=True` is not the default is a serious design flaw.
+            rv = self._translations[lang] = gettext.translation(self._domain, localedir=localedir, languages=[lang],
+                                                                fallback=True)
+            return rv
+
+    def get(self, lang, msg):
+        """Return a message translated to a specified language"""
+
+        return self._get_translation(lang).gettext(msg)
+
+
+def print_messages(domain, msg):
+    """Debugging function to print all message language variants"""
+
+    domain = Domain(domain)
+    for lang in all_languages():
+        print(lang, ':', domain.get(lang, msg))
+
+
+def i18n(msg, event=None, lang='C', domain='backend'):
+    """Gettext function wrapper to return a message in a specified language by domain
+
+    To use internationalization (i18n) on your messages, import it as '_' and use as usual.
+    Do not forget to supply the client's language setting."""
+
+    if event is not None:
+        language = event.client.language
+    else:
+        language = lang
+
+    domain = Domain(domain)
+    return domain.get(language, msg)
 
 
 def std_hash(word, salt):

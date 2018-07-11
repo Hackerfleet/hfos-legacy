@@ -43,7 +43,7 @@ from base64 import b64decode
 from hfos.component import handler
 from circuits.net.events import write
 from circuits import Event, Timer
-from hfos.events.system import get_anonymous_events, get_user_events, authorizedevent
+from hfos.events.system import get_anonymous_events, get_user_events, authorizedevent, anonymousevent
 from hfos.events.client import authenticationrequest, send, clientdisconnect, \
     userlogin, userlogout
 from hfos.component import ConfigurableComponent
@@ -52,7 +52,7 @@ from hfos.logger import error, warn, critical, debug, info, network, \
     verbose, hilight
 from hfos.ui.clientobjects import Socket, Client, User
 from hfos.debugger import cli_register_event
-from hfos.misc import std_table
+from hfos.misc import std_table, i18n as _
 
 
 class cli_users(Event):
@@ -96,6 +96,10 @@ class reset_flood_offenders(Event):
 # Ping for latency measurement
 
 class ping(authorizedevent):
+    pass
+
+
+class selectlanguage(anonymousevent):
     pass
 
 
@@ -146,6 +150,8 @@ class ClientManager(ConfigurableComponent):
     @handler('cli_client')
     def client_details(self, *args):
         """Display known details about a given client"""
+
+        self.log(_('Client details:', 'de'))
         client = self._clients[args[0]]
 
         self.log('UUID:', client.uuid, 'IP:', client.ip, 'Name:', client.name, 'User:', client.useruuid, pretty=True)
@@ -462,7 +468,7 @@ class ClientManager(ConfigurableComponent):
                 result = {
                     'component': 'hfos.ui.clientmanager',
                     'action': 'Permission',
-                    'data': 'You have no role that allows this action.'
+                    'data': _('You have no role that allows this action.', 'de')
                 }
                 self.fireEvent(send(event.client.uuid, result))
                 return
@@ -648,7 +654,7 @@ class ClientManager(ConfigurableComponent):
             return
 
         if requestcomponent in self.anonymous_events and requestaction in \
-                self.anonymous_events[requestcomponent]:
+            self.anonymous_events[requestcomponent]:
             self.log('Executing anonymous event:', requestcomponent,
                      requestaction)
             try:
@@ -781,6 +787,11 @@ class ClientManager(ConfigurableComponent):
         except Exception as e:
             self.log("Error (%s, %s) during auth grant: %s" % (
                 type(e), e, event), lvl=error)
+
+    @handler(selectlanguage)
+    def selectlanguage(self, event):
+        self.log('Language selection event:', event.client, pretty=True)
+        event.client.language = event.data
 
     @handler(ping)
     def ping(self, event):

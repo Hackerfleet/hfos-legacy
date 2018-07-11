@@ -42,7 +42,7 @@ from hfos.events.system import authorizedevent, anonymousevent
 from hfos.events.client import send
 from hfos.database import objectmodels
 from hfos.logger import warn, debug, verbose, error, hilight
-from hfos.misc import std_uuid, std_now, std_hash, std_salt, _, std_human_uid
+from hfos.misc import std_uuid, std_now, std_hash, std_salt, i18n as _, std_human_uid
 from pystache import render
 from email.mime.text import MIMEText
 from smtplib import SMTP, SMTP_SSL
@@ -408,35 +408,35 @@ the friendly robot of {{node_name}}
             self.log('Captcha solved!')
         else:
             self.log('Captcha failed!')
-            self._fail(event, _('You did not solve the captcha correctly.'))
+            self._fail(event, _('You did not solve the captcha correctly.', event))
             self._generate_captcha(event)
 
             return
 
         mail = event.data.get('mail', None)
         if mail is None:
-            self._fail(event, _('You have to supply all required fields.'))
+            self._fail(event, _('You have to supply all required fields.', event))
             return
         elif not validate_email(mail):
-            self._fail(event, _('The supplied email address seems invalid'))
+            self._fail(event, _('The supplied email address seems invalid', event))
             return
 
         if objectmodels['user'].count({'mail': mail}) > 0:
-            self._fail(event, _('Your mail address cannot be used.'))
+            self._fail(event, _('Your mail address cannot be used.', event))
             return
 
         password = event.data.get('password', None)
         if password is None or len(password) < 5:
-            self._fail(event, _('Your password is not long enough.'))
+            self._fail(event, _('Your password is not long enough.', event))
             return
 
         username = event.data.get('username', None)
         if username is None or len(username) < 4:
-            self._fail(event, _('Your username is not long enough.'))
+            self._fail(event, _('Your username is not long enough.', event))
             return
         elif (objectmodels['user'].count({'name': username}) > 0) or \
             (objectmodels['enrollment'].count({'name': username}) > 0):
-            self._fail(event, _('The username you supplied is not available.'))
+            self._fail(event, _('The username you supplied is not available.', event))
             return
 
         self.log('Provided data is good to enrol.')

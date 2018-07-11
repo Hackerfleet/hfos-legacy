@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos.misc import all_languages
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -166,3 +167,14 @@ def base_object(name,
         base_schema['required'] = ["uuid"]
 
     return base_schema
+
+
+def language_field():
+    schema = {
+        'type': 'string',
+        'enum': all_languages(),
+        'title': 'Language',
+        'description': 'Select a language'
+    }
+
+    return schema
