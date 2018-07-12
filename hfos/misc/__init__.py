@@ -1,5 +1,5 @@
 import gettext
-import pprint
+import json
 
 import os
 
@@ -9,10 +9,21 @@ from uuid import uuid4
 from hashlib import sha512
 from random import choice
 
+from hfos.logger import hfoslog, verbose, warn
+
 localedir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '..', 'locale'))
 
 
+def l10n_log(*args, **kwargs):
+    """Log as L10N emitter"""
+
+    kwargs.update({'emitter': 'L10N', 'frame_ref': 2})
+    hfoslog(*args, **kwargs)
+
+
 def all_languages():
+    """Compile a list of all available language translations"""
+
     rv = []
 
     for lang in os.listdir(localedir):
@@ -21,10 +32,28 @@ def all_languages():
             if base != 'all':
                 rv.append(lang)
     rv.sort()
-    rv.append('C.UTF-8')
     rv.append('C')
-    # pprint.pprint(rv)
+    l10n_log('Registered languages:', rv, lvl=verbose)
+
     return rv
+
+
+def language_token_to_name(languages):
+    """Get a descriptive title for all languages"""
+
+    result = {}
+
+    with open(os.path.join(localedir, 'languages.json'), 'r') as f:
+        language_lookup = json.load(f)
+
+    for language in languages:
+        try:
+            result[language] = language_lookup[language]
+        except KeyError:
+            l10n_log('Language token lookup not found:', language, lvl=warn)
+            result[language] = language
+
+    return result
 
 
 class Domain:

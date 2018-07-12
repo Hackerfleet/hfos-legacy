@@ -52,7 +52,7 @@ from hfos.logger import error, warn, critical, debug, info, network, \
     verbose, hilight
 from hfos.ui.clientobjects import Socket, Client, User
 from hfos.debugger import cli_register_event
-from hfos.misc import std_table, i18n as _
+from hfos.misc import std_table, i18n as _, all_languages, language_token_to_name
 
 
 class cli_users(Event):
@@ -100,6 +100,10 @@ class ping(authorizedevent):
 
 
 class selectlanguage(anonymousevent):
+    pass
+
+
+class getlanguages(anonymousevent):
     pass
 
 
@@ -747,7 +751,8 @@ class ClientManager(ConfigurableComponent):
                 clientuuid=clientuuid,
                 useruuid=useruuid,
                 name=clientconfig.name,
-                config=clientconfig
+                config=clientconfig,
+                language=clientconfig.language
             )
 
             del (self._clients[originatingclientuuid])
@@ -790,11 +795,27 @@ class ClientManager(ConfigurableComponent):
 
     @handler(selectlanguage)
     def selectlanguage(self, event):
+        """Store client's selection of a new translation"""
+
         self.log('Language selection event:', event.client, pretty=True)
         event.client.language = event.data
 
+    @handler(getlanguages)
+    def getlanguages(self, event):
+        """Compile and return a human readable list of registered translations"""
+
+        self.log('Client requests all languages.', lvl=verbose)
+        result = {
+            'component': 'hfos.ui.clientmanager',
+            'action': 'getlanguages',
+            'data': language_token_to_name(all_languages())
+        }
+        self.fireEvent(send(event.client.uuid, result))
+
     @handler(ping)
     def ping(self, event):
+        """Perform a ping to measure client <-> node latency"""
+
         self.log('Client ping received:', event.data, lvl=verbose)
         response = {
             'component': 'hfos.ui.clientmanager',
