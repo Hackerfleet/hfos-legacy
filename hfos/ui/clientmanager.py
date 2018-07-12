@@ -805,6 +805,9 @@ class ClientManager(ConfigurableComponent):
 
         self.log('Language selection event:', event.client, pretty=True)
         event.client.language = event.data
+        if event.client.config is not None:
+            event.client.config.language = event.data
+            event.client.config.save()
 
     @handler(getlanguages)
     def getlanguages(self, event):
