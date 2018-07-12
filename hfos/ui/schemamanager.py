@@ -35,7 +35,7 @@ from hfos.events.client import send
 from hfos.events.schemamanager import get, all, configuration
 from hfos.debugger import cli_register_event
 from hfos.component import ConfigurableComponent
-from hfos.database import schemastore, configschemastore
+from hfos.database import schemastore, l10n_schemastore, configschemastore
 from hfos.logger import warn, debug, error  # , hilight
 from hfos.component import handler
 
@@ -87,12 +87,15 @@ class SchemaManager(ConfigurableComponent):
     def cli_schemata_list(self, *args):
         """Display a list of registered schemata"""
 
-        self.log('Registered Schemata:', ",".join(sorted(schemastore.keys())), pretty=True)
+        self.log('Registered schemata languages:', ",".join(sorted(l10n_schemastore.keys())))
+        self.log('Registered Schemata:', ",".join(sorted(schemastore.keys())))
         if 'CONFIG' in args:
             self.log('Registered Configuration Schemata:', ",".join(sorted(configschemastore.keys())), pretty=True)
 
     @handler('cli_form')
     def cli_form(self, *args):
+        """Display a schemata's form definition"""
+
         if args[0] == '*':
             for schema in schemastore:
                 self.log(schema, ':', schemastore[schema]['form'], pretty=True)
@@ -101,6 +104,8 @@ class SchemaManager(ConfigurableComponent):
 
     @handler('cli_schema')
     def cli_schema(self, *args):
+        """Display a single schema definition"""
+
         key = None
         if len(args) > 1:
             key = args[1]
@@ -129,6 +134,8 @@ class SchemaManager(ConfigurableComponent):
 
     @handler('cli_forms')
     def cli_forms(self, *args):
+        """List all available form definitions"""
+
         forms = []
         missing = []
 
@@ -143,6 +150,8 @@ class SchemaManager(ConfigurableComponent):
 
     @handler('cli_default_perms')
     def cli_default_perms(self, *args):
+        """Show default permissions for all schemata"""
+
         for key, item in schemastore.items():
             # self.log(item, pretty=True)
             if item['schema'].get('no_perms', False):
@@ -167,6 +176,7 @@ class SchemaManager(ConfigurableComponent):
     @handler('ready')
     def ready(self):
         """Sets up the application after startup."""
+
         self.log('Got', len(schemastore), 'data and',
                  len(configschemastore), 'component schemata.', lvl=debug)
 
@@ -182,7 +192,7 @@ class SchemaManager(ConfigurableComponent):
         response = {
             'component': 'hfos.events.schemamanager',
             'action': 'all',
-            'data': schemastore
+            'data': l10n_schemastore[event.client.language]
         }
         self.fireEvent(send(event.client.uuid, response))
 
@@ -195,7 +205,7 @@ class SchemaManager(ConfigurableComponent):
             response = {
                 'component': 'hfos.events.schemamanager',
                 'action': 'get',
-                'data': schemastore[event.data]
+                'data': l10n_schemastore[event.client.language][event.data]
             }
             self.fireEvent(send(event.client.uuid, response))
         else:

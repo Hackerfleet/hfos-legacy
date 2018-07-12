@@ -85,6 +85,7 @@ except NameError:
     PermissionError = IOError  # NOQA
 
 schemastore = None
+l10n_schemastore = {}
 configschemastore = {}
 objectmodels = None
 collections = None
@@ -206,6 +207,10 @@ def _build_schemastore_new():
 
     schemata_log("Found", len(available), "schemata: ", sorted(available.keys()), lvl=debug)
 
+    return available
+
+
+def _build_l10n_schemastore(available):
     l10n_schemata = {}
 
     for lang in all_languages():
@@ -213,10 +218,13 @@ def _build_schemastore_new():
         language_schemata = {}
 
         def translate(schema):
+            """Generate a translated copy of a schema"""
 
             localized = deepcopy(schema)
 
             def walk(branch):
+                """Inspect a schema recursively to translate descriptions and titles"""
+
                 if isinstance(branch, dict):
 
                     if 'title' in branch and isinstance(branch['title'], str):
@@ -238,11 +246,14 @@ def _build_schemastore_new():
 
         l10n_schemata[lang] = language_schemata
 
-    # schemata_log(l10n_schemata['de']['client'], pretty=True, lvl=error)
-    return available
+        # schemata_log(l10n_schemata['de']['client'], pretty=True, lvl=error)
+
+    return l10n_schemata
 
 
 def _build_model_factories(store):
+    """Generate factories to construct objects from schemata"""
+
     result = {}
 
     for schemaname in store:
@@ -263,6 +274,8 @@ def _build_model_factories(store):
 
 
 def _build_collections(store):
+    """Generate database collections with indices from the schemastore"""
+
     result = {}
 
     client = pymongo.MongoClient(host=dbhost, port=dbport)
@@ -334,10 +347,10 @@ def _build_collections(store):
 
 
 def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="default", reload=False):
-    """Initializes the database connectivity, schemata and finally
-    object models"""
+    """Initializes the database connectivity, schemata and finally object models"""
 
     global schemastore
+    global l10n_schemastore
     global objectmodels
     global collections
     global dbhost
@@ -369,6 +382,7 @@ def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="d
     warmongo.connect(database_name)
 
     schemastore = _build_schemastore_new()
+    l10n_schemastore = _build_l10n_schemastore(schemastore)
     objectmodels = _build_model_factories(schemastore)
     collections = _build_collections(schemastore)
     instance = instance_name
