@@ -58,7 +58,7 @@ if VERB="$( which apt-get )" 2> /dev/null; then
     apt-get install -y $DEBIAN_PKGS &>> output.log
 
     # This one doesn't run nicely, so we get it via pip:
-    apt-get remove -y python3-crypto python3-cffi-backend
+    apt-get remove -y python3-crypto python3-cffi-backend &>> output.log
 
     npm install -g npm@4.2.0 &>> output.log
 
