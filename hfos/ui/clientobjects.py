@@ -60,7 +60,7 @@ class Client(object):
     """
 
     def __init__(self, sock, ip, clientuuid, useruuid=None, name='',
-                 config=None):
+                 config=None, language='C'):
         """
 
         :param sock: Associated connection
@@ -78,7 +78,7 @@ class Client(object):
         else:
             self.name = name
         self.config = config
-        self.language = "C"
+        self.language = language
 
     def __repr__(self):
         return self.name
