@@ -63,7 +63,7 @@ msgstr ""
 msgid "Browse on Github"
 msgstr ""
 
-#: src/common/modals/login.tpl.html:16
+#: src/common/modals/login.tpl.html:43
 #: src/common/modals/user.tpl.html:24
 msgid "Cancel"
 msgstr ""
@@ -203,6 +203,7 @@ msgid "Logging in..."
 msgstr ""
 
 #: src/common/component/login.tpl.html:29
+#: src/common/modals/login.tpl.html:22
 msgid "Login"
 msgstr ""
 
@@ -307,6 +308,7 @@ msgid "Readonly"
 msgstr ""
 
 #: src/common/component/login.tpl.html:37
+#: src/common/modals/login.tpl.html:30
 msgid "Register"
 msgstr ""
 
@@ -352,6 +354,7 @@ msgid "Starting HFOS client"
 msgstr ""
 
 #: src/common/component/login.tpl.html:43
+#: src/common/modals/login.tpl.html:36
 msgid "Stay logged in"
 msgstr ""
 
