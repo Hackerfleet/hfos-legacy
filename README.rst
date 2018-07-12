@@ -158,6 +158,7 @@ Code
 -  Heiko 'riot' Weinen riot@c-base.org
 -  Johannes 'ijon' Rundfeldt ijon@c-base.org
 -  Martin Ling
+-  Sascha 'c_ascha' Behrendt c_ascha@c-base.org
 
 Assets
 ------
