@@ -744,6 +744,12 @@ class ClientManager(ConfigurableComponent):
             self._sockets[event.sock] = socket
 
             # ..and client lists
+
+            try:
+                language = clientconfig.language
+            except AttributeError:
+                language = "C"
+
             # TODO: Rewrite and simplify this:
             newclient = Client(
                 sock=event.sock,
@@ -752,7 +758,7 @@ class ClientManager(ConfigurableComponent):
                 useruuid=useruuid,
                 name=clientconfig.name,
                 config=clientconfig,
-                language=clientconfig.language
+                language=language
             )
 
             del (self._clients[originatingclientuuid])
