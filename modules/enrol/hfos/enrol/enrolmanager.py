@@ -35,13 +35,13 @@ from base64 import b64encode
 from time import time
 from captcha.image import ImageCaptcha
 from validate_email import validate_email
-from circuits import Timer, Event
+from circuits import Timer, Event, Worker, task
 
 from hfos.component import ConfigurableComponent, handler
 from hfos.events.system import authorizedevent, anonymousevent
 from hfos.events.client import send
 from hfos.database import objectmodels
-from hfos.logger import warn, debug, verbose, error, hilight
+from hfos.logger import warn, debug, verbose, error, hilight, hfoslog
 from hfos.misc import std_uuid, std_now, std_hash, std_salt, i18n as _, std_human_uid
 from pystache import render
 from email.mime.text import MIMEText
@@ -253,10 +253,14 @@ the friendly robot of {{node_name}}
 
         super(EnrolManager, self).__init__("ENROL", *args, **kwargs)
 
-        self._setup()
+        self.worker = Worker(process=False, workers=2, channel="enrolworkers").register(self)
+
         self.log("Started")
+        self._setup()
 
     def reload_configuration(self, event):
+        """Reload the current configuration and set up everything depending on it"""
+
         super(EnrolManager, self).reload_configuration(event)
         self.log('Reloaded configuration.')
         self._setup()
@@ -329,7 +333,7 @@ the friendly robot of {{node_name}}
         if status == 'Resend':
             enrollment.timestamp = std_now()
             enrollment.save()
-            self._send_invitation(enrollment)
+            self._send_invitation(enrollment, event)
             reply = {True: 'Resent'}
         else:
             enrollment.status = status
@@ -338,7 +342,7 @@ the friendly robot of {{node_name}}
 
         if status == 'Accepted' and enrollment.method == 'Enrolled':
             self._create_user(enrollment.name, enrollment.password, enrollment.email, 'Invited', event.client.uuid)
-            self._send_acceptance(enrollment, None)
+            self._send_acceptance(enrollment, None, event)
 
         packet = {
             'component': 'hfos.enrol.enrolmanager',
@@ -389,7 +393,7 @@ the friendly robot of {{node_name}}
         email = event.data['email']
         method = event.data['method']
 
-        self._invite(name, method, email, event.client.uuid)
+        self._invite(name, method, email, event.client.uuid, event)
 
     @handler(enrol)
     def enrol(self, event):
@@ -443,7 +447,7 @@ the friendly robot of {{node_name}}
         if self.config.no_verify:
             self._create_user(username, password, mail, 'Enrolled', uuid)
         else:
-            self._invite(username, 'Enrolled', mail, uuid, password)
+            self._invite(username, 'Enrolled', mail, uuid, event, password)
 
     @handler(accept)
     def accept(self, event):
@@ -469,15 +473,16 @@ the friendly robot of {{node_name}}
                         password = std_human_uid().replace(" ", '')
 
                         self._create_user(enrollment.name, password, enrollment.email, enrollment.method, uuid)
-                        self._send_acceptance(enrollment, password)
+                        self._send_acceptance(enrollment, password, event)
                     elif enrollment.method == 'Enrolled' and self.config.auto_accept_enrolled:
                         enrollment.status = 'Accepted'
                         data = 'Your account is now activated.'
 
-                        self._create_user(enrollment.name, enrollment.password, enrollment.email, enrollment.method, uuid)
+                        self._create_user(enrollment.name, enrollment.password, enrollment.email, enrollment.method,
+                                          uuid)
 
                         # TODO: Evaluate if sending an acceptance mail makes sense
-                        # self._send_acceptance(enrollment, "")
+                        # self._send_acceptance(enrollment, "", event)
                     else:
                         enrollment.status = 'Pending'
                         data = 'Someone has to confirm your enrollment ' \
@@ -643,7 +648,7 @@ the friendly robot of {{node_name}}
         }
         self.fire(send(uuid, response))
 
-    def _invite(self, name, method, email, uuid, password=""):
+    def _invite(self, name, method, email, uuid, event, password=""):
         """Actually invite a given user"""
 
         props = {
@@ -660,7 +665,7 @@ the friendly robot of {{node_name}}
 
         self.log('Enrollment stored', lvl=debug)
 
-        self._send_invitation(enrollment)
+        self._send_invitation(enrollment, event)
 
         packet = {
             'component': 'hfos.enrol.enrolmanager',
@@ -725,14 +730,14 @@ the friendly robot of {{node_name}}
             self.log("Problem creating new profile: ", type(e),
                      e, lvl=error)
 
-    def _send_invitation(self, enrollment):
+    def _send_invitation(self, enrollment, event):
         """Send an invitation mail to an open enrolment"""
 
         self.log('Sending enrollment status mail to user')
 
-        self._send_mail(self.config.invitation_subject, self.config.invitation_mail, enrollment)
+        self._send_mail(self.config.invitation_subject, self.config.invitation_mail, enrollment, event)
 
-    def _send_acceptance(self, enrollment, password):
+    def _send_acceptance(self, enrollment, password, event):
         """Send an acceptance mail to an open enrolment"""
 
         self.log('Sending acceptance status mail to user')
@@ -744,9 +749,9 @@ the friendly robot of {{node_name}}
         else:
             acceptance_text = self.config.acceptance_mail
 
-        self._send_mail(self.config.acceptance_subject, acceptance_text, enrollment)
+        self._send_mail(self.config.acceptance_subject, acceptance_text, enrollment, event)
 
-    def _send_mail(self, subject, template, enrollment):
+    def _send_mail(self, subject, template, enrollment, event):
         """Connect to mail server and send actual email"""
 
         context = {
@@ -767,30 +772,50 @@ the friendly robot of {{node_name}}
         self.log('MimeMail:', mime_mail, lvl=verbose)
         if self.config.mail_send is True:
             self.log('Sending mail to', enrollment.email)
-            try:
-                if self.config.mail_ssl:
-                    server = SMTP_SSL(self.config.mail_server, port=self.config.mail_server_port, timeout=5)
-                else:
-                    server = SMTP(self.config.mail_server, port=self.config.mail_server_port, timeout=5)
 
-                if self.config.mail_tls:
-                    self.log('Starting TLS', lvl=debug)
-                    server.starttls()
-
-                if self.config.mail_username != '':
-                    self.log('Logging in with', self.config.mail_username, lvl=debug)
-                    server.login(self.config.mail_username, self.config.mail_password)
-                else:
-                    self.log('No username, trying anonymous access', lvl=debug)
-
-                self.log('Sending Mail', lvl=debug)
-                response_send = server.send_message(mime_mail)
-                server.quit()
-
-            except timeout as e:
-                self.log('Could not send email to enrollee, mailserver timeout:', e, lvl=error)
-                return
-            self.log('Server response:', response_send)
-
+            self.fireEvent(task(send_mail_worker, self.config, mime_mail, event), "enrolworkers")
         else:
             self.log('Not sending mail, here it is for debugging info:', mail, pretty=True)
+
+    @handler('task_success', channel="enrolworkers")
+    def task_success(self, event, call, result):
+        success, log, originating_event = result
+
+        if success is True:
+            self.log('Sent mail successfully.')
+        else:
+            self.log('Sending mail failed:', event, call, log, lvl=error)
+            self._fail(originating_event,
+                       _('Sorry, sending that email apparently failed. Please contact a node maintainer.'))
+
+
+def send_mail_worker(config, mail, event):
+    """Worker task to send out an email, which blocks the process unless it is threaded"""
+    log = ""
+
+    try:
+        if config.mail_ssl:
+            server = SMTP_SSL(config.mail_server, port=config.mail_server_port, timeout=30)
+        else:
+            server = SMTP(config.mail_server, port=config.mail_server_port, timeout=30)
+
+        if config.mail_tls:
+            log += 'Starting TLS\n'
+            server.starttls()
+
+        if config.mail_username != '':
+            log += 'Logging in with ' + str(config.mail_username) + "\n"
+            server.login(config.mail_username, config.mail_password)
+        else:
+            log += 'No username, trying anonymous access\n'
+
+        log += 'Sending Mail\n'
+        response_send = server.send_message(mail)
+        server.quit()
+
+    except timeout as e:
+        log += 'Could not send email to enrollee, mailserver timeout: ' + str(e) + "\n"
+        return False, log, event
+
+    log += 'Server response:' + str(response_send)
+    return True, log, event
