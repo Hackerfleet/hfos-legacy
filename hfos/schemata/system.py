@@ -87,7 +87,7 @@ SystemconfigForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    {'key': 'active', 'readonly': True}
+                    'contact', {'key': 'active', 'readonly': True}
                 ]
             },
             {
