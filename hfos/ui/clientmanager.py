@@ -748,7 +748,7 @@ class ClientManager(ConfigurableComponent):
             try:
                 language = clientconfig.language
             except AttributeError:
-                language = "C"
+                language = "en"
 
             # TODO: Rewrite and simplify this:
             newclient = Client(
@@ -804,9 +804,15 @@ class ClientManager(ConfigurableComponent):
         """Store client's selection of a new translation"""
 
         self.log('Language selection event:', event.client, pretty=True)
-        event.client.language = event.data
+        if event.data is None:
+            language = 'en'
+        else:
+            language = event.data
+
+        event.client.language = language
+
         if event.client.config is not None:
-            event.client.config.language = event.data
+            event.client.config.language = language
             event.client.config.save()
 
     @handler(getlanguages)
