@@ -32,7 +32,7 @@ def all_languages():
             if base != 'all':
                 rv.append(lang)
     rv.sort()
-    rv.append('C')
+    rv.append('en')
     l10n_log('Registered languages:', rv, lvl=verbose)
 
     return rv
@@ -47,6 +47,7 @@ def language_token_to_name(languages):
         language_lookup = json.load(f)
 
     for language in languages:
+        language = language.lower()
         try:
             result[language] = language_lookup[language]
         except KeyError:
@@ -88,7 +89,7 @@ def print_messages(domain, msg):
         print(lang, ':', domain.get(lang, msg))
 
 
-def i18n(msg, event=None, lang='C', domain='backend'):
+def i18n(msg, event=None, lang='en', domain='backend'):
     """Gettext function wrapper to return a message in a specified language by domain
 
     To use internationalization (i18n) on your messages, import it as '_' and use as usual.
