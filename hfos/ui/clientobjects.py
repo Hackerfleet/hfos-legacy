@@ -60,7 +60,7 @@ class Client(object):
     """
 
     def __init__(self, sock, ip, clientuuid, useruuid=None, name='',
-                 config=None, language='C'):
+                 config=None, language='en'):
         """
 
         :param sock: Associated connection

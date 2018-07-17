@@ -37,7 +37,7 @@ import shutil
 from OpenSSL import crypto
 from click_didyoumean import DYMGroup
 
-from hfos.logger import error, warn
+from hfos.logger import error, warn, debug
 from hfos.tool import _check_root, log, _get_system_configuration, _ask, run_process
 from hfos.tool.templates import write_template_file
 from hfos.tool.defaults import service_template, cert_file, key_file, distribution, nginx_configuration, combined_file
@@ -208,8 +208,10 @@ def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, 
         """Topologically sort the dependency tree"""
 
         g = networkx.DiGraph()
+        log('Sorting dependencies')
 
         for key, item in items:
+            log('key: ', key, 'item:', item, pretty=True, lvl=debug)
             dependencies = item.get('dependencies', [])
             if isinstance(dependencies, str):
                 dependencies = [dependencies]
