@@ -61,6 +61,12 @@ SystemconfigSchema['properties'].update({
     'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
                      'description': 'Default theme used for user '
                                     'interface'},
+    'initial_state': {'type': 'string', 'title': 'State after login',
+                    'description': 'Frontend state, users are directed to after logging in.',
+                    'default': ''},
+    'initial_state_args': {'type': 'string', 'title': 'State arguments',
+                   'description': 'Arguments (JSON) for login state.',
+                   'default': ''},
     'hostname': {'type': 'string', 'title': 'Public hostname',
                  'description': 'Public FQDN hostname to use for internet '
                                 'based services (host.domain.tld)',
@@ -94,6 +100,7 @@ SystemconfigForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
+                    'initial_state', 'initial_state_args'
                 ]
             }
         ]
