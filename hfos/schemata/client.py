@@ -81,6 +81,14 @@ ClientconfigSchema['properties'].update({
         'description': _('Determines whether the client should be '
                          'locked against changes.')
     },
+    'fullscreen': {
+        'type': 'boolean', 'title': _('Switch fullscreen'),
+        'description': _('Switch to fullscreen after login')
+    },
+    'hide_menu': {
+        'type': 'boolean', 'title': _('Hide menu'),
+        'description': _('Hide menu after login')
+    },
     'language': language_field(),
     'infoscreen': {
         'type': 'boolean', 'title': _('Infoscreen client'),
@@ -116,16 +124,23 @@ ClientconfigForm = [
         'items': [
             {
                 'type': 'section',
-                'htmlClass': 'col-xs-6',
+                'htmlClass': 'col-xs-4',
                 'items': [
                     'name', 'theme', 'infoscreen'
                 ]
             },
             {
                 'type': 'section',
-                'htmlClass': 'col-xs-6',
+                'htmlClass': 'col-xs-4',
                 'items': [
-                    'language', {'key': 'active', 'readonly': True}, 'locked', 'autologin'
+                    'language', {'key': 'active', 'readonly': True}, 'locked'
+                ]
+            },
+            {
+                'type': 'section',
+                'htmlClass': 'col-xs-4',
+                'items': [
+                    'autologin', 'fullscreen', 'hide_menu'
                 ]
             }
         ]
