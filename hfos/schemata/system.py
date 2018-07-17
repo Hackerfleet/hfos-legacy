@@ -33,7 +33,7 @@ System: Global systemwide settings
 
 """
 from hfos.schemata.defaultform import savebutton, lookup_field
-from hfos.schemata.base import base_object, uuid_object
+from hfos.schemata.base import base_object, uuid_object, language_field
 
 SystemconfigSchema = base_object('systemconfig', roles_read=['admin', 'crew'], roles_write=['admin'])
 
@@ -57,6 +57,7 @@ SystemconfigSchema['properties'].update({
         'type': 'string', 'title': 'Contact',
         'description': 'Contact e-mail address'
     },
+    'language': language_field(),
     # TODO: This should probably be an extension of a future themes pack
     'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
                      'description': 'Default theme used for user '
@@ -86,14 +87,14 @@ SystemconfigForm = [
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'name', 'hostname'
+                    'name', 'hostname', 'language'
                 ]
             },
             {
                 'type': 'section',
                 'htmlClass': 'col-xs-4',
                 'items': [
-                    'contact', {'key': 'active', 'readonly': True}
+                    {'key': 'active', 'readonly': True}, 'contact'
                 ]
             },
             {

@@ -34,7 +34,7 @@ Profile: Userprofile with general flags and fields
 
 """
 from hfos.schemata.defaultform import savebutton, lookup_field, country_field, area_field
-from hfos.schemata.base import base_object, uuid_object
+from hfos.schemata.base import base_object, uuid_object, language_field
 
 ProfileSchema = base_object('profile', roles_create='crew')
 
@@ -112,6 +112,7 @@ ProfileSchema['properties'].update({
         "type": "object",
         "default": {},
         "properties": {
+            'language': language_field(),
             'color': {'type': 'string', 'title': 'User Color',
                       'format': 'color',
                       'description': 'Color used for map annotations, '
