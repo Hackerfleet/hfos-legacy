@@ -181,8 +181,9 @@ class Authenticator(ConfigurableComponent):
                  event.clientuuid)
 
         # TODO: Define the requirements for secure passwords etc.
+        # They're also required in the Enrol module..!
 
-        if (len(event.username) < 3) or (len(event.password) < 3):
+        if (len(event.username) < 1) or (len(event.password) < 5):
             self.log("Illegal username or password received, login cancelled", lvl=warn)
             self._fail(event, 'Password or username too short')
             return
