@@ -74,7 +74,7 @@ def test_invalid_user_auth():
 
     client_uuid = std_uuid()
     event = authenticationrequest(
-        username='test',
+        username='',
         password='test',
         clientuuid=client_uuid,
         requestedclientuuid=client_uuid,
@@ -85,4 +85,4 @@ def test_invalid_user_auth():
     result = transmit('authentication', 'auth', event, 'auth')
 
     assert result is None
-    assert "No userobject due to error" in str(log)
+    assert "Illegal username or password received, login cancelled" in str(log)
