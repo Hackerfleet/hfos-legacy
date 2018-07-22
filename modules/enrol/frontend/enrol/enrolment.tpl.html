@@ -25,7 +25,11 @@
 <div class="well" style="padding-top: 5px">
     <h1 translate>Enrol Account</h1>
 
-    <div class="text-warning" ng-hide="$ctrl.registration_open">
+    <div class="text-info" ng-show="$ctrl.registration_open === null">
+        <span translate>Please wait a few seconds.</span>
+    </div>
+
+    <div class="text-warning" ng-show="$ctrl.registration_open === false">
         <span translate>Sorry, but enrolling is currently not possible.</span>
     </div>
 
@@ -45,6 +49,7 @@
             </div>
             <div ng-show="$ctrl.enrolled">
                 <span translate>You can now </span><a ng-click="$ctrl.state.go('app.menu'); $ctrl.user.showlogin()" translate>login to this node.</a>
+                <span translate>If you didn't specify a password, there should be a temporary one in your activation confirmation mail.</span>
             </div>
         </div>
     </div>
@@ -53,15 +58,15 @@
         <span translate>Enrol a new account with this form</span>
 
         <form name="enrolment" class="form-horizontal" novalidate>
-            <div class="form-group" ng-class="{hasError: $ctrl.username.length < 4}">
+            <div class="form-group" ng-class="{hasError: $ctrl.username.length < 1}">
                 <label for="username" class="col-sm-2 control-label" translate>Username:</label>
                 <div class="col-sm-offset-1 col-sm-2">
                     <input id="username" name="username" type="text" ng-model="$ctrl.username" class="form-control"
                            autofocus required/>
                 </div>
                 <div ng-show="enrolment.$submitted || enrolment.username.$touched">
-                    <div class="help-block" ng-show="$ctrl.username.length < 4" translate>
-                        Please use at least 4 characters
+                    <div class="help-block" ng-show="$ctrl.username.length < 1" translate>
+                        Please use at least one character
                     </div>
                     <div class="help-block" ng-show="enrolment.username.$error.required" translate>
                         Please enter a username
