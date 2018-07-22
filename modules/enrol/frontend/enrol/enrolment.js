@@ -33,12 +33,13 @@
  */
 class Enrol {
 
-    constructor(scope, user, socket, notification, state) {
+    constructor(scope, user, socket, notification, state, timeout) {
         this.scope = scope;
         this.user = user;
         this.socket = socket;
         this.notification = notification;
         this.state = state;
+        this.timeout = timeout;
 
         this.registration_open = null;
         this.success = false;
@@ -89,7 +90,9 @@ class Enrol {
         });
 
         if (!user.signedin) {
-            this.get_registration_status();
+            this.timeout(function() {
+                self.get_registration_status();
+            }, 2000);
         }
     }
 
@@ -137,6 +140,6 @@ class Enrol {
     }
 }
 
-Enrol.$inject = ['$scope', 'user', 'socket', 'notification', '$state'];
+Enrol.$inject = ['$scope', 'user', 'socket', 'notification', '$state', '$timeout'];
 
 export default Enrol;
