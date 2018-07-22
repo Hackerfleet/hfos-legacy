@@ -435,7 +435,7 @@ the friendly robot of {{node_name}}
             return
 
         username = event.data.get('username', None)
-        if username is None or len(username) < 4:
+        if username is None or len(username) < 1:
             self._fail(event, _('Your username is not long enough.', event))
             return
         elif (objectmodels['user'].count({'name': username}) > 0) or \
