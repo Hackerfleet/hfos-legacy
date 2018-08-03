@@ -26,13 +26,13 @@ import json
 import bson
 import click
 
-from hfos.database import backup
+from hfos.database import backup as internal_backup
 from hfos.logger import warn
 from hfos.tool import log
 from hfos.tool.database import db
 
 
-@db.command(short_help='export objects to json')
+@db.command('export', short_help='export objects to json')
 @click.option("--schema", "-s", default=None, help="Specify schema to export")
 @click.option("--uuid", "-u", default=None, help="Specify single object to export")
 @click.option("--filter", "--object-filter", default=None, help="Find objects to export by filter")
@@ -42,13 +42,13 @@ from hfos.tool.database import db
               help="Agree to export all documents, if no schema specified")
 @click.option("--omit", "-o", multiple=True, default=[], help="Omit given fields (multiple, e.g. '-o _id -o perms')")
 @click.argument("filename")
-def export(schema, uuid, object_filter, export_format, filename, pretty, all_schemata, omit):
+def db_export(schema, uuid, object_filter, export_format, filename, pretty, all_schemata, omit):
     """Export stored objects
 
     Warning! This functionality is work in progress and you may destroy live data by using it!
     Be very careful when using the export/import functionality!"""
 
-    backup(schema, uuid, object_filter, export_format, filename, pretty, all_schemata, omit)
+    internal_backup(schema, uuid, object_filter, export_format, filename, pretty, all_schemata, omit)
 
 
 @db.command('import', short_help='import objects from json')
@@ -62,7 +62,7 @@ def export(schema, uuid, object_filter, export_format, filename, pretty, all_sch
               help="Agree to import all documents, if no schema specified")
 @click.option("--dry", default=False, is_flag=True, help="Do not write changes to the database")
 @click.pass_context
-def cli_import(ctx, schema, uuid, object_filter, import_format, filename, all_schemata, dry):
+def db_import(ctx, schema, uuid, object_filter, import_format, filename, all_schemata, dry):
     """Import objects from file
 
     Warning! This functionality is work in progress and you may destroy live data by using it!

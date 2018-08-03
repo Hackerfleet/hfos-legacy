@@ -1,5 +1,6 @@
 from hfos.tool.create_module import create_module
 from hfos.tool.configuration import config
+from hfos.tool.backup import db_export, db_import
 from hfos.tool.database import db
 from hfos.tool.objects import objects
 from hfos.tool.installer import install, uninstall, update
@@ -20,6 +21,8 @@ cli.add_command(shell)
 db.add_command(user)
 db.add_command(rbac)
 db.add_command(objects)
+db.add_command(db_export)
+db.add_command(db_import)
 
 cli.add_command(db)
 
