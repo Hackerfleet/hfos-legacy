@@ -34,7 +34,7 @@ msgstr "Das akzeptieren der Nutzungsbedingungen ist erforderlich"
 
 #: src/objects/list/list.tpl.html:177
 msgid "Actions"
-msgstr ""
+msgstr "Aktionen"
 
 #: src/objects/list/list.tpl.html:102 src/objects/list/list.tpl.html:125
 #: src/objects/list/list.tpl.html:132 src/objects/list/list.tpl.html:154
@@ -43,7 +43,7 @@ msgstr ""
 #: src/objects/list/list.tpl.html:251 src/objects/list/list.tpl.html:274
 #: src/objects/list/list.tpl.html:282 src/objects/list/list.tpl.html:95
 msgid "Add"
-msgstr ""
+msgstr "Hinzufügen"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:40
 msgid ""
@@ -54,58 +54,68 @@ msgid ""
 "                If you do not receive this mail, contact an administrator of "
 "this system."
 msgstr ""
+"Eine E-Mail mit einem Bestätigungslink wurde an die angebene Adresse "
+"geschickt.\n"
+"Bitte diesen Link in einem Browser öffnen um den Zugang zu verifizieren.\n"
+"\n"
+"Sollte die Mail nicht ankommen, bitte den Spam-Folder prüfen und \n"
+"ggf. den Node-Besitzer kontaktieren."
 
 #: src/about/about-component/about-component.tpl.html:44
 msgid "An isomer node"
-msgstr ""
+msgstr "Eine Isomer Node"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:129
 msgid "Are you a conscious being?"
-msgstr ""
+msgstr "Ist ein Bewusstsein vorhanden?"
 
 #: src/about/missing/missing.tpl.html:24
 msgid "Back to the main menu"
-msgstr ""
+msgstr "Zurück zum Hauptmenü"
 
 #: src/about/about-component/about-component.tpl.html:66
 msgid "Browse on Github"
-msgstr ""
+msgstr "Auf Github"
 
 #: src/common/modals/login.tpl.html:16 src/common/modals/user.tpl.html:24
 msgid "Cancel"
-msgstr ""
+msgstr "Abbruch"
 
 #: src/common/modals/user.tpl.html:15
 msgid "Change Password"
-msgstr ""
+msgstr "Passwort ändern"
 
 #: src/objects/list/list.tpl.html:77
 msgid "Change Permissions"
-msgstr ""
+msgstr "Berechtigungen ändern"
 
 #: src/objects/list/list.tpl.html:55
 msgid "Checkbox"
-msgstr ""
+msgstr "Häkchen"
 
 #: src/about/about-component/about-component.tpl.html:49
 msgid "Client name:"
-msgstr ""
+msgstr "Client Name:"
 
 #: src/about/about-component/about-component.tpl.html:47
 msgid "Client version:"
-msgstr ""
+msgstr "Client Version:"
 
 #: src/app/app-component/app-component.tpl.html:129
 msgid "Client<span class=\"caret\"></span>"
-msgstr ""
+msgstr "Client<span class=\"caret\"></span>"
+
+#: src/components/enrol/enrol/enrolment.tpl.html:89
+msgid "Confirm:"
+msgstr "Bestätigen:"
 
 #: src/about/about-component/about-component.tpl.html:56
 msgid "Contact the isomer framework maintainers"
-msgstr ""
+msgstr "Kontaktiere die Isomer Framework Maintainer"
 
 #: src/about/about-component/about-component.tpl.html:53
 msgid "Contact this node's maintainer"
-msgstr ""
+msgstr "Kontaktiere den Maintainer dieser Node"
 
 #: src/objects/list/list.tpl.html:57
 msgid "Controls"
@@ -121,7 +131,7 @@ msgstr "Debug"
 
 #: src/objects/list/list.tpl.html:189
 msgid "Delete"
-msgstr ""
+msgstr "Löschen"
 
 #: src/app/app-component/app-component.tpl.html:173
 msgid "Documentation"
@@ -129,15 +139,15 @@ msgstr "Dokumentation"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:112
 msgid "E-Mail address is not valid"
-msgstr ""
+msgstr "E-Mail Adresse ist nicht gültig."
 
 #: src/components/enrol/enrol/enrolment.tpl.html:111
 msgid "E-Mail address is required"
-msgstr ""
+msgstr "E-Mail Adresse ist notwendig."
 
 #: src/objects/list/list.tpl.html:185
 msgid "Edit"
-msgstr ""
+msgstr "Editieren"
 
 #: src/objects/editor/editor.tpl.html:30
 msgid "Edit Live"
@@ -145,47 +155,47 @@ msgstr "Live editieren"
 
 #: src/common/modals/user.tpl.html:18
 msgid "Edit Profile"
-msgstr ""
+msgstr "Profil Editieren"
 
 #: src/common/services/user.service.js:141
 msgid "Either the username or the supplied password is invalid."
-msgstr ""
+msgstr "Entweder der Nutzername oder das angegebene Passwort sind falsch."
 
 #: src/components/enrol/enrol/enrolment.tpl.html:26
 msgid "Enrol Account"
-msgstr ""
+msgstr "Konto registrieren"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:53
 msgid "Enrol a new account with this form"
-msgstr ""
+msgstr "Registriere einen neues Konto mit diesem Formular"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:82
 msgid "Enter at least 5 characters"
-msgstr ""
+msgstr "Bitte mindestens fünf Zeichen eingeben"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:98
 msgid "Enter the same password for confirmation"
-msgstr ""
+msgstr "Bitte das Passwort erneut eingeben"
 
 #: src/objects/list/list.tpl.html:44
 msgid "Fields"
-msgstr ""
+msgstr "Felder"
 
 #: src/objects/list/list.tpl.html:28
 msgid "Filters"
-msgstr ""
+msgstr "Filter"
 
 #: src/common/modals/user.tpl.html:10
 msgid "Hello {{$ctrl.greetingname}}!"
-msgstr ""
+msgstr "Hallo {{$ctrl.greetingname}}!"
 
 #: src/common/services/socket.factory.js:328
 msgid "High latency"
-msgstr ""
+msgstr "Hohe latenz"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:134
 msgid "Illegible?"
-msgstr ""
+msgstr "Unlesbar?"
 
 #: src/objects/editor/editor.tpl.html:34
 msgid "Keep History"
@@ -193,7 +203,7 @@ msgstr "Behalte Vergangenheit"
 
 #: src/objects/list/list.tpl.html:140 src/objects/list/list.tpl.html:259
 msgid "List"
-msgstr ""
+msgstr "Liste"
 
 #: src/objects/list/list.tpl.html:22
 msgid "List:"
@@ -209,19 +219,23 @@ msgstr "Anmelden"
 
 #: src/common/services/user.service.js:143
 msgid "Login failed"
-msgstr ""
+msgstr "Anmeldung fehlgeschlagen"
 
 #: src/common/services/user.service.js:436
 msgid "Login to this node"
-msgstr ""
+msgstr "An dieser Node anmelden."
 
 #: src/common/modals/user.tpl.html:21
 msgid "Logout"
-msgstr ""
+msgstr "Abmelden"
+
+#: src/components/enrol/enrol/enrolment.tpl.html:106
+msgid "Mail Address"
+msgstr "E-Mail Adresse"
 
 #: src/about/missing/missing.tpl.html:23
 msgid "Maybe this functionality has not been developed, yet."
-msgstr ""
+msgstr "Möglicherweise wurde diese Funktionalität noch nicht entwickelt."
 
 #: src/objects/editor/editor.tpl.html:50
 msgid "Modified"
@@ -229,15 +243,15 @@ msgstr "Modifiziert"
 
 #: src/app/app-component/app-component.tpl.html:133
 msgid "N/A"
-msgstr ""
+msgstr "N.V."
 
 #: src/objects/list/list.tpl.html:176 src/objects/list/list.tpl.html:56
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: src/objects/list/list.tpl.html:54
 msgid "No"
-msgstr ""
+msgstr "Nr"
 
 #: src/featuremenu/menu/menu.tpl.html:38
 msgid "No connection"
@@ -245,83 +259,89 @@ msgstr "Keine Verbindung"
 
 #: src/common/services/socket.factory.js:333
 msgid "No permission"
-msgstr ""
+msgstr "Keine Erlaubnis"
 
 #: src/common/services/user.service.js:373
 msgid "No response from node within 30 seconds!"
-msgstr ""
+msgstr "Keine Antwort von der Node in 30 Sekunden!"
 
 #: src/app/app-component/app-component.tpl.html:35
 msgid "Node menu"
-msgstr ""
+msgstr "Node Menü"
 
 #: src/about/missing/missing.tpl.html:22
 msgid "Not found"
-msgstr ""
+msgstr "Nicht gefunden"
 
 #: src/common/services/socket.factory.js:141
 msgid "Offline"
-msgstr ""
+msgstr "Offline"
 
 #: src/common/services/socket.factory.js:181
 msgid "Online"
-msgstr ""
+msgstr "Online"
+
+#: src/components/enrol/enrol/enrolment.tpl.html:73
+msgid "Password:"
+msgstr "Passwort:"
 
 #: src/objects/list/list.tpl.html:192
 msgid "Permissions"
-msgstr ""
+msgstr "Berechtigungen"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:79
 msgid ""
 "Please enter a\n"
 "                        password"
 msgstr ""
+"Bitte ein \n"
+"                        Passwort eingeben"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:66
 msgid "Please enter a username"
-msgstr ""
+msgstr "Bitte einen Nutzernamen eingeben"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:143
 msgid "Please type in the characters you see in the image next to the input"
-msgstr ""
+msgstr "Bitte die Zeichen aus dem Bild neben an eingeben"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:63
 msgid "Please use at least 4 characters"
-msgstr ""
+msgstr "Bitte mindestens vier Zeichen eingeben"
 
 #: src/objects/list/list.tpl.html:111 src/objects/list/list.tpl.html:228
 msgid "Read"
-msgstr ""
+msgstr "Lesen"
 
 #: src/objects/editor/editor.tpl.html:40
 msgid "Readonly"
 msgstr "Schreibgeschützt"
 
-#: src/common/component/login.tpl.html:37
+#: src/common/component/login.tpl.html:37 src/common/modals/login.tpl.html:30
 msgid "Register"
 msgstr "Registrieren"
 
 #: src/common/services/user.service.js:129
 msgid "Registration successful"
-msgstr ""
+msgstr "Registrierung erfolgreich"
 
 #: src/about/about-component/about-component.tpl.html:63
 msgid "Report Bugs"
-msgstr ""
+msgstr "Fehler melden"
 
 #: src/about/about-component/about-component.tpl.html:69
 msgid "Report on Github"
-msgstr ""
+msgstr "Fehler auf Github melden"
 
 #: src/objects/list/list.tpl.html:114 src/objects/list/list.tpl.html:143
 #: src/objects/list/list.tpl.html:199 src/objects/list/list.tpl.html:231
 #: src/objects/list/list.tpl.html:262 src/objects/list/list.tpl.html:84
 msgid "Revoke"
-msgstr ""
+msgstr "Zurückziehen"
 
 #: src/common/services/socket.factory.js:328
 msgid "Roundtrip took"
-msgstr ""
+msgstr "Latenz betrug"
 
 #: src/objects/search/search.tpl.html:22
 msgid "Search:"
@@ -329,11 +349,11 @@ msgstr "Suchen:"
 
 #: src/objects/list/list.tpl.html:70
 msgid "Select multiple objects to:"
-msgstr ""
+msgstr "Wähle mehrere Objekte um:"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:29
 msgid "Sorry, but enrolling is currently not possible."
-msgstr ""
+msgstr "Entschuldigung, aber die Registrierung ist aktuell nicht möglich."
 
 #: src/app/app-component/app-component.tpl.html:196
 msgid "Starting HFOS client"
@@ -341,7 +361,7 @@ msgstr "Starte HFOS Klient"
 
 #: src/common/component/login.tpl.html:43
 msgid "Stay logged in"
-msgstr ""
+msgstr "Angemeldet bleiben"
 
 #: src/objects/editor/editor.tpl.html:49
 msgid "Stored"
@@ -349,11 +369,11 @@ msgstr "Gespeichert"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:38
 msgid "Thanks for enrolling, {{$ctrl.username}}!"
-msgstr ""
+msgstr "Danke für die Registrierung, {{$ctrl.username}}!"
 
 #: src/common/services/socket.factory.js:182
 msgid "The connection to the node has been established. You're online!"
-msgstr ""
+msgstr "Die Verbindung zur Node wurde aufgebaut. Du bist online!"
 
 #: src/app/app-component/app-component.tpl.html:56
 msgid "Toggle Fullscreen"
@@ -361,31 +381,35 @@ msgstr "Vollbild umschalten"
 
 #: src/app/app-component/app-component.tpl.html:27
 msgid "Toggle navigation"
-msgstr ""
+msgstr "Navigation umschalten"
 
 #: src/objects/editor/editor.tpl.html:23
 msgid "Unknown schema!"
-msgstr ""
+msgstr "Unbekanntes Schema!"
 
 #: src/common/services/user.service.js:454
 msgid "User actions"
-msgstr ""
+msgstr "Nutzeraktionen"
+
+#: src/components/enrol/enrol/enrolment.tpl.html:57
+msgid "Username:"
+msgstr "Nutzername:"
 
 #: src/objects/list/list.tpl.html:187
 msgid "View"
-msgstr ""
+msgstr "Ansicht"
 
 #: src/objects/list/list.tpl.html:67
 msgid "With {{$ctrl.selected_objects.length}} selected, do:"
-msgstr ""
+msgstr "Mit {{$ctrl.selected_objects.length}} mache:"
 
 #: src/objects/list/list.tpl.html:196 src/objects/list/list.tpl.html:81
 msgid "Write"
-msgstr ""
+msgstr "Schreiben"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:47
 msgid "You can now"
-msgstr ""
+msgstr "Sie können sich jetzt"
 
 #: src/common/services/socket.factory.js:142
 msgid "You have been disconnected from the node. Retry interval is at"
@@ -393,11 +417,11 @@ msgstr "Sie wurden vom Knoten getrennt. Es wird wieder versucht in"
 
 #: src/common/services/socket.factory.js:334
 msgid "You have insufficient permissions to do that."
-msgstr ""
+msgstr "Sie haben nicht genügend Berechtigungen dies zu tun."
 
 #: src/components/enrol/enrol/enrolment.tpl.html:33
 msgid "You're already logged in. Please"
-msgstr ""
+msgstr "Sie sind bereits angemeldet. Bitte"
 
 #: src/featuremenu/menu/menu.tpl.html:39
 msgid "Your client is not connected to the node."
@@ -405,15 +429,18 @@ msgstr "Ihr Klient ist nicht mit dem Knoten verbunden."
 
 #: src/components/enrol/enrol/enrolment.tpl.html:33
 msgid "log out"
-msgstr ""
+msgstr "abmelden"
 
 #: src/components/enrol/enrol/enrolment.tpl.html:47
 msgid "login to this node."
-msgstr ""
+msgstr "jetzt an dieser Node anmelden."
 
 #: src/components/enrol/enrol/enrolment.tpl.html:33
 msgid "to enrol another account."
-msgstr ""
+msgstr "abmelden um gegebenfalls einen neuen Zugang zu registrieren."
+
+#~ msgid "Search:"
+#~ msgstr "Suchen:"
 
 #~ msgid "Accept"
 #~ msgstr "Akzeptieren"

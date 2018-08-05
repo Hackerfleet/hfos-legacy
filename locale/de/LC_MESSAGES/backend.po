@@ -21,99 +21,103 @@ msgstr ""
 
 #: hfos/database.py:224
 msgid "title"
-msgstr ""
+msgstr "Titel"
 
 #: hfos/database.py:227
 msgid "description"
-msgstr ""
+msgstr "Beschreibung"
 
 #: hfos/schemata/client.py:43
 msgid "New State"
-msgstr ""
+msgstr "Neuer Zustand"
 
 #: hfos/schemata/client.py:44
 msgid "State to switch to"
-msgstr ""
+msgstr "Zu Zustand wechseln"
 
 #: hfos/schemata/client.py:51
 msgid "Argument Name"
-msgstr ""
+msgstr "Argument Name"
 
 #: hfos/schemata/client.py:53
 msgid "Argument Value"
-msgstr ""
+msgstr "Argument Wert"
 
 #: hfos/schemata/client.py:58
 msgid "Duration"
-msgstr ""
+msgstr "Dauer"
 
 #: hfos/schemata/client.py:59
 msgid "Timeout in seconds to swith to the next screen"
-msgstr ""
+msgstr "Zeitspanne in Sekunden bis zum nächsten Zustand gewechselt wird"
 
 #: hfos/schemata/client.py:72
 msgid "Automatic login"
-msgstr "Automatischer Login"
+msgstr "Automatisch anmelden"
 
 #: hfos/schemata/client.py:73
 msgid "Automatically logs in this client."
-msgstr "Loggt diesen Klienten automatisch ein."
+msgstr "Meldet diesen Client automatisch an"
 
 #: hfos/schemata/client.py:76
 msgid "Active client"
-msgstr ""
+msgstr "Aktiver Client"
 
 #: hfos/schemata/client.py:77
 msgid "Indicates whether client is currently active."
-msgstr ""
+msgstr "Zeigt, ob dieser Client gerade aktiv ist."
 
 #: hfos/schemata/client.py:80
 msgid "Locked client"
-msgstr ""
+msgstr "Gesperrter Client"
 
 #: hfos/schemata/client.py:81
 msgid "Determines whether the client should be locked against changes."
-msgstr ""
+msgstr "Gesperrte Clients können nicht eingestellt werden."
 
 #: hfos/schemata/client.py:86
 msgid "Infoscreen client"
-msgstr ""
+msgstr "Infoscreen Client"
 
 #: hfos/schemata/client.py:87
 msgid "This client rotates set up infoscreens"
-msgstr ""
+msgstr "Infoscreen Clients rotieren automatisch durch Ansichten"
 
 #: hfos/schemata/client.py:90
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: hfos/schemata/client.py:91
 msgid "Client name"
-msgstr ""
+msgstr "Client Name"
 
 #: hfos/schemata/client.py:94
 msgid "Client Theme"
-msgstr ""
+msgstr "Client Design"
 
 #: hfos/schemata/client.py:95
 msgid "Theme used for user interface"
-msgstr ""
+msgstr "Design der Anwenderschnittstelle"
 
 #: hfos/schemata/client.py:99 hfos/schemata/client.py:100
 msgid "Client description"
-msgstr ""
+msgstr "Client Beschreibung"
 
 #: hfos/schemata/client.py:164
 msgid "<h2>Default module configurations</h2>"
-msgstr ""
+msgstr "<h2>Standard Modulkonfiguration</h2>"
+
+#: hfos/schemata/profile.py:50
+msgid "Profile name"
+msgstr "Profilname"
 
 #: hfos/ui/clientmanager.py:154
 msgid "Client details:"
-msgstr "Klienten Details:"
+msgstr "Client Details:"
 
 #: hfos/ui/clientmanager.py:471
 msgid "You have no role that allows this action."
-msgstr "Sie besitzen die für diese Aktion erforderliche Rolle nicht."
+msgstr "Sie haben nicht die erforderliche Berechtigung dies zu tun."
 
 #: modules/enrol/hfos/enrol/enrolmanager.py:411
 msgid "You did not solve the captcha correctly."
@@ -125,7 +129,7 @@ msgstr "Sie müssen alle notwendigen Felder ausfüllen."
 
 #: modules/enrol/hfos/enrol/enrolmanager.py:421
 msgid "The supplied email address seems invalid"
-msgstr "Die angegebene e-Mail Adresse scheint ungültig."
+msgstr "Die angegebene Mail-Adresse scheint ungültig zu sein."
 
 #: modules/enrol/hfos/enrol/enrolmanager.py:425
 msgid "Your mail address cannot be used."
