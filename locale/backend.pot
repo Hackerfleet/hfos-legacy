@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: hfos 1.2.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-07-11 20:53+0200\n"
+"POT-Creation-Date: 2018-08-05 23:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.1\n"
 
-#: hfos/database.py:224
+#: hfos/database.py:232
 msgid "title"
 msgstr ""
 
-#: hfos/database.py:227
+#: hfos/database.py:235
 msgid "description"
 msgstr ""
 
@@ -73,71 +73,145 @@ msgstr ""
 msgid "Determines whether the client should be locked against changes."
 msgstr ""
 
-#: hfos/schemata/client.py:86
-msgid "Infoscreen client"
+#: hfos/schemata/client.py:85
+msgid "Switch fullscreen"
 msgstr ""
 
-#: hfos/schemata/client.py:87
-msgid "This client rotates set up infoscreens"
+#: hfos/schemata/client.py:86
+msgid "Switch to fullscreen after login"
+msgstr ""
+
+#: hfos/schemata/client.py:89
+msgid "Hide menu"
 msgstr ""
 
 #: hfos/schemata/client.py:90
-msgid "Name"
-msgstr ""
-
-#: hfos/schemata/client.py:91
-msgid "Client name"
+msgid "Hide menu after login"
 msgstr ""
 
 #: hfos/schemata/client.py:94
-msgid "Client Theme"
+msgid "Infoscreen client"
 msgstr ""
 
 #: hfos/schemata/client.py:95
+msgid "This client rotates set up infoscreens"
+msgstr ""
+
+#: hfos/schemata/client.py:98
+msgid "Name"
+msgstr ""
+
+#: hfos/schemata/client.py:99
+msgid "Client name"
+msgstr ""
+
+#: hfos/schemata/client.py:102
+msgid "Client Theme"
+msgstr ""
+
+#: hfos/schemata/client.py:103
 msgid "Theme used for user interface"
 msgstr ""
 
-#: hfos/schemata/client.py:99 hfos/schemata/client.py:100
+#: hfos/schemata/client.py:107 hfos/schemata/client.py:108
 msgid "Client description"
 msgstr ""
 
-#: hfos/schemata/client.py:164
+#: hfos/schemata/client.py:179
 msgid "<h2>Default module configurations</h2>"
 msgstr ""
 
-#: hfos/ui/clientmanager.py:154
+#: hfos/ui/clientmanager.py:158
 msgid "Client details:"
 msgstr ""
 
-#: hfos/ui/clientmanager.py:471
+#: hfos/ui/clientmanager.py:475
 msgid "You have no role that allows this action."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/enrolmanager.py:411
+#: modules/enrol/hfos/enrol/enrolmanager.py:417
 msgid "You did not solve the captcha correctly."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/enrolmanager.py:418
+#: modules/enrol/hfos/enrol/enrolmanager.py:424
 msgid "You have to supply all required fields."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/enrolmanager.py:421
+#: modules/enrol/hfos/enrol/enrolmanager.py:427
 msgid "The supplied email address seems invalid"
 msgstr ""
 
-#: modules/enrol/hfos/enrol/enrolmanager.py:425
+#: modules/enrol/hfos/enrol/enrolmanager.py:431
 msgid "Your mail address cannot be used."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/enrolmanager.py:430
+#: modules/enrol/hfos/enrol/enrolmanager.py:436
 msgid "Your password is not long enough."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/enrolmanager.py:435
+#: modules/enrol/hfos/enrol/enrolmanager.py:441
 msgid "Your username is not long enough."
 msgstr ""
 
-#: modules/enrol/hfos/enrol/enrolmanager.py:439
+#: modules/enrol/hfos/enrol/enrolmanager.py:445
 msgid "The username you supplied is not available."
+msgstr ""
+
+#: modules/enrol/hfos/enrol/enrolmanager.py:795
+msgid ""
+"Sorry, sending that email apparently failed. Please contact a node "
+"maintainer."
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:49
+msgid "Text"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:50
+msgid "Notification text"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:55
+msgid "Time"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:56
+msgid "When this notification was issued"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:61
+msgid "Priority"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:64
+msgid "Acknowledged"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:69
+msgid "Acknowledged when"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:70
+msgid "When this notification was acknowledged"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:76
+msgid "Acknowledgement required"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:82
+msgid "Acknowledgment due by"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:83
+msgid "Latest time, this notification has to be acknowledged"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:98
+msgid "New text"
+msgstr ""
+
+#: modules/notifications/hfos/notifications/notification.py:105
+msgid "Timespan for repeated escalation"
 msgstr ""
 
