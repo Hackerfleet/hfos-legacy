@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: \n"
 
 #: src/common/services/user.service.js:124
-msgid "<br />Welcome to this HFOS node! Now is a good time to fill out your profile.<br />Click the user button <a href=\"/#!/editor/profile//edit\">to edit your profile</a>, logout or change your password.<br /> <small>Adding some user data will prevent this notification from reappearing.</small>"
+msgid "<br />Welcome to this Isomer node! Now is a good time to fill out your profile.<br />Click the user button <a href=\"/#!/editor/profile//edit\">to edit your profile</a>, logout or change your password.<br /> <small>Adding some user data will prevent this notification from reappearing.</small>"
 msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:188
