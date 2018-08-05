@@ -1,20 +1,115 @@
+# Translators:
+# riot <riot@c-base.org>, 2018
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"Last-Translator: riot <riot@c-base.org>, 2018\n"
+"Language-Team: French (https://www.transifex.com/hackerfleet-community/teams/78369/fr/)\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Project-Id-Version: \n"
-"POT-Creation-Date: \n"
-"PO-Revision-Date: \n"
-"Language-Team: \n"
-"MIME-Version: 1.0\n"
-"X-Generator: Poedit 1.8.11\n"
-"Last-Translator: Hackerfleet German Translation Team <riot@c-base.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/common/services/user.service.js:125
+msgid ""
+"<br />Welcome to this HFOS node! Now is a good time to fill out your "
+"profile.<br />Click the user button <a href=\"/#!/editor/profile//edit\">to "
+"edit your profile</a>, logout or change your password.<br /> <small>Adding "
+"some user data will prevent this notification from reappearing.</small>"
+msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:175
 msgid "About"
 msgstr "Sur"
+
+#: src/components/enrol/enrol/enrolment.tpl.html:118
+msgid "Accept <a href=\"{{$ctrl.tos}}\">terms of service</a>"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:123
+msgid "Acceptance of Terms is required"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:177
+msgid "Actions"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:102 src/objects/list/list.tpl.html:125
+#: src/objects/list/list.tpl.html:132 src/objects/list/list.tpl.html:154
+#: src/objects/list/list.tpl.html:161 src/objects/list/list.tpl.html:211
+#: src/objects/list/list.tpl.html:219 src/objects/list/list.tpl.html:243
+#: src/objects/list/list.tpl.html:251 src/objects/list/list.tpl.html:274
+#: src/objects/list/list.tpl.html:282 src/objects/list/list.tpl.html:95
+msgid "Add"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:40
+msgid ""
+"An email with a confirmation link has been sent to you.\n"
+"                Please open this link in your browser to confirm your account.\n"
+"\n"
+"                If you do not receive this mail, contact an administrator of this system."
+msgstr ""
+
+#: src/about/about-component/about-component.tpl.html:44
+msgid "An isomer node"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:129
+msgid "Are you a conscious being?"
+msgstr ""
+
+#: src/about/missing/missing.tpl.html:24
+msgid "Back to the main menu"
+msgstr ""
+
+#: src/about/about-component/about-component.tpl.html:66
+msgid "Browse on Github"
+msgstr ""
+
+#: src/common/modals/login.tpl.html:43 src/common/modals/user.tpl.html:24
+msgid "Cancel"
+msgstr ""
+
+#: src/common/modals/user.tpl.html:15
+msgid "Change Password"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:77
+msgid "Change Permissions"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:55
+msgid "Checkbox"
+msgstr ""
+
+#: src/about/about-component/about-component.tpl.html:49
+msgid "Client name:"
+msgstr ""
+
+#: src/about/about-component/about-component.tpl.html:47
+msgid "Client version:"
+msgstr ""
+
+#: src/app/app-component/app-component.tpl.html:129
+msgid "Client<span class=\"caret\"></span>"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:89
+msgid "Confirm:"
+msgstr ""
+
+#: src/about/about-component/about-component.tpl.html:56
+msgid "Contact the isomer framework maintainers"
+msgstr ""
+
+#: src/about/about-component/about-component.tpl.html:53
+msgid "Contact this node's maintainer"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:57
+msgid "Controls"
+msgstr ""
 
 #: src/objects/list/list.tpl.html:23 src/objects/search/search.tpl.html:23
 msgid "Create new"
@@ -24,29 +119,109 @@ msgstr "Créer un nouveau"
 msgid "Debug"
 msgstr "Déboguer"
 
+#: src/objects/list/list.tpl.html:189
+msgid "Delete"
+msgstr ""
+
 #: src/app/app-component/app-component.tpl.html:173
 msgid "Documentation"
 msgstr "Documentation"
+
+#: src/components/enrol/enrol/enrolment.tpl.html:112
+msgid "E-Mail address is not valid"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:111
+msgid "E-Mail address is required"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:185
+msgid "Edit"
+msgstr ""
 
 #: src/objects/editor/editor.tpl.html:30
 msgid "Edit Live"
 msgstr "Modifier en direct"
 
+#: src/common/modals/user.tpl.html:18
+msgid "Edit Profile"
+msgstr ""
+
+#: src/common/services/user.service.js:135
+msgid "Either the username or the supplied password is invalid."
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:26
+msgid "Enrol Account"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:53
+msgid "Enrol a new account with this form"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:82
+msgid "Enter at least 5 characters"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:98
+msgid "Enter the same password for confirmation"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:44
+msgid "Fields"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:28
+msgid "Filters"
+msgstr ""
+
+#: src/common/modals/user.tpl.html:10
+msgid "Hello {{$ctrl.greetingname}}!"
+msgstr ""
+
+#: src/common/services/socket.factory.js:328
+msgid "High latency"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:134
+msgid "Illegible?"
+msgstr ""
+
 #: src/objects/editor/editor.tpl.html:34
 msgid "Keep History"
 msgstr "Garder l'histoire"
+
+#: src/objects/list/list.tpl.html:140 src/objects/list/list.tpl.html:259
+msgid "List"
+msgstr ""
 
 #: src/objects/list/list.tpl.html:22
 msgid "List:"
 msgstr "Liste:"
 
-#: src/featuremenu/menu/menu.tpl.html:44
+#: src/featuremenu/menu/menu.tpl.html:32
 msgid "Logging in..."
 msgstr "Se connecter"
 
-#: src/common/component/login.tpl.html:29
+#: src/common/component/login.tpl.html:29 src/common/modals/login.tpl.html:22
 msgid "Login"
 msgstr "S'identifier"
+
+#: src/common/services/user.service.js:137
+msgid "Login failed"
+msgstr ""
+
+#: src/common/services/user.service.js:450
+msgid "Login to this node"
+msgstr ""
+
+#: src/common/modals/user.tpl.html:21
+msgid "Logout"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:106
+msgid "Mail Address"
+msgstr ""
 
 #: src/about/missing/missing.tpl.html:23
 msgid "Maybe this functionality has not been developed, yet."
@@ -56,34 +231,198 @@ msgstr "Peut-être que cette fonctionnalité n'a pas encore été développée."
 msgid "Modified"
 msgstr "Modifié"
 
-#: src/featuremenu/menu/menu.tpl.html:50
+#: src/app/app-component/app-component.tpl.html:133
+msgid "N/A"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:176 src/objects/list/list.tpl.html:56
+msgid "Name"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:54
+msgid "No"
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:38
 msgid "No connection"
 msgstr "Pas de connection"
+
+#: src/common/services/socket.factory.js:333
+msgid "No permission"
+msgstr ""
+
+#: src/common/services/user.service.js:387
+msgid "No response from node within 30 seconds!"
+msgstr ""
+
+#: src/app/app-component/app-component.tpl.html:35
+msgid "Node menu"
+msgstr ""
 
 #: src/about/missing/missing.tpl.html:22
 msgid "Not found"
 msgstr "Pas trouvé"
 
+#: src/common/services/socket.factory.js:141
+msgid "Offline"
+msgstr ""
+
+#: src/common/services/socket.factory.js:181
+msgid "Online"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:73
+msgid "Password:"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:192
+msgid "Permissions"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:79
+msgid ""
+"Please enter a\n"
+"                        password"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:66
+msgid "Please enter a username"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:143
+msgid "Please type in the characters you see in the image next to the input"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:63
+msgid "Please use at least 4 characters"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:111 src/objects/list/list.tpl.html:228
+msgid "Read"
+msgstr ""
+
 #: src/objects/editor/editor.tpl.html:40
 msgid "Readonly"
 msgstr "Lecture seulement"
 
-#: src/common/component/login.tpl.html:37
+#: src/common/component/login.tpl.html:37 src/common/modals/login.tpl.html:30
 msgid "Register"
 msgstr "Registre"
+
+#: src/common/services/user.service.js:124
+msgid "Registration successful"
+msgstr ""
+
+#: src/about/about-component/about-component.tpl.html:63
+msgid "Report Bugs"
+msgstr ""
+
+#: src/about/about-component/about-component.tpl.html:69
+msgid "Report on Github"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:114 src/objects/list/list.tpl.html:143
+#: src/objects/list/list.tpl.html:199 src/objects/list/list.tpl.html:231
+#: src/objects/list/list.tpl.html:262 src/objects/list/list.tpl.html:84
+msgid "Revoke"
+msgstr ""
+
+#: src/common/services/socket.factory.js:328
+msgid "Roundtrip took"
+msgstr ""
 
 #: src/objects/search/search.tpl.html:22
 msgid "Search:"
 msgstr "Chercher"
 
+#: src/objects/list/list.tpl.html:70
+msgid "Select multiple objects to:"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:29
+msgid "Sorry, but enrolling is currently not possible."
+msgstr ""
+
 #: src/app/app-component/app-component.tpl.html:196
 msgid "Starting HFOS client"
 msgstr "Démarrer le HFOS client"
+
+#: src/common/component/login.tpl.html:43 src/common/modals/login.tpl.html:36
+msgid "Stay logged in"
+msgstr ""
 
 #: src/objects/editor/editor.tpl.html:49
 msgid "Stored"
 msgstr "Stocké"
 
-#: src/featuremenu/menu/menu.tpl.html:51
+#: src/components/enrol/enrol/enrolment.tpl.html:38
+msgid "Thanks for enrolling, {{$ctrl.username}}!"
+msgstr ""
+
+#: src/common/services/socket.factory.js:182
+msgid "The connection to the node has been established. You're online!"
+msgstr ""
+
+#: src/app/app-component/app-component.tpl.html:56
+msgid "Toggle Fullscreen"
+msgstr ""
+
+#: src/app/app-component/app-component.tpl.html:27
+msgid "Toggle navigation"
+msgstr ""
+
+#: src/objects/editor/editor.tpl.html:23
+msgid "Unknown schema!"
+msgstr ""
+
+#: src/common/services/user.service.js:468
+msgid "User actions"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:57
+msgid "Username:"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:187
+msgid "View"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:67
+msgid "With {{$ctrl.selected_objects.length}} selected, do:"
+msgstr ""
+
+#: src/objects/list/list.tpl.html:196 src/objects/list/list.tpl.html:81
+msgid "Write"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:47
+msgid "You can now"
+msgstr ""
+
+#: src/common/services/socket.factory.js:142
+msgid "You have been disconnected from the node. Retry interval is at"
+msgstr ""
+
+#: src/common/services/socket.factory.js:334
+msgid "You have insufficient permissions to do that."
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:33
+msgid "You're already logged in. Please"
+msgstr ""
+
+#: src/featuremenu/menu/menu.tpl.html:39
 msgid "Your client is not connected to the node."
 msgstr "Votre client n'est pas connecté au noeud."
+
+#: src/components/enrol/enrol/enrolment.tpl.html:33
+msgid "log out"
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:47
+msgid "login to this node."
+msgstr ""
+
+#: src/components/enrol/enrol/enrolment.tpl.html:33
+msgid "to enrol another account."
+msgstr ""
