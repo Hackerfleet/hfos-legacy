@@ -32,7 +32,7 @@ Authentication (and later Authorization) system
 """
 
 from uuid import uuid4
-from circuits import Event
+from circuits import Event, Timer
 
 from hfos.component import handler
 from hfos.events.client import authentication, send
@@ -69,6 +69,8 @@ class Authenticator(ConfigurableComponent):
         super(Authenticator, self).__init__('AUTH', *args)
         # self.log(objectmodels['systemconfig'], lvl=error)
 
+        self.failing_clients = {}
+
         systemconfig = objectmodels['systemconfig'].find_one({'active': True})
 
         # TODO: Decouple systemconfig creation from authenticator
@@ -99,7 +101,16 @@ class Authenticator(ConfigurableComponent):
             'action': 'fail',
             'data': message
         }
-        self.fireEvent(send(event.clientuuid, notification, sendtype='client'))
+
+        ip = event.sock.getpeername()[0]
+
+        self.failing_clients[ip] = event
+        Timer(3, Event.create('notify_fail', event.clientuuid, notification, ip)).register(self)
+
+    def notify_fail(self, uuid, notification, ip):
+        self.log('Transmitting delayed fail notification', lvl=debug)
+        self.fireEvent(send(uuid, notification, sendtype='client'))
+        del self.failing_clients[ip]
 
     def _login(self, event, user_account, user_profile, client_config):
         """Send login notification to client"""
@@ -121,6 +132,10 @@ class Authenticator(ConfigurableComponent):
         """Handles authentication requests from clients
         :param event: AuthenticationRequest with user's credentials
         """
+
+        if event.sock.getpeername()[0] in self.failing_clients:
+            self.log('Client failed a login and has to wait', lvl=debug)
+            return
 
         if event.auto:
             self._handle_autologin(event)
