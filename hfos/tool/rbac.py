@@ -40,7 +40,7 @@ from hfos.tool.database import db
               help="Agree to work on all documents, if no schema specified")
 @click.pass_context
 def rbac(ctx, schema, object_filter, action, role, all_schemata):
-    """Database operations around role based access control."""
+    """[GROUP] Role based access control"""
 
     database = ctx.obj['db']
 

@@ -35,7 +35,7 @@ from hfos.tool import log, _ask
 @click.group(cls=DYMGroup)
 @click.pass_context
 def db(ctx):
-    """Database management operations (GROUP)"""
+    """[GROUP] Database management operations"""
 
     from hfos import database
     database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
@@ -117,7 +117,7 @@ def clear(ctx, schema):
               default=None)
 @click.pass_context
 def migrations(ctx, schema):
-    """Data migration management (GROUP)"""
+    """[GROUP] Data migration management"""
 
     ctx.obj['schema'] = schema
 

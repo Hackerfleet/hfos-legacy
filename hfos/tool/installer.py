@@ -49,7 +49,7 @@ from hfos.ui.builder import install_frontend
 @click.option('--port', help='Specify local HFOS port', default=8055)
 @click.pass_context
 def install(ctx, port):
-    """Install various aspects of HFOS (GROUP)"""
+    """[GROUP] Install various aspects of HFOS"""
 
     ctx.obj['port'] = port
 
@@ -608,8 +608,8 @@ def install_cert(selfsigned):
 
 
 @install.command(short_help='build and install frontend')
-@click.option('--dev', help="Use frontend development (./frontend) location",
-              default=False, is_flag=True)
+@click.option('--dev', help="Use frontend development location",
+              default=True, is_flag=True)
 @click.option('--rebuild', help="Rebuild frontend before installation",
               default=False, is_flag=True)
 @click.option('--no-install', help="Do not install requirements",

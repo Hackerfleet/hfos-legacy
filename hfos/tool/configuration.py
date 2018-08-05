@@ -33,7 +33,7 @@ from hfos.tool import log
 @click.group(cls=DYMGroup)
 @click.pass_context
 def config(ctx):
-    """Configuration management operations (GROUP)"""
+    """[GROUP] Configuration management operations"""
 
     from hfos import database
     database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])

@@ -39,7 +39,7 @@ from hfos.tool.database import db
               default=None)
 @click.pass_context
 def user(ctx, username, password):
-    """User management operations (GROUP)"""
+    """[GROUP] User management operations"""
 
     ctx.obj['username'] = username
     ctx.obj['password'] = password

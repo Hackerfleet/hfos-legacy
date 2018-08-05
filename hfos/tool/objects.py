@@ -37,7 +37,7 @@ from hfos.tool.database import db
 @db.group(cls=DYMGroup)
 @click.pass_context
 def objects(ctx):
-    """Object operations (GROUP)"""
+    """[GROUP] Object operations"""
     pass
 
 
