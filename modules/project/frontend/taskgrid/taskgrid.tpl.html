@@ -10,7 +10,22 @@
                     <span class="icon-bar"></span>
                 </button>
                 <div class="navbar-brand">
-                    TaskGrid: {{$ctrl.taskgridconfig.name}}
+                    TaskGrid:
+                    <span uib-dropdown keyboard-nav>
+                        <a href id="taskgrid-menu-nav" type="button"
+                           class="dropdown-toggle" uib-dropdown-toggle>
+                            {{$ctrl.taskgridconfig.name}}
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" uib-dropdown-menu role="menu"
+                            aria-labelledby="language-menu-nav">
+                            <li role="menuitem" ng-repeat="taskgrid in $ctrl.taskgrids">
+                                <a href ng-click="$ctrl.switchtaskgridconfig(taskgrid.uuid)">
+                                    {{taskgrid.name}}
+                                </a>
+                            </li>
+                        </ul>
+                    </span>
                 </div>
             </div>
             <div class="collapse navbar-collapse" id="toolbar">
@@ -20,12 +35,20 @@
                     <li class="inline-block"><a role="button" ng-click="show_setup = !show_setup">
                         <i class="fa fa-gear"></i>Setup</a>
                     </li>
-                    <li class="inline-block" ng-class="{'active': show_filters_tag || show_filters_project}"><a role="button" ng-click="show_filters = !show_filters">
-                        <i class="fa fa-filter"></i>Filter</a>
+                    <li class="inline-block">
+                        <a role="button" class="btn" ng-class="{'active': $ctrl.show_filters_tag || $ctrl.show_filters_project}"
+                           ng-click="$ctrl.show_filters = !$ctrl.show_filters">
+                            <i class="fa fa-filter"></i>Filter</a>
                     </li>
-                    <li class="inline-block"><a role="button" href="#!/editor/task//create"><i class="fa fa-plus"
-                                                                                               aria-hidden="true"></i>
-                        Task</a>
+                    <li class="inline-block">
+                        <a role="button" class="btn" ng-class="{'active': $ctrl.selecting}"
+                           ng-click="$ctrl.selecting = !$ctrl.selecting">
+                            <i class="fa fa-check"></i>Edit multiple</a>
+                    </li>
+                    <li class="inline-block">
+                        <a role="button" href="#!/editor/task//create">
+                            <i class="fa fa-plus" aria-hidden="true"></i> Task
+                        </a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -75,18 +98,73 @@
         </div>
     </div>
 
-    <div class="well" ng-show="show_filters">
+    <div class="well" ng-show="$ctrl.selecting">
+        <h4>
+            Edit multiple
+            <span ng-show="$ctrl.selected.length > 0" class="small">{{$ctrl.selected.length}} selected</span>
+            <span class="fa btn fa-times fa-pull-right" ng-click="$ctrl.selecting = false"></span>
+        </h4>
+
+        <div class="row">
+
+            <div class="form-inline">
+                <a role="button" class="btn btn-default"
+                   ng-click="$ctrl.select_all()">
+                    <i class="fa fa-asterisk"></i> All
+                </a>
+                <a role="button" class="btn btn-default"
+                   ng-click="$ctrl.selected = []">
+                    <i class="fa fa-times"></i> Clear
+                </a>
+
+                <div class="vertical-divider"></div>
+
+                <a role="button" class="btn btn-default"
+                   ng-click="$ctrl.move()">
+                    <i class="fa fa-arrow-right"></i> Move selection to:
+                </a>
+                <select class="form-control" ng-model="$ctrl.target_group">
+                    <option ng-repeat="(uuid, group) in $ctrl.taskgroups" value="{{uuid}}">{{group.name}}</option>
+                </select>
+
+                <div class="vertical-divider"></div>
+
+                <a role="button" class="btn btn-success"
+                   ng-click="$ctrl.add_tags()">
+                    <i class="fa fa-tag"></i> Add tag:
+                </a>
+                <a role="button" class="btn btn-danger"
+                   ng-click="$ctrl.remove_tags()">
+                    <i class="fa fa-times"></i> Remove tag:
+                </a>
+                <select class="form-control" ng-model="$ctrl.tag"
+                        ng-style="{color: $ctrl.tags[$ctrl.tag].color}">
+                    <option ng-repeat="(uuid, tag) in $ctrl.tags"
+                            value="{{uuid}}"
+                            ng-style="{background: tag.color,
+                                           color: 'white'}">
+                        {{tag.name}}
+                    </option>
+                </select>
+
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="well" ng-show="$ctrl.show_filters">
         <h4>
             Filter tasks
-            <span class="fa btn fa-times fa-pull-right" ng-click="show_filters = false"></span>
+            <span class="fa btn fa-times fa-pull-right" ng-click="$ctrl.show_filters = false"></span>
         </h4>
         <div class="row">
             <div class="col-md-4">
                 <div class="form-inline">
                     <div class="form-group">
-                        <input class="form-control" type="checkbox" ng-model="show_filters_project">
+                        <input class="form-control" type="checkbox" ng-model="$ctrl.show_filters_project">
                         <label>By Project</label>
-                        <select class="form-control" ng-show="show_filters_project"
+                        <select class="form-control" ng-show="$ctrl.show_filters_project"
                                 ng-model="$ctrl.filter_project">
                             <option value=""></option>
                             <option ng-repeat="(uuid, project) in $ctrl.projects" value="{{uuid}}">{{project.name}}
@@ -94,9 +172,9 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <input class="form-control" type="checkbox" ng-model="show_filters_tag">
+                        <input class="form-control" type="checkbox" ng-model="$ctrl.show_filters_tag">
                         <label>By tag</label>
-                        <select class="form-control" ng-show="show_filters_tag"
+                        <select class="form-control" ng-show="$ctrl.show_filters_tag"
                                 ng-model="$ctrl.filter_tag">
                             <option value=""></option>
                             <option ng-repeat="(uuid, tag) in $ctrl.tags" value="{{uuid}}">{{tag.name}}
@@ -130,6 +208,11 @@
                             <a class="pull-right" href="#!/editor/taskgroup/{{item.taskgroup}}/edit">
                                 <span class="fa fa-edit"></span>
                             </a>
+                            <a class="pull-right"
+                               ng-show="$ctrl.selecting"
+                               ng-click="$ctrl.select_all_of_group(item.taskgroup)">
+                                <span class="fa fa-asterisk"></span>
+                            </a>
                         </h3>
 
                         <div class="hidden box-header-btns pull-right">
@@ -144,16 +227,27 @@
                             ng-drag="!$ctrl.lockState" ng-drag-data="task"
                             ng-show="(task.name.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1
                                          || task.description.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1)
-                                         && (show_filters_project ? $ctrl.filter_project === task.project : true)
-                                         && ((show_filters_tag ? task.tags.indexOf($ctrl.filter_tag) > -1 : true)
-                                         || (show_filters_tag && $ctrl.filter_tag === '' && task.tags.length === 0))"
+                                         && ($ctrl.show_filters_project ? $ctrl.filter_project === task.project : true)
+                                         && (($ctrl.show_filters_tag ? task.tags.indexOf($ctrl.filter_tag) > -1 : true)
+                                         || ($ctrl.show_filters_tag && $ctrl.filter_tag === '' && task.tags.length === 0))"
                             ng-repeat="task in $ctrl.tasksByGroup[item.taskgroup]">
+
+                            <span class="taskBoxHeaderOverlay"
+                                  ng-show="$ctrl.selecting"
+                                  ng-style="{background: $ctrl.selected.indexOf(task.uuid) >= 0 ?
+                                                         'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.6)'}"
+                                  ng-click="$ctrl.selected.indexOf(task.uuid) >= 0 ?
+                                            $ctrl.selected.splice($ctrl.selected.indexOf(task.uuid), 1) :
+                                            $ctrl.selected.push(task.uuid)">
+                            </span>
+
                             <ul class="tagList">
                                 <li class="tagPill"
                                     ng-repeat="tag in task.tags"
                                     title="{{$ctrl.tags[tag].name}}"
                                     ng-style="{background: $ctrl.tags[tag].color}"></li>
                             </ul>
+
                             <a href="#!/editor/task/{{task.uuid}}/edit"
                                ng-bind-html="task.name | embed:$ctrl.user.embed_options"></a>
                             <span class="taskShowDesc pull-right fa"
@@ -164,6 +258,7 @@
 
                             <div ng-show="task.showDescription" class="taskDescription"
                                  ng-bind-html="$ctrl.tasklist[task.uuid].notes | embed:$ctrl.user.embed_options"></div>
+
                             <div class="taskLabels small">
                                 <div class="taskProjectName"
                                      ng-show="task.project != null"

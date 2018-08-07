@@ -9,7 +9,7 @@
  */
 
 class taskgridcomponent {
-    constructor($scope, $rootScope, $timeout, user, ObjectProxy, state, menu) {
+    constructor($scope, $rootScope, $timeout, user, ObjectProxy, state, menu, notification) {
         this.scope = $scope;
         this.rootscope = $rootScope;
         this.timeout = $timeout;
@@ -17,6 +17,7 @@ class taskgridcomponent {
         this.state = state;
         this.op = ObjectProxy;
         this.menu = menu;
+        this.notification = notification;
 
         this.columns = {};
         this.columnsize = 4;
@@ -33,6 +34,15 @@ class taskgridcomponent {
 
         this.filter_tag = "";
         this.filter_project = "";
+
+        this.show_filters = false;
+        this.show_filters_tag = false;
+        this.show_filters_project = false;
+
+        this.selected = [];
+        this.selected_groups = [];
+
+        this.target_group = null;
 
         this.search_string = '';
 
@@ -118,19 +128,7 @@ class taskgridcomponent {
 
         this.scope.$on('OP.ListUpdate', function (event, schema) {
             if (schema === 'taskgridconfig') {
-                let taskgridconfiglist = self.op.lists.taskgridconfig;
-                let taskgridconfigmenu = [];
-                for (let taskgridconfig of taskgridconfiglist) {
-                    taskgridconfigmenu.push({
-                        type: 'func',
-                        name: taskgridconfig.uuid,
-                        text: taskgridconfig.name,
-                        callback: self.switchtaskgridconfig,
-                        args: taskgridconfig.uuid
-                    });
-                }
-                self.menu.removeMenu('Taskgrids');
-                self.menu.addMenu('Taskgrids', taskgridconfigmenu);
+                self.taskgrids = self.op.lists.taskgridconfig;
             }
         });
 
@@ -178,12 +176,26 @@ class taskgridcomponent {
         });
 
         console.log('[TASKGRID] Getting configured taskgridconfig');
-        let uuid = this.user.clientconfig.taskgriduuid;
+        /*
+        // TODO: Pull module default configurations from a service
+        let uuid = self.user.clientconfig.modules.taskgriduuid;
 
-        if (typeof uuid === 'undefined') {
-            uuid = this.user.profile.settings.taskgriduuid;
+        console.log('[TASKGRID] Clientconfig Taskgrid UUID: ', self.taskgriduuid);
+
+        if (uuid === '' || typeof uuid === 'undefined') {
+            console.log('[TASKGRID] Picking user profile taskgrid', self.user.profile);
+            uuid = self.user.profile.modules.taskgriduuid;
         }
+        if (uuid === '' || typeof uuid === 'undefined') {
+            console.log('[TASKGRID] Picking system profile taskgrid', self.systemconfig.config);
+            uuid = self.systemconfig.config.modules.taskgriduuid;
+        }
+        console.log('[TASKGRID] Final Taskgrid UUID: ', uuid);
+
         this.taskgridconfiguuid = uuid;
+        */
+
+        this.taskgridconfiguuid = this.user.getModuleDefault('taskgriduuid');
 
         console.log('[TASKGRID] Config: ', this.taskgridconfiguuid);
         this.op.getObject('taskgridconfig', this.taskgridconfiguuid);
@@ -192,6 +204,103 @@ class taskgridcomponent {
     new_task(group_uuid) {
         console.log('[TASKGRID] Adding new task to group:', group_uuid);
         this.state.go('app.editor', {schema: 'task', action: 'create', initial: {taskgroup: group_uuid}})
+    }
+
+    select_all() {
+        this.selected = [];
+        for (let uuid of Object.keys(this.tasklist)) {
+            let task = this.tasklist[uuid];
+
+            let name = task.name.toLowerCase(),
+                search = this.search_string.toLowerCase(),
+                description = "";
+            if (typeof task.description !== 'undefined') description = task.description.toLowerCase();
+
+            console.log('[TASKGRID] Filters:', name, description, search);
+
+            if ((name.indexOf(search) > -1 || description.indexOf(search) > -1) &&
+                (this.show_filters_project ? this.filter_project === task.project : true) &&
+                ((this.show_filters_tag ? task.tags.indexOf(this.filter_tag) > -1 : true) ||
+                    (this.show_filters_tag && this.filter_tag === '' && task.tags.length === 0))
+            ) {
+                this.selected.push(task.uuid);
+            }
+        }
+    }
+
+
+    select_all_of_group(uuid) {
+        let index = this.selected_groups.indexOf(uuid);
+
+        if (index < 0) {
+            for (let task of this.tasksByGroup[uuid]) {
+                if (this.selected.indexOf(task.uuid) < 0) this.selected.push(task.uuid);
+            }
+            this.selected_groups.push(uuid);
+        } else {
+            for (let task of this.tasksByGroup[uuid]) {
+                this.selected.splice(this.selected.indexOf(task.uuid), 1);
+            }
+            this.selected_groups.splice(index, 1)
+        }
+    }
+
+    add_tags() {
+        if (typeof this.tag === 'undefined' || this.tag === null || this.tag === '') {
+            this.notification.add('warning', 'Select a tag first', 'You have to select a tag to add.', 3);
+            return
+        }
+
+        for (let uuid of this.selected) {
+            let task = this.tasklist[uuid];
+            console.log(task);
+
+            if (task.tags.indexOf(this.tag) < 0) {
+                console.log('[TASKGRID] Adding tag.');
+                task.tags.push(this.tag);
+
+                this.op.changeObject('task', uuid, {field: 'tags', 'value': task.tags});
+            }
+        }
+    }
+
+    remove_tags() {
+        if (typeof this.tag === 'undefined' || this.tag === null || this.tag === '') {
+            this.notification.add('warning', 'Select a tag first', 'You have to select a tag to be removed.', 3);
+            return
+        }
+
+        for (let uuid of this.selected) {
+            let task = this.tasklist[uuid];
+
+            if (task.tags.indexOf(this.tag) >= 0) {
+                task.tags.splice(task.tags.indexOf(this.tag), 1);
+                this.op.changeObject('task', uuid, {field: 'tags', 'value': task.tags});
+            }
+        }
+    }
+
+
+    move() {
+        if (typeof this.target_group === 'undefined' || this.target_group === null || this.target_group === '') {
+            this.notification.add('warning', 'Select a target group', 'You have to select a target group to mass move tasks.', 3);
+            return
+        }
+
+        console.log('[TASKGRID] Moving Tasks');
+
+        for (let uuid of this.selected) {
+            let task = this.tasklist[uuid];
+            let old_group = this.tasksByGroup[task.taskgroup];
+
+            old_group.splice(old_group.indexOf(task), 1);
+
+            this.tasksByGroup[this.target_group].push(task);
+
+            task.taskgroup = this.target_group;
+
+            this.op.changeObject('task', uuid, {'field': 'taskgroup', 'value': this.target_group});
+        }
     }
 
     opentab(tabname) {
@@ -218,6 +327,6 @@ class taskgridcomponent {
 
 }
 
-taskgridcomponent.$inject = ['$scope', '$rootScope', '$timeout', 'user', 'objectproxy', '$state', 'menu'];
+taskgridcomponent.$inject = ['$scope', '$rootScope', '$timeout', 'user', 'objectproxy', '$state', 'menu', 'notification'];
 
 export default taskgridcomponent;
