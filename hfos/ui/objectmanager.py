@@ -604,9 +604,16 @@ class ObjectManager(ConfigurableComponent):
             return
 
         try:
-            uuid = data['uuid']
+            uuids = data['uuid']
 
-            if schema in objectmodels.keys():
+            if not isinstance(uuids, list):
+                uuids = [uuids]
+
+            if schema not in objectmodels.keys():
+                self.log("Unknown schema encountered: ", schema, lvl=warn)
+                return
+
+            for uuid in uuids:
                 self.log("Looking for object to be deleted:", uuid, lvl=debug)
                 storage_object = objectmodels[schema].find_one({'uuid': uuid})
 
@@ -652,8 +659,7 @@ class ObjectManager(ConfigurableComponent):
                 }
 
                 self._respond(notification, result, event)
-            else:
-                self.log("Unknown schema encountered: ", schema, lvl=warn)
+
         except Exception as e:
             self.log("Error during delete request: ", e, type(e),
                      lvl=error)
