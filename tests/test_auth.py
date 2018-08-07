@@ -67,6 +67,14 @@ def transmit(event_in, channel_in, event_out, channel_out):
 def test_invalid_user_auth():
     """Test if login with invalid credentials fails"""
 
+    class sock():
+        """Mock socket"""
+
+        def getpeername(self):
+            """Mock function to return a fake peer name"""
+
+            return "localhost"
+
     log = logger.LiveLog
     logger.live = True
 
@@ -78,7 +86,7 @@ def test_invalid_user_auth():
         password='test',
         clientuuid=client_uuid,
         requestedclientuuid=client_uuid,
-        sock=None,
+        sock=sock(),
         auto=False
     )
 
