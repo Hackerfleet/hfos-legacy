@@ -47,7 +47,7 @@ msgid ""
 "                If you do not receive this mail, contact an administrator of this system."
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:44
+#: src/about/about-component/about-component.tpl.html:46
 msgid "An isomer node"
 msgstr ""
 
@@ -59,7 +59,7 @@ msgstr ""
 msgid "Back to the main menu"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:75
+#: src/about/about-component/about-component.tpl.html:77
 msgid "Browse on Github"
 msgstr ""
 
@@ -88,11 +88,11 @@ msgstr ""
 msgid "Checkbox"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:49
+#: src/about/about-component/about-component.tpl.html:51
 msgid "Client name:"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:47
+#: src/about/about-component/about-component.tpl.html:49
 msgid "Client version:"
 msgstr ""
 
@@ -105,11 +105,11 @@ msgstr ""
 msgid "Confirm:"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:59
+#: src/about/about-component/about-component.tpl.html:61
 msgid "Contact the isomer framework maintainers"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:54
+#: src/about/about-component/about-component.tpl.html:56
 msgid "Contact this node's maintainer"
 msgstr ""
 
@@ -235,7 +235,7 @@ msgstr ""
 msgid "List:"
 msgstr ""
 
-#: src/featuremenu/menu/menu.tpl.html:32
+#: src/featuremenu/menu/menu.tpl.html:34
 msgid "Logging in..."
 msgstr ""
 
@@ -281,7 +281,7 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: src/featuremenu/menu/menu.tpl.html:38
+#: src/featuremenu/menu/menu.tpl.html:41
 msgid "No connection"
 msgstr ""
 
@@ -366,11 +366,11 @@ msgstr ""
 msgid "Registration successful"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:72
+#: src/about/about-component/about-component.tpl.html:74
 msgid "Report Bugs"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:78
+#: src/about/about-component/about-component.tpl.html:80
 msgid "Report on Github"
 msgstr ""
 
@@ -404,7 +404,7 @@ msgid "Sorry, but enrolling is currently not possible."
 msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:210
-msgid "Starting HFOS client"
+msgid "Starting Isomer client"
 msgstr ""
 
 #: src/common/component/login.tpl.html:45
@@ -490,7 +490,7 @@ msgstr ""
 msgid "You're already logged in. Please"
 msgstr ""
 
-#: src/featuremenu/menu/menu.tpl.html:39
+#: src/featuremenu/menu/menu.tpl.html:42
 msgid "Your client is not connected to the node."
 msgstr ""
 
