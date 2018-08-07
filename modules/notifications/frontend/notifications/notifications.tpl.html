@@ -1,0 +1,64 @@
+<div class="well">
+    <h1>Address book</h1>
+    <div class="row">
+        <div class="col-sm-3">
+            <a href="#!/editor/contact//create">
+                <span class="fa fa-plus btn"></span>Add contact
+            </a>
+        </div>
+        <div class="col-sm-6">
+            <ui-select ng-if="$ctrl.show_columns"
+                       multiple ng-model="$ctrl.shown"
+                       close-on-select="false"
+                       on-remove="$ctrl.update_cols()"
+                       on-select="$ctrl.update_cols()"
+                       theme="bootstrap">
+                <ui-select-match placeholder="Select fields to display">{{$item}}</ui-select-match>
+                <span class="fa fa-plus"></span>
+                <ui-select-choices repeat="item in $ctrl.all">{{item}}</ui-select-choices>
+            </ui-select>
+            <ul class="list-inline" ng-show="$ctrl.show_order" ng-cloak>
+                <li ng-repeat="col in $ctrl.cols track by col.title" style="min-width: 100px">
+                    <a ng-show="!$first" href="" ng-click="$ctrl.move_column(col,$index,-1)">
+                        <span class="fa fa-caret-left"></span>
+                    </a>
+                    {{col.title}}
+                    <a ng-show="!$last" href="" ng-click="$ctrl.move_column(col,$index, 1)">
+                        <span class="fa fa-caret-right"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-sm-3">
+            <div class="pull-right">
+                <span class="fa btn fa-filter"
+                      ng-class="{off: !$ctrl.show_filter}"
+                      ng-click="$ctrl.show_filter = !$ctrl.show_filter">
+                </span>
+                <span class="fa btn fa-columns"
+                      ng-class="{off: !$ctrl.show_columns}"
+                      ng-click="$ctrl.show_columns = !$ctrl.show_columns">
+                </span>
+                <span class="fa btn fa-exchange"
+                      ng-class="{off: !$ctrl.show_order}"
+                      ng-click="$ctrl.show_order = !$ctrl.show_order">
+                </span>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="well well-sm">
+        <table ng-table-dynamic="$ctrl.tableParams with $ctrl.cols"
+               show-filter="$ctrl.show_filter"
+               class="table table-condensed table-bordered table-striped">
+            <tr ng-repeat="user in $data">
+                <td ng-repeat="col in $columns">
+                    {{user[col.field]}}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
