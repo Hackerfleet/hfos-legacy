@@ -126,6 +126,12 @@
                 <select class="form-control" ng-model="$ctrl.target_group">
                     <option ng-repeat="(uuid, group) in $ctrl.taskgroups" value="{{uuid}}">{{group.name}}</option>
                 </select>
+                <div class="vertical-divider"></div>
+
+                <a role="button" class="btn btn-danger"
+                   ng-click="$ctrl.delete_selected()">
+                    <i class="fa fa-times"></i> Delete
+                </a>
 
                 <div class="vertical-divider"></div>
 
@@ -133,7 +139,7 @@
                    ng-click="$ctrl.add_tags()">
                     <i class="fa fa-tag"></i> Add tag:
                 </a>
-                <a role="button" class="btn btn-danger"
+                <a role="button" class="btn btn-warning"
                    ng-click="$ctrl.remove_tags()">
                     <i class="fa fa-times"></i> Remove tag:
                 </a>

@@ -8,8 +8,10 @@
  * Controller of the hfosFrontendApp
  */
 
+import deletionWarning from './modals/deletionWarning.tpl.html'
+
 class taskgridcomponent {
-    constructor($scope, $rootScope, $timeout, user, ObjectProxy, state, menu, notification) {
+    constructor($scope, $rootScope, $timeout, user, ObjectProxy, state, menu, notification, modal) {
         this.scope = $scope;
         this.rootscope = $rootScope;
         this.timeout = $timeout;
@@ -18,6 +20,7 @@ class taskgridcomponent {
         this.op = ObjectProxy;
         this.menu = menu;
         this.notification = notification;
+        this.modal = modal;
 
         this.columns = {};
         this.columnsize = 4;
@@ -280,6 +283,39 @@ class taskgridcomponent {
         }
     }
 
+    delete_selected() {
+        this.modal({
+            template: deletionWarning,
+            scope: this.scope,
+            title: 'Really delete tasks?',
+            keyboard: false,
+            id: 'deletionWarningDialog'
+        });
+    }
+
+    confirm_deletion() {
+        let self = this,
+            success = false;
+
+
+        for (let uuid of this.selected) {
+            console.log('Deleting ticket ', uuid);
+            this.op.deleteObject('task', uuid).then(function(response) {
+                if (response.data.uuid === uuid) {
+                    let task = self.tasklist[uuid];
+                    let group = self.tasksByGroup[task.taskgroup];
+                    group.splice(group.indexOf(task), 1);
+                    delete self.tasklist[uuid];
+                    success = true;
+                }
+            });
+        }
+
+        if (success === true) self.notification.add('success', 'Deleted', 'The selected tasks have been deleted.', 3);
+
+        this.selected = [];
+    }
+
 
     move() {
         if (typeof this.target_group === 'undefined' || this.target_group === null || this.target_group === '') {
@@ -327,6 +363,6 @@ class taskgridcomponent {
 
 }
 
-taskgridcomponent.$inject = ['$scope', '$rootScope', '$timeout', 'user', 'objectproxy', '$state', 'menu', 'notification'];
+taskgridcomponent.$inject = ['$scope', '$rootScope', '$timeout', 'user', 'objectproxy', '$state', 'menu', 'notification', '$modal'];
 
 export default taskgridcomponent;
