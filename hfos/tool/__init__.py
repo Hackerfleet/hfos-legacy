@@ -27,7 +27,7 @@ import sys
 import hashlib
 import os
 
-from hfos.logger import hfoslog, error
+from hfos.logger import hfoslog, error, verbose
 # 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
 from hfos.tool.defaults import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar
 
@@ -38,10 +38,10 @@ except NameError:
     pass
 
 try:
-    from subprocess import Popen, PIPE
+    from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
 except ImportError:
     # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
-    from subprocess32 import Popen, PIPE  # NOQA
+    from subprocess32 import Popen, PIPE, STDOUT  # NOQA
 
 
 def log(*args, **kwargs):
@@ -58,8 +58,7 @@ def _check_root():
         log("Need root access to install. Use sudo!", lvl=error)
         log("If you installed into a virtual environment, don't forget to "
             "specify the interpreter binary for sudo, e.g:\n"
-            "$ sudo /home/user/.virtualenv/hfos/bin/python3 "
-            "hfos_manage.py")
+            "$ sudo /home/user/.virtualenv/hfos/bin/python3 iso")
 
         sys.exit(1)
 
@@ -67,11 +66,13 @@ def _check_root():
 def run_process(cwd, args):
     """Executes an external process via subprocess.Popen"""
     try:
-        process = Popen(args, cwd=cwd)
+        process = check_output(args, cwd=cwd, stderr=STDOUT)
 
-        process.wait()
-    except Exception as e:
-        log('Uh oh, the teapot broke again! Error:', e, type(e), lvl=error)
+        return process
+    except CalledProcessError as e:
+        log('Uh oh, the teapot broke again! Error:', e, type(e), lvl=verbose, pretty=True)
+        log(e.cmd, e.returncode, e.output, lvl=verbose)
+        return e.output
 
 
 def _ask_password():
@@ -177,5 +178,3 @@ def _ask(question, default=None, data_type='str', show_hint=False):
             data = int(data)
 
     return data
-
-
