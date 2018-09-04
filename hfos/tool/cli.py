@@ -32,7 +32,7 @@ from hfos.tool import db_host_default, db_host_help, db_host_metavar, db_default
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']},
              cls=DYMGroup)
-@click.option('--instance', default='hfos', help='Name of instance to act on',
+@click.option('--instance', default='default', help='Name of instance to act on',
               metavar='<name>')
 @click.option('--quiet', default=False, help="Suppress all output",
               is_flag=True)
@@ -65,6 +65,10 @@ def cli(ctx, instance, quiet, verbose, log_level, dbhost, dbname):
     """
 
     ctx.obj['instance'] = instance
+
+    if dbname == db_default and instance != 'default':
+        dbname = instance
+
     ctx.obj['quiet'] = quiet
     ctx.obj['verbose'] = verbose
     verbosity['console'] = log_level
