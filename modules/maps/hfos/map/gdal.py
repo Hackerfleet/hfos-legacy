@@ -77,7 +77,7 @@ class rescan(authorizedevent):
 
 class GDAL(ConfigurableComponent):
     """
-    Threaded, disk-caching tile delivery component
+    GDAL Map conversion component
     """
     channel = "hfosweb"
 
