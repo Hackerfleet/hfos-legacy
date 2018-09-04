@@ -41,7 +41,7 @@ layers = [
         "shared": True,
         "description": "Open Street Map",
         "category": "baselayer",
-        "url": "http://hfoshost/tilecache/a.tile.osm.org/{z}/{x}/{y}.png",
+        "url": "http://hfoshost/tilecache/{s}.tile.osm.org/{z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": False,
             "attribution": "&copy; <a "
@@ -56,7 +56,7 @@ layers = [
         "shared": True,
         "description": "Open Street Map Overlay",
         "category": "overlay",
-        "url": "http://hfoshost/tilecache/a.tile.osm.org/{z}/{x}/{y}.png",
+        "url": "http://hfoshost/tilecache/{s}.tile.osm.org/{z}/{x}/{y}.png",
         "layerOptions": {
             "opacity": 0.5,
             "continuousWorld": False,
@@ -102,7 +102,7 @@ layers = [
         "shared": True,
         "category": "baselayer",
         "description": "Open Cycle Map",
-        "url": "http://hfoshost/tilecache/a.tile.opencyclemap.org/cycle/{"
+        "url": "http://hfoshost/tilecache/{s}.tile.opencyclemap.org/cycle/{"
                "z}/{x}/{y}.png",
         "layerOptions": {
             "continuousWorld": True,
