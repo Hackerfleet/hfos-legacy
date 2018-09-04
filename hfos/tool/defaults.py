@@ -28,6 +28,7 @@ db_host_default = '127.0.0.1:27017'
 db_host_help = 'Define hostname for database server (default: ' + \
                db_host_default + ')'
 db_host_metavar = '<ip:port>'
+
 db_default = 'hfos'
 db_help = 'Define name of database (default: ' + db_default + ')'
 db_metavar = '<name>'
