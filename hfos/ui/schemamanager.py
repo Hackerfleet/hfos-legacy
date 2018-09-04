@@ -89,7 +89,7 @@ class SchemaManager(ConfigurableComponent):
 
         self.log('Registered schemata languages:', ",".join(sorted(l10n_schemastore.keys())))
         self.log('Registered Schemata:', ",".join(sorted(schemastore.keys())))
-        if 'CONFIG' in args:
+        if '-c' in args or '-config' in args:
             self.log('Registered Configuration Schemata:', ",".join(sorted(configschemastore.keys())), pretty=True)
 
     @handler('cli_form')
@@ -109,25 +109,36 @@ class SchemaManager(ConfigurableComponent):
         key = None
         if len(args) > 1:
             key = args[1]
+            args = list(args)
+
+        if '-config' in args or '-c' in args:
+            store = configschemastore
+            try:
+                args.remove('-c')
+                args.remove('-config')
+            except ValueError:
+                pass
+        else:
+            store = schemastore
 
         def output(schema):
             self.log("%s :" % schema)
             if key == 'props':
-                self.log(schemastore[schema]['schema']['properties'], pretty=True)
+                self.log(store[schema]['schema']['properties'], pretty=True)
             elif key == 'perms':
                 try:
-                    self.log(schemastore[schema]['schema']['roles_create'], pretty=True)
+                    self.log(store[schema]['schema']['roles_create'], pretty=True)
                 except KeyError:
                     self.log('Schema', schema, 'has no role for creation', lvl=warn)
                 try:
-                    self.log(schemastore[schema]['schema']['properties']['perms']['properties'], pretty=True)
+                    self.log(store[schema]['schema']['properties']['perms']['properties'], pretty=True)
                 except KeyError:
                     self.log('Schema', schema, 'has no permissions', lvl=warn)
             else:
-                self.log(schemastore[schema]['schema'], pretty=True)
+                self.log(store[schema]['schema'], pretty=True)
 
-        if args[0] == '*':
-            for schema in schemastore:
+        if '*' in args:
+            for schema in store:
                 output(schema)
         else:
             output(args[0])
