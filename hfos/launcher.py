@@ -87,6 +87,11 @@ class cli_reload(Event):
     pass
 
 
+class cli_info(Event):
+    """Provide information about the running instance"""
+    pass
+
+
 class cli_quit(Event):
     """Stop this instance
 
@@ -159,6 +164,7 @@ class Core(ConfigurableComponent):
         self.insecure = args['insecure']
         self.quiet = args['quiet']
         self.development = args['dev']
+        self.instance = args['instance']
 
         self.host = args['host']
         self.port = args['port']
@@ -172,7 +178,7 @@ class Core(ConfigurableComponent):
 
         self.frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
             __file__)) + "/../frontend")
-        self.frontendtarget = os.path.join('/var/lib/hfos', args['instance'], 'frontend')
+        self.frontendtarget = os.path.join('/var/lib/hfos', self.instance, 'frontend')
 
         self.loadable_components = {}
         self.runningcomponents = {}
@@ -207,6 +213,8 @@ class Core(ConfigurableComponent):
             # 'machineroom'
         ]
 
+        self.component_blacklist += args['blacklist']
+
         self.update_components()
         self._write_config()
 
@@ -234,6 +242,7 @@ class Core(ConfigurableComponent):
         self.fireEvent(cli_register_event('reload_db', cli_reload_db))
         self.fireEvent(cli_register_event('reload', cli_reload))
         self.fireEvent(cli_register_event('quit', cli_quit))
+        self.fireEvent(cli_register_event('info', cli_info))
 
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
@@ -248,21 +257,29 @@ class Core(ConfigurableComponent):
 
     @handler('cli_drop_privileges')
     def cli_drop_privileges(self, event):
+        """Drop possible user privileges"""
+
         self.log('Trying to drop privileges', lvl=debug)
         self._drop_privileges()
 
     @handler('cli_components')
     def cli_components(self, event):
+        """List all running components"""
+
         self.log('Running components: ', sorted(self.runningcomponents.keys()))
 
     @handler('cli_reload_db')
     def cli_reload_db(self, event):
+        """Experimental call to reload the database"""
+
         self.log('This command is WiP.')
 
         initialize()
 
     @handler('cli_reload')
     def cli_reload(self, event):
+        """Experimental call to reload the component tree"""
+
         self.log('Reloading all components.')
 
         self.update_components(forcereload=True)
@@ -273,8 +290,21 @@ class Core(ConfigurableComponent):
 
     @handler('cli_quit')
     def cli_quit(self, event):
+        """Stop the instance immediately"""
+
         self.log('Quitting on CLI request.')
         sys.exit()
+
+    @handler('cli_info')
+    def cli_info(self, event):
+        """Provides information about the running instance"""
+
+        self.log('Instance:', self.instance,
+                 'Dev:', self.development,
+                 'Host:', self.host,
+                 'Port:', self.port,
+                 'Insecure:', self.insecure,
+                 'Frontend:', self.frontendtarget)
 
     def _start_server(self, *args):
         """Run the node local server"""
@@ -398,6 +428,8 @@ class Core(ConfigurableComponent):
             self._instantiate_components(clear=True)
 
     def _start_frontend(self, restart=False):
+        """Check if it is enabled and start the frontend http & websocket"""
+
         self.log(self.config, self.config.frontendenabled, lvl=verbose)
         if self.config.frontendenabled and not self.frontendrunning or restart:
             self.log("Restarting webfrontend services on",
@@ -410,6 +442,8 @@ class Core(ConfigurableComponent):
             self.frontendrunning = True
 
     def _instantiate_components(self, clear=True):
+        """Inspect all loadable components and run them"""
+
         if clear:
             import objgraph
             from copy import deepcopy
@@ -461,6 +495,7 @@ class Core(ConfigurableComponent):
 
     def started(self, component):
         """Sets up the application after startup."""
+
         self.log("Running.")
         self.log("Started event origin: ", component, lvl=verbose)
         populate_user_events()
@@ -487,14 +522,17 @@ def construct_graph(args):
         dbg = Debugger().register(app)
         # TODO: Make these configurable from modules, navdata is _very_ noisy
         # but should not be listed _here_
-        dbg.IgnoreEvents.extend(["read", "_read", "write", "_write",
-                                 "stream_success", "stream_complete",
-                                 "serial_packet", "raw_data",
-                                 "stream", "navdatapush", "referenceframe",
-                                 "updateposition", "updatesubscriptions",
-                                 "generatevesseldata", "generatenavdata", "sensordata",
-                                 "reset_flood_offenders", "reset_flood_counters",
-                                 "task_success", "task_done"])
+        dbg.IgnoreEvents.extend([
+            "read", "_read", "write", "_write",
+            "stream_success", "stream_complete",
+            "serial_packet", "raw_data", "stream",
+            "navdatapush", "referenceframe",
+            "updateposition", "updatesubscriptions",
+            "generatevesseldata", "generatenavdata", "sensordata",
+            "reset_flood_offenders", "reset_flood_counters",  # Flood counters
+            "task_success", "task_done",  # Thread completion
+            "keepalive"  # IRC Gateway
+        ])
 
     hfoslog("Beginning graph assembly.", emitter='GRAPH')
 
@@ -543,6 +581,7 @@ def construct_graph(args):
               metavar='<name>')
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
 @click.option("--norun", help="Only assemble system, do not run", is_flag=True)
+@click.option("--blacklist", "-b", help="Blacklist a component", multiple=True, default=[])
 def launch(run=True, **args):
     """Bootstrap basics, assemble graph and hand over control to the Core
     component"""
