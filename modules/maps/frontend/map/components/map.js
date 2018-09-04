@@ -292,7 +292,14 @@ class mapcomponent {
         }
 
 
-        this.mapsidebar = $aside({scope: this.scope, template: sidebar, backdrop: false, show: false});
+        this.mapsidebar = $aside({
+            scope: this.scope,
+            template: sidebar,
+            backdrop: false,
+            show: false,
+            container: '#content'
+        });
+
         this.showSidebar = function (event) {
             console.log('[MAP] Opening sidebar: ', self.mapsidebar);
 
@@ -521,7 +528,8 @@ class mapcomponent {
                     template: '<h2>' + obj.name + '</h2>' +
                     '<small>' + type + '</small>' +
                     '<div ng-bind-html="popup.notes | embed:popup.user.embed_options"></div>' +
-                    '<small><a href="#!/editor/geoobject/' + uuid + '/edit">Edit Object in Editor</a></small>',
+                    '<small><a href="#!/editor/geoobject/' + uuid + '/edit">Edit Object in Editor</a></small><br />' +
+                    '<small><a ng-click="popup.zoom_to_geoobject()">Zoom to</a></small>',
                     controllerAs: 'popup',
                     controller: ['user', function (user) {
                         this.user = user;
@@ -529,6 +537,9 @@ class mapcomponent {
                         this.type = type;
                         this.notes = notes;
                         this.uuid = uuid;
+                        this.zoom_to_geoobject = function() {
+                            self.zoom_to_geoobject(obj);
+                        };
                     }]
                 })
                     .setLatLng(e.latlng)
@@ -727,7 +738,11 @@ class mapcomponent {
 
         this.getMapview = function () {
             self.op.get('mapview', self.mapviewuuid).then(function (msg) {
-                self.updateMapview(msg.data.object);
+                let mapview = msg.data.object;
+                if (typeof mapview.coords === 'undefined') {
+                    mapview.coords = self.center;
+                }
+                self.updateMapview(mapview);
                 self.switchMapview(self.mapviewuuid);
             });
         };
@@ -735,17 +750,18 @@ class mapcomponent {
         this.getDefaultMapview = function () {
             console.log('[MAP] Getting associated mapview.');
 
-            self.mapviewuuid = self.user.clientconfig.mapviewuuid;
+            // TODO: Pull module default configurations from a service
+            self.mapviewuuid = self.user.clientconfig.modules.mapviewuuid;
 
             console.log('[MAP] Clientconfig Mapview UUID: ', self.mapviewuuid);
 
             if (self.mapviewuuid === '' || typeof self.mapviewuuid === 'undefined') {
                 console.log('[MAP] Picking user profile mapview', self.user.profile);
-                self.mapviewuuid = self.user.profile.settings.mapviewuuid;
+                self.mapviewuuid = self.user.profile.modules.mapviewuuid;
             }
             if (self.mapviewuuid === '' || typeof self.mapviewuuid === 'undefined') {
                 console.log('[MAP] Picking system profile mapview', self.user.profile);
-                self.mapviewuuid = self.systemconfig.config.defaultmapviewuuid;
+                self.mapviewuuid = self.systemconfig.config.modules.mapviewuuid;
             }
             console.log('[MAP] Final Mapview UUID: ', self.mapviewuuid);
 
@@ -995,15 +1011,6 @@ class mapcomponent {
             self.toggledash = L.easyButton({
                 id: 'btn_toggledash',
                 states: [{
-                    stateName: 'nodash',
-                    icon: 'fa-tachometer',
-                    onClick: function (control) {
-                        console.log('[MAP] Enabling Dashboard');
-                        self.dashboardoverlay = true;
-                        $('#btn_toggledash').css({'color': '#000'});
-                        control.state('dash');
-                    }
-                }, {
                     stateName: 'dash',
                     icon: 'fa-tachometer',
                     onClick: function (control) {
@@ -1012,6 +1019,16 @@ class mapcomponent {
                         $('#btn_toggledash').css({'color': '#aaa'});
                         control.state('nodash');
                     }
+                }, {
+                    stateName: 'nodash',
+                    icon: 'fa-tachometer',
+                    onClick: function (control) {
+                        console.log('[MAP] Enabling Dashboard');
+                        self.dashboardoverlay = true;
+                        $('#btn_toggledash').css({'color': '#000'});
+                        control.state('dash');
+                    }
+
                 }],
                 title: 'Toggle dashboard overlay'
             });
