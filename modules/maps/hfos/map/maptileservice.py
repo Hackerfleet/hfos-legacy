@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from random import choice
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -46,12 +47,9 @@ from hfos.events.client import send
 from hfos.misc import std_uuid
 from hfos.database import objectmodels, instance
 from hfos.debugger import cli_register_event
-from hfos.logger import error, verbose, warn, hilight
+from hfos.logger import error, verbose, warn, debug
 
 from .TileTools import TileFinder, TileUtils
-
-from pprint import pprint
-from time import sleep
 
 if six.PY2:
     from urllib import unquote, urlopen
@@ -162,12 +160,15 @@ class MaptileLoader(ConfigurableComponent):
         self.fire(event)
 
     def _split_cache_url(self, url, url_type):
+        filename = None
+        real_url = None
+
         try:
-            # self.log('SPLITTING: ', url)
+            # self.log('SPLITTING: ', url, lvl=verbose)
             url = url[len('/' + url_type):].lstrip('/')
             url = unquote(url)
 
-            # self.log('SPLITDONE:', url)
+            # self.log('SPLITDONE:', url, lvl=1)
 
             if '..' in url:  # Does this need more safety checks?
                 self.log("Fishy url with parent path: ", url, lvl=error)
@@ -176,7 +177,7 @@ class MaptileLoader(ConfigurableComponent):
             split_url = url.split("/")
             service = "/".join(
                 split_url[0:-3])  # get all but the coords as service
-            # self.log('SERVICE:', service)
+            # self.log('SERVICE:', service, lvl=1)
 
             x = split_url[-3]
             y = split_url[-2]
@@ -187,7 +188,7 @@ class MaptileLoader(ConfigurableComponent):
             real_url = "http://%s/%s/%s/%s.png" % (service, x, y, z)
         except Exception as e:
             self.log("ERROR (%s) in URL: %s" % (e, url), exc=True)
-            raise UrlError
+            # raise UrlError
 
         return filename, real_url
 
@@ -211,9 +212,11 @@ class MaptileLoader(ConfigurableComponent):
                 self.log('Skipping non existing layer:', layer_uuid, lvl=warn)
                 continue
             template = layer_object.url.split('hfoshost')[1]
+
+            template = template.replace("{s}", choice(['a', 'b', 'c']))
             template = template.replace('{', '{{')
             template = template.replace('}', '}}')
-            self.log('Template:', template)
+            self.log('Template:', template, lvl=debug)
 
             tileUtils = TileUtils()
             tileFinder = TileFinder(tileUtils, template)
@@ -333,6 +336,11 @@ class MaptileLoader(ConfigurableComponent):
             return
 
         filename, real_url = self._split_cache_url(url, 'tilecache')
+
+        if filename is None or real_url is None:
+            self.log('Could not get tile:', url)
+            return
+
         try:
             tile, log = yield self.call(task(get_tile, real_url), "tclworkers")
             if log != "":
