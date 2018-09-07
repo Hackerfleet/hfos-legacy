@@ -394,15 +394,14 @@ class mapcomponent {
                 bounds._northEast.lng, bounds._northEast.lat
             ];
             let layers = [];
-            let uuid;
 
-            for (uuid in Object.keys(self.leafletlayers.baselayers)) {
-                if (uuid in Object.keys(self.layers.baselayers)) {
+            for (const uuid of Object.keys(self.leafletlayers.baselayers)) {
+                if (self.layers.baselayers.hasOwnProperty(uuid)) {
                     layers.push(uuid);
                 }
             }
-            for (uuid in Object.keys(self.leafletlayers.overlays)) {
-                if (uuid in Object.keys(self.layers.overlays)) {
+            for (const uuid of Object.keys(self.leafletlayers.overlays)) {
+                if (self.layers.overlays.hasOwnProperty(uuid)) {
                     layers.push(uuid);
                 }
             }
