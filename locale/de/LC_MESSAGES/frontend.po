@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-08-05 23:49+0200\n"
+"PO-Revision-Date: 2018-10-01 19:55+0200\n"
 "Last-Translator: Hackerfleet German Translation Team <riot@c-base.org>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -12,7 +12,7 @@ msgstr ""
 "X-Generator: Poedit 1.8.11\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/common/services/user.service.js:124
+#: src/common/services/user.service.js:131
 msgid ""
 "<br />Welcome to this Isomer node! Now is a good time to fill out your "
 "profile.<br />Click the user button <a href=\"/#!/editor/profile//edit\">to "
@@ -61,7 +61,7 @@ msgstr ""
 "Sollte die Mail nicht ankommen, bitte den Spam-Folder prüfen und \n"
 "ggf. den Node-Besitzer kontaktieren."
 
-#: src/about/about-component/about-component.tpl.html:44
+#: src/about/about-component/about-component.tpl.html:45
 msgid "An isomer node"
 msgstr "Eine Isomer Node"
 
@@ -73,11 +73,11 @@ msgstr "Ist ein Bewusstsein vorhanden?"
 msgid "Back to the main menu"
 msgstr "Zurück zum Hauptmenü"
 
-#: src/about/about-component/about-component.tpl.html:75
+#: src/about/about-component/about-component.tpl.html:76
 msgid "Browse on Github"
 msgstr "Auf Github"
 
-#: src/common/modals/login.tpl.html:43 src/common/modals/user.tpl.html:24
+#: src/common/modals/login.tpl.html:16 src/common/modals/user.tpl.html:24
 msgid "Cancel"
 msgstr "Abbruch"
 
@@ -101,11 +101,11 @@ msgstr ""
 msgid "Checkbox"
 msgstr "Häkchen"
 
-#: src/about/about-component/about-component.tpl.html:49
+#: src/about/about-component/about-component.tpl.html:50
 msgid "Client name:"
 msgstr "Client Name:"
 
-#: src/about/about-component/about-component.tpl.html:47
+#: src/about/about-component/about-component.tpl.html:48
 msgid "Client version:"
 msgstr "Client Version:"
 
@@ -113,16 +113,20 @@ msgstr "Client Version:"
 msgid "Client<span class=\"caret\"></span>"
 msgstr "Client<span class=\"caret\"></span>"
 
+#: src/components/project/todo/todo.tpl.html:77
+msgid "Closed tasks group:"
+msgstr ""
+
 #: src/components/enrol/enrol/enrolment.tpl.html:94
 #: src/components/enrol/enrol/password.tpl.html:42
 msgid "Confirm:"
 msgstr "Bestätigen:"
 
-#: src/about/about-component/about-component.tpl.html:59
+#: src/about/about-component/about-component.tpl.html:60
 msgid "Contact the isomer framework maintainers"
 msgstr "Kontaktiere die Isomer Framework Maintainer"
 
-#: src/about/about-component/about-component.tpl.html:54
+#: src/about/about-component/about-component.tpl.html:55
 msgid "Contact this node's maintainer"
 msgstr "Kontaktiere den Maintainer dieser Node"
 
@@ -133,6 +137,10 @@ msgstr ""
 #: src/objects/list/list.tpl.html:23 src/objects/search/search.tpl.html:23
 msgid "Create new"
 msgstr "Erzeuge neu"
+
+#: src/common/component/login.tpl.html:65
+msgid "Custom port"
+msgstr ""
 
 #: src/objects/editor/editor.tpl.html:46
 msgid "Debug"
@@ -166,7 +174,7 @@ msgstr "Live editieren"
 msgid "Edit Profile"
 msgstr "Profil Editieren"
 
-#: src/common/services/user.service.js:134
+#: src/common/services/user.service.js:141
 msgid "Either the username or the supplied password is invalid."
 msgstr "Entweder der Nutzername oder das angegebene Passwort sind falsch."
 
@@ -201,7 +209,7 @@ msgstr "Felder"
 msgid "Filters"
 msgstr "Filter"
 
-#: src/common/component/login.tpl.html:50
+#: src/common/component/login.tpl.html:53
 msgid "Forgot your password or username?"
 msgstr ""
 
@@ -217,7 +225,7 @@ msgstr ""
 msgid "Hide menu"
 msgstr ""
 
-#: src/common/services/socket.factory.js:328
+#: src/common/services/socket.factory.js:331
 msgid "High latency"
 msgstr "Hohe latenz"
 
@@ -248,19 +256,19 @@ msgstr "Liste"
 msgid "List:"
 msgstr "Liste:"
 
-#: src/featuremenu/menu/menu.tpl.html:32
+#: src/featuremenu/menu/menu.tpl.html:37
 msgid "Logging in..."
 msgstr "Anmelden..."
 
-#: src/common/component/login.tpl.html:31 src/common/modals/login.tpl.html:22
+#: src/common/component/login.tpl.html:32
 msgid "Login"
 msgstr "Anmelden"
 
-#: src/common/services/user.service.js:136
+#: src/common/services/user.service.js:143
 msgid "Login failed"
 msgstr "Anmeldung fehlgeschlagen"
 
-#: src/common/services/user.service.js:451
+#: src/common/services/user.service.js:485
 msgid "Login to this node"
 msgstr "An dieser Node anmelden."
 
@@ -292,15 +300,15 @@ msgstr "Name"
 msgid "No"
 msgstr "Nr"
 
-#: src/featuremenu/menu/menu.tpl.html:38
+#: src/featuremenu/menu/menu.tpl.html:33
 msgid "No connection"
 msgstr "Keine Verbindung"
 
-#: src/common/services/socket.factory.js:333
+#: src/common/services/socket.factory.js:336
 msgid "No permission"
 msgstr "Keine Erlaubnis"
 
-#: src/common/services/user.service.js:388
+#: src/common/services/user.service.js:418
 msgid "No response from node within 30 seconds!"
 msgstr "Keine Antwort von der Node in 30 Sekunden!"
 
@@ -312,7 +320,7 @@ msgstr "Node Menü"
 msgid "Not found"
 msgstr "Nicht gefunden"
 
-#: src/common/services/socket.factory.js:141
+#: src/common/services/socket.factory.js:144
 msgid "Offline"
 msgstr "Offline"
 
@@ -320,7 +328,7 @@ msgstr "Offline"
 msgid "Old password:"
 msgstr ""
 
-#: src/common/services/socket.factory.js:181
+#: src/common/services/socket.factory.js:184
 msgid "Online"
 msgstr "Online"
 
@@ -357,6 +365,10 @@ msgstr ""
 msgid "Please wait a few seconds."
 msgstr ""
 
+#: src/common/component/login.tpl.html:103
+msgid "Privacy level:"
+msgstr ""
+
 #: src/objects/list/list.tpl.html:112 src/objects/list/list.tpl.html:229
 msgid "Read"
 msgstr "Lesen"
@@ -369,19 +381,19 @@ msgstr "Schreibgeschützt"
 msgid "Ready."
 msgstr ""
 
-#: src/common/component/login.tpl.html:39 src/common/modals/login.tpl.html:30
+#: src/common/component/login.tpl.html:40
 msgid "Register"
 msgstr "Registrieren"
 
-#: src/common/services/user.service.js:123
+#: src/common/services/user.service.js:130
 msgid "Registration successful"
 msgstr "Registrierung erfolgreich"
 
-#: src/about/about-component/about-component.tpl.html:72
+#: src/about/about-component/about-component.tpl.html:73
 msgid "Report Bugs"
 msgstr "Fehler melden"
 
-#: src/about/about-component/about-component.tpl.html:78
+#: src/about/about-component/about-component.tpl.html:79
 msgid "Report on Github"
 msgstr "Fehler auf Github melden"
 
@@ -395,7 +407,7 @@ msgstr ""
 msgid "Revoke"
 msgstr "Zurückziehen"
 
-#: src/common/services/socket.factory.js:328
+#: src/common/services/socket.factory.js:331
 msgid "Roundtrip took"
 msgstr "Latenz betrug"
 
@@ -407,15 +419,19 @@ msgstr "Suchen:"
 msgid "Select multiple objects to:"
 msgstr "Wähle mehrere Objekte um:"
 
+#: src/components/project/todo/todo.tpl.html:71
+msgid "Showing tasks from:"
+msgstr ""
+
 #: src/components/enrol/enrol/enrolment.tpl.html:33
 msgid "Sorry, but enrolling is currently not possible."
 msgstr "Entschuldigung, aber die Registrierung ist aktuell nicht möglich."
 
 #: src/app/app-component/app-component.tpl.html:210
-msgid "Starting HFOS client"
-msgstr "Starte HFOS Klient"
+msgid "Starting Isomer client"
+msgstr ""
 
-#: src/common/component/login.tpl.html:45 src/common/modals/login.tpl.html:36
+#: src/common/component/login.tpl.html:93
 msgid "Stay logged in"
 msgstr "Angemeldet bleiben"
 
@@ -431,7 +447,7 @@ msgstr ""
 msgid "Thanks for enrolling, {{$ctrl.username}}!"
 msgstr "Danke für die Registrierung, {{$ctrl.username}}!"
 
-#: src/common/services/socket.factory.js:182
+#: src/common/services/socket.factory.js:185
 msgid "The connection to the node has been established. You're online!"
 msgstr "Die Verbindung zur Node wurde aufgebaut. Du bist online!"
 
@@ -459,8 +475,12 @@ msgstr ""
 msgid "Unknown schema!"
 msgstr "Unbekanntes Schema!"
 
+#: src/common/component/login.tpl.html:83
+msgid "Use SSL"
+msgstr ""
+
 #: src/app/app-component/app-component.tpl.html:49
-#: src/common/services/user.service.js:469
+#: src/common/services/user.service.js:503
 msgid "User actions"
 msgstr "Nutzeraktionen"
 
@@ -484,11 +504,11 @@ msgstr "Schreiben"
 msgid "You can now"
 msgstr "Sie können sich jetzt"
 
-#: src/common/services/socket.factory.js:142
+#: src/common/services/socket.factory.js:145
 msgid "You have been disconnected from the node. Retry interval is at"
 msgstr "Sie wurden vom Knoten getrennt. Es wird wieder versucht in"
 
-#: src/common/services/socket.factory.js:334
+#: src/common/services/socket.factory.js:337
 msgid "You have insufficient permissions to do that."
 msgstr "Sie haben nicht genügend Berechtigungen dies zu tun."
 
@@ -496,7 +516,7 @@ msgstr "Sie haben nicht genügend Berechtigungen dies zu tun."
 msgid "You're already logged in. Please"
 msgstr "Sie sind bereits angemeldet. Bitte"
 
-#: src/featuremenu/menu/menu.tpl.html:39
+#: src/featuremenu/menu/menu.tpl.html:34
 msgid "Your client is not connected to the node."
 msgstr "Ihr Klient ist nicht mit dem Knoten verbunden."
 
@@ -512,9 +532,13 @@ msgstr "jetzt an dieser Node anmelden."
 msgid "to enrol another account."
 msgstr "abmelden um gegebenfalls einen neuen Zugang zu registrieren."
 
+# Do not translate manually!
 #: src/app/app-component/app-component.tpl.html:140
 msgid "{{$ctrl.user.clientconfig.name}}"
 msgstr ""
+
+#~ msgid "Starting HFOS client"
+#~ msgstr "Starte HFOS Klient"
 
 #~ msgid "N/A"
 #~ msgstr "N.V."
