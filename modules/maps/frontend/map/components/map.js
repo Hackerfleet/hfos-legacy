@@ -71,7 +71,7 @@ import lighthouseIcon from '../../assets/images/icons/lighthouse.png';
 class mapcomponent {
 
     constructor(scope, leafletData, systemconfig, objectproxy, $state, $rootScope, socket, user, schemata, menu, notification, clipboard,
-                navdata, mapservice, $compile, $aside, uuid, NgTableParams) {
+                navdata, mapservice, $compile, $aside, uuid, NgTableParams, timeout) {
         let self = this;
 
         {
@@ -90,6 +90,7 @@ class mapcomponent {
             this.navdata = navdata;
             this.service = mapservice;
             this.uuid = uuid;
+            this.timeout = timeout;
 
             this.scope.otherCollapsed = true;
 
@@ -110,6 +111,7 @@ class mapcomponent {
             this.objectlayers = {};
 
             this.vessel_display = 'off';
+            this.side_bar_open = false;
 
             this.DefaultMarker = vectormarkers.Icon;
 
@@ -292,6 +294,7 @@ class mapcomponent {
         }
 
 
+        /*
         this.mapsidebar = $aside({
             scope: this.scope,
             template: sidebar,
@@ -307,7 +310,7 @@ class mapcomponent {
                 console.log("[MAP] Sidebar:", self.mapsidebar);
                 self.mapsidebar.show();
             });
-        };
+        };*/
 
 
         this.copyCoordinates = function (e) {
@@ -536,7 +539,7 @@ class mapcomponent {
                         this.type = type;
                         this.notes = notes;
                         this.uuid = uuid;
-                        this.zoom_to_geoobject = function() {
+                        this.zoom_to_geoobject = function () {
                             self.zoom_to_geoobject(obj);
                         };
                     }]
@@ -776,6 +779,13 @@ class mapcomponent {
             console.log('[MAP] Profile update - fetching map data');
             self.requestMapData();
         });
+
+        this.resize =  function () {
+            self.timeout(function () {
+                    self.map.invalidateSize()
+                },
+                500);
+        };
 
         this.scope.$on('OP.Update', function (event, objuuid, obj) {
             if (objuuid === self.mapviewuuid) {
@@ -1359,6 +1369,6 @@ class mapcomponent {
 }
 
 mapcomponent.$inject = ['$scope', 'leafletData', 'systemconfig', 'objectproxy', '$state', '$rootScope', 'socket', 'user', 'schemata',
-    'menu', 'notification', 'clipboard', 'navdata', 'mapservice', '$compile', '$aside', 'uuid', 'NgTableParams'];
+    'menu', 'notification', 'clipboard', 'navdata', 'mapservice', '$compile', '$aside', 'uuid', 'NgTableParams', '$timeout'];
 
 export default mapcomponent;
