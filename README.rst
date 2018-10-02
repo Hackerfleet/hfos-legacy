@@ -38,7 +38,7 @@ The simplest way is to use the supplied installation script:
 
 .. code-block:: sh
 
-    $ sudo ./install
+    sudo ./install
 
 The installation produces a lot of output which is automatically piped into 'output.log'.
 It installs all dependencies then sets up a user account and the system's services.
