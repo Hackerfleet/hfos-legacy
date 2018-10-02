@@ -9,7 +9,7 @@
  */
 
 class TODOcomponent {
-    constructor($scope, $rootScope, $timeout, user, ObjectProxy, state, menu) {
+    constructor($scope, $rootScope, $timeout, user, ObjectProxy, state) {
         this.scope = $scope;
         this.rootscope = $rootScope;
         this.timeout = $timeout;
@@ -17,40 +17,58 @@ class TODOcomponent {
         this.state = state;
         this.op = ObjectProxy;
 
-        this.tasklist = {};
+        this.tasklist = [];
 
         this.tags = {};
-        this.projects = {};
-        this.groups = [];
+        this.projects = [];
+        this.projects_lookup = {};
+        this.groups = {};
+
+        this.open_groups = [];
+        this.closed_group = null;
+
+        this.show_closed = false;
+        this.show_priorities = false;
+        this.show_max_priority = 10;
 
         this.filtername = "Assigned to me";
-        this.closed_status = null;
+        this.filtered_projects = [];
 
         this.changetimeout = null;
 
         let self = this;
 
-        this.get_filtered_tasks = function() {
+        this.get_filtered_tasks = function () {
             console.log('[TODO] Getting list of tasks');
-            this.op.search('task', {'assignee': this.user.useruuid}, '*').then(function(msg) {
-                let tasks = msg.data.list;
-                console.log('[TODO] Filling task list:', tasks);
-                for (let item of tasks) {
-                    self.tasklist[item.uuid] = item;
-                }
+            let groups = this.open_groups.concat(this.closed_group);
+            console.log('[TODO] Groups:', groups, this.open_groups, this.closed_group);
+
+            let filter = {
+                assignee: this.user.useruuid,
+                taskgroup: {'$in': groups}
+            };
+            console.log(filter);
+            this.op.search('task', filter, '*').then(function (msg) {
+                console.log('[TODO] Filling task list:', msg.data.list);
+                self.tasklist = msg.data.list;
             })
         };
 
-        this.update_lists = function() {
+        this.update_lists = function () {
             let self = this;
 
-            this.op.search('taskgroup').then(function (msg) {
-                self.groups = msg.data.list;
+            this.op.search('taskgroup', '', ['name', 'color']).then(function (msg) {
+                for (let group of msg.data.list) {
+                    self.groups[group.uuid] = group;
+                }
             });
 
             this.op.search('project').then(function (msg) {
+                self.projects = msg.data.list;
+
                 for (let project of msg.data.list) {
-                    self.projects[project.uuid] = project;
+                    self.filtered_projects.push(project.uuid);
+                    self.projects_lookup[project.uuid] = project;
                 }
             });
 
@@ -61,30 +79,54 @@ class TODOcomponent {
             });
         };
 
-        this.rootscope.$on('User.Login', function () {
+        this.get_settings = function () {
+            this.closed_group = this.user.get_module_default('closed_group');
+            this.open_groups = this.user.get_module_default('open_groups');
+            console.log('[TODO] Settings:', this.closed_group, this.open_groups);
             self.get_filtered_tasks();
+        };
+
+        this.rootscope.$on('User.Login', function () {
             self.update_lists();
+            self.get_settings()
         });
 
         if (this.user.signedin === true) {
-            this.get_filtered_tasks();
             self.update_lists();
+            self.get_settings()
         }
 
     }
 
-    toggle_task(uuid) {
-        console.log('[TODO] Toggling task ', uuid);
-        this.tasklist[uuid].status = this.closed_status;
+    increase_priority(task) {
+        if (typeof task.priority === 'undefined') task.priority = 9;
+        else if (task.priority > 1) task.priority--;
+
+        this.op.changeObject('task', task.uuid, {field: 'priority', value: task.priority});
     }
 
-    opentab(tabname) {
-        console.log('[TODO] Switching tab to ', tabname);
-        $('.nav-pills .active, .tab-content .active').removeClass('active');
-        $('#' + tabname).addClass('active');
+    decrease_priority(task) {
+        if (typeof task.priority === 'undefined') task.priority = 1;
+        else if (task.priority < 9) task.priority++;
+
+        this.op.changeObject('task', task.uuid, {field: 'priority', value: task.priority});
+    }
+
+    toggle_task(task) {
+        console.log('[TODO] Toggling task ', task);
+        let previous_group = task.group;
+        task.taskgroup = this.closed_group;
+
+        this.op.changeObject('task', task.uuid, {field: 'taskgroup', value: this.closed_group})
+            .then(function (msg) {
+                console.log('[TODO] Response:', msg);
+                if (msg.action === 'fail') {
+                    task.taskgroup = previous_group;
+                }
+            });
     }
 }
 
-TODOcomponent.$inject = ['$scope', '$rootScope', '$timeout', 'user', 'objectproxy', '$state', 'menu'];
+TODOcomponent.$inject = ['$scope', '$rootScope', '$timeout', 'user', 'objectproxy', '$state'];
 
 export default TODOcomponent;

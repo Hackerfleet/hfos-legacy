@@ -22,12 +22,28 @@
  * """
  */
 
-@import '../../../colors.scss';
+@import '../../../scss/colors';
+
+#project_selector {
+  @media (min-width: 768px) {
+    max-width: 33vw;
+  }
+  @media (max-width: 767px) {
+    max-width: none;
+  }
+}
+
+.todoHeader > h2 {
+  @media (max-width: 767px) {
+    word-wrap: break-word;
+  }
+}
 
 .todoList {
   list-style-type: none;
   padding: 0;
   overflow: auto;
+  max-height: 85vh;
   top: 2.5em;
   bottom: 5px;
   right: 10px;
@@ -41,12 +57,38 @@
 .todoCheck {
   height: 100%;
   width: 55px;
+  padding: 0 2px;
+}
+
+.big-checkbox {
+/* Double-sized Checkboxes */
+  -ms-transform: scale(4); /* IE */
+  -moz-transform: scale(4); /* FF */
+  -webkit-transform: scale(4); /* Safari and Chrome */
+  -o-transform: scale(4); /* Opera */
+  //padding: 10px;
+  margin: 23px 0 0 20px !important;
+  float: left;
+}
+
+.todoPriority {
+  font-size: 55px;
+  height: 100%;
   float: left;
   padding: 0 2px;
+  line-height: 1em;
+  width: 1.5em;
+  text-align: center;
 }
 
 .todoTask {
   min-height: 4em;
+}
+
+.todoTask h2 {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 5px;
 }
 
 .box-content {
@@ -76,6 +118,10 @@
   margin: 5px;
   border-radius: 5px;
   z-index: 55;
+}
+
+.todoHeader {
+  padding-left: 50px;
 }
 
 .taskHeader {
@@ -138,6 +184,7 @@
 }
 
 .taskLabels {
+  margin-left: 5px;
 }
 
 .taskAlertTime {
@@ -155,4 +202,16 @@
 .gridster-mobile .gridster-item {
   position: relative;
   min-height: 25vh;
+}
+
+.priority_dial {
+  float: right;
+  max-height: 42px;
+  line-height: 29px;
+  font-size: 18px;
+  max-width: 1em;
+}
+
+.increase_priority, .decrease_priority {
+  display: inline;
 }
