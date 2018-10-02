@@ -50,6 +50,9 @@ This software package is a plugin module for HFOS.
       projectservice=hfos.project.projectservice:ProjectService
       [hfos.management]
       import-gh=hfos.project.importer.github:GithubImporter
+      [hfos.provisions]
+      taskgroup=hfos.project.provisions.taskgroup:provision
+      taskgrid=hfos.project.provisions.taskgrid:provision
     """,
       test_suite="tests.main.main",
       )
