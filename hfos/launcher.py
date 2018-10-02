@@ -552,11 +552,11 @@ def construct_graph(args):
 
 
 @click.command()
-@click.option("-p", "--port", help="Define port for server", type=int,
+@click.option("--port", "-p", help="Define port for server", type=int,
               default=8055)
 @click.option("--host", help="Define hostname for server", type=str,
               default='127.0.0.1')
-@click.option("--certificate", "--cert", '-c', help="Certificate file path",
+@click.option("--cert", "--certificate", '-c', help="Certificate file path",
               type=str, default=None)
 @click.option("--dbhost", help="Define hostname for database server",
               type=str, default='127.0.0.1:27017')
