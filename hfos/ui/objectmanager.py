@@ -229,7 +229,7 @@ class ObjectManager(ConfigurableComponent):
             return
 
         if storage_object:
-            self.log("Object found, checking permissions: ", data, lvl=debug)
+            self.log("Object found, checking permissions: ", data, lvl=verbose)
 
             if not self._check_permissions(user, 'read',
                                            storage_object):
