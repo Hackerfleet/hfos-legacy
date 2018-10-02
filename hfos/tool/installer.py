@@ -55,7 +55,7 @@ def install(ctx, port):
 
 
 @install.command(short_help='build and install docs')
-@click.option('--clear', '--clear-target', help='Clears target documentation '
+@click.option('--clear-target', '--clear', help='Clears target documentation '
                                                 'folders', default=False, is_flag=True)
 @click.pass_context
 def docs(ctx, clear_target):
@@ -116,7 +116,7 @@ def install_docs(instance, clear_target):
 
 
 @install.command(short_help='create structures in /var')
-@click.option('--clear', '--clear-target', help='Clears already existing cache '
+@click.option('--clear-target', '--clear', help='Clears already existing cache '
                                                 'directories', is_flag=True, default=False)
 @click.option('--clear-all', help='Clears all already existing '
                                   'directories', is_flag=True, default=False)
@@ -176,7 +176,7 @@ def install_var(instance, clear_target, clear_all):
 @click.option('--provision', '-p', help="Specify a provision (default=install "
                                         "all)",
               default=None, metavar='<name>')
-@click.option('--clear', '--clear-existing', help='Clears already existing collections (DANGER!)',
+@click.option('--clear-existing', '--clear', help='Clears already existing collections (DANGER!)',
               is_flag=True, default=False)
 @click.option('--overwrite', '-o', help='Overwrites existing provisions',
               is_flag=True, default=False)
@@ -628,7 +628,7 @@ def frontend(ctx, dev, rebuild, no_install, build_type):
 
 
 @install.command('all', short_help='install everything')
-@click.option('--clear', '--clear-all', help='Clears already existing cache directories and data', is_flag=True,
+@click.option('--clear-all', '--clear', help='Clears already existing cache directories and data', is_flag=True,
               default=False)
 @click.pass_context
 def install_all(ctx, clear_all):

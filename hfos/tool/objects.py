@@ -264,7 +264,7 @@ def find_field(ctx, search, by_type, obj):
 
 
 @objects.command(short_help='Find illegal _id fields')
-@click.option('--delete', '--delete-duplicates', default=False, is_flag=True, help='Delete found duplicates')
+@click.option('--delete-duplicates', '--delete', default=False, is_flag=True, help='Delete found duplicates')
 @click.option('--fix', default=False, is_flag=True, help='Tries to fix faulty object ids')
 @click.option('--test', default=False, is_flag=True, help='Test if faulty objects have clones with correct ids')
 @click.option('--schema', default=None, help='Work on specified schema only')
@@ -304,7 +304,7 @@ def illegalcheck(ctx, schema, delete_duplicates, fix, test):
 
 
 @objects.command(short_help='Find duplicates by UUID')
-@click.option('--delete', '--delete-duplicates', default=False, is_flag=True, help='Delete found duplicates')
+@click.option('--delete-duplicates', '--delete', default=False, is_flag=True, help='Delete found duplicates')
 @click.option('--merge', default=False, is_flag=True, help='Merge found duplicates')
 @click.option('--schema', default=None, help='Work on specified schema only')
 @click.pass_context

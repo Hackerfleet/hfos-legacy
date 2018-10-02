@@ -141,7 +141,7 @@ def _ask_questionnaire():
 
 
 @click.command(short_help='create starterkit module')
-@click.option('--clear', '--clear-target', help='Clears already existing target',
+@click.option('--clear-target', '--clear', help='Clears already existing target',
               default=False, is_flag=True)
 @click.option("--target", help="Create module in the given folder (uses ./ "
                                "if omitted)", default=".", metavar='<folder>')

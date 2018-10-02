@@ -38,7 +38,7 @@ from hfos.tool import db_host_default, db_host_help, db_host_metavar, db_default
               is_flag=True)
 @click.option('--verbose', '-v', default=False, help="Give verbose output",
               is_flag=True)
-@click.option('--log', '--log-level', default=20, help='Log level to use (0-100)',
+@click.option('--log-level', '--log', default=20, help='Log level to use (0-100)',
               metavar='<number>')
 @click.option('--dbhost', default=db_host_default, help=db_host_help,
               metavar=db_host_metavar)
