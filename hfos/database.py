@@ -195,8 +195,11 @@ def _build_schemastore_new():
                     for index, extensions in form_extensions.items():
                         schemata_log('Item:', index, 'Extensions:', extensions, lvl=verbose)
                         for path, obj in extensions.items():
-                            available[model]['form'] = form_insert(form, index, path, obj)
-                            schemata_log('Path:', path, 'obj:', obj, lvl=verbose)
+                            if not isinstance(obj, list):
+                                obj = [obj]
+                            for thing in obj:
+                                available[model]['form'] = form_insert(form, index, path, thing)
+                                schemata_log('Path:', path, 'obj:', thing, lvl=verbose)
 
                 # schemata_log(available[model]['form'], pretty=True, lvl=warn)
                 try:
