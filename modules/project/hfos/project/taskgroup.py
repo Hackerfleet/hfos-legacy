@@ -39,8 +39,9 @@ Provisions
 
 """
 
-from hfos.schemata.defaultform import editbuttons
-from hfos.schemata.base import base_object
+from hfos.schemata.extends import DefaultExtension
+from hfos.schemata.defaultform import lookup_field, editbuttons
+from hfos.schemata.base import uuid_object, base_object
 
 TaskGroupSchema = base_object('taskgroup', all_roles='crew')
 
@@ -121,4 +122,49 @@ TaskGroupForm = [
     editbuttons
 ]
 
-TaskGroup = {'schema': TaskGroupSchema, 'form': TaskGroupForm}
+TaskgroupExtends = DefaultExtension(
+    {
+        'closed_group': uuid_object('Default "Closed" group', default=['f7525ffb-0f30-4654-bb72-602fb17247af']),
+    # Taskgroup "Closed"
+        'open_groups': {
+            'type': 'array',
+            'title': 'Open Groups',
+            'description': 'Taskgroups with open tasks for Todo list',
+            'default': [
+                "52fc2c8d-bf7a-4835-bbfe-82d3ddf3742f",  # Taskgroup "New"
+                "9d7f146e-1307-47d5-a2cf-bc26f0f515d5",  # Taskgroup "In progress"
+            ],
+            'items': uuid_object('Open groups')
+        }
+    },
+    [
+        lookup_field('modules.closed_group', 'taskgroup', 'Select a group for closed tasks'),
+        {
+            'key': 'modules.open_groups',
+            'type': 'strapselect',
+            'placeholder': 'Select taskgroups',
+            'options': {
+                "multiple": 'true',
+                "type": "taskgroup",
+                "asyncCallback": "$ctrl.getFormData",
+                "map": {
+                    'valueProperty': "uuid",
+                    'nameProperty': 'name'
+                }
+            }
+        }
+        # {
+        #    'key': 'modules.open_groups',
+        #    'startEmpty': True,
+        #    'add': 'Add Taskgroup',
+        #    'style': {
+        #        'add': 'btn-success'
+        #    },
+        #    'items': [
+        #        lookup_field('modules.open_groups[].uuid', 'taskgroup', 'Select a taskgroup')
+        #    ]
+        # }
+    ]
+)
+
+TaskGroup = {'schema': TaskGroupSchema, 'form': TaskGroupForm, 'extends': TaskgroupExtends}
