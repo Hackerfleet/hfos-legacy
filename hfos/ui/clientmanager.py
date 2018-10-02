@@ -155,10 +155,11 @@ class ClientManager(ConfigurableComponent):
     def client_details(self, *args):
         """Display known details about a given client"""
 
-        self.log(_('Client details:', 'de'))
+        self.log(_('Client details:', lang='de'))
         client = self._clients[args[0]]
 
-        self.log('UUID:', client.uuid, 'IP:', client.ip, 'Name:', client.name, 'User:', client.useruuid, pretty=True)
+        self.log('UUID:', client.uuid, 'IP:', client.ip, 'Name:', client.name, 'User:', self._users[client.useruuid],
+                 pretty=True)
 
     @handler('cli_clients')
     def client_list(self, *args):
@@ -472,7 +473,7 @@ class ClientManager(ConfigurableComponent):
                 result = {
                     'component': 'hfos.ui.clientmanager',
                     'action': 'Permission',
-                    'data': _('You have no role that allows this action.', 'de')
+                    'data': _('You have no role that allows this action.', lang='de')
                 }
                 self.fireEvent(send(event.client.uuid, result))
                 return

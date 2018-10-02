@@ -121,7 +121,7 @@ def std_hash(word, salt):
 
 
 def std_now():
-    """Return current timestamp in ISO format"""
+    """Return current (UTC) timestamp in ISO format"""
 
     return datetime.now().isoformat()
 

@@ -76,30 +76,26 @@ class ObjectManager(ConfigurableComponent):
         self.log('Subscriptions', self.subscriptions, pretty=True)
 
     def _check_permissions(self, subject, action, obj):
-        self.log('Roles of user:', subject.account.roles, lvl=verbose)
+        # self.log('Roles of user:', subject.account.roles, lvl=verbose)
 
         if 'perms' not in obj._fields:
             if 'admin' in subject.account.roles:
-                self.log('Access to administrative object granted',
-                         lvl=verbose)
+                # self.log('Access to administrative object granted', lvl=verbose)
                 return True
             else:
-                self.log('Access to administrative object failed',
-                         lvl=verbose)
+                # self.log('Access to administrative object failed', lvl=verbose)
                 return False
 
         if 'owner' in obj.perms[action]:
             try:
                 if subject.uuid == obj.owner:
-                    self.log('Access granted via ownership', lvl=verbose)
+                    # self.log('Access granted via ownership', lvl=verbose)
                     return True
             except AttributeError as e:
-                self.log('Schema has ownership permission but no owner:',
-                         obj._schema['name'], obj._fields, e, type(e),
-                         lvl=verbose, exc=True)
+                self.log('Schema has ownership permission but no owner:', obj._schema['name'], lvl=verbose)
         for role in subject.account.roles:
             if role in obj.perms[action]:
-                self.log('Access granted', lvl=verbose)
+                # self.log('Access granted', lvl=verbose)
                 return True
 
         self.log('Access denied', lvl=verbose)
@@ -469,8 +465,9 @@ class ObjectManager(ConfigurableComponent):
         try:
             storage_object = objectmodels[schema].find_one({'uuid': uuid})
         except Exception as e:
-            self.log('Change for unknown object requested:', schema,
-                     data, lvl=warn)
+            self.log('Change for unknown object requested:', schema, data, lvl=warn)
+
+        if storage_object is None:
             self._cancel_by_error(event, 'not_found')
             return
 
@@ -495,7 +492,7 @@ class ObjectManager(ConfigurableComponent):
         self.log("Object stored.")
 
         result = {
-            'component': 'hfos.ui.objectmanager',
+            'component': 'hfos.events.objectmanager',
             'action': 'change',
             'data': {
                 'schema': schema,
