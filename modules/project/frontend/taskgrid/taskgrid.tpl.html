@@ -1,17 +1,23 @@
-<div class="well">
-    <div class="taskgrid-nav navbar navbar-default">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                        data-target="#toolbar" aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <div class="navbar-brand">
-                    TaskGrid:
-                    <span uib-dropdown keyboard-nav>
+<button id="sidebargrab" type="button" ng-click="$ctrl.open_sidebar()">
+    <span id="sidebargrabicon" class="fa fa-arrow-left"></span>
+</button>
+
+<div class="content">
+    <div id="leftpane">
+        <div class="well">
+            <div class="taskgrid-nav navbar navbar-default">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                                data-target="#toolbar" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="navbar-brand">
+                            TaskGrid:
+                            <span uib-dropdown keyboard-nav>
                         <a href id="taskgrid-menu-nav" type="button"
                            class="dropdown-toggle" uib-dropdown-toggle>
                             {{$ctrl.taskgridconfig.name}}
@@ -26,217 +32,256 @@
                             </li>
                         </ul>
                     </span>
-                </div>
-            </div>
-            <div class="collapse navbar-collapse" id="toolbar">
-                <ul class="nav navbar-nav" role="tablist">
-                    <!-- <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>-->
-                    <!--<li><a role="tab" ng-click="$ctrl.opentab('tasklist')" data-toggle="tab">Task List</a></li>-->
-                    <li class="inline-block"><a role="button" ng-click="show_setup = !show_setup">
-                        <i class="fa fa-gear"></i>Setup</a>
-                    </li>
-                    <li class="inline-block">
-                        <a role="button" class="btn" ng-class="{'active': $ctrl.show_filters_tag || $ctrl.show_filters_project}"
-                           ng-click="$ctrl.show_filters = !$ctrl.show_filters">
-                            <i class="fa fa-filter"></i>Filter</a>
-                    </li>
-                    <li class="inline-block">
-                        <a role="button" class="btn" ng-class="{'active': $ctrl.selecting}"
-                           ng-click="$ctrl.selecting = !$ctrl.selecting">
-                            <i class="fa fa-check"></i>Edit multiple</a>
-                    </li>
-                    <li class="inline-block">
-                        <a role="button" href="#!/editor/task//create">
-                            <i class="fa fa-plus" aria-hidden="true"></i> Task
-                        </a>
-                    </li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <form class="navbar-form">
-                            <div class="form-group clearable">
-                                <input type="search" class="form-control"
-                                       ng-model="$ctrl.search_string">
-                                <span class="clearable__clear fa"
-                                      style="top: 9px"
-                                      ng-click="$ctrl.search_string = ''"
-                                      ng-class="{'fa-search': $ctrl.search_string === '',
+                        </div>
+                    </div>
+                    <div class="collapse navbar-collapse" id="toolbar">
+                        <ul class="nav navbar-nav" role="tablist">
+                            <!-- <li class="active"><a role="tab" ng-click="$ctrl.opentab('taskgrid')" data-toggle="tab">Task Grid</a></li>-->
+                            <!--<li><a role="tab" ng-click="$ctrl.opentab('tasklist')" data-toggle="tab">Task List</a></li>-->
+                            <li class="inline-block"><a role="button" ng-click="show_setup = !show_setup">
+                                <i class="fa fa-gear"></i>Setup</a>
+                            </li>
+                            <li class="inline-block">
+                                <a role="button" class="btn"
+                                   ng-class="{'active': $ctrl.show_filters_tag || $ctrl.show_filters_project}"
+                                   ng-click="$ctrl.show_filters = !$ctrl.show_filters">
+                                    <i class="fa fa-filter"></i>Filter</a>
+                            </li>
+                            <li class="inline-block">
+                                <a role="button" class="btn" ng-class="{'active': $ctrl.selecting}"
+                                   ng-click="$ctrl.selecting = !$ctrl.selecting">
+                                    <i class="fa fa-check"></i>Edit multiple</a>
+                            </li>
+                            <li class="inline-block">
+                                <a role="button" href="#!/editor/task//create">
+                                    <i class="fa fa-plus" aria-hidden="true"></i> Task
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <form class="navbar-form">
+                                    <div class="form-group clearable">
+                                        <input type="search" class="form-control"
+                                               ng-model="$ctrl.search_string">
+                                        <span class="clearable__clear fa"
+                                              style="top: 9px"
+                                              ng-click="$ctrl.search_string = ''"
+                                              ng-class="{'fa-search': $ctrl.search_string === '',
                                          'fa-times': $ctrl.search_string !== ''}"></span>
-                            </div>
-                        </form>
-                    </li>
-                    <li class="inline-block">
+                                    </div>
+                                </form>
+                            </li>
+                            <li class="inline-block">
                         <span class="fa btn"
                               ng-click="$ctrl.toggleLock()"
                               ng-class="{'fa-lock':!$ctrl.lockState,'fa-unlock':$ctrl.lockState}">
                         </span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="well" ng-show="show_setup">
-        <h4>
-            Setup Project Planning
-            <span class="fa btn fa-times fa-pull-right" ng-click="show_setup = false"></span>
-        </h4>
-
-        <div class="row">
-            <div class="col-md-9">
-                <div class="form-inline">
-                    <a role="button" class="btn btn-default"
-                       href="#!/editor/taskgridconfig/{{$ctrl.taskgridconfiguuid}}/edit">
-                        <i class="fa fa-gear"></i>Edit Taskgrid</a>
-                    <a role="button" class="btn btn-default" href="#!/editor/taskgridconfig//create">
-                        <i class="fa fa-plus" aria-hidden="true"></i>Add Taskgrid</a>
-                    <a role="button" class="btn btn-default" href="#!/editor/taskgroup//create">
-                        <i class="fa fa-plus" aria-hidden="true"></i>Add Taskgroup</a>
-                    <a role="button" class="btn btn-default" href="#!/editor/project//create">
-                        <i class="fa fa-plus" aria-hidden="true"></i>Add Project</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="well" ng-show="$ctrl.selecting">
-        <h4>
-            Edit multiple
-            <span ng-show="$ctrl.selected.length > 0" class="small">{{$ctrl.selected.length}} selected</span>
-            <span class="fa btn fa-times fa-pull-right" ng-click="$ctrl.selecting = false"></span>
-        </h4>
-
-        <div class="row">
-
-            <div class="form-inline">
-                <a role="button" class="btn btn-default"
-                   ng-click="$ctrl.select_all()">
-                    <i class="fa fa-asterisk"></i> All
-                </a>
-                <a role="button" class="btn btn-default"
-                   ng-click="$ctrl.selected = []">
-                    <i class="fa fa-times"></i> Clear
-                </a>
-
-                <div class="vertical-divider"></div>
-
-                <a role="button" class="btn btn-default"
-                   ng-click="$ctrl.move()">
-                    <i class="fa fa-arrow-right"></i> Move selection to:
-                </a>
-                <select class="form-control" ng-model="$ctrl.target_group">
-                    <option ng-repeat="(uuid, group) in $ctrl.taskgroups" value="{{uuid}}">{{group.name}}</option>
-                </select>
-                <div class="vertical-divider"></div>
-
-                <a role="button" class="btn btn-danger"
-                   ng-click="$ctrl.delete_selected()">
-                    <i class="fa fa-times"></i> Delete
-                </a>
-
-                <div class="vertical-divider"></div>
-
-                <a role="button" class="btn btn-success"
-                   ng-click="$ctrl.add_tags()">
-                    <i class="fa fa-tag"></i> Add tag:
-                </a>
-                <a role="button" class="btn btn-warning"
-                   ng-click="$ctrl.remove_tags()">
-                    <i class="fa fa-times"></i> Remove tag:
-                </a>
-                <select class="form-control" ng-model="$ctrl.tag"
-                        ng-style="{color: $ctrl.tags[$ctrl.tag].color}">
-                    <option ng-repeat="(uuid, tag) in $ctrl.tags"
-                            value="{{uuid}}"
-                            ng-style="{background: tag.color,
-                                           color: 'white'}">
-                        {{tag.name}}
-                    </option>
-                </select>
-
-
-            </div>
-
-        </div>
-    </div>
-
-    <div class="well" ng-show="$ctrl.show_filters">
-        <h4>
-            Filter tasks
-            <span class="fa btn fa-times fa-pull-right" ng-click="$ctrl.show_filters = false"></span>
-        </h4>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-inline">
-                    <div class="form-group">
-                        <input class="form-control" type="checkbox" ng-model="$ctrl.show_filters_project">
-                        <label>By Project</label>
-                        <select class="form-control" ng-show="$ctrl.show_filters_project"
-                                ng-model="$ctrl.filter_project">
-                            <option value=""></option>
-                            <option ng-repeat="(uuid, project) in $ctrl.projects" value="{{uuid}}">{{project.name}}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <input class="form-control" type="checkbox" ng-model="$ctrl.show_filters_tag">
-                        <label>By tag</label>
-                        <select class="form-control" ng-show="$ctrl.show_filters_tag"
-                                ng-model="$ctrl.filter_tag">
-                            <option value=""></option>
-                            <option ng-repeat="(uuid, tag) in $ctrl.tags" value="{{uuid}}">{{tag.name}}
-                            </option>
-                        </select>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+            <div class="well" ng-show="show_setup">
+                <h4>
+                    Setup Project Planning
+                    <span class="fa btn fa-times fa-pull-right" ng-click="show_setup = false"></span>
+                </h4>
 
-    <div class="container-fluid" id="taskgrid">
-        <div gridster="$ctrl.gridsterOptions">
-            <ul>
-                <li data-gridster-item
-                    data-row="item.position.x"
-                    data-col="item.position.y"
-                    data-sizex="item.size.width"
-                    data-sizey="item.size.height"
-                    ng-repeat="item in $ctrl.taskgridconfig.cards"
-                    ng-style="{'background': $ctrl.taskgroups[item.taskgroup].color}"
-                    ng-drop="true"
-                    ng-drop-success="$ctrl.onDropComplete($data,$event,item.taskgroup)"
-                    class="taskBox">
-                    <div class="taskBoxOverlay" ng-show="$ctrl.lockState"></div>
-                    <div class="taskHeader">
-                        <h3>{{$ctrl.taskgroups[item.taskgroup].name }}
-                            <a class="pull-right" ng-click="$ctrl.new_task(item.taskgroup)">
-                                <span class="fa fa-plus"></span>
-                            </a>
-                            <a class="pull-right" href="#!/editor/taskgroup/{{item.taskgroup}}/edit">
-                                <span class="fa fa-edit"></span>
-                            </a>
-                            <a class="pull-right"
-                               ng-show="$ctrl.selecting"
-                               ng-click="$ctrl.select_all_of_group(item.taskgroup)">
-                                <span class="fa fa-asterisk"></span>
-                            </a>
-                        </h3>
-
-                        <div class="hidden box-header-btns pull-right">
-                            <a title="settings" ng-click="$ctrl.openSettings(item)"><i
-                                class="glyphicon glyphicon-cog"></i></a>
-                            <a title="Remove widget" ng-click="$ctrl.remove(item)"><i
-                                class="glyphicon glyphicon-trash"></i></a>
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="form-inline">
+                            <a role="button" class="btn btn-default"
+                               href="#!/editor/taskgridconfig/{{$ctrl.taskgridconfiguuid}}/edit">
+                                <i class="fa fa-gear"></i>Edit Taskgrid</a>
+                            <a role="button" class="btn btn-default" href="#!/editor/taskgridconfig//create">
+                                <i class="fa fa-plus" aria-hidden="true"></i>Add Taskgrid</a>
+                            <a role="button" class="btn btn-default" href="#!/editor/taskgroup//create">
+                                <i class="fa fa-plus" aria-hidden="true"></i>Add Taskgroup</a>
+                            <a role="button" class="btn btn-default" href="#!/editor/project//create">
+                                <i class="fa fa-plus" aria-hidden="true"></i>Add Project</a>
                         </div>
                     </div>
-                    <ul class="taskGridlist">
-                        <li class="taskBoxHeader"
-                            ng-drag="!$ctrl.lockState" ng-drag-data="task"
-                            ng-show="(task.name.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1
+                </div>
+            </div>
+
+            <div class="well" ng-show="$ctrl.selecting">
+                <h4>
+                    Edit multiple
+                    <span ng-show="$ctrl.selected.length > 0" class="small">{{$ctrl.selected.length}} selected</span>
+                    <span class="fa btn fa-times fa-pull-right" ng-click="$ctrl.selecting = false"></span>
+                </h4>
+
+                <div class="row">
+
+                    <div class="form-inline">
+                        <a role="button" class="btn btn-default"
+                           ng-click="$ctrl.select_all()">
+                            <i class="fa fa-asterisk"></i> All
+                        </a>
+                        <a role="button" class="btn btn-default"
+                           ng-click="$ctrl.selected = []">
+                            <i class="fa fa-times"></i> Clear
+                        </a>
+
+                        <div class="vertical-divider"></div>
+
+                        <a role="button" class="btn btn-default"
+                           ng-click="$ctrl.move()">
+                            <i class="fa fa-arrow-right"></i> Move to:
+                        </a>
+                        <select class="form-control" ng-model="$ctrl.me_target_group">
+                            <option ng-repeat="(uuid, group) in $ctrl.taskgroups" value="{{uuid}}">{{group.name}}
+                            </option>
+                        </select>
+                        <div class="vertical-divider"></div>
+
+                        <a role="button" class="btn btn-danger"
+                           ng-click="$ctrl.delete_selected()">
+                            <i class="fa fa-times"></i> Delete
+                        </a>
+
+                        <div class="vertical-divider"></div>
+                        <span>Tag</span>
+
+                        <a role="button" class="btn btn-success"
+                           ng-click="$ctrl.add_tags()">
+                            <i class="fa fa-tag"></i> Add:
+                        </a>
+                        <a role="button" class="btn btn-warning"
+                           ng-click="$ctrl.remove_tags()">
+                            <i class="fa fa-times"></i> Remove:
+                        </a>
+                        <select class="form-control" ng-model="$ctrl.me_tag"
+                                ng-style="{color: $ctrl.tags[$ctrl.me_tag].color}">
+                            <option ng-repeat="(uuid, tag) in $ctrl.tags"
+                                    value="{{uuid}}"
+                                    ng-style="{background: tag.color,
+                                           color: 'white'}">
+                                {{tag.name}}
+                            </option>
+                        </select>
+
+                        <div class="vertical-divider"></div>
+                        <span>Project</span>
+
+                        <a role="button" class="btn btn-warning"
+                           ng-click="$ctrl.remove_project()">
+                            <i class="fa fa-object-ungroup"></i> Remove
+                        </a>
+                        <a role="button" class="btn btn-success"
+                           ng-click="$ctrl.assign_project()">
+                            <i class="fa fa-object-group"></i> Assign:
+                        </a>
+                        <select class="form-control" ng-model="$ctrl.me_project">
+                            <option ng-repeat="(uuid, project) in $ctrl.projects"
+                                    value="{{uuid}}">
+                                {{project.name}}
+                            </option>
+                        </select>
+
+                        <div class="vertical-divider"></div>
+
+                        <a role="button" class="btn btn-success"
+                           ng-click="$ctrl.set_priority()">
+                            <i class="fa fa-"></i> Priority:
+                        </a>
+                        <select class="form-control" ng-model="$ctrl.me_priority">
+                            <option ng-repeat="priority in [] | range:10"
+                                    value="{{priority}}">
+                                {{priority}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="well" ng-show="$ctrl.show_filters">
+                <h4>
+                    Filter tasks
+                    <span class="fa btn fa-times fa-pull-right" ng-click="$ctrl.show_filters = false"></span>
+                </h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-inline">
+                            <div class="form-group">
+                                <label>
+                                    <input class="form-control" type="checkbox" ng-model="$ctrl.show_filters_project">
+                                    By Project
+                                </label>
+                                <select class="form-control" ng-show="$ctrl.show_filters_project"
+                                        ng-model="$ctrl.filter_project">
+                                    <option value=""></option>
+                                    <option ng-repeat="(uuid, project) in $ctrl.projects" value="{{uuid}}">
+                                        {{project.name}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input class="form-control" type="checkbox" ng-model="$ctrl.show_filters_tag">
+                                    By tag
+                                </label>
+                                <select class="form-control" ng-show="$ctrl.show_filters_tag"
+                                        ng-model="$ctrl.filter_tag">
+                                    <option value=""></option>
+                                    <option ng-repeat="(uuid, tag) in $ctrl.tags" value="{{uuid}}"
+                                            ng-style="{background: tag.color, color: 'white'}">
+                                        {{tag.name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-fluid" id="taskgrid">
+                <div gridster="$ctrl.gridsterOptions">
+                    <ul>
+                        <li data-gridster-item
+                            data-row="item.position.x"
+                            data-col="item.position.y"
+                            data-sizex="item.size.width"
+                            data-sizey="item.size.height"
+                            ng-repeat="item in $ctrl.taskgridconfig.cards"
+                            ng-style="{'background': $ctrl.taskgroups[item.taskgroup].color}"
+                            ng-drop="true"
+                            ng-drop-success="$ctrl.onDropComplete($data,$event,item.taskgroup)"
+                            class="taskBox">
+                            <div class="taskBoxOverlay" ng-show="$ctrl.lockState"></div>
+                            <div class="taskHeader">
+                                <h3>{{$ctrl.taskgroups[item.taskgroup].name }}
+                                    <a class="pull-right" ng-click="$ctrl.new_task(item.taskgroup)">
+                                        <span class="fa fa-plus"></span>
+                                    </a>
+                                    <a class="pull-right" href="#!/editor/taskgroup/{{item.taskgroup}}/edit">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                    <a class="pull-right"
+                                       ng-show="$ctrl.selecting"
+                                       ng-click="$ctrl.select_all_of_group(item.taskgroup)">
+                                        <span class="fa fa-asterisk"></span>
+                                    </a>
+                                </h3>
+
+                                <div class="hidden box-header-btns pull-right">
+                                    <a title="settings" ng-click="$ctrl.openSettings(item)"><i
+                                        class="glyphicon glyphicon-cog"></i></a>
+                                    <a title="Remove widget" ng-click="$ctrl.remove(item)"><i
+                                        class="glyphicon glyphicon-trash"></i></a>
+                                </div>
+                            </div>
+                            <ul class="taskGridlist">
+                                <li class="taskBoxHeader"
+                                    ng-drag="!$ctrl.lockState" ng-drag-data="task"
+                                    ng-show="(task.name.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1
                                          || task.description.toLowerCase().indexOf($ctrl.search_string.toLowerCase()) > -1)
-                                         && ($ctrl.show_filters_project ? $ctrl.filter_project === task.project : true)
+                                         && ($ctrl.show_filters_project ? ($ctrl.filter_project === task.project
+                                         || ($ctrl.filter_project === '' && (task.project == null || task.project === ''))) : true)
                                          && (($ctrl.show_filters_tag ? task.tags.indexOf($ctrl.filter_tag) > -1 : true)
                                          || ($ctrl.show_filters_tag && $ctrl.filter_tag === '' && task.tags.length === 0))"
-                            ng-repeat="task in $ctrl.tasksByGroup[item.taskgroup]">
+                                    ng-repeat="task in $ctrl.tasksByGroup[item.taskgroup] | orderBy:'priority'">
 
                             <span class="taskBoxHeaderOverlay"
                                   ng-show="$ctrl.selecting"
@@ -247,54 +292,130 @@
                                             $ctrl.selected.push(task.uuid)">
                             </span>
 
-                            <ul class="tagList">
-                                <li class="tagPill"
-                                    ng-repeat="tag in task.tags"
-                                    title="{{$ctrl.tags[tag].name}}"
-                                    ng-style="{background: $ctrl.tags[tag].color}"></li>
-                            </ul>
+                                    <ul class="tagList">
+                                        <li class="tagPill"
+                                            ng-repeat="tag in task.tags"
+                                            title="{{$ctrl.tags[tag].name}}"
+                                            ng-style="{background: $ctrl.tags[tag].color}"></li>
+                                    </ul>
 
-                            <a href="#!/editor/task/{{task.uuid}}/edit"
-                               ng-bind-html="task.name | embed:$ctrl.user.embed_options"></a>
-                            <span class="taskShowDesc pull-right fa"
-                                  ng-show="task.notes.length > 0"
-                                  ng-click="task.showDescription = !task.showDescription"
-                                  ng-class="{'fa-chevron-down':!task.showDescription,'fa-chevron-up':task.showDescription}"
-                                  ng-model="task.showDescription"></span>
+                                    <div class="taskgrid-badge badge small">{{task.priority}}</div>
 
-                            <div ng-show="task.showDescription" class="taskDescription"
-                                 ng-bind-html="$ctrl.tasklist[task.uuid].notes | embed:$ctrl.user.embed_options"></div>
+                                    <a ng-click="$ctrl.select_task(task.uuid)"
+                                       ng-bind-html="task.name | embed:$ctrl.user.embed_options"></a>
+                                    <span class="taskShowDesc pull-right fa"
+                                          ng-show="task.notes.length > 0"
+                                          ng-click="task.showDescription = !task.showDescription"
+                                          ng-class="{'fa-chevron-down':!task.showDescription,'fa-chevron-up':task.showDescription}"
+                                          ng-model="task.showDescription"></span>
 
-                            <div class="taskLabels small">
-                                <div class="taskProjectName"
-                                     ng-show="task.project != null"
-                                     ng-bind="$ctrl.projects[task.project].name">
-                                    <br/>
-                                </div>
+                                    <div ng-show="task.showDescription" class="taskDescription"
+                                         ng-bind-html="$ctrl.tasklist[task.uuid].notes | embed:$ctrl.user.embed_options"></div>
 
-                                <span class="taskAlertDate"
-                                      ng-show="(task.alert_date != null || task.alert_time != null)">
+                                    <div class="taskLabels small">
+                                        <div class="taskProjectName"
+                                             ng-show="task.project != null"
+                                             ng-bind="$ctrl.projects[task.project].name">
+                                            <br/>
+                                        </div>
+
+                                        <span class="taskAlertDate"
+                                              ng-show="(task.alert_date != null || task.alert_time != null)">
                                         <span class="fa fa-bell-o"></span>{{::task.alert_date}} - {{::task.alert_time}}
                                     </span>
 
-                                <div class="taskIcons">
+                                        <div class="taskIcons">
                                         <span class="fa fa-paperclip"
                                               title="Has {{task.references.length}} reference{{task.references.length > 1 ? 's' : ''}}"
                                               ng-show="task.references.length > 0"></span>
-                                    <span class="fa fa-comments"
-                                          title="Has {{task.comments.length}} comment{{task.comments.length > 1 ? 's' : ''}}"
-                                          ng-show="task.comments.length > 0"></span>
-                                </div>
+                                            <span class="fa fa-comments"
+                                                  title="Has {{task.comments.length}} comment{{task.comments.length > 1 ? 's' : ''}}"
+                                                  ng-show="task.comments.length > 0"></span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="taskBoxHeader" ng-drag-clone="">
+                                {{clonedData.name}}
+                                <br>
+                                Was in: {{$ctrl.taskgroups[clonedData.taskgroup].name}}
                             </div>
                         </li>
                     </ul>
-                    <div class="taskBoxHeader" ng-drag-clone="">
-                        {{clonedData.name}}
-                        <br>
-                        Was in: {{$ctrl.taskgroups[clonedData.taskgroup].name}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vertical Resizer -->
+    <div id="vResizer" ng-show="$ctrl.side_bar_open"
+         resizer="vertical" resizer-keep="false" resizer-width="10" resizer-left="#leftpane" resizer-right="#rightpane">
+    </div>
+
+    <div id="rightpane" class="sidebar" ng-show="$ctrl.side_bar_open">
+        <div class="sidebar-header">
+            <button type="button" class="close"
+                    ng-click="$ctrl.close_sidebar()">
+                &times;
+            </button>
+            <h4 class="sidebar-title">Taskgrid Sidebar</h4>
+        </div>
+        <div id="map-sidebar" class="sidebar-body">
+            <uib-tabset active="active">
+                <uib-tab index="0" heading="Tasks">
+
+                    <div id="tasks">
+                        <h4 ng-click="tasksCollapsed = !tasksCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': tasksCollapsed,
+                                                            'fa-chevron-down': !tasksCollapsed}">
+                                </span>
+                            Tasks
+                        </h4>
+
+                        <div uib-collapse="tasksCollapsed">
+                            <table ng-table="$ctrl.tableParams"
+                                   show-filter="true"
+                                   class="table table-condensed table-bordered table-striped">
+                                <tr ng-repeat="task in $data">
+                                    <td class="text-nowrap" title="'name'" filter="{ name: 'text'}"
+                                        sortable="'name'">
+                                        <a ng-click="$ctrl.switchtask(task.uuid)"><span
+                                            ng-bind="task.name != null ? task.name : 'Untitled Object'"></span></a>
+                                    </td>
+                                    <td class="text-nowrap"
+                                        title="'Actions'">
+                                        <a ng-click="$ctrl.zoom_to_task(task)">
+                                            <span class="fa fa-crosshairs"></span>
+                                        </a>
+                                        <a ng-click="$ctrl.select_task(task.uuid)">
+                                            <span class="fa fa-pencil"></span>
+                                        </a>
+                                        <a ng-click="$ctrl.delete_task(task.uuid)">
+                                            <span class="fa fa-times"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
-                </li>
-            </ul>
+
+                    <div id="task_editor">
+                        <h4 ng-click="task_editorCollapsed = !task_editorCollapsed">
+                                <span class="fa" ng-class="{'fa-chevron-right': task_editorCollapsed,
+                                                            'fa-chevron-down': !task_editorCollapsed}">
+                                </span>
+                            Task Editor
+                        </h4>
+
+                        <div uib-collapse="task_editorCollapsed">
+                            <objecteditor eid="taskEditor" schema="task" action="edit"
+                                          uuid="{{$ctrl.selected_task}}"
+                                          ng-if="$ctrl.selected_task != null"></objecteditor>
+                        </div>
+                    </div>
+
+                </uib-tab>
+
         </div>
     </div>
 </div>
