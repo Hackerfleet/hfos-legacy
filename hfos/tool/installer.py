@@ -315,28 +315,27 @@ def install_modules(wip):
         'alert',
         'automat',
         'busrepeater',
-        'camera',
-        'chat',
         'calendar',
         'countables',
-        'crew',
         'dash',
         # 'dev',
         'enrol',
+        'mail',
         'maps',
         'nmea',
         'nodestate',
-        'polls',
         'project',
-        'shareables',
         'webguides',
         'wiki'
     ]
 
     modules_wip = [
         'calc',
+        'camera',
+        'chat',
         'comms',
         'contacts',
+        'crew',
         'equipment',
         'filemanager',
         'garden',
@@ -344,10 +343,12 @@ def install_modules(wip):
         'ldap',
         'library',
         'logbook',
-        'mesh',
         'protocols',
+        'polls',
+        'mesh',
         'robot',
         'switchboard',
+        'shareables',
     ]
 
     installables = modules_production
