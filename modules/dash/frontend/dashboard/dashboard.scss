@@ -1,4 +1,8 @@
-@import '../../../colors.scss';
+@import '../../../scss/colors';
+
+#tab-content {
+  position: absolute;
+}
 
 #compass {
   width: 50px;
@@ -20,9 +24,14 @@
   color: black;
 }
 
+.dashboard-box {
+  // TODO: Color in $color-primary-0 at calculated 0.05 alpha:
+  background: rgba(0,0,255,0.05);
+  border: 2px solid $color-primary-3;
+}
+
 .box {
   height: 100%;
-  border: 2px solid $color-primary-3;
   /*background-color: #fff;*/
 }
 

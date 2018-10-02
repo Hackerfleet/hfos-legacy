@@ -1,4 +1,4 @@
-@import '../../../colors';
+@import '../../../scss/colors';
 
 .leaflet-control-container > div {
   z-index: 30;
@@ -81,8 +81,8 @@
 
 #map-sidebar .tab-content {
   margin: 10px;
-  min-width: 320px;
-  max-width: 320px;
+  /*min-width: 320px;
+  max-width: 320px;*/
   overflow-wrap: break-word;
 }
 
@@ -132,5 +132,5 @@
 }
 
 #gdal_loader {
-  max-width: 25vw;
+  /* max-width: 25vw; */
 }
