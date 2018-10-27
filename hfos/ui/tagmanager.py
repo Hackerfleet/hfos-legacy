@@ -17,6 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from hfos.events.system import authorizedevent
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -32,12 +33,13 @@ Module: TagManager
 from circuits import Timer, Event
 
 from hfos.events.client import send
-from hfos.events.schemamanager import get, all, configuration
 from hfos.component import ConfigurableComponent
 from hfos.database import objectmodels
-from hfos.logger import warn, debug  # , error, hilight
+from hfos.logger import warn, debug, verbose  # , error, hilight
 from hfos.component import handler
 
+class get_tagged(authorizedevent):
+    pass
 
 class TagManager(ConfigurableComponent):
     """
@@ -56,9 +58,9 @@ class TagManager(ConfigurableComponent):
         tag = objectmodels['tag']
 
         for item in tag.find():
-            self.tags[item.name] = item
+            self.tags[item.name.upper()] = item
 
-        self.log('Tags:', self.tags, pretty=True, lvl=debug)
+        self.log('Tags:', list(self.tags.keys()), pretty=True, lvl=verbose)
 
         #tagged = self._get_tagged('PR')
 
@@ -72,24 +74,24 @@ class TagManager(ConfigurableComponent):
         self.log('TAG UUID', tag.uuid)
         tagged = []
         for model in objectmodels.values():
-            self.log(model ,pretty=True)
+            self.log(model, pretty=True)
             self.log('Find:', model.find, pretty=True)
-            for item in model.find({'tags': {'uuid': tag.uuid}}):
-                tagged.append(item)
+            for item in model.find({'tags': {'$in': [tag.uuid]}}):
+                tagged.append(item.serializablefields())
 
         return tagged
 
-    @handler(get)
+    @handler(get_tagged)
     def get_tagged(self, event):
         """Return a list of tagged objects for a schema"""
         self.log("Tagged objects request for", event.data, "from",
                  event.user, lvl=debug)
-        if event.data in self.tags:
-            tagged = self._get_tagged(event.data)
+        if event.data.upper() in self.tags:
+            tagged = self._get_tagged(event.data.upper())
 
             response = {
-                'component': 'hfos.events.schemamanager',
-                'action': 'get',
+                'component': 'hfos.ui.tagmanager',
+                'action': 'get_tagged',
                 'data': tagged
             }
             self.fireEvent(send(event.client.uuid, response))
