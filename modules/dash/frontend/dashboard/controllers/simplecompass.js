@@ -94,8 +94,9 @@ class SimpleCompass {
         });
         
         this.init_svg = function () {
-            self.rawSvg = element.find('svg');
-            d3.selectAll("svg > *").remove();
+            // TODO: Make this work with multiple compasses:
+            self.rawSvg = element.find('.simplecompass');
+            d3.selectAll(".simplecompass > *").remove();
             
             self.svg = d3.select(self.rawSvg[0])
                 .attr("width", self.width)
