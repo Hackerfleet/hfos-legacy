@@ -57,18 +57,21 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
                     else:
                         hfoslog('Overwriting frontend file:', dst_file,
                                 emitter='BUILDER', lvl=verbose)
+                else:
+                    hfoslog('Target not existing:', dst_file, emitter='BUILDER', lvl=verbose)
+            except PermissionError as e:
+                hfoslog('No permission to remove target:', e, emitter='BUILDER', lvl=error)
 
-                hfoslog('Hardlinking ', src_file, dst_dir, emitter='BUILDER',
-                        lvl=verbose)
-
+            try:
                 if hardlink:
+                    hfoslog('Hardlinking ', src_file, dst_dir, emitter='BUILDER', lvl=verbose)
                     os.link(src_file, dst_file)
                 else:
+                    hfoslog('Copying ', src_file, dst_dir, emitter='BUILDER', lvl=verbose)
                     copy(src_file, dst_dir)
             except PermissionError as e:
                 hfoslog(
-                    " No permission to remove/create target %s for "
-                    "frontend:" % ('link' if hardlink else 'copy'),
+                    " No permission to create target %s for frontend:" % ('link' if hardlink else 'copy'),
                     dst_dir, e, emitter='BUILDER', lvl=error)
             except Exception as e:
                 hfoslog("Error during", 'link' if hardlink else 'copy',
@@ -141,7 +144,7 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                     hfoslog("Checking component frontend parts: ",
                             frontend, lvl=verbose, emitter='BUILDER')
                     if os.path.isdir(
-                            frontend) and frontend != frontendroot:
+                        frontend) and frontend != frontendroot:
                         comp['frontend'] = frontend
                     else:
                         hfoslog("Component without frontend "
@@ -158,6 +161,13 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                     hfoslog("Could not inspect entrypoint: ", e,
                             type(e), entry_point, iterator, lvl=error,
                             exc=True, emitter='BUILDER')
+
+        frontends = iter_entry_points(group='isomer.frontend', name=None)
+        for entrypoint in frontends:
+            name = entrypoint.name
+            location = entrypoint.dist.location
+
+            hfoslog('Frontend entrypoint:', name, location, entrypoint, lvl=hilight)
 
     # except Exception as e:
     #    hfoslog("Error: ", e, type(e), lvl=error, exc=True, emitter='BUILDER')
@@ -185,7 +195,7 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
 
                     if os.path.exists(reqfile):
                         # TODO: Speed this up by collecting deps first then doing one single install call
-                        hfoslog("Installing package dependencies", lvl=debug,
+                        hfoslog("Installing package dependencies for", name, lvl=debug,
                                 emitter='BUILDER')
                         with open(reqfile, 'r') as f:
                             cmdline = ["npm", "install"]
