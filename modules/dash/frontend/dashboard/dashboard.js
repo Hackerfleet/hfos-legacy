@@ -10,21 +10,22 @@ let humanizeDuration = require('humanize-duration');
  * Controller of the hfosFrontendApp
  */
 class Dashboard {
-    
-    constructor($scope, $rootscope, $stateParams, $modal, navdata, user, objectproxy, socket, menu, $timeout) {
+
+    constructor($scope, $rootscope, $stateParams, $modal, navdata, user, systemconfig, objectproxy, socket, menu, $timeout) {
         this.scope = $scope;
         this.rootscope = $rootscope;
         this.$modal = $modal;
         this.navdata = navdata;
         this.user = user;
+        this.systemconfig = systemconfig;
         this.op = objectproxy;
         this.socket = socket;
         this.menu = menu;
         this.timeout = $timeout;
-        
-    
+
+
         this.humanize = humanizeDuration;
-        
+
         this.now = new Date() / 1000;
         this.lockState = false;
         this.showBoxes = true;
@@ -34,6 +35,7 @@ class Dashboard {
             columns: screen.width / 75,
             rowHeight: 75,
             colWidth: 75,
+            mobileModeEnabled: false,
             floating: false,
             draggable: {
                 enabled: false
@@ -42,35 +44,34 @@ class Dashboard {
                 enabled: false
             }
         };
-        
+
         this.changetimeout = null;
-    
+
         if (typeof this.uuid === 'undefined') {
             this.dashboarduuid = $stateParams.uuid;
         } else {
             this.dashboarduuid = this.uuid;
         }
-        
+
         if (typeof this.hideui === 'undefined') {
             this.hideui = false;
         }
-    
-        if (typeof this.dashboarduuid === 'undefined') {
-            this.dashboarduuid = user.clientconfig.dashboarduuid;
-        }
-    
+
         this.dashboard = {};
-        
+
         this.sensed = [];
-        
+
         this.referencedata = {};
         this.referenceages = {};
         this.observed = [];
-        
-        this.op.getObject('dashboardconfig', this.dashboarduuid);
-        
+
+        if (this.user.signedIn === true) {
+            if (typeof this.dashboarduuid === 'undefined') this.getDefaultDashboard();
+            this.op.getObject('dashboardconfig', this.dashboarduuid);
+        }
+
         let self = this;
-        
+
         this.handleNavdata = function (msg) {
             console.log('DASHBOARD HANDLING NAVDATA');
             if (msg.action === 'sensed') {
@@ -82,23 +83,23 @@ class Dashboard {
                 }
             }
         };
-        
+
         self.socket.listen('hfos.navdata.sensors', self.handleNavdata);
-        
+
         this.stopSubscriptions = function () {
             console.log('[DASH] Finally destroying all subscriptions');
             self.stopObserved();
             self.socket.unlisten('hfos.navdata.sensors', self.handleNavdata);
         };
-        
+
         this.statechange = self.rootscope.$on('$stateChangeStart',
             function (event, toState, toParams, fromState, fromParams, options) {
                 console.log('DASH] States: ', toState, fromState);
-                if (toState != 'Dashboard') {
+                if (toState !== 'Dashboard') {
                     self.stopSubscriptions();
                 }
             });
-        
+
         this.switchDashboard = function (uuid) {
             self.dashboarduuid = uuid;
             self.op.get('dashboardconfig', uuid).then(function(msg) {
@@ -107,23 +108,31 @@ class Dashboard {
                 }
             });
         };
-    
+
         this.dashboardupdate = this.rootscope.$on('OP.Get', function (ev, uuid) {
             if (uuid === self.dashboarduuid) {
                 console.log('[DASH] Received dashboard configuration');
                 self.resetDashboard();
             }
         });
-    
+
         this.loginupdate = this.rootscope.$on('User.Login', function () {
             console.log('[DASH] Login successful - fetching dashboard data');
             self.requestDashboards();
+            self.getDefaultDashboard();
         });
-    
+
+        this.profileupdate = this.rootscope.$on('Profile.Update', function() {
+            console.log('[DASH] Profile updated');
+            self.getDefaultDashboard();
+        });
+
         this.clientconfigupdate = this.rootscope.$on('Clientconfig.Update', function () {
-            self.getDashboard();
+            // TODO: Is this handling smart? Maybe it overrides a manually selected one.
+            console.log('[DASH] Clientconfig updated');
+            self.getDefaultDashboard();
         });
-        
+
         if (typeof user.clientconfig.dashboarduuid !== 'undefined') {
             this.getDashboard();
         }
@@ -163,7 +172,7 @@ class Dashboard {
                 delete card['$$hashKey'];
             }
             self.op.putObject('dashboardconfig', self.dashboard);
-            
+
             self.changetimeout = null;
         };
 
@@ -171,7 +180,7 @@ class Dashboard {
             console.log('[DASH] Getting list of dashboards');
             self.op.getList('dashboardconfig');
         };
-        
+
         if (this.user.signedin === true) {
             console.log('[DASH] Logged in - fetching dashboard data');
             this.requestDashboards();
@@ -195,13 +204,14 @@ class Dashboard {
             self.dashboardupdate();
             self.clientconfigupdate();
             self.loginupdate();
+            self.profileupdate();
             self.statechange();
             self.store_listener();
         });
 
         console.log('[DASH] Starting');
     }
-    
+
     stopObserved() {
         if (this.observed.length > 0) {
             console.log('[DASH] Stopping current navdata subscriptions');
@@ -215,7 +225,7 @@ class Dashboard {
             console.log('[DASH] No subscriptions to remove');
         }
     }
-    
+
     updateObserved() {
         this.stopObserved();
         console.log('[DASH] Updating observed values from ', this.dashboard.cards);
@@ -235,15 +245,20 @@ class Dashboard {
         };
         this.socket.send(request);
     }
-    
+
     resetDashboard() {
         console.log('[DASH] Resetting dashboard to ', this.dashboarduuid);
         this.dashboard = this.op.objects[this.dashboarduuid];
         console.log(this.dashboard);
-        //console.log(decksterConfig);
         this.updateObserved();
     }
-    
+
+    getDefaultDashboard() {
+        this.dashboardconfiguuid = this.user.getModuleDefault('dashboarduuid');
+
+        this.getDashboard();
+    }
+
     getDashboard() {
         console.log('[DASH] Getting newly configured dashboard');
         this.switchDashboard(this.user.clientconfig.dashboarduuid);
@@ -300,6 +315,6 @@ class Dashboard {
     }
 }
 
-Dashboard.$inject = ['$scope', '$rootScope', '$stateParams', '$modal', 'navdata', 'user', 'objectproxy', 'socket', 'menu', '$timeout'];
+Dashboard.$inject = ['$scope', '$rootScope', '$stateParams', '$modal', 'navdata', 'user', 'systemconfig', 'objectproxy', 'socket', 'menu', '$timeout'];
 
 export default Dashboard;
