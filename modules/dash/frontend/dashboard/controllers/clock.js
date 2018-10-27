@@ -34,7 +34,11 @@ class DigitalReadout {
         this.moment = moment;
 
         console.log('[CLOCK] Valuetype:', this.scope.$parent.valuetype, this.scope);
-        this.valuetype = JSON.parse(this.scope.$parent.valuetype);
+        if (typeof this.valuetype !== 'undefined') {
+            this.valuetype = JSON.parse(this.scope.$parent.valuetype);
+        } else {
+            this.valuetype = {source: null, timezone: null, format: null};
+        }
 
         this.source = this.valuetype.source;
         this.timezone = this.valuetype.timezone;
