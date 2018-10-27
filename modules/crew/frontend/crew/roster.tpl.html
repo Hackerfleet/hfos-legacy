@@ -9,8 +9,10 @@
             </thead>
             <tbody>
             <tr ng-repeat="user in $ctrl.usermenu">
+                <td></td>
                 <td ng-repeat="field in $ctrl.fieldnames">
-                    <span ng-hide="field == 'image'">{{user[field]}}</span>
+                    <div class="roster-field" ng-hide="field == 'image'"
+                         ng-bind-html="user[field]|embed:$ctrl.user.embed_options"></div>
                     <img class="profile-icon" ng-hide="field !== 'image'"
                          ng-src="assets/images/icons/anonymous-icon.png"/>
                 </td>
