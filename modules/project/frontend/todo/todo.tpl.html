@@ -133,6 +133,10 @@
                               ng-show="task.project != null"
                               ng-bind="$ctrl.projects_lookup[task.project].name">
                         </span>
+                        <span class="small taskGroupName"
+                              ng-show="task.taskgroup != null">
+                            ({{$ctrl.groups[task.taskgroup].name}})
+                        </span>
 
                         <div class="taskIcons text-right">
                             <span class="taskDueTime"
