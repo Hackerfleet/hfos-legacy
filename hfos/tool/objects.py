@@ -85,7 +85,7 @@ def modify(ctx, schema, uuid, object_filter, field, value):
 @objects.command(short_help='view objects')
 @click.option("--schema", default=None)
 @click.option("--uuid", default=None)
-@click.option("--filter", "--object-filter", default=None)
+@click.option("--object-filter", "--filter", default=None)
 @click.pass_context
 def view(ctx, schema, uuid, object_filter):
     """Show stored objects"""
@@ -112,7 +112,7 @@ def view(ctx, schema, uuid, object_filter):
 @objects.command(short_help='view objects')
 @click.option("--schema", default=None)
 @click.option("--uuid", default=None)
-@click.option("--filter", "--object-filter", default=None)
+@click.option("--object-filter", "--filter", default=None)
 @click.option("--yes", "-y", help="Assume yes to a safety question", default=False, is_flag=True)
 @click.pass_context
 def delete(ctx, schema, uuid, object_filter, yes):
@@ -150,10 +150,9 @@ def delete(ctx, schema, uuid, object_filter, yes):
     log('Done')
 
 
-
 @objects.command(short_help='Validates stored objects')
 @click.option("--schema", "-s", default=None, help="Specify object schema to validate")
-@click.option("--all", "--all-schemata", help="Agree to validate all objects, if no schema given", is_flag=True)
+@click.option("--all-schemata", "--all", help="Agree to validate all objects, if no schema given", is_flag=True)
 @click.pass_context
 def validate(ctx, schema, all_schemata):
     """Validates all objects or all objects of a given schema."""
