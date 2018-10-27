@@ -3,7 +3,7 @@
 </button>
 
 <div class="content">
-    <div id="leftpane">
+    <div id="leftpane" class="taskgrid-pane">
         <div class="well">
             <div class="taskgrid-nav navbar navbar-default">
                 <div class="container-fluid">
@@ -82,7 +82,7 @@
                     </div>
                 </div>
             </div>
-            <div class="well" ng-show="show_setup">
+            <div class="panel" ng-show="show_setup">
                 <h4>
                     Setup Project Planning
                     <span class="fa btn fa-times fa-pull-right" ng-click="show_setup = false"></span>
@@ -105,7 +105,7 @@
                 </div>
             </div>
 
-            <div class="well" ng-show="$ctrl.selecting">
+            <div class="panel" ng-show="$ctrl.selecting">
                 <h4>
                     Edit multiple
                     <span ng-show="$ctrl.selected.length > 0" class="small">{{$ctrl.selected.length}} selected</span>
@@ -196,7 +196,7 @@
                 </div>
             </div>
 
-            <div class="well" ng-show="$ctrl.show_filters">
+            <div class="panel" ng-show="$ctrl.show_filters">
                 <h4>
                     Filter tasks
                     <span class="fa btn fa-times fa-pull-right" ng-click="$ctrl.show_filters = false"></span>
@@ -210,7 +210,7 @@
                                     By Project
                                 </label>
                                 <select class="form-control" ng-show="$ctrl.show_filters_project"
-                                        ng-model="$ctrl.filter_project">
+                                        ng-model="$ctrl.filter_project" ng-change="$ctrl.change_project()">
                                     <option value=""></option>
                                     <option ng-repeat="(uuid, project) in $ctrl.projects" value="{{uuid}}">
                                         {{project.name}}
@@ -223,7 +223,7 @@
                                     By tag
                                 </label>
                                 <select class="form-control" ng-show="$ctrl.show_filters_tag"
-                                        ng-model="$ctrl.filter_tag">
+                                        ng-model="$ctrl.filter_tag" ng-change="$ctrl.change_tags()">
                                     <option value=""></option>
                                     <option ng-repeat="(uuid, tag) in $ctrl.tags" value="{{uuid}}"
                                             ng-style="{background: tag.color, color: 'white'}">

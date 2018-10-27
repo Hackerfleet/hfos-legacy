@@ -65,12 +65,14 @@ class taskgridcomponent {
 
         this.gridsterOptions = {
             // any options that you can set for angular-gridster (see:  http://manifestwebdesign.github.io/angular-gridster/)
-            columns: screen.width / 100,
+            columns: 64,
             rowHeight: 100,
             colWidth: 100,
-            // mobileBreakPoint: 200,
-            mobileModeEnabled: false, // whether or not to toggle mobile mode when screen width is less than mobileBreakPoint
-
+            floating: false,
+            swapping: false,
+            pushing: true,
+            mobileBreakPoint: 800,
+            mobileModeEnabled: true,
             draggable: {
                 enabled: false
             },

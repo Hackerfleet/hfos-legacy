@@ -23,6 +23,10 @@
  */
 @import '../../../scss/colors';
 
+.taskgrid-pane {
+  overflow: auto !important;
+}
+
 .taskgrid-nav {
   margin-bottom: 0;
 }
