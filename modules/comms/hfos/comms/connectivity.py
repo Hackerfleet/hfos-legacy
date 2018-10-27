@@ -68,7 +68,7 @@ class ConnectivityMonitor(ConfigurableComponent):
         'host': {'type': 'string', 'default': ''},
         'port': {'type': 'integer', 'default': 80},
         'timeout': {'type': 'integer', 'default': 30},
-        'interval': {'type': 'integer', 'default': 5}
+        'interval': {'type': 'integer', 'default': 30}
     }
     channel = "hfosweb"
 
