@@ -1,6 +1,12 @@
-@import '../../../colors.scss';
+@import '../../../scss/colors';
 
 .profile-icon {
   width: 32px;
   height: 32px;
+}
+
+.roster-field {
+  max-height: 10vh;
+  max-width: 33vw;
+  overflow: auto;
 }
