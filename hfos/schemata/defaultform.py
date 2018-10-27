@@ -114,6 +114,30 @@ def lookup_field(key, lookup_type=None, placeholder=None, html_class="div",
     return result
 
 
+def lookup_object(key, lookup_type):
+    """Returns a lookup button to inspect a selected object"""
+
+    result = {
+        'key': 'lookup_' + key,
+        'type': 'template',
+        'template': '<a href="/#!/editor/' + lookup_type + '/{{$ctrl.model.' + key + '}}/edit">Edit</a>',
+    }
+
+    return result
+
+
+def create_object(key, lookup_type):
+    """Returns a lookup button to inspect a selected object"""
+
+    result = {
+        'key': 'create_' + key,
+        'type': 'template',
+        'template': '<a href="/#!/editor/' + lookup_type + '//create">Create new</a>',
+    }
+
+    return result
+
+
 def fieldset(title, items, options=None):
     """A field set with a title and sub items"""
     result = {
