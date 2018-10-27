@@ -17,6 +17,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import pyinotify
+
 from hfos import component
 
 __author__ = "Heiko 'riot' Weinen"
@@ -57,7 +59,7 @@ from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 from hfos.component import handler, ConfigurableComponent
 # from hfos.schemata.component import ComponentBaseConfigSchema
 from hfos.database import initialize  # , schemastore
-from hfos.events.system import populate_user_events
+from hfos.events.system import populate_user_events, frontendbuildrequest
 from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
     setup_root, verbosity, set_logfile
 from hfos.debugger import cli_register_event
@@ -103,6 +105,17 @@ class cli_quit(Event):
 class cli_drop_privileges(Event):
     """Try to drop possible root privileges"""
     pass
+
+
+class FrontendHandler(pyinotify.ProcessEvent):
+    def __init__(self, launcher, *args, **kwargs):
+        super(FrontendHandler, self).__init__(*args, **kwargs)
+        self.launcher = launcher
+
+    def process_IN_CLOSE_WRITE(self, event):
+        print("CHANGE EVENT:", event)
+        install_frontend(self.launcher.instance, install=False, development=True)
+
 
 
 def drop_privileges(uid_name='hfos', gid_name='hfos'):
@@ -183,7 +196,12 @@ class Core(ConfigurableComponent):
         self.loadable_components = {}
         self.runningcomponents = {}
 
+        self.moduleroot = os.path.abspath(os.path.dirname(os.path.realpath(
+            __file__)) + "/../modules")
+
         self.frontendrunning = False
+        self.frontend_watcher = None
+        self.frontend_watchmanager = None
 
         self.static = None
         self.websocket = None
@@ -293,6 +311,8 @@ class Core(ConfigurableComponent):
         """Stop the instance immediately"""
 
         self.log('Quitting on CLI request.')
+        if self.frontend_watcher is not None:
+            self.frontend_watcher.stop()
         sys.exit()
 
     @handler('cli_info')
@@ -440,6 +460,14 @@ class Core(ConfigurableComponent):
                 self)
             self.websocket = WebSocketsDispatcher("/websocket").register(self)
             self.frontendrunning = True
+
+            if self.development:
+                self.frontend_watchmanager = pyinotify.WatchManager()
+                self.frontend_watcher = pyinotify.ThreadedNotifier(self.frontend_watchmanager, FrontendHandler(self))
+                self.frontend_watcher.start()
+                mask = pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
+                self.log('ROOT:', self.frontendroot, lvl=error)
+                self.frontend_watchmanager.add_watch(self.moduleroot, mask, rec=True)
 
     def _instantiate_components(self, clear=True):
         """Inspect all loadable components and run them"""
