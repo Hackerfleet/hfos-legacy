@@ -45,8 +45,8 @@
                                     <li ng-repeat="(uuid, layer) in $ctrl.layers[name]">
                                         <!-- {{layer}} -->
                                         <span class="layer-expander fa" ng-class="
-                                               {'fa-chevron-down': $ctrl.layer_flags[uuid].expanded,
-                                                'fa-chevron-right': !$ctrl.layer_flags[uuid].expanded}"
+                                               {'fa-chevron-right': $ctrl.layer_flags[uuid].expanded,
+                                                'fa-chevron-down': !$ctrl.layer_flags[uuid].expanded}"
                                               ng-click="$ctrl.layer_flags[uuid].expanded = !$ctrl.layer_flags[uuid].expanded">
                                             </span>
                                         <a ng-click="$ctrl.switchLayer(uuid)">
@@ -100,10 +100,11 @@
 
                     <div id="mapview_selector">
                         <h4 ng-click="mapviewsCollapsed = !mapviewsCollapsed">
-                                <span class="fa" ng-class="{'fa-chevron-right': !mapviewsCollapsed,
-                                                            'fa-chevron-down': mapviewsCollapsed}">
+                                <span class="fa" ng-class="{'fa-chevron-right': mapviewsCollapsed,
+                                                            'fa-chevron-down': !mapviewsCollapsed}">
                                 </span>
                             Mapviews
+                            <a href="#!/editor/mapview//create" class="pull-right fa fa-plus" ></a>
                         </h4>
 
                         <ul uib-collapse="mapviewsCollapsed" class="layer-overview">
@@ -133,6 +134,7 @@
                                                             'fa-chevron-down': !groupsCollapsed}">
                                 </span>
                             Layergroups
+                            <a href="#!/editor/layergroup//create" class="pull-right fa fa-plus" ></a>
                         </h4>
 
                         <ul uib-collapse="groupsCollapsed" class="layer-overview">
@@ -162,6 +164,7 @@
                                                             'fa-chevron-down': !otherCollapsed}">
                                 </span>
                             Other layers
+                            <a href="#!/editor/layer//create" class="pull-right fa fa-plus" ></a>
                         </h4>
 
                         <ul uib-collapse="otherCollapsed" class="layer-list">
@@ -244,12 +247,12 @@
 
                     <div id="geoobject_defaults">
                         <h4 ng-click="geoobjectDetailsCollapsed = !geoobjectDetailsCollapsed">
-                                <span class="fa" ng-class="{'fa-chevron-right': !geoobjectDetailsCollapsed,
-                                                            'fa-chevron-down': geoobjectDetailsCollapsed}">
+                                <span class="fa" ng-class="{'fa-chevron-right': geoobjectDetailsCollapsed,
+                                                            'fa-chevron-down': !geoobjectDetailsCollapsed}">
                                 </span>
                             Defaults
                         </h4>
-                        <form class="form" uib-collapse="!geoobjectDetailsCollapsed">
+                        <form class="form" uib-collapse="geoobjectDetailsCollapsed">
                             <div class="form-group">
                                 <label class="col-lg-4">Object Color:</label>
                                 <div class="col-lg-8">
@@ -420,6 +423,10 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+                    <div ng-show="$ctrl.user.debug">
+                        <span>MapView: {{$ctrl.mapviewuuid}} - {{$ctrl.mapviews[$ctrl.mapviewuuid]}}</span>
+                        <span>Layergroup: {{$ctrl.layergroup}} - {{$ctrl.layergroups[$ctrl.layergroup]}}</span>
                     </div>
                 </uib-tab>
             </uib-tabset>
