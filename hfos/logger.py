@@ -53,12 +53,15 @@ import pprint
 import time
 import sys
 import inspect
+
+# TODO: Kick out 2.x compat
 import six
 
 import os
 
 root = None
 
+temp = 1
 events = 2
 network = 4
 verbose = 5
@@ -72,6 +75,7 @@ off = 100
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 lvldata = {
+    temp: ['TEMP', '\033[1;30m'],
     events: ['EVENT', '\033[1:36m'],
     verbose: ['VERB', '\033[1;30m'],
     network: ['NET', '\033[1;34m'],
@@ -254,8 +258,8 @@ def hfoslog(*what, **kwargs):
 
     for thing in what:
         content += " "
-        if kwargs.get('pretty', False):
-            content += pprint.pformat(thing)
+        if kwargs.get('pretty', False) and not isinstance(thing, str):
+            content += "\n" + pprint.pformat(thing)
         else:
             content += str(thing)
 
