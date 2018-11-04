@@ -27,21 +27,10 @@ import sys
 import hashlib
 import os
 
-from hfos.logger import hfoslog, error, verbose
-# 2.x/3.x imports: (TODO: Simplify those, one 2x/3x ought to be enough)
+from hfos.logger import hfoslog, error, verbose, debug
 from hfos.tool.defaults import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar
 
-try:
-    # noinspection PyUnresolvedReferences,PyShadowingBuiltins
-    input = raw_input  # NOQA
-except NameError:
-    pass
-
-try:
-    from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
-except ImportError:
-    # noinspection PyUnresolvedReferences,PyUnresolvedReferences,PyUnresolvedReferences
-    from subprocess32 import Popen, PIPE, STDOUT  # NOQA
+from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
 
 
 def log(*args, **kwargs):
@@ -51,7 +40,7 @@ def log(*args, **kwargs):
     hfoslog(*args, **kwargs)
 
 
-def _check_root():
+def check_root():
     """Check if current user has root permissions"""
 
     if os.geteuid() != 0:
@@ -65,6 +54,9 @@ def _check_root():
 
 def run_process(cwd, args):
     """Executes an external process via subprocess.Popen"""
+
+    log("Running:", cwd, args, lvl=verbose)
+
     try:
         process = check_output(args, cwd=cwd, stderr=STDOUT)
 
@@ -107,7 +99,7 @@ def _get_credentials(username=None, password=None, dbhost=None):
         sys.exit(3)
 
     if username is None:
-        username = _ask("Please enter username: ")
+        username = ask("Please enter username: ")
     else:
         username = username
 
@@ -137,7 +129,7 @@ def _get_system_configuration(dbhost, dbname):
     return systemconfig
 
 
-def _ask(question, default=None, data_type='str', show_hint=False):
+def ask(question, default=None, data_type='str', show_hint=False):
     """Interactively ask the user for data"""
 
     data = default
@@ -153,7 +145,6 @@ def _ask(question, default=None, data_type='str', show_hint=False):
                 return default
 
         return data in ('Y', 'J', '1')
-
     elif data_type in ('str', 'unicode'):
         if show_hint:
             msg = "%s? [%s] (%s): " % (question, default, data_type)
@@ -176,5 +167,7 @@ def _ask(question, default=None, data_type='str', show_hint=False):
             data = int(default)
         else:
             data = int(data)
+    else:
+        print('Programming error! Datatype invalid!')
 
     return data
