@@ -170,7 +170,9 @@ Support
 
 -  `c-base e.V. <https://c-base.org>`__ our home base, the spacestation below Berlin Mitte
 -  Lassulus for hosting and nix expertise
+-  `Jetbrains s.r.o <https://jetbrains.com>`__ for the opensource license of their ultimate IDE
 -  `Github <https://github.com>`__ for hosting our code
+-  `Gitlab <https://gitlab.com>`__ for hosting our code ;)
 -  `Travis.CI <https://travis-ci.org>`__ for continuous integration services
 -  `BrowserStack <https://browserstack.com>`__ for cross device testing capabilities
 
