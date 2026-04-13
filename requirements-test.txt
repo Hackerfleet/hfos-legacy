@@ -1,6 +1,6 @@
 # Running Tests
 tox
-pytest==3.8.0
+pytest==9.0.3
 pytest-sugar==0.9.1
 coveralls
 pytest-cov
